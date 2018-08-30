@@ -18,7 +18,7 @@ def get_meter_point_api_info(account_id):
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
-
+# get meter point readings api info
 def get_meter_readings_api_info(account_id, meter_point_id):
     api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
     token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
