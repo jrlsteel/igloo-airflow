@@ -10,13 +10,14 @@ from boto.s3.connection import S3Connection
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
 
-
+# get meter point api info
 def get_meter_point_api_info(account_id):
     api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
     token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
+
 
 def get_meter_readings_api_info(account_id, meter_point_id):
     api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
