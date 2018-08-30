@@ -55,9 +55,9 @@ def extract_meter_point_json(data, account_id, k):
     '''
     meter_point_ids = []
 
+    ''' Processing meter points data'''
     meta_meters = ['associationStartDate', 'associationEndDate', 'supplyStartDate', 'supplyEndDate', 'isSmart', 'isSmartCommunicating', 'id', 'meterPointNumber', 'meterPointType']
     df_meterpoints = json_normalize(data)
-    # print(df_meterpoints['associationEndDate'])
     if(df_meterpoints.empty):
         print(" - has no meters points data")
     else:
@@ -72,6 +72,7 @@ def extract_meter_point_json(data, account_id, k):
         k.set_contents_from_string(df_meter_points_string)
 
 
+    ''' Processing meters data'''
     meta_meters = ['meterId', 'meterSerialNumber', 'installedDate', 'removedDate', 'meter_point_id']
     df_meters = json_normalize(data, record_path=['meters'], meta=['id'], meta_prefix='meter_point_')
     if(df_meters.empty):
@@ -86,6 +87,7 @@ def extract_meter_point_json(data, account_id, k):
         k.set_contents_from_string(df_meters_string)
     
 
+    ''' Processing attributes data'''
     df_attributes = json_normalize(data, record_path=['attributes'], record_prefix='attributes_', meta=['id'], meta_prefix='meter_point_')
     if(df_attributes.empty):
         print(" - has no attributes data")
@@ -97,6 +99,7 @@ def extract_meter_point_json(data, account_id, k):
         k.key = 'ensek-meterpoints/Attributes/' + filename_attributes
         k.set_contents_from_string(df_attributes_string)
 
+    ''' Processing registers data'''
     df_registers = json_normalize(data, record_path=['meters','registers'],meta=['id'], 
     meta_prefix='meter_point_', record_prefix='registers_')
     if(df_registers.empty):
@@ -111,33 +114,19 @@ def extract_meter_point_json(data, account_id, k):
 
     return meter_point_ids 
 
+''' Processing meter readings data'''
 def extract_meter_readings_json(data, account_id, meter_point_id,k):
     meta_readings = ['id', 'readingType', 'meterPointId', 'dateTime', 'createdDate', 'meterReadingSource']
     df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
     df_meter_readings['account_id'] = account_id
     df_meter_readings['meter_point_id'] = meter_point_id
     # df_meter_readings.to_csv('meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '_' + '.csv')
-    # df_meter_readings_string = df_meter_readings.applymap(str)
-    # [x.encode('utf-8') for x in df_meter_readings_string]
     filename_readings = 'meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
     df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
     k.key = 'ensek-meterpoints/Readings/' + filename_readings
     k.set_contents_from_string(df_meter_readings_string)
 
-    # csv_buffer = BytesIO()
-    # print(type(csv_buffer))
-    # s3.put_object(
-    # Body=csv_buffer.getvalue(),
-    # ContentType='application/vnd.ms-excel',
-    # Bucket='igloo-uat-bucket',
-    # Key='ensek-meterpoints/Readings/meterpointreadings.csv'
-    # )
-    # r = s3.put_object(Key='ensek-meterpoints/Readings/meterpointreadings.csv', Body=toBinary(df_meter_readings_string),Bucket='igloo-uat-bucket',)
-    # print(r)
-    # df_meter_readings_string = df_meter_readings.to_string
-    # df_meter_readings_string
-    # print(df_meter_readings)
-
+'''Get S3 connection'''
 def get_S3_Connections():
     access_key = con.s3_config['access_key']
     secret_key = con.s3_config['secret_key']
@@ -149,6 +138,7 @@ def get_S3_Connections():
     k = Key(bucket)
     return k
 
+'''Read Users from S3'''
 def get_Users(k):
     filename_Users = 'users.csv'
     k.key = 'ensek-meterpoints/Users/' + filename_Users
@@ -159,18 +149,19 @@ def get_Users(k):
     # print(len(p))
     return p
 
+'''Format Json to handle null values'''
 def format_json_response(data):
     data_str = json.dumps(data, indent=4).replace('null','""')
     data_json = json.loads(data_str)
     return data_json
 
+
 def main():
-    account_ids = con.api_config['account_ids']
+    # account_ids = con.api_config['account_ids']
     t = con.api_config['total_no_of_calls']
 
     k = get_S3_Connections()
-
-    # account_ids = get_Users(k)
+    account_ids = get_Users(k)
 
     # run for configured account ids
     for account_id in account_ids[:t]:
