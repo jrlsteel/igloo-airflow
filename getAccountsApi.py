@@ -14,16 +14,19 @@ rate = con.api_config['allowed_period_in_secs']
 
 # get meter point api info
 def get_meter_point_api_info(account_id):
-    api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
-    token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
 # get meter point readings api info
 def get_meter_readings_api_info(account_id, meter_point_id):
-    api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
-    token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
@@ -35,7 +38,7 @@ def get_api_response(api_url,token,head):
         get the response for the respective url that is passed as part of this function
    '''
    response = requests.get(api_url, headers=head)
-
+   
    if response.status_code == 200:
        return json.loads(response.content.decode('utf-8'))
 
@@ -151,13 +154,20 @@ def main():
     for account_id in account_ids[:t]:
         api_url,token,head = get_meter_point_api_info(account_id)
         meter_info_response = get_api_response(api_url,token,head)
-        meter_points = extract_meter_point_json(meter_info_response, account_id, k)
-        print('ac:' + str(account_id))
-        for each_meter_point in meter_points:
-            api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
-            meter_reading_response = get_api_response(api_url,token,head)
-            extract_meter_readings_json(meter_reading_response, account_id, each_meter_point,k)
-            print('mp:' + str(each_meter_point))
+        if(meter_info_response):
+            meter_points = extract_meter_point_json(meter_info_response, account_id, k)
+            print('ac:' + str(account_id))
+            for each_meter_point in meter_points:
+                api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
+                meter_reading_response = get_api_response(api_url,token,head)
+                if(meter_reading_response):
+                    extract_meter_readings_json(meter_reading_response, account_id, each_meter_point,k)
+                    print('mp:' + str(each_meter_point))
+                else:
+                    print('mp:' + account_id + ' has no data')
+                    
+        else:
+            print('ac:' + account_id + ' has no data')
 
 if __name__ == "__main__":
     main()
