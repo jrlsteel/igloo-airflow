@@ -8,6 +8,9 @@ import boto
 from io import BytesIO
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
+from retrying import retry
+import time
+from requests import ConnectionError
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
@@ -37,15 +40,28 @@ def get_api_response(api_url,token,head):
    ''' 
         get the response for the respective url that is passed as part of this function
    '''
-   response = requests.get(api_url, headers=head)
+   start_time = time.time()
+   timeout = con.api_config['connection_timeout']
+   retry_in_secs = con.api_config['retry_in_secs']
+   i=0
+   while True:
+        try:
+            response = requests.get(api_url, headers=head)
+            if response.status_code == 200:
+                return json.loads(response.content.decode('utf-8'))
+            else:
+                print ('Problem Grabbing Data: ', response.status_code)
+
+        except ConnectionError:
+            if time.time() > start_time + timeout:
+                print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                break
+            else:
+                print('Retrying connection in ' + str(retry_in_secs) +  ' seconds' + str(i))
+                time.sleep(retry_in_secs)
+        i=i+retry_in_secs
+
    
-   if response.status_code == 200:
-       return json.loads(response.content.decode('utf-8'))
-
-   else:
-       print ('Problem Grabbing Data: ', response.status_code)
-       return None
-
 
 def extract_meter_point_json(data, account_id, k):
     '''
@@ -157,16 +173,20 @@ def format_json_response(data):
 
 
 def main():
+    '''Enable this to test for 1 account id'''
     # account_ids = con.api_config['account_ids']
+    
     t = con.api_config['total_no_of_calls']
 
     k = get_S3_Connections()
+    
     account_ids = get_Users(k)
 
     # run for configured account ids
     for account_id in account_ids[:t]:
         api_url,token,head = get_meter_point_api_info(account_id)
         meter_info_response = get_api_response(api_url,token,head)
+
         if(meter_info_response):
             print('ac:' + str(account_id))
             formatted_meter_info = format_json_response(meter_info_response)
@@ -179,7 +199,7 @@ def main():
                     formatted_meter_reading = format_json_response(meter_reading_response)
                     extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
                 else:
-                    print('mp:' + str(each_meter_point) + ' has no data' )
+                    print('mp:' + str(each_meter_point) + ' has no data')
         else:
             print('ac:' + str(account_id) + 'has no data')
 
