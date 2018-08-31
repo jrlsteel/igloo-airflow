@@ -51,6 +51,7 @@ def get_api_response(api_url,token,head):
                 return json.loads(response.content.decode('utf-8'))
             else:
                 print ('Problem Grabbing Data: ', response.status_code)
+                break
 
         except ConnectionError:
             if time.time() > start_time + timeout:
@@ -174,34 +175,35 @@ def format_json_response(data):
 
 def main():
     '''Enable this to test for 1 account id'''
-    # account_ids = con.api_config['account_ids']
+    account_ids = con.api_config['account_ids']
     
-    t = con.api_config['total_no_of_calls']
-
+    e = con.api_config['total_no_of_calls']
     k = get_S3_Connections()
-    
-    account_ids = get_Users(k)
+
+    if len(account_ids) == 0:
+        account_ids = get_Users(k)
 
     # run for configured account ids
-    for account_id in account_ids[:t]:
+    for account_id in account_ids[:e]:
         api_url,token,head = get_meter_point_api_info(account_id)
+        print('ac:' + str(account_id))
         meter_info_response = get_api_response(api_url,token,head)
 
         if(meter_info_response):
-            print('ac:' + str(account_id))
+            
             formatted_meter_info = format_json_response(meter_info_response)
-            meter_points = extract_meter_point_json(formatted_meter_info, account_id, k)
+            meter_points = extract_meter_point_json(formatted_meter_info, account_id,k)
             for each_meter_point in meter_points:
+                print('mp:' + str(each_meter_point))
                 api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
                 meter_reading_response = get_api_response(api_url,token,head)
                 if(meter_reading_response):
-                    print('mp:' + str(each_meter_point))
                     formatted_meter_reading = format_json_response(meter_reading_response)
                     extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
                 else:
                     print('mp:' + str(each_meter_point) + ' has no data')
         else:
-            print('ac:' + str(account_id) + 'has no data')
+            print('ac:' + str(account_id) + ' has no data')
 
 if __name__ == "__main__":
     main()
