@@ -11,6 +11,7 @@ from boto.s3.key import Key
 from retrying import retry
 import time
 from requests import ConnectionError
+import csv
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
@@ -51,14 +52,19 @@ def get_api_response(api_url,token,head):
                 return json.loads(response.content.decode('utf-8'))
             else:
                 print ('Problem Grabbing Data: ', response.status_code)
+                log_error('Response Error: Problem grabbing data', response.status_code)
                 break
 
         except ConnectionError:
             if time.time() > start_time + timeout:
                 print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+
                 break
             else:
                 print('Retrying connection in ' + str(retry_in_secs) +  ' seconds' + str(i))
+                log_error('Retrying connection in ' + str(retry_in_secs) +  ' seconds' + str(i))
+
                 time.sleep(retry_in_secs)
         i=i+retry_in_secs
 
@@ -94,6 +100,7 @@ def extract_meter_point_json(data, account_id, k):
     df_meters = json_normalize(data, record_path=['meters'], meta=['id'], meta_prefix='meter_point_')
     if(df_meters.empty):
         print(" - has no meters data")
+        log_error(" - has no meters data")
     else:
         df_meters['account_id'] = account_id
         df_meters1 = df_meters[meta_meters + ['account_id']]
@@ -108,6 +115,8 @@ def extract_meter_point_json(data, account_id, k):
     df_attributes = json_normalize(data, record_path=['attributes'], record_prefix='attributes_', meta=['id'], meta_prefix='meter_point_')
     if(df_attributes.empty):
         print(" - has no attributes data")
+        log_error(" - has no attributes data")
+
     else:
         df_attributes['account_id'] = account_id
         # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
@@ -121,6 +130,8 @@ def extract_meter_point_json(data, account_id, k):
     meta_prefix='meter_point_', record_prefix='registers_')
     if(df_registers.empty):
         print(" - has no registers data")
+        log_error(" - has no registers data")
+        
     else:
         df_registers['account_id'] = account_id
         # df_registers.to_csv('registers_' + str(account_id) + '.csv')
@@ -172,6 +183,10 @@ def format_json_response(data):
     data_json = json.loads(data_str)
     return data_json
 
+def log_error(error_msg, error_code=''):
+    with open('meterpoint_logs' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
+        employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        employee_writer.writerow([error_msg, error_code])
 
 def main():
     '''Enable this to test for 1 account id'''
@@ -187,6 +202,8 @@ def main():
     for account_id in account_ids[:e]:
         api_url,token,head = get_meter_point_api_info(account_id)
         print('ac:' + str(account_id))
+        msg_ac = 'ac:' + str(account_id)
+        log_error(msg_ac, '')
         meter_info_response = get_api_response(api_url,token,head)
 
         if(meter_info_response):
@@ -195,6 +212,8 @@ def main():
             meter_points = extract_meter_point_json(formatted_meter_info, account_id,k)
             for each_meter_point in meter_points:
                 print('mp:' + str(each_meter_point))
+                msg_mp = 'mp:' + str(each_meter_point)
+                log_error(msg_mp, '')
                 api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
                 meter_reading_response = get_api_response(api_url,token,head)
                 if(meter_reading_response):
@@ -202,8 +221,15 @@ def main():
                     extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
                 else:
                     print('mp:' + str(each_meter_point) + ' has no data')
+                    msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
+                    log_error(msg_mp, '')
         else:
             print('ac:' + str(account_id) + ' has no data')
+            msg_ac = 'ac:' + str(account_id) + ' has no data'
+            log_error(msg_mp, '')
+
+
+
 
 if __name__ == "__main__":
     main()
