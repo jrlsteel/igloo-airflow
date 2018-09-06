@@ -116,7 +116,7 @@ def extract_meter_point_json(data, account_id, k):
         filename_meters = 'meters_' + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/Meters/' + filename_meters
         k.set_contents_from_string(df_meters_string)
-    
+        # print(df_meters_string)
 
     ''' Processing attributes data'''
     df_attributes = json_normalize(data, record_path=['attributes'], record_prefix='attributes_', meta=['id'], meta_prefix='meter_point_')
@@ -140,12 +140,14 @@ def extract_meter_point_json(data, account_id, k):
         log_error(" - has no registers data")
         
     else:
+        df_registers.drop(columns=['registers_attributes'], inplace=True)
         df_registers['account_id'] = account_id
         # df_registers.to_csv('registers_' + str(account_id) + '.csv')
         df_registers_string = df_registers.to_csv(None, index=False)
         filename_registers =  'registers_'  + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/Registers/' + filename_registers
         k.set_contents_from_string(df_registers_string)
+        # print(df_registers_string)
 
     ''' Prcessing registers -> attributes data '''
     df_registersAttributes = json_normalize(data, record_path=['meters','registers','attributes'],meta=[['meters','meterId'],['meters','registers','id'],'id'], 
