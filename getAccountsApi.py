@@ -103,7 +103,7 @@ def extract_meter_point_json(data, account_id, k):
 
 
     ''' Processing meters data'''
-    meta_meters = ['meterId', 'meterSerialNumber', 'installedDate', 'removedDate', 'meter_point_id']
+    meta_meters = ['meterSerialNumber', 'installedDate', 'removedDate','meterId', 'meter_point_id']
     df_meters = json_normalize(data, record_path=['meters'], meta=['id'], meta_prefix='meter_point_')
     if(df_meters.empty):
         print(" - has no meters data")
@@ -133,17 +133,20 @@ def extract_meter_point_json(data, account_id, k):
         k.set_contents_from_string(df_attributes_string)
 
     ''' Processing registers data'''
-    df_registers = json_normalize(data, record_path=['meters','registers'],meta=['id'], 
-    meta_prefix='meter_point_', record_prefix='registers_')
+    ordered_columns = ['registers_eacAq','registers_registerReference','registers_sourceIdType','registers_tariffComponent','registers_tpr','registers_tprPeriodDescription','meter_point_meters_meterId','registers_id','meter_point_id']
+    df_registers = json_normalize(data, record_path=['meters','registers'],meta=['id',['meters', 'meterId']], 
+    meta_prefix='meter_point_', record_prefix='registers_', sep='_')
     if(df_registers.empty):
         print(" - has no registers data")
         log_error(" - has no registers data")
         
     else:
-        df_registers.drop(columns=['registers_attributes'], inplace=True)
-        df_registers['account_id'] = account_id
+        df_registers1 = df_registers[ordered_columns]
+        df_registers1.rename(columns={'meter_point_meters_meterId' : 'meter_id', 'registers_id' : 'register_id'}, inplace=True)
+        # df_registers.rename(columns={'registers_id' : 'register_id'}, inplace=True)
+        df_registers1['account_id'] = account_id
         # df_registers.to_csv('registers_' + str(account_id) + '.csv')
-        df_registers_string = df_registers.to_csv(None, index=False)
+        df_registers_string = df_registers1.to_csv(None, index=False)
         filename_registers =  'registers_'  + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/Registers/' + filename_registers
         k.set_contents_from_string(df_registers_string)
@@ -241,6 +244,9 @@ def main():
 
     if len(account_ids) == 0:
         account_ids = get_Users(k)
+
+    # c = get_DB_Connection()
+    # get_Users_from_DB()
 
     # run for configured account ids
     for account_id in account_ids[:e]:
