@@ -18,18 +18,25 @@ rate = con.api_config['allowed_period_in_secs']
 
 # get meter point api info
 def get_meter_point_api_info(account_id):
-    api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
-    token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
-    # token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+    #UAT
+    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+
+    #prod
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
-# get meter point readings api info
+# get meter point readings api info 
 def get_meter_readings_api_info(account_id, meter_point_id):
-    api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
-    token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
-    # token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+    #UAT
+    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    #prod
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
 
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
@@ -140,6 +147,41 @@ def extract_meter_point_json(data, account_id, k):
         k.key = 'ensek-meterpoints/Registers/' + filename_registers
         k.set_contents_from_string(df_registers_string)
 
+    ''' Prcessing registers -> attributes data '''
+    df_registersAttributes = json_normalize(data, record_path=['meters','registers','attributes'],meta=[['meters','meterId'],['meters','registers','id'],'id'], 
+    meta_prefix='meter_point_', record_prefix='registersAttributes_', sep='_')
+    if(df_registersAttributes.empty):
+        print(" - has no registers data")
+        log_error(" - has no registers data")
+        
+    else:
+        df_registersAttributes.rename(columns={'meter_point_meters_meterId' : 'meter_id'}, inplace=True)
+        df_registersAttributes.rename(columns={'meter_point_meters_registers_id' : 'register_id'}, inplace=True)
+        df_registersAttributes['account_id'] = account_id
+        # df_registersAttributes.to_csv('registers_' + str(account_id) + '.csv')
+        df_registersAttributes_string = df_registersAttributes.to_csv(None, index=False)
+        filename_registersAttributes =  'registers_'  + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/RegistersAttributes/' + filename_registersAttributes
+        k.set_contents_from_string(df_registersAttributes_string)
+        # print(df_registersAttributes_string)
+    
+    ''' Prcessing Meters -> attributes data '''
+    df_metersAttributes = json_normalize(data, record_path=['meters','attributes'],meta=[['meters','meterId'],'id'], 
+    meta_prefix='meter_point_', record_prefix='metersAttributes_', sep='_')
+    if(df_metersAttributes.empty):
+        print(" - has no registers data")
+        log_error(" - has no registers data")
+        
+    else:
+        df_metersAttributes.rename(columns={'meter_point_meters_meterId' : 'meter_id'}, inplace=True)
+        df_metersAttributes['account_id'] = account_id
+        # df_metersAttributes.to_csv('metersAttributes_' + str(account_id) + '.csv')
+        df_metersAttributes_string = df_metersAttributes.to_csv(None, index=False)
+        filename_metersAttributes =  'metersAttributes_'  + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/MetersAttributes/' + filename_metersAttributes
+        k.set_contents_from_string(df_metersAttributes_string)
+        # print(df_metersAttributes_string)
+
     return meter_point_ids 
 
 ''' Processing meter readings data'''
@@ -205,7 +247,7 @@ def main():
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
         meter_info_response = get_api_response(api_url,token,head)
-
+        # print(json.dumps(meter_info_response, indent=4))
         if(meter_info_response):
             
             formatted_meter_info = format_json_response(meter_info_response)
@@ -216,6 +258,7 @@ def main():
                 log_error(msg_mp, '')
                 api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
                 meter_reading_response = get_api_response(api_url,token,head)
+                # print(json.dumps(meter_reading_response, indent=4))
                 if(meter_reading_response):
                     formatted_meter_reading = format_json_response(meter_reading_response)
                     extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
