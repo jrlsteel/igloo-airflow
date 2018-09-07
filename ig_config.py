@@ -16,10 +16,18 @@ rds_config = dict(
                     pwd = 'hX4M2S4vj2v5qKb8qQqbLIFYMBoSvGZa',
                     port = 22                          
 )
+redshift_config = dict (
+                    host = 'localhost',
+                    user = 'igloo',    
+                    db = 'igloosense',
+                    pwd = 'tL2ZqlSOukYg',
+                    port = 22     
+
+)
 test_config = dict(
                     enable_manual = 'N', # If enabled, uses the account ids from test_config[account_ids]  
                     account_ids = [10855], # run for one or list of account ids for testing.
                     enable_file = 'N', # If enabled, uses the account ids from s3 bucket
                     enable_db = 'Y', # If enabled, fetches the account ids RDS mysql db
-                    account_ids_sql = 'select s.external_id from supply_contracts s limit 5'
+                    account_ids_sql = 'select s.external_id from supply_contracts s limit 5' # Sql to fetch from rds db.
 )
