@@ -12,6 +12,7 @@ from retrying import retry
 import time
 from requests import ConnectionError
 import csv
+import pymysql
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
@@ -235,18 +236,35 @@ def log_error(error_msg, error_code=''):
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
-def main():
-    '''Enable this to test for 1 account id'''
-    account_ids = con.api_config['account_ids']
-    
-    e = con.api_config['total_no_of_calls']
-    k = get_S3_Connections()
+def get_accountID_fromDB():
 
-    if len(account_ids) == 0:
+    conn = pymysql.connect(host=con.rds_config['host'], port=con.rds_config['port'], user=con.rds_config['user'], passwd=con.rds_config['pwd'], db=con.rds_config['db'])
+
+    cur = conn.cursor()
+
+    cur.execute(con.test_config['account_ids_sql'])
+
+    account_ids = [row[0] for row in cur]
+    cur.close()
+    conn.close()
+    
+    return account_ids
+
+
+def main():
+
+    k = get_S3_Connections()
+    e = con.api_config['total_no_of_calls']
+
+    '''Enable this to test for 1 account id'''
+    if con.test_config['enable_manual'] == 'Y':
+        account_ids = con.test_config['account_ids']
+    
+    if con.test_config['enable_file'] == 'Y':
         account_ids = get_Users(k)
 
-    # c = get_DB_Connection()
-    # get_Users_from_DB()
+    if con.test_config['enable_db'] == 'Y':
+        account_ids = get_accountID_fromDB()
 
     # run for configured account ids
     for account_id in account_ids[:e]:
