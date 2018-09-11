@@ -13,18 +13,12 @@ from pyspark.sql.types import *
 
 def extract_meterpoints_data():
     
-    pr.connect_to_redshift(host=con.redshift_config['host'], port=con.redshift_config['port'], user=con.redshift_config['user'], password=con.redshift_config['pwd'], dbname=con.redshift_config['db'])
-    readings_sql = '''with q as 
-                    (select * , row_number() over(partition by reading_id order by reading_id) row_no from ref_readings)
-                    select * from q where row_no = 1
-                    order by q.reading_id,row_no'''
-    ref_readings = pr.redshift_to_pandas(readings_sql)
-    # ref_meterpoints = pr.redshift_to_pandas("SELECT * FROM public.ref_meterpoints limit 1000")
-    # ref_meters = pr.redshift_to_pandas("SELECT * FROM public.ref_meters limit 1000")
-    # ref_metersattributes = pr.redshift_to_pandas("SELECT * FROM public.ref_metersattributes limit 1000")
-    # ref_registers = pr.redshift_to_pandas("SELECT * FROM public.ref_registers limit 1000")
-    # ref_registersattributes = pr.redshift_to_pandas("SELECT * FROM public.ref_registersattributes limit 1000")
-    # ref_attributes = pr.redshift_to_pandas("SELECT * FROM public.ref_attributes limit 1000")
+    # pr.connect_to_redshift(host=con.redshift_config['host'], port=con.redshift_config['port'], user=con.redshift_config['user'], password=con.redshift_config['pwd'], dbname=con.redshift_config['db'])
+    # readings_sql = '''with q as 
+    #                 (select * , row_number() over(partition by reading_id order by reading_id) row_no from ref_readings)
+    #                 select * from q where row_no = 1
+    #                 order by q.reading_id,row_no'''
+    # ref_readings = pr.redshift_to_pandas(readings_sql)
 
 #   creating spark session 
     spark = SparkSession. \
@@ -40,75 +34,74 @@ def extract_meterpoints_data():
     spark._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", con.s3_config['secret_key'])
     spark._jsc.hadoopConfiguration().set("fs.s3n.impl", "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
 
-    # sqlContext = SQLContext(spark)
-    # ref_readings = sqlContext.read \
-    # .format("com.databricks.spark.redshift") \
-    # .option("url", con.redshift_config['host']) \
-    # .option("dbtable", "ref_readings") \
-    # .load() 
-    
-    mySchema = StructType([ StructField("reading_value", FloatType(), True)\
-                       ,StructField("id", IntegerType(), True)\
-                       ,StructField("readingtype", StringType(), True)\
-                       ,StructField("meterpointid", IntegerType(), True)\
-                       ,StructField("datetime", StringType(), True)\
-                       ,StructField("createddate", StringType(), True)\
-                       ,StructField("meterreadingsource", StringType(), True)\
-                       ,StructField("reading_id", LongType(), True)\
-                       ,StructField("register_id", IntegerType(), True)\
-                       ,StructField("meter_point_id", IntegerType(), True)\
-                       ,StructField("account_id", IntegerType(), True)\
-                       ,StructField("reading_registerid", IntegerType(), True)\
-                       ,StructField("row_no", IntegerType(), True)])
-                       
+    '''
+### REDSHIFT ###
 
-    sc_reading = spark.createDataFrame(ref_readings, schema=mySchema)
-    
-    print(type(sc_reading))
-    sc_reading.printSchema()
-    sc_reading.registerTempTable("readings_rs")
-    spark.sql("select count(1) from readings_rs limit 2").show()
-    
+    #Reading from Redshift
+    rs_readings = spark.read \
+    .format("com.databricks.spark.redshift") \
+    .option("url", "jdbc:postgresql://localhost:22/igloosense") \
+    .option("user", con.redshift_config['user']) \
+    .option("password", con.redshift_config['pwd']) \
+    .option("tempdir", "s3n://igloo-uat-bucket/ensek-meterpoints/pysparkTemp/") \
+    .option('forward_spark_s3_credentials',True) \
+    .option("dbtable", "ref_readings") \
+    .load() 
 
     
-    
+    # Registering redshift data as temp table
+    rs_readings.registerTempTable("readings_rs")
+    '''
 
-    s3_df = spark.read \
+
+    # Reading from s3
+    s3_df_raw = spark.read \
     .format("com.databricks.spark.csv") \
     .option("header", "true") \
     .option("inferSchema", "true") \
-    .load("s3n://igloo-uat-bucket/ensek-meterpoints/Readings/meter_point_readings_1865_2147.csv") \
-
-    # s3_df.show()
-    print(type(s3_df))
+    .load("s3n://igloo-uat-bucket/ensek-meterpoints/Readings/*.csv") 
+    
+    
+    s3_df = s3_df_raw.withColumn('reading_id', s3_df_raw['reading_id'].cast(LongType()))
+    s3_df = s3_df_raw.withColumn('account_id', s3_df_raw['account_id'].cast(LongType())) 
+    s3_df = s3_df_raw.withColumn('meter_point_id', s3_df_raw['meter_point_id'].cast(LongType()))
+    s3_df = s3_df_raw.withColumn('reading_registerid', s3_df_raw['reading_registerid'].cast(LongType()))
+    s3_df = s3_df_raw.withColumn('id', s3_df_raw['id'].cast(LongType()))
+    s3_df = s3_df_raw.withColumn('meterPointId', s3_df_raw['meterPointId'].cast(LongType()))
+    s3_df = s3_df_raw.withColumn('meterReadingSource', s3_df_raw['meterReadingSource'].cast(StringType()))
+    s3_df = s3_df_raw.withColumn('meterpointid', s3_df_raw['meterpointid'].cast(LongType()))
+    
     s3_df.printSchema()
+
+    # Registering s3 data as temp table
     s3_df.registerTempTable('readings_s3')
-    spark.sql("select count(1) from readings_s3 limit 2").show()
+
+# Copy from s3 to Redshift
+    spark.sql("SELECT account_id,meter_point_id,id,datetime,createddate,meterreadingsource,reading_id,reading_registerid,readingtype,reading_value,meterpointid FROM reading_s3") \
+    .write.format("com.databricks.spark.redshift") \
+    .option("url", "jdbc:postgresql://localhost:22/igloosense") \
+    .option("user", con.redshift_config['user']) \
+    .option("password", con.redshift_config['pwd']) \
+    .option("tempdir", "s3n://igloo-uat-bucket/ensek-meterpoints/pysparkTemp/") \
+    .option('forward_spark_s3_credentials',True) \
+    .option("dbtable", "ref_readings") \
+    .mode("overwrite") \
+    .save()
+    
+
+    # .mode(SaveMode.Overwrite) \
+    # spark.sql("select * from readings_s3 s where s.account_id = 1865 and s.meter_point_id = 2147").show()
+
+
 
     
-    spark.sql("select count(1) from readings_s3 s \
-                left outer join readings_rs r  \
-                ON s.reading_id = r.reading_id \
-                ").show()
+    # ### Insert ###
+    # spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
+    #             left outer join readings_rs r  \
+    #             ON s.reading_id = r.reading_id \
+    #             where r.reading_id is null").show()
 
-    # file = Path('ref_readings_B.csv')
-    # if not file.exists():
-    #     ref_readings.to_csv('ref_readings_B.csv', index=False)
-
-    # ref_meterpoints.to_csv('ref_meterpoints_B.csv', index=False)
-    # ref_meters.to_csv('ref_meters_B.csv', index=False)
-    # ref_metersattributes.to_csv('ref_metersattributes_B.csv', index=False)
-    # ref_registers.to_csv('ref_registers_B.csv', index=False)
-    # ref_registersattributes.to_csv('ref_registersattributes_B.csv', index=False)
-    # ref_attributes.to_csv('ref_attributes_B.csv', index=False)
-    # print(ref_readings.head(2))
-
-    # ref_readings_B = pd.read_csv('ref_readings_B.csv')
-    # ref_readings_join = ref_readings_B.merge(ref_readings[(ref_readings.reading_value != ref_readings_B.reading_value) | (ref_readings.readingtype != ref_readings_B.readingtype)][['reading_id']], left_on='reading_id', right_on='reading_id', how='right')
-    # ref_readings_join.to_csv('readings_updated.csv', index=False)
-
-    # reading_out = ref_readings_join[ref_readings_join.reading_value != ref_readings_join.reading_value_B]
-    # print(reading_out)
+    
 
 def main():
    extract_meterpoints_data()
