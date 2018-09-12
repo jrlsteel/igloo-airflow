@@ -23,8 +23,8 @@ def extract_meterpoints_data():
 #   creating spark session 
     spark = SparkSession. \
     builder. \
-    master('local'). \
-    appName('Getting Started'). \
+    master('local[5]'). \
+    appName('Process new ensec data'). \
     enableHiveSupport(). \
     getOrCreate()
     
@@ -34,10 +34,10 @@ def extract_meterpoints_data():
     spark._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", con.s3_config['secret_key'])
     spark._jsc.hadoopConfiguration().set("fs.s3n.impl", "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
 
-    '''
+   
 ### REDSHIFT ###
 
-    #Reading from Redshift
+# Reading from Redshift - ref_readings_test
     rs_readings = spark.read \
     .format("com.databricks.spark.redshift") \
     .option("url", "jdbc:postgresql://localhost:22/igloosense") \
@@ -45,21 +45,21 @@ def extract_meterpoints_data():
     .option("password", con.redshift_config['pwd']) \
     .option("tempdir", "s3n://igloo-uat-bucket/ensek-meterpoints/pysparkTemp/") \
     .option('forward_spark_s3_credentials',True) \
-    .option("dbtable", "ref_readings") \
+    .option("dbtable", "ref_readings_test") \
     .load() 
 
     
-    # Registering redshift data as temp table
+# Registering redshift data as temp table - readings_s3
     rs_readings.registerTempTable("readings_rs")
-    '''
+    
 
 
-    # Reading from s3
+# Reading from s3 - readings
     s3_df_raw = spark.read \
     .format("com.databricks.spark.csv") \
     .option("header", "true") \
     .option("inferSchema", "true") \
-    .load("s3n://igloo-uat-bucket/ensek-meterpoints/Readings/*.csv") 
+    .load("s3n://igloo-uat-bucket/ensek-meterpoints/Readings/meter_point_readings_10815_17148.csv") 
     
     
     s3_df = s3_df_raw.withColumn('reading_id', s3_df_raw['reading_id'].cast(LongType()))
@@ -73,35 +73,43 @@ def extract_meterpoints_data():
     
     s3_df.printSchema()
 
-    # Registering s3 data as temp table
+# Registering s3 data as temp table
     s3_df.registerTempTable('readings_s3')
 
-# Copy from s3 to Redshift
-    spark.sql("SELECT account_id,meter_point_id,id,datetime,createddate,meterreadingsource,reading_id,reading_registerid,readingtype,reading_value,meterpointid FROM reading_s3") \
-    .write.format("com.databricks.spark.redshift") \
-    .option("url", "jdbc:postgresql://localhost:22/igloosense") \
-    .option("user", con.redshift_config['user']) \
-    .option("password", con.redshift_config['pwd']) \
-    .option("tempdir", "s3n://igloo-uat-bucket/ensek-meterpoints/pysparkTemp/") \
-    .option('forward_spark_s3_credentials',True) \
-    .option("dbtable", "ref_readings") \
-    .mode("overwrite") \
-    .save()
+#  Copy from s3 to Redshift
+    # redshift_copy = spark.sql("SELECT account_id,meter_point_id,id,datetime,createddate,meterreadingsource,reading_id,reading_registerid,readingtype,reading_value,meterpointid FROM readings_s3") \
+    # .write.format("com.databricks.spark.redshift") \
+    # .option("url", "jdbc:postgresql://localhost:22/igloosense") \
+    # .option("user", con.redshift_config['user']) \
+    # .option("password", con.redshift_config['pwd']) \
+    # .option("tempdir", "s3n://igloo-uat-bucket/ensek-meterpoints/pysparkTemp/") \
+    # .option('forward_spark_s3_credentials',True) \
+    # .option("dbtable", "ref_readings_test") \
+    # .mode("overwrite") \
+    # .save()
     
-
-    # .mode(SaveMode.Overwrite) \
+# Get count(1) data from s3
+    # spark.sql("select count(1) from readings_s3").show()
     # spark.sql("select * from readings_s3 s where s.account_id = 1865 and s.meter_point_id = 2147").show()
+   
+# ### Insert ###
+    readings_insert = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
+                left outer join readings_rs r  \
+                ON s.reading_id = r.reading_id \
+                where r.reading_id is null").show()
+    print(readings_insert)
 
-
-
-    
-    # ### Insert ###
-    # spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
-    #             left outer join readings_rs r  \
+    # ### UPDATE ###
+    # readings_update = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
+    #              inner join readings_rs r  \
     #             ON s.reading_id = r.reading_id \
-    #             where r.reading_id is null").show()
+    #             where (s.meterreadingsource != r.meterreadingsource or s.readingtype != r.readingtype or s.reading_value != r.reading_value")).show()
 
-    
+    # ### DELETE ###
+    # readings_insert = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_rs r \
+    #             left outer join readings_s3 s  \
+    #             ON r.reading_id = s.reading_id \
+    #             where s.reading_id is null").show()
 
 def main():
    extract_meterpoints_data()
