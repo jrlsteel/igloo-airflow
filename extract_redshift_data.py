@@ -23,7 +23,7 @@ def extract_meterpoints_data():
 #   creating spark session 
     spark = SparkSession. \
     builder. \
-    master('local[5]'). \
+    master('local[*]'). \
     appName('Process new ensec data'). \
     enableHiveSupport(). \
     getOrCreate()
@@ -34,6 +34,7 @@ def extract_meterpoints_data():
     spark._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", con.s3_config['secret_key'])
     spark._jsc.hadoopConfiguration().set("fs.s3n.impl", "org.apache.hadoop.fs.s3native.NativeS3FileSystem")
 
+    spark._jsc.hadoopConfiguration().set("spark.sql.parquet.output.committer.class","org.apache.spark.sql.parquet.DirectParquetOutputCommitter")
    
 ### REDSHIFT ###
 
@@ -71,7 +72,7 @@ def extract_meterpoints_data():
     s3_df = s3_df_raw.withColumn('meterReadingSource', s3_df_raw['meterReadingSource'].cast(StringType()))
     s3_df = s3_df_raw.withColumn('meterpointid', s3_df_raw['meterpointid'].cast(LongType()))
     
-    s3_df.printSchema()
+    # s3_df.printSchema()
 
 # Registering s3 data as temp table
     s3_df.registerTempTable('readings_s3')
@@ -88,16 +89,24 @@ def extract_meterpoints_data():
     # .mode("overwrite") \
     # .save()
     
-# Get count(1) data from s3
+# Test to count(1) data from s3
     # spark.sql("select count(1) from readings_s3").show()
     # spark.sql("select * from readings_s3 s where s.account_id = 1865 and s.meter_point_id = 2147").show()
    
 # ### Insert ###
-    readings_insert = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
-                left outer join readings_rs r  \
-                ON s.reading_id = r.reading_id \
-                where r.reading_id is null").show()
-    print(readings_insert)
+    readings_insert = spark.sql("select s.account_id, s.meter_point_id, s.id, s.datetime, s.createddate, s.meterreadingsource, s.reading_id, s.reading_registerid, s.readingtype, \
+                                s.reading_value, s.meterpointid from readings_s3 s \
+                                left outer join readings_rs r  \
+                                ON s.reading_id = r.reading_id \
+                                where r.reading_id is null")
+    
+    readings_insert.show()
+
+    readings_insert.coalesce(1).write \
+    .format("com.databricks.spark.csv") \
+    .option("header", "true") \
+    .mode("overwrite") \
+    .save("s3n://igloo-uat-bucket/ensek-meterpoints/altReadings/insert/")
 
     # ### UPDATE ###
     # readings_update = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_s3 s \
@@ -106,7 +115,7 @@ def extract_meterpoints_data():
     #             where (s.meterreadingsource != r.meterreadingsource or s.readingtype != r.readingtype or s.reading_value != r.reading_value")).show()
 
     # ### DELETE ###
-    # readings_insert = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_rs r \
+    # readings_delete = spark.sql("select s.reading_id,s.account_id,meter_point_id, from readings_rs r \
     #             left outer join readings_s3 s  \
     #             ON r.reading_id = s.reading_id \
     #             where s.reading_id is null").show()
