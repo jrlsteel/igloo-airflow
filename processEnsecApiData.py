@@ -266,81 +266,54 @@ def get_accountID_fromDB():
     
     return account_ids
 
-def processAccounts(account_id):
-    t = con.api_config['total_no_of_calls']
-    # run for configured account ids
-    api_url,token,head = get_meter_point_api_info(account_id)
-    print('ac:' + str(account_id) + str(multiprocessing.current_process()))
-    msg_ac = 'ac:' + str(account_id)
-    log_error(msg_ac, '')
-    meter_info_response = get_api_response(api_url,token,head)
-    # print(json.dumps(meter_info_response, indent=4))
-    if(meter_info_response):
-        
-        formatted_meter_info = format_json_response(meter_info_response)
-        meter_points = extract_meter_point_json(formatted_meter_info, account_id)
-        for each_meter_point in meter_points:
-            print('mp:' + str(each_meter_point))
-            msg_mp = 'mp:' + str(each_meter_point)
-            log_error(msg_mp, '')
-            api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
-            meter_reading_response = get_api_response(api_url,token,head)
-            # print(json.dumps(meter_reading_response, indent=4))
-            if(meter_reading_response):
-                formatted_meter_reading = format_json_response(meter_reading_response)
-                extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point)
-            else:
-                print('mp:' + str(each_meter_point) + ' has no data')
-                msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
-                log_error(msg_mp, '')
-    else:
-        print('ac:' + str(account_id) + ' has no data')
-        msg_ac = 'ac:' + str(account_id) + ' has no data'
+def processAccounts(account_ids):
+    for account_id in account_ids:
+        t = con.api_config['total_no_of_calls']
+        # run for configured account ids
+        api_url,token,head = get_meter_point_api_info(account_id)
+        print('ac:' + str(account_id) + str(multiprocessing.current_process()))
+        msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
+        meter_info_response = get_api_response(api_url,token,head)
+        # print(json.dumps(meter_info_response, indent=4))
+        if(meter_info_response):
+            
+            formatted_meter_info = format_json_response(meter_info_response)
+            meter_points = extract_meter_point_json(formatted_meter_info, account_id)
+            for each_meter_point in meter_points:
+                print('mp:' + str(each_meter_point))
+                msg_mp = 'mp:' + str(each_meter_point)
+                log_error(msg_mp, '')
+                api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
+                meter_reading_response = get_api_response(api_url,token,head)
+                # print(json.dumps(meter_reading_response, indent=4))
+                if(meter_reading_response):
+                    formatted_meter_reading = format_json_response(meter_reading_response)
+                    extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point)
+                else:
+                    print('mp:' + str(each_meter_point) + ' has no data')
+                    msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
+                    log_error(msg_mp, '')
+        else:
+            print('ac:' + str(account_id) + ' has no data')
+            msg_ac = 'ac:' + str(account_id) + ' has no data'
+            log_error(msg_ac, '')
 
-
-# def main():
-
-#     get_S3_Connections()
-    
-#     '''Enable this to test for 1 account id'''
-#     if con.test_config['enable_manual'] == 'Y':
-#         account_ids = con.test_config['account_ids']
-    
-#     if con.test_config['enable_file'] == 'Y':
-#         account_ids = get_Users()
-
-#     if con.test_config['enable_db'] == 'Y':
-#         account_ids = get_accountID_fromDB()
-
-#     threads = 5
-#     chunksize = 2
-
-#     with Pool(threads) as pool:
-#         pool.starmap(processAccounts, zip(account_ids), chunksize)
-
-def processAccounts1(account_ids):
-    for account_id in account_ids:
-        print(account_id)
-
-def processAccounts2(account_ids):
-    for account_id in account_ids:
-        print(account_id)
 
 if __name__ == "__main__":
     freeze_support()
     
-    # get_S3_Connections()
+    get_S3_Connections()
     
-    # '''Enable this to test for 1 account id'''
-    # if con.test_config['enable_manual'] == 'Y':
-    #     account_ids = con.test_config['account_ids']
+    '''Enable this to test for 1 account id'''
+    if con.test_config['enable_manual'] == 'Y':
+        account_ids = con.test_config['account_ids']
     
-    # if con.test_config['enable_file'] == 'Y':
-    #     account_ids = get_Users()
+    if con.test_config['enable_file'] == 'Y':
+        account_ids = get_Users()
 
-    # if con.test_config['enable_db'] == 'Y':
-    #     account_ids = get_accountID_fromDB()
+    if con.test_config['enable_db'] == 'Y':
+        account_ids = get_accountID_fromDB()
 
     # threads = 5
     # chunksize = 100
@@ -348,21 +321,34 @@ if __name__ == "__main__":
     # with Pool(threads) as pool:
     #     pool.starmap(processAccounts, zip(account_ids), chunksize)
 
-    account_ids1 = [123,333,444,222,444,555]
-    account_ids2 = [666,777,888,999,100]
-    # print(type(account_ids))
-    print(len(account_ids1))
-    print(len(account_ids2))
+    print(len(account_ids))
+    print(int(len(account_ids)/6))
+    p = int(len(account_ids)/6)
+
+    print(account_ids)
 
     start_time = datetime.datetime.now()
-    p1 = multiprocessing.Process(target = processAccounts1, args=(account_ids1,))
-    p2 = multiprocessing.Process(target = processAccounts2, args=(account_ids2,))
+    p1 = multiprocessing.Process(target = processAccounts, args=(account_ids[0:p],))
+    p2 = multiprocessing.Process(target = processAccounts, args=(account_ids[p:2*p],))
+    p3 = multiprocessing.Process(target = processAccounts, args=(account_ids[2*p:3*p],))
+    p4 = multiprocessing.Process(target = processAccounts, args=(account_ids[3*p:4*p],))
+    p5 = multiprocessing.Process(target = processAccounts, args=(account_ids[4*p:5*p],))
+    p6 = multiprocessing.Process(target = processAccounts, args=(account_ids[5*p:],))
     end_time = datetime.datetime.now()
 
     diff = end_time - start_time
     p1.start()
     p2.start()
+    p3.start()
+    p4.start()
+    p5.start()
+    p6.start()
+
     p1.join()
     p2.join()
+    p3.join()
+    p4.join()
+    p5.join()
+    p6.join()
 
     print("Process completed. Time taken: " + str(diff))
