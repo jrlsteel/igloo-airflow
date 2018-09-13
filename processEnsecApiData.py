@@ -10,11 +10,12 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from retrying import retry
 import time
+import datetime
 from requests import ConnectionError
 import csv
 import pymysql
 import multiprocessing
-from multiprocessing import Pool, freeze_support
+from multiprocessing import Pool, freeze_support, Process
 from time import sleep
 from itertools import repeat
 from functools import partial
@@ -318,23 +319,50 @@ def processAccounts(account_id):
 #     with Pool(threads) as pool:
 #         pool.starmap(processAccounts, zip(account_ids), chunksize)
 
+def processAccounts1(account_ids):
+    for account_id in account_ids:
+        print(account_id)
+
+def processAccounts2(account_ids):
+    for account_id in account_ids:
+        print(account_id)
+
 if __name__ == "__main__":
     freeze_support()
     
-    get_S3_Connections()
+    # get_S3_Connections()
     
-    '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
+    # '''Enable this to test for 1 account id'''
+    # if con.test_config['enable_manual'] == 'Y':
+    #     account_ids = con.test_config['account_ids']
     
-    if con.test_config['enable_file'] == 'Y':
-        account_ids = get_Users()
+    # if con.test_config['enable_file'] == 'Y':
+    #     account_ids = get_Users()
 
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = get_accountID_fromDB()
+    # if con.test_config['enable_db'] == 'Y':
+    #     account_ids = get_accountID_fromDB()
 
-    threads = 5
-    chunksize = 2
+    # threads = 5
+    # chunksize = 100
 
-    with Pool(threads) as pool:
-        pool.starmap(processAccounts, zip(account_ids), chunksize)
+    # with Pool(threads) as pool:
+    #     pool.starmap(processAccounts, zip(account_ids), chunksize)
+
+    account_ids1 = [123,333,444,222,444,555]
+    account_ids2 = [666,777,888,999,100]
+    # print(type(account_ids))
+    print(len(account_ids1))
+    print(len(account_ids2))
+
+    start_time = datetime.datetime.now()
+    p1 = multiprocessing.Process(target = processAccounts1, args=(account_ids1,))
+    p2 = multiprocessing.Process(target = processAccounts2, args=(account_ids2,))
+    end_time = datetime.datetime.now()
+
+    diff = end_time - start_time
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+
+    print("Process completed. Time taken: " + str(diff))
