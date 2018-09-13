@@ -23,7 +23,7 @@ from functools import partial
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
-k = Key()
+# k = Key()
 
 # get meter point api info
 def get_meter_point_api_info(account_id):
@@ -86,7 +86,7 @@ def get_api_response(api_url,token,head):
 
    
 
-def extract_meter_point_json(data, account_id):
+def extract_meter_point_json(data, account_id,k):
 
     '''
     Extracting meterpoints, registers, meters, attributes data
@@ -94,7 +94,7 @@ def extract_meter_point_json(data, account_id):
     key = meter_point_id
     '''
     meter_point_ids = []
-    global k
+    # global k
 
     ''' Processing meter points data'''
     meta_meters = ['associationStartDate', 'associationEndDate', 'supplyStartDate', 'supplyEndDate', 'isSmart', 'isSmartCommunicating', 'id', 'meterPointNumber', 'meterPointType']
@@ -202,8 +202,8 @@ def extract_meter_point_json(data, account_id):
     return meter_point_ids 
 
 ''' Processing meter readings data'''
-def extract_meter_readings_json(data, account_id, meter_point_id):
-    global k
+def extract_meter_readings_json(data, account_id, meter_point_id,k):
+    # global k
     meta_readings = ['id', 'readingType', 'meterPointId', 'dateTime', 'createdDate', 'meterReadingSource']
     df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
     df_meter_readings['account_id'] = account_id
@@ -218,7 +218,7 @@ def extract_meter_readings_json(data, account_id, meter_point_id):
 
 '''Get S3 connection'''
 def get_S3_Connections():
-    global k
+    # global k
     access_key = con.s3_config['access_key']
     secret_key = con.s3_config['secret_key']
     # print(access_key)
@@ -230,8 +230,8 @@ def get_S3_Connections():
     return k
 
 '''Read Users from S3'''
-def get_Users():
-    global k
+def get_Users(k):
+    # global k
     filename_Users = 'users.csv'
     k.key = 'ensek-meterpoints/Users/' + filename_Users
     k.open()
@@ -266,7 +266,7 @@ def get_accountID_fromDB():
     
     return account_ids
 
-def processAccounts(account_ids):
+def processAccounts(account_ids,k):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
         # run for configured account ids
@@ -279,7 +279,7 @@ def processAccounts(account_ids):
         if(meter_info_response):
             
             formatted_meter_info = format_json_response(meter_info_response)
-            meter_points = extract_meter_point_json(formatted_meter_info, account_id)
+            meter_points = extract_meter_point_json(formatted_meter_info, account_id,k)
             for each_meter_point in meter_points:
                 print('mp:' + str(each_meter_point))
                 msg_mp = 'mp:' + str(each_meter_point)
@@ -289,7 +289,7 @@ def processAccounts(account_ids):
                 # print(json.dumps(meter_reading_response, indent=4))
                 if(meter_reading_response):
                     formatted_meter_reading = format_json_response(meter_reading_response)
-                    extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point)
+                    extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
                 else:
                     print('mp:' + str(each_meter_point) + ' has no data')
                     msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
@@ -303,14 +303,14 @@ def processAccounts(account_ids):
 if __name__ == "__main__":
     freeze_support()
     
-    get_S3_Connections()
+    k = get_S3_Connections()
     
     '''Enable this to test for 1 account id'''
     if con.test_config['enable_manual'] == 'Y':
         account_ids = con.test_config['account_ids']
     
     if con.test_config['enable_file'] == 'Y':
-        account_ids = get_Users()
+        account_ids = get_Users(k)
 
     if con.test_config['enable_db'] == 'Y':
         account_ids = get_accountID_fromDB()
@@ -328,12 +328,12 @@ if __name__ == "__main__":
     print(account_ids)
 
     start_time = datetime.datetime.now()
-    p1 = multiprocessing.Process(target = processAccounts, args=(account_ids[0:p],))
-    p2 = multiprocessing.Process(target = processAccounts, args=(account_ids[p:2*p],))
-    p3 = multiprocessing.Process(target = processAccounts, args=(account_ids[2*p:3*p],))
-    p4 = multiprocessing.Process(target = processAccounts, args=(account_ids[3*p:4*p],))
-    p5 = multiprocessing.Process(target = processAccounts, args=(account_ids[4*p:5*p],))
-    p6 = multiprocessing.Process(target = processAccounts, args=(account_ids[5*p:],))
+    p1 = multiprocessing.Process(target = processAccounts, args=(account_ids[0:p],k))
+    p2 = multiprocessing.Process(target = processAccounts, args=(account_ids[p:2*p],k))
+    p3 = multiprocessing.Process(target = processAccounts, args=(account_ids[2*p:3*p],k))
+    p4 = multiprocessing.Process(target = processAccounts, args=(account_ids[3*p:4*p],k))
+    p5 = multiprocessing.Process(target = processAccounts, args=(account_ids[4*p:5*p],k))
+    p6 = multiprocessing.Process(target = processAccounts, args=(account_ids[5*p:],k))
     end_time = datetime.datetime.now()
 
     diff = end_time - start_time
