@@ -13,8 +13,8 @@ import time
 from requests import ConnectionError
 import csv
 import pymysql
-from multiprocessing import Pool, freeze_support
 import multiprocessing
+from multiprocessing import Pool, freeze_support
 from time import sleep
 from itertools import repeat
 from functools import partial
@@ -297,11 +297,30 @@ def processAccounts(account_id):
         msg_ac = 'ac:' + str(account_id) + ' has no data'
         log_error(msg_ac, '')
 
-def func(a):
-    print(str(a))
 
-def main():
+# def main():
 
+#     get_S3_Connections()
+    
+#     '''Enable this to test for 1 account id'''
+#     if con.test_config['enable_manual'] == 'Y':
+#         account_ids = con.test_config['account_ids']
+    
+#     if con.test_config['enable_file'] == 'Y':
+#         account_ids = get_Users()
+
+#     if con.test_config['enable_db'] == 'Y':
+#         account_ids = get_accountID_fromDB()
+
+#     threads = 5
+#     chunksize = 2
+
+#     with Pool(threads) as pool:
+#         pool.starmap(processAccounts, zip(account_ids), chunksize)
+
+if __name__ == "__main__":
+    freeze_support()
+    
     get_S3_Connections()
     
     '''Enable this to test for 1 account id'''
@@ -319,7 +338,3 @@ def main():
 
     with Pool(threads) as pool:
         pool.starmap(processAccounts, zip(account_ids), chunksize)
-
-if __name__ == "__main__":
-    freeze_support()
-    main()
