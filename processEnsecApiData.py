@@ -51,6 +51,18 @@ def get_meter_readings_api_info(account_id, meter_point_id):
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
+def get_meter_readings_billeable_api_info(account_id, meter_point_id):
+    #UAT
+    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings'.format(account_id,meter_point_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    #prod
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings?isBilleable=true'.format(account_id,meter_point_id)
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+
+    head = {'Content-Type': 'application/json',
+           'Authorization': 'Bearer {0}'.format(token)}
+    return api_url,token,head
+
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
 def get_api_response(api_url,token,head):
@@ -208,10 +220,27 @@ def extract_meter_readings_json(data, account_id, meter_point_id,k):
     df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
     df_meter_readings['account_id'] = account_id
     df_meter_readings['meter_point_id'] = meter_point_id
+    filename_readings = 'meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
+    df_meter_readings['readings_filename'] = filename_readings
+    # df_meter_readings.to_csv('meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '_' + '.csv')
+
+    df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
+    k.key = 'ensek-meterpoints/Readings/' + filename_readings
+    k.set_contents_from_string(df_meter_readings_string)
+    # print(df_meter_readings_string)
+    # print(filename_readings)
+
+''' Processing meter readings data billeable'''
+def extract_meter_readings_billeable_json(data, account_id, meter_point_id,k):
+    # global k
+    meta_readings = ['id', 'readingType', 'meterPointId', 'dateTime', 'createdDate', 'meterReadingSource']
+    df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
+    df_meter_readings['account_id'] = account_id
+    df_meter_readings['meter_point_id'] = meter_point_id
     # df_meter_readings.to_csv('meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '_' + '.csv')
     filename_readings = 'meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
     df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
-    k.key = 'ensek-meterpoints/Readings/' + filename_readings
+    k.key = 'ensek-meterpoints/ReadingsBilleable/' + filename_readings
     k.set_contents_from_string(df_meter_readings_string)
     # print(df_meter_readings_string)
     # print(filename_readings)
@@ -286,10 +315,16 @@ def processAccounts(account_ids,k):
                 log_error(msg_mp, '')
                 api_url,token,head = get_meter_readings_api_info(account_id, each_meter_point)
                 meter_reading_response = get_api_response(api_url,token,head)
+                
+                api_url_billeable,token_billeable,head_billeable = get_meter_readings_billeable_api_info(account_id, each_meter_point)
+                meter_reading_billeable_response = get_api_response(api_url,token,head)
                 # print(json.dumps(meter_reading_response, indent=4))
                 if(meter_reading_response):
                     formatted_meter_reading = format_json_response(meter_reading_response)
                     extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point,k)
+                     
+                    formatted_meter_reading = format_json_response(meter_reading_billeable_response)
+                    extract_meter_readings_billeable_json(formatted_meter_reading, account_id, each_meter_point,k)
                 else:
                     print('mp:' + str(each_meter_point) + ' has no data')
                     msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
@@ -322,10 +357,10 @@ if __name__ == "__main__":
     #     pool.starmap(processAccounts, zip(account_ids), chunksize)
 
     print(len(account_ids))
-    print(int(len(account_ids)/6))
-    p = int(len(account_ids)/6)
+    print(int(len(account_ids)/12))
+    p = int(len(account_ids)/12)
 
-    print(account_ids)
+    # print(account_ids)
 
     start_time = datetime.datetime.now()
     p1 = multiprocessing.Process(target = processAccounts, args=(account_ids[0:p],k))
@@ -333,7 +368,13 @@ if __name__ == "__main__":
     p3 = multiprocessing.Process(target = processAccounts, args=(account_ids[2*p:3*p],k))
     p4 = multiprocessing.Process(target = processAccounts, args=(account_ids[3*p:4*p],k))
     p5 = multiprocessing.Process(target = processAccounts, args=(account_ids[4*p:5*p],k))
-    p6 = multiprocessing.Process(target = processAccounts, args=(account_ids[5*p:],k))
+    p6 = multiprocessing.Process(target = processAccounts, args=(account_ids[5*p:6*p],k))
+    p7 = multiprocessing.Process(target = processAccounts, args=(account_ids[6*p:7*p],k))
+    p8 = multiprocessing.Process(target = processAccounts, args=(account_ids[7*p:8*p],k))
+    p9 = multiprocessing.Process(target = processAccounts, args=(account_ids[8*p:9*p],k))
+    p10 = multiprocessing.Process(target = processAccounts, args=(account_ids[9*p:10*p],k))
+    p11 = multiprocessing.Process(target = processAccounts, args=(account_ids[10*p:11*p],k))
+    p12 = multiprocessing.Process(target = processAccounts, args=(account_ids[11*p:],k))
     end_time = datetime.datetime.now()
 
     diff = end_time - start_time
@@ -343,6 +384,12 @@ if __name__ == "__main__":
     p4.start()
     p5.start()
     p6.start()
+    p7.start()
+    p8.start()
+    p9.start()
+    p10.start()
+    p11.start()
+    p12.start()
 
     p1.join()
     p2.join()
@@ -350,5 +397,12 @@ if __name__ == "__main__":
     p4.join()
     p5.join()
     p6.join()
+    p7.join()
+    p8.join()
+    p9.join()
+    p10.join()
+    p11.join()
+    p12.join()
+
 
     print("Process completed. Time taken: " + str(diff))
