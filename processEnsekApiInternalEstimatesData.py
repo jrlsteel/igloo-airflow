@@ -57,8 +57,9 @@ def get_api_response(api_url,token,head):
 
             if response.status_code == 200:
                 response_json = json.loads(response.content.decode('utf-8'))
-                response_items = response_json['Electricity']
-                return response_items
+                response_items_elec = response_json['Electricity']
+                response_items_gas = response_json['Gas']
+                return response_items_elec, response_items_gas
             else:
                 print ('Problem Grabbing Data: ', response.status_code)
                 log_error('Response Error: Problem grabbing data', response.status_code)
@@ -79,7 +80,7 @@ def get_api_response(api_url,token,head):
 
    
 
-def extract_internal_data_response(data, account_id,k):
+def extract_internal_data_response_elec(data, account_id,k):
 
    
     ''' Processing meter points data'''
@@ -89,9 +90,25 @@ def extract_internal_data_response(data, account_id,k):
     if(df_internal_readings.empty):
         print(" - has no readings data")
     else:
+        df_internal_readings['account_id'] = account_id
         df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
         file_name_internal_readings = 'internal_estimates_elec_' + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/EstimatesElecInternal/' + file_name_internal_readings
+        k.set_contents_from_string(df_internal_readings_string)
+
+
+def extract_internal_data_response_gas(data, account_id, k):
+    ''' Processing meter points data'''
+    # meta_meters = ['associationStartDate', 'associationEndDate', 'supplyStartDate', 'supplyEndDate', 'isSmart', 'isSmartCommunicating', 'id', 'meterPointNumber', 'meterPointType']
+    df_internal_readings = json_normalize(data)
+    # print(df_internal_readings)
+    if (df_internal_readings.empty):
+        print(" - has no readings data")
+    else:
+        df_internal_readings['account_id'] = account_id
+        df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
+        file_name_internal_readings = 'internal_estimates_gas_' + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/EstimatesGasInternal/' + file_name_internal_readings
         k.set_contents_from_string(df_internal_readings_string)
 
 '''Get S3 connection'''
@@ -126,7 +143,7 @@ def format_json_response(data):
     return data_json
 
 def log_error(error_msg, error_code=''):
-    with open('estimates_logs' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
+    with open('estimates_logs_' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
@@ -154,11 +171,14 @@ def processAccounts(account_ids,k):
         print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
-        internal_data_response = get_api_response(api_url,token,head)
+        internal_data_response_elec, internal_data_response_gas = get_api_response(api_url,token,head)
         # print(json.dumps(internal_data_response, indent=4))
 
-        formatted_internal_data = format_json_response(internal_data_response)
-        extract_internal_data_response(formatted_internal_data, account_id,k)
+        formatted_internal_data_elec = format_json_response(internal_data_response_elec)
+        extract_internal_data_response_elec(formatted_internal_data_elec, account_id,k)
+
+        formatted_internal_data_gas = format_json_response(internal_data_response_gas)
+        extract_internal_data_response_gas(formatted_internal_data_gas, account_id, k)
 
 
 if __name__ == "__main__":

@@ -194,8 +194,8 @@ if __name__ == "__main__":
     #     pool.starmap(processAccounts, zip(account_ids), chunksize)
 
     print(len(account_ids))
-    print(int(len(account_ids)/12))
-    p = int(len(account_ids)/12)
+    print(int(len(account_ids)/18))
+    p = int(len(account_ids)/18)
 
     # print(account_ids)
 
