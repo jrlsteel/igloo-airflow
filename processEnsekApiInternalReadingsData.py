@@ -96,7 +96,7 @@ def extract_internal_data_response(data, account_id,k):
         print(" - has no readings data")
     else:
         # df_internal_readings['account_id'] = account_id
-        # df_meterpoints2 = df_meterpoints[meta_meters + ['account_id']]
+        # df_meterpoints2 = df_internal_readings[meta_meters + ['account_id']]
         # df_meterpoints1 = df_meterpoints2.rename(columns={'id' : 'meter_point_id'})
         # meter_point_ids = df_meterpoints1['meter_point_id']
         # # df_meterpoints1.to_csv('meter_points_' + str(account_id) + '_.csv')
