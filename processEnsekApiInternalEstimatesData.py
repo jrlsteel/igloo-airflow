@@ -34,7 +34,9 @@ def get_estimates_internal_api_info(account_id):
     #prod
     api_url = 'https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage'.format(account_id)
     token = 'UG60b6ZEKH80WjJE0pTGVHZtRiOkRN5vSBzQdHqwVc9Ri6d76CQWX8YnTkE0AWjkiiMAITDjz9VFaEs2l1_6Ni2LitZQTFFvc_65CN01Z4pV78FhiJ5wpvzlYx2wrpyNZMam9JdeODEgEfwoAreuLNN0lYGIU8BHTEKpsYAsha7rFXbEedv2JgSIGbLw9r8PdScxkonff6WK4FdofskuNPGfs1n_ih6PT_eoZf28drnnLsLUUPwVsG0d3k9kZFB1eEUZc-Ao_tZ5KZrNLUzHY44hbfWEHdZ43HEzeDEJeOqirbfH0Y6Gbj14hAZZvwdfC265QyIkD8SZCbhCo_hrkzdVAqSqPNtTH_q0kSQrYvmatKq93o-SjkMr9yAbvIRTRWMCQoJQOCCgjRCirKVe9tDnCc5s886MGS-lflMT8AKn39_6xJz7ZkmyYr86tfxEQpjVWNFQmmKf73sKijPaPbWLJItTtaGfzNsmSbPLg6Ii9fLbLw8c6bTmyc8ywFTuK5xoXoKx945S7h_2IgLgjZGH9LcP1PYhJLmyPIRrKqwY59cLnvt9fBBIKLpP45Flx92joEJZigOoqgxtVYrxofuLn-UaDoa_7oEqSsOR6BKm6pWmksFgbiBqOAAk79D1CrulQ4RWLtJ6g4QVhsdDVfLWpvb0gCgV9pmRpUabkPcVQNs4UNKepXmCVYyf_Y0iwNsZzTTqsoSW9CHvhVNuDy8vStzusu89EPi3tbDhnO6NeyB9'
-    head = {'Content-Type': 'application/json',
+    head = {'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Referrer':'https://igloo.ignition.ensek.co.uk',
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
@@ -88,8 +90,8 @@ def extract_internal_data_response(data, account_id,k):
         print(" - has no readings data")
     else:
         df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
-        file_name_internal_readings = 'internal_estimates_' + str(account_id) + '.csv'
-        k.key = 'ensek-meterpoints/EstimatesInternal/' + file_name_internal_readings
+        file_name_internal_readings = 'internal_estimates_elec_' + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/EstimatesElecInternal/' + file_name_internal_readings
         k.set_contents_from_string(df_internal_readings_string)
 
 '''Get S3 connection'''

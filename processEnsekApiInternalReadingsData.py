@@ -34,8 +34,10 @@ def get_readings_internal_api_info(account_id):
     #prod
     api_url = 'https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending'.format(account_id)
     token = 'UG60b6ZEKH80WjJE0pTGVHZtRiOkRN5vSBzQdHqwVc9Ri6d76CQWX8YnTkE0AWjkiiMAITDjz9VFaEs2l1_6Ni2LitZQTFFvc_65CN01Z4pV78FhiJ5wpvzlYx2wrpyNZMam9JdeODEgEfwoAreuLNN0lYGIU8BHTEKpsYAsha7rFXbEedv2JgSIGbLw9r8PdScxkonff6WK4FdofskuNPGfs1n_ih6PT_eoZf28drnnLsLUUPwVsG0d3k9kZFB1eEUZc-Ao_tZ5KZrNLUzHY44hbfWEHdZ43HEzeDEJeOqirbfH0Y6Gbj14hAZZvwdfC265QyIkD8SZCbhCo_hrkzdVAqSqPNtTH_q0kSQrYvmatKq93o-SjkMr9yAbvIRTRWMCQoJQOCCgjRCirKVe9tDnCc5s886MGS-lflMT8AKn39_6xJz7ZkmyYr86tfxEQpjVWNFQmmKf73sKijPaPbWLJItTtaGfzNsmSbPLg6Ii9fLbLw8c6bTmyc8ywFTuK5xoXoKx945S7h_2IgLgjZGH9LcP1PYhJLmyPIRrKqwY59cLnvt9fBBIKLpP45Flx92joEJZigOoqgxtVYrxofuLn-UaDoa_7oEqSsOR6BKm6pWmksFgbiBqOAAk79D1CrulQ4RWLtJ6g4QVhsdDVfLWpvb0gCgV9pmRpUabkPcVQNs4UNKepXmCVYyf_Y0iwNsZzTTqsoSW9CHvhVNuDy8vStzusu89EPi3tbDhnO6NeyB9'
-    head = {'Content-Type': 'application/json',
-           'Authorization': 'Bearer {0}'.format(token)}
+    head = {'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Referrer': 'https://igloo.ignition.ensek.co.uk',
+            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
 @sleep_and_retry
