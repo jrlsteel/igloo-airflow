@@ -29,7 +29,7 @@ test_config = dict(
                     account_ids = [1865], # run for one or list of account ids for testing.
                     enable_file = 'N', # If enabled, uses the account ids from s3 bucket
                     enable_db = 'Y', # If enabled, fetches the account ids RDS mysql db
-                    account_ids_sql = 'select s.external_id from supply_contracts s where s.external_id is not null order by s.external_id asc limit 100' # Sql to fetch from rds db.
+                    account_ids_sql = 'select s.external_id from supply_contracts s where s.external_id is not null order by s.external_id asc' # Sql to fetch from rds db.
 )
 thread_config = dict(
 

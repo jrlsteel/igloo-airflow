@@ -26,13 +26,13 @@ rate = con.api_config['allowed_period_in_secs']
 # k = Key()
 
 # get meter point api info
-def get_readings_internal_api_info(account_id):
+def get_estimates_internal_api_info(account_id):
     #UAT
     # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
     # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
 
     #prod
-    api_url = 'https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending'.format(account_id)
+    api_url = 'https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage'.format(account_id)
     token = 'UG60b6ZEKH80WjJE0pTGVHZtRiOkRN5vSBzQdHqwVc9Ri6d76CQWX8YnTkE0AWjkiiMAITDjz9VFaEs2l1_6Ni2LitZQTFFvc_65CN01Z4pV78FhiJ5wpvzlYx2wrpyNZMam9JdeODEgEfwoAreuLNN0lYGIU8BHTEKpsYAsha7rFXbEedv2JgSIGbLw9r8PdScxkonff6WK4FdofskuNPGfs1n_ih6PT_eoZf28drnnLsLUUPwVsG0d3k9kZFB1eEUZc-Ao_tZ5KZrNLUzHY44hbfWEHdZ43HEzeDEJeOqirbfH0Y6Gbj14hAZZvwdfC265QyIkD8SZCbhCo_hrkzdVAqSqPNtTH_q0kSQrYvmatKq93o-SjkMr9yAbvIRTRWMCQoJQOCCgjRCirKVe9tDnCc5s886MGS-lflMT8AKn39_6xJz7ZkmyYr86tfxEQpjVWNFQmmKf73sKijPaPbWLJItTtaGfzNsmSbPLg6Ii9fLbLw8c6bTmyc8ywFTuK5xoXoKx945S7h_2IgLgjZGH9LcP1PYhJLmyPIRrKqwY59cLnvt9fBBIKLpP45Flx92joEJZigOoqgxtVYrxofuLn-UaDoa_7oEqSsOR6BKm6pWmksFgbiBqOAAk79D1CrulQ4RWLtJ6g4QVhsdDVfLWpvb0gCgV9pmRpUabkPcVQNs4UNKepXmCVYyf_Y0iwNsZzTTqsoSW9CHvhVNuDy8vStzusu89EPi3tbDhnO6NeyB9'
     head = {'Content-Type': 'application/json',
            'Authorization': 'Bearer {0}'.format(token)}
@@ -51,17 +51,11 @@ def get_api_response(api_url,token,head):
    i=0
    while True:
         try:
-            response = session.post(api_url, headers=head, params={'page': 1})
+            response = session.get(api_url, headers=head)
 
             if response.status_code == 200:
                 response_json = json.loads(response.content.decode('utf-8'))
-                total_pages = response_json['totalPages']
-                response_items = response_json['items']
-        
-                for page in range(2, total_pages + 1):
-                    response_next_page = session.post(api_url, headers=head, params={'page': page})
-                    response_next_page_json =  json.loads(response_next_page.content.decode('utf-8'))['items']
-                    response_items.extend(response_next_page_json)
+                response_items = response_json['Electricity']
                 return response_items
             else:
                 print ('Problem Grabbing Data: ', response.status_code)
@@ -93,14 +87,9 @@ def extract_internal_data_response(data, account_id,k):
     if(df_internal_readings.empty):
         print(" - has no readings data")
     else:
-        # df_internal_readings['account_id'] = account_id
-        # df_meterpoints2 = df_meterpoints[meta_meters + ['account_id']]
-        # df_meterpoints1 = df_meterpoints2.rename(columns={'id' : 'meter_point_id'})
-        # meter_point_ids = df_meterpoints1['meter_point_id']
-        # # df_meterpoints1.to_csv('meter_points_' + str(account_id) + '_.csv')
         df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
-        file_name_internal_readings = 'internal_readings_' + str(account_id) + '.csv'
-        k.key = 'ensek-meterpoints/ReadingsInternal/' + file_name_internal_readings
+        file_name_internal_readings = 'internal_estimates_' + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/EstimatesInternal/' + file_name_internal_readings
         k.set_contents_from_string(df_internal_readings_string)
 
 '''Get S3 connection'''
@@ -135,7 +124,7 @@ def format_json_response(data):
     return data_json
 
 def log_error(error_msg, error_code=''):
-    with open('internal_readings_logs' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
+    with open('estimates_logs' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
@@ -158,7 +147,7 @@ def processAccounts(account_ids,k):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
         # run for configured account ids
-        api_url,token,head = get_readings_internal_api_info(account_id)
+        api_url,token,head = get_estimates_internal_api_info(account_id)
         # print('ac:' + str(account_id) + str(multiprocessing.current_process()))
         print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
