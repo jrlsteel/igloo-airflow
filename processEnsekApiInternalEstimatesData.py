@@ -137,7 +137,13 @@ def get_Users(k):
     return p
 
 '''Format Json to handle null values'''
-def format_json_response(data):
+def format_json_response(data)
+
+
+
+
+
+
     data_str = json.dumps(data, indent=4).replace('null','""')
     data_json = json.loads(data_str)
     return data_json
