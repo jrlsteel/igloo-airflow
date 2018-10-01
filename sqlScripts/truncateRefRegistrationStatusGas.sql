@@ -1,0 +1,1 @@
+truncate  ref_registrations_status_gas;

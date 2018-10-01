@@ -1,0 +1,1 @@
+truncate ref_meters;

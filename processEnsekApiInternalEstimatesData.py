@@ -33,7 +33,7 @@ def get_estimates_internal_api_info(account_id):
 
     #prod
     api_url = 'https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage'.format(account_id)
-    token = 'UG60b6ZEKH80WjJE0pTGVHZtRiOkRN5vSBzQdHqwVc9Ri6d76CQWX8YnTkE0AWjkiiMAITDjz9VFaEs2l1_6Ni2LitZQTFFvc_65CN01Z4pV78FhiJ5wpvzlYx2wrpyNZMam9JdeODEgEfwoAreuLNN0lYGIU8BHTEKpsYAsha7rFXbEedv2JgSIGbLw9r8PdScxkonff6WK4FdofskuNPGfs1n_ih6PT_eoZf28drnnLsLUUPwVsG0d3k9kZFB1eEUZc-Ao_tZ5KZrNLUzHY44hbfWEHdZ43HEzeDEJeOqirbfH0Y6Gbj14hAZZvwdfC265QyIkD8SZCbhCo_hrkzdVAqSqPNtTH_q0kSQrYvmatKq93o-SjkMr9yAbvIRTRWMCQoJQOCCgjRCirKVe9tDnCc5s886MGS-lflMT8AKn39_6xJz7ZkmyYr86tfxEQpjVWNFQmmKf73sKijPaPbWLJItTtaGfzNsmSbPLg6Ii9fLbLw8c6bTmyc8ywFTuK5xoXoKx945S7h_2IgLgjZGH9LcP1PYhJLmyPIRrKqwY59cLnvt9fBBIKLpP45Flx92joEJZigOoqgxtVYrxofuLn-UaDoa_7oEqSsOR6BKm6pWmksFgbiBqOAAk79D1CrulQ4RWLtJ6g4QVhsdDVfLWpvb0gCgV9pmRpUabkPcVQNs4UNKepXmCVYyf_Y0iwNsZzTTqsoSW9CHvhVNuDy8vStzusu89EPi3tbDhnO6NeyB9'
+    token = 'UmESNqfm1ylZBou4_SPieMJC45H1xe8W3xOTPFKIwwsLQmS3DdiaTUmAYj-uu5mRTxJxFm-P7K4plP2Csg7kfjl-XxOfL7Jig_u-0Q41o4u_IagxU7n5iD-Ujy0LvH0tHlPGdE_eEZKOx4Cc9dk7FwjCDrCm8oeYaWHDVWrDTo3s5tbZKPLT-v52qyeccyqPXnYPZnNhReoAA8xTucdu74ID_-Y1mjkeo6R-QEKMuXZHlVd2Jsv7kYdwQU0N4VLJWCrKpOrME9i0tKtSjl5IjFUyaoZDvPnGLHHL-GCA5rpPPo4HvKfNZynMkhgIaQKddnUiRVGJeRIAYo2JyF92LsRdhO8oVZ8_G0lb39s8vms30aOzmXBPFVMFWNpvoocabRDn_iYUiAkdiO8kwA_0DmmWPbRKpUopapgnwYCyTenkFxa5Ir61MXIGEtnRLyXUs0LJxahY9EuFLVXUFakA5wWSBb-uJdybAdmzWtLuAMWIY_sn3t8hZUmjAK7UM2jq_MIGExzgsSyeJAStNIbw6wkaMv_1_GrNataXYrNRdXpXjBQ1OPhF4ijD2rrNU8mH0lRLFFcXsTARLJimzo1t_7VJlqHcQABEOb8Qq02QpytTLZmxFtaQ4efTa0Bk-5psDW12cPzp-dieWuXTFVUwScERvADEoQggQfIAgR1jINbKR5-8duPLqQ6QU1oxAm7C9QbfMngsQ93x5TUGt-BwjV5ERRWvBi1-4oyaGMkySR-iR3pE'
     head = {'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
             'Referrer':'https://igloo.ignition.ensek.co.uk',
@@ -137,13 +137,7 @@ def get_Users(k):
     return p
 
 '''Format Json to handle null values'''
-def format_json_response(data)
-
-
-
-
-
-
+def format_json_response(data):
     data_str = json.dumps(data, indent=4).replace('null','""')
     data_json = json.loads(data_str)
     return data_json
