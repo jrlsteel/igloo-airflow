@@ -182,6 +182,7 @@ def extract_meter_point_json(data, account_id,k):
         df_registers1.rename(columns={'meter_point_meters_meterId' : 'meter_id', 'registers_id' : 'register_id'}, inplace=True)
         # df_registers.rename(columns={'registers_id' : 'register_id'}, inplace=True)
         df_registers1['account_id'] = account_id
+        df_registers1['registers_sourceIdType'] =  df_registers1['registers_sourceIdType'].str.replace("\t","").str.strip()
         # df_registers.to_csv('registers_' + str(account_id) + '.csv')
         df_registers_string = df_registers1.to_csv(None, index=False)
         filename_registers =  'registers_'  + str(account_id) + '.csv'
