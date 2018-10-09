@@ -38,18 +38,18 @@ def get_meter_point_api_info(account_id):
            'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
-# get account status api info
-def get_account_status_api_info(account_id):
-    #UAT
-    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
-    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+# # get account status api info
+# def get_account_status_api_info(account_id):
+#     #UAT
+#     # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
+#     # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
 
-    #prod  
-    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus'.format(account_id)
-    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
-    head = {'Content-Type': 'application/json',
-           'Authorization': 'Bearer {0}'.format(token)}
-    return api_url,token,head
+#     #prod  
+#     api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus'.format(account_id)
+#     token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+#     head = {'Content-Type': 'application/json',
+#            'Authorization': 'Bearer {0}'.format(token)}
+#     return api_url,token,head
 
 # get meter point readings api info 
 def get_meter_readings_api_info(account_id, meter_point_id):
@@ -217,6 +217,7 @@ def extract_meter_point_json(data, account_id,k):
     else:
         df_metersAttributes.rename(columns={'meter_point_meters_meterId' : 'meter_id'}, inplace=True)
         df_metersAttributes['account_id'] = account_id
+        df_metersAttributes['metersAttributes_attributeValue'] = df_metersAttributes['metersAttributes_attributeValue'].str.replace(",", " ") 
         # df_metersAttributes.to_csv('metersAttributes_' + str(account_id) + '.csv')
         df_metersAttributes_string = df_metersAttributes.to_csv(None, index=False)
         filename_metersAttributes =  'metersAttributes_'  + str(account_id) + '.csv'
@@ -259,20 +260,20 @@ def extract_meter_readings_billeable_json(data, account_id, meter_point_id,k):
     # print(filename_readings)
 
 ''' Processing meter readings data billeable'''
-def extract_account_status_json(data,account_id,k):
-    # global k
+# def extract_account_status_json(data,account_id,k):
+#     # global k
    
-    status_dict = dict(Account_id = account_id, Status = data)
-    status_str = json.dumps(status_dict) 
-    status_json = json.loads(status_str) 
-    df_account_status = json_normalize(status_json)
-    filename_account_status = 'account_status_' + str(account_id) + '.csv'
-    df_account_status_string = df_account_status.to_csv(None, index=False)
+#     status_dict = dict(Account_id = account_id, Status = data)
+#     status_str = json.dumps(status_dict) 
+#     status_json = json.loads(status_str) 
+#     df_account_status = json_normalize(status_json)
+#     filename_account_status = 'account_status_' + str(account_id) + '.csv'
+#     df_account_status_string = df_account_status.to_csv(None, index=False)
     
-    k.key = 'ensek-meterpoints/AccountStatus/' + filename_account_status
-    k.set_contents_from_string(df_account_status_string)
-    # print(df_meter_readings_string)
-    # print(filename_readings)
+#     k.key = 'ensek-meterpoints/AccountStatus/' + filename_account_status
+#     k.set_contents_from_string(df_account_status_string)
+#     # print(df_meter_readings_string)
+#     # print(filename_readings)
 
 
 '''Get S3 connection'''
@@ -328,12 +329,12 @@ def get_accountID_fromDB():
 def processAccounts(account_ids,k):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
-        #Get Account Staus
-        api_url,token,head = get_account_status_api_info(account_id)
-        account_status_response = get_api_response(api_url,token,head)
-        if(account_status_response):
-            formated_account_status = account_status_response
-            extract_account_status_json(formated_account_status,account_id,k)
+        # #Get Account Staus
+        # api_url,token,head = get_account_status_api_info(account_id)
+        # account_status_response = get_api_response(api_url,token,head)
+        # if(account_status_response):
+        #     formated_account_status = account_status_response
+        #     extract_account_status_json(formated_account_status,account_id,k)
         # run for configured account ids
         api_url,token,head = get_meter_point_api_info(account_id)
         print('ac:' + str(account_id) + str(multiprocessing.current_process()))
