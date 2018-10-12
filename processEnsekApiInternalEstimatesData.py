@@ -1,14 +1,10 @@
 import requests
 import json
-import pandas as pd
 from pandas.io.json import json_normalize 
 from ratelimit import limits, sleep_and_retry
 import ig_config as con
 import boto
-from io import BytesIO
-from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from retrying import retry
 import time
 import datetime
 from requests import ConnectionError
@@ -16,9 +12,6 @@ import csv
 import pymysql
 import multiprocessing
 from multiprocessing import Pool, freeze_support, Process
-from time import sleep
-from itertools import repeat
-from functools import partial
 
 
 max_calls = con.api_config['max_api_calls']
@@ -33,7 +26,7 @@ def get_estimates_internal_api_info(account_id):
 
     #prod
     api_url = 'https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage'.format(account_id)
-    token = 'UmESNqfm1ylZBou4_SPieMJC45H1xe8W3xOTPFKIwwsLQmS3DdiaTUmAYj-uu5mRTxJxFm-P7K4plP2Csg7kfjl-XxOfL7Jig_u-0Q41o4u_IagxU7n5iD-Ujy0LvH0tHlPGdE_eEZKOx4Cc9dk7FwjCDrCm8oeYaWHDVWrDTo3s5tbZKPLT-v52qyeccyqPXnYPZnNhReoAA8xTucdu74ID_-Y1mjkeo6R-QEKMuXZHlVd2Jsv7kYdwQU0N4VLJWCrKpOrME9i0tKtSjl5IjFUyaoZDvPnGLHHL-GCA5rpPPo4HvKfNZynMkhgIaQKddnUiRVGJeRIAYo2JyF92LsRdhO8oVZ8_G0lb39s8vms30aOzmXBPFVMFWNpvoocabRDn_iYUiAkdiO8kwA_0DmmWPbRKpUopapgnwYCyTenkFxa5Ir61MXIGEtnRLyXUs0LJxahY9EuFLVXUFakA5wWSBb-uJdybAdmzWtLuAMWIY_sn3t8hZUmjAK7UM2jq_MIGExzgsSyeJAStNIbw6wkaMv_1_GrNataXYrNRdXpXjBQ1OPhF4ijD2rrNU8mH0lRLFFcXsTARLJimzo1t_7VJlqHcQABEOb8Qq02QpytTLZmxFtaQ4efTa0Bk-5psDW12cPzp-dieWuXTFVUwScERvADEoQggQfIAgR1jINbKR5-8duPLqQ6QU1oxAm7C9QbfMngsQ93x5TUGt-BwjV5ERRWvBi1-4oyaGMkySR-iR3pE'
+    token = 'sJtG2NKvOonsk3UaXx47IRoDLi2-zEnZ0GUi75_dTxdfIe2kDYgxw3G9MhUcSzy3O0dJmZPGWZgwBrWpyplUVHdFuELjy-gBsVJkfBL1qUGB9WpilGoBD7Nbw27Af2K4_Zu0OaxOMQl9bxVPCoRDMSgF5oaime8az_UtTfl0YcvZmVdomjpOqfESVLVYjv0W8Sm7Sh3FfVaVnKhd7NKZ7eNy78kLZEFGjbJEzCO2N5u8MrOgGy4S3lmIh0TSFvmB102bfwMDzrO-hR_SSEjT0NDxXqYlwNXlKqoJ9pzXDyk6xD7pPqEQ5xsQYRD3cY3_mVK_Q9vi5OF9NLZKYQJMoGQNGTxOZpCEu5ZlRU0Pyum-BhRnr5RgaTJtXntDZq4EW1ZmnVxsq0qucorGOH7rD_2kyJ1WvZEOgCnoy9dXN0i54U1D15xDgIY3oveIHohOOfJOWDVdvxAEYXjeuMNStZemir8D8-gMHY1cK_yI3i8Es6o6vlFrthhrXT-GMjgK9gumW4TxT2t9AIwGhmCLiZkn5bLW7H3lzEjKn5GDnyrrPB410fNqRYM30knZoaaMXvDUqAkmzinGX6wmwuHF8gbLFUbZ5enWZpCyFRhbbYEh1jNzWytZslqqYolb00yumrl9hRaHGRTwoAepZ-Dqmic8S78WJ_5-C9IAKRltjrbHhhYh0CJPz6EeucPjrg2jBBZNHRqWK48LunDaTeIBPTpIGH-Uj7xejUtzmymiFR4cftrGfvrjkwqgD5Au63sqXmGGz1l2DxGkh-rpRwQwFI5oIWda--L24gfY1N7w9jfQCZmEIvle_lKM7IWQBk9DAqWuQ'
     head = {'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
             'Referrer':'https://igloo.ignition.ensek.co.uk',
