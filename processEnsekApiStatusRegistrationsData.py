@@ -1,14 +1,10 @@
 import requests
 import json
-import pandas as pd
 from pandas.io.json import json_normalize 
 from ratelimit import limits, sleep_and_retry
 import ig_config as con
 import boto
-from io import BytesIO
-from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from retrying import retry
 import time
 import datetime
 from requests import ConnectionError
@@ -16,9 +12,6 @@ import csv
 import pymysql
 import multiprocessing
 from multiprocessing import Pool, freeze_support, Process
-from time import sleep
-from itertools import repeat
-from functools import partial
 
 
 max_calls = con.api_config['max_api_calls']
