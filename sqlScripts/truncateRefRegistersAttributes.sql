@@ -1,0 +1,1 @@
+truncate ref_registers_attributes;
