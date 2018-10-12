@@ -1,11 +1,9 @@
 import requests
 import json
-import pandas as pd
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import ig_config as con
 import boto
-from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 import time
 import datetime
@@ -14,9 +12,7 @@ import csv
 import pymysql
 import multiprocessing
 from multiprocessing import Pool, freeze_support, Process
-from time import sleep
-from itertools import repeat
-from functools import partial
+
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
