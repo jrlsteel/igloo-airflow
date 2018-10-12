@@ -78,7 +78,7 @@ def extract_direct_debit_json(data, account_id, k):
 
     df_direct_debit = json_normalize(data)
     df_direct_debit['account_id'] = account_id
-    print(df_direct_debit.to_string)
+    # print(df_direct_debit.to_string)
     filename_direct_debit = 'direct_debit' + str(account_id) + '.csv'
     df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
     k.key = 'ensek-meterpoints/DirectDebit/' + filename_direct_debit
@@ -153,7 +153,7 @@ def processAccounts(account_ids, k):
         dd_response = get_api_response(api_url, token, head)
         if dd_response:
             formatted_dd = format_json_response(dd_response)
-            print(json.dumps(formatted_dd))
+            # print(json.dumps(formatted_dd))
             extract_direct_debit_json(formatted_dd, account_id, k)
         else:
             print('ac:' + str(account_id) + ' has no data')
