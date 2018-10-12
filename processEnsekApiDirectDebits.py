@@ -25,7 +25,7 @@ def get_direct_debit_api_info(account_id):
     # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
 
     # prod
-    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus'.format(account_id)
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits'.format(account_id)
     token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}
