@@ -40,6 +40,27 @@ def get_readings_internal_api_info(account_id):
             'Authorization': 'Bearer {0}'.format(token)}
     return api_url,token,head
 
+
+def get_auth_code():
+
+    oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
+    data = dict(
+        username='sakthi.murugan@igloo.energy',
+        password='CCboyz@123',
+        grant_type='password'
+    )
+
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+        'Referrer': 'https: // igloo.ignition.ensek.co.uk'
+    }
+    response = requests.post(oauth_url, data=data, headers=headers)
+    response = response.json()
+    return response.get('access_token')
+
+
+
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
 def get_api_response(api_url,token,head):
@@ -164,7 +185,10 @@ def processAccounts(account_ids,k):
         print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
-        internal_data_response = get_api_response(api_url,token,head)
+
+        token1 = get_auth_code()
+
+        internal_data_response = get_api_response(api_url,token1,head)
         # print(json.dumps(internal_data_response, indent=4))
 
         formatted_internal_data = format_json_response(internal_data_response)
