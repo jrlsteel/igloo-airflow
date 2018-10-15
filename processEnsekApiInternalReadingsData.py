@@ -27,7 +27,7 @@ rate = con.api_config['allowed_period_in_secs']
 # k = Key()
 
 # get meter point api info
-def get_readings_internal_api_info(account_id):
+def get_readings_internal_api_info(account_id, token):
     # UAT
     # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
     # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
@@ -35,20 +35,19 @@ def get_readings_internal_api_info(account_id):
     # prod
     api_url = 'https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending'.format(
         account_id)
-    token = get_auth_code()
     head = {'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
             'Referrer': 'https://igloo.ignition.ensek.co.uk',
             'Authorization': 'Bearer {0}'.format(token)}
-    return api_url, token, head
+    return api_url, head
 
 
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
     data = dict(
-        username='sakthi.murugan@igloo.energy',
-        password='CCboyz@123',
-        grant_type='password'
+        username=con.internalapi_config['username'],
+        password=con.internalapi_config['password'],
+        grant_type=con.internalapi_config['grant_type']
     )
 
     headers = {
@@ -63,7 +62,7 @@ def get_auth_code():
 
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
-def get_api_response(api_url, token, head):
+def get_api_response(api_url, head):
     '''
         get the response for the respective url that is passed as part of this function
    '''
@@ -180,19 +179,17 @@ def get_accountID_fromDB():
     return account_ids
 
 
-def processAccounts(account_ids, k):
+def processAccounts(account_ids, k, token):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
         # run for configured account ids
-        api_url, token, head = get_readings_internal_api_info(account_id)
+        api_url, head = get_readings_internal_api_info(account_id, token)
         # print('ac:' + str(account_id) + str(multiprocessing.current_process()))
         print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
 
-        # token1 = get_auth_code()
-
-        internal_data_response = get_api_response(api_url, token, head)
+        internal_data_response = get_api_response(api_url, head)
         # print(json.dumps(internal_data_response, indent=4))
 
         formatted_internal_data = format_json_response(internal_data_response)
@@ -203,6 +200,8 @@ if __name__ == "__main__":
     freeze_support()
 
     k = get_S3_Connections()
+
+    t = get_auth_code()
 
     '''Enable this to test for 1 account id'''
     if con.test_config['enable_manual'] == 'Y':
@@ -221,18 +220,18 @@ if __name__ == "__main__":
     # print(account_ids)
 
     start_time = datetime.datetime.now()
-    p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k))
-    p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k))
-    p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k))
-    p4 = multiprocessing.Process(target=processAccounts, args=(account_ids[3 * p:4 * p], k))
-    p5 = multiprocessing.Process(target=processAccounts, args=(account_ids[4 * p:5 * p], k))
-    p6 = multiprocessing.Process(target=processAccounts, args=(account_ids[5 * p:6 * p], k))
-    p7 = multiprocessing.Process(target=processAccounts, args=(account_ids[6 * p:7 * p], k))
-    p8 = multiprocessing.Process(target=processAccounts, args=(account_ids[7 * p:8 * p], k))
-    p9 = multiprocessing.Process(target=processAccounts, args=(account_ids[8 * p:9 * p], k))
-    p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k))
-    p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k))
-    p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k))
+    p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k, t))
+    p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k, t))
+    p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k, t))
+    p4 = multiprocessing.Process(target=processAccounts, args=(account_ids[3 * p:4 * p], k, t))
+    p5 = multiprocessing.Process(target=processAccounts, args=(account_ids[4 * p:5 * p], k, t))
+    p6 = multiprocessing.Process(target=processAccounts, args=(account_ids[5 * p:6 * p], k, t))
+    p7 = multiprocessing.Process(target=processAccounts, args=(account_ids[6 * p:7 * p], k, t))
+    p8 = multiprocessing.Process(target=processAccounts, args=(account_ids[7 * p:8 * p], k, t))
+    p9 = multiprocessing.Process(target=processAccounts, args=(account_ids[8 * p:9 * p], k, t))
+    p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k, t))
+    p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k, t))
+    p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k, t))
     end_time = datetime.datetime.now()
 
     diff = end_time - start_time
