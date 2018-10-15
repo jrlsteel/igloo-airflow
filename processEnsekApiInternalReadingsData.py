@@ -53,7 +53,7 @@ def get_auth_code():
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'Referrer': 'https: // igloo.ignition.ensek.co.uk'
+        'Referrer': 'https://igloo.ignition.ensek.co.uk'
     }
     response = requests.post(oauth_url, data=data, headers=headers)
     response = response.json()
