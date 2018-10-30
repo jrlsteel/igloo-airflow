@@ -1,0 +1,8 @@
+{
+    "Amount": "float|null",
+    "BankName": "str|null",
+    "BankAccount": "str|null",
+    "PaymentDate": "int|null",
+    "Reference": "any|null",
+    "SortCode": "str|null"
+}

@@ -2,7 +2,6 @@ import requests
 import json
 from pandas.io.json import json_normalize 
 from ratelimit import limits, sleep_and_retry
-import ig_config as con
 import boto
 from boto.s3.key import Key
 import time
@@ -11,7 +10,15 @@ from requests import ConnectionError
 import csv
 import pymysql
 import multiprocessing
-from multiprocessing import Pool, freeze_support, Process
+from multiprocessing import freeze_support
+
+
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from conf import config as con
 
 
 max_calls = con.api_config['max_api_calls']
@@ -171,7 +178,10 @@ def format_json_response(data):
     return data_json
 
 def log_error(error_msg, error_code=''):
-    with open('meterpoint_logs' + time.strftime('%m%d%Y') + '.csv' , mode='a') as errorlog:
+    logs_dir_path = sys.path[0] + '/logs/'
+    if not os.path.exists(logs_dir_path):
+        os.makedirs(logs_dir_path)
+    with open(sys.path[0] + '/logs/' + 'status_logs_' + time.strftime('%d%m%Y') + '.csv' , mode='a') as errorlog:
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
@@ -197,8 +207,8 @@ def processAccounts(account_ids,k):
             formated_account_status = account_status_response
             extract_account_status_json(formated_account_status,account_id,k)
         else:
-            print('ac:' + str(account_id) + ' has no data')
-            msg_ac = 'ac:' + str(account_id) + ' has no data'
+            print('ac:' + str(account_id) + ' has no data for account status')
+            msg_ac = 'ac:' + str(account_id) + ' has no data for account status'
             log_error(msg_ac, '')
         
         # Get Elec details
@@ -210,8 +220,8 @@ def processAccounts(account_ids,k):
             formated_elec = account_elec_response
             extract_reg_elec_json(formated_elec,account_id,k)
         else:
-            print('ac:' + str(account_id) + ' has no data')
-            msg_ac = 'ac:' + str(account_id) + ' has no data'
+            print('ac:' + str(account_id) + ' has no data for Elec status')
+            msg_ac = 'ac:' + str(account_id) + ' has no data for Elec status'
             log_error(msg_ac, '')
 
         # Get Gas details
@@ -222,8 +232,8 @@ def processAccounts(account_ids,k):
             formated_gas = account_gas_response
             extract_reg_gas_json(formated_gas,account_id,k)
         else:
-            print('ac:' + str(account_id) + ' has no data')
-            msg_ac = 'ac:' + str(account_id) + ' has no data'
+            print('ac:' + str(account_id) + ' has no data Gas status')
+            msg_ac = 'ac:' + str(account_id) + ' has no data for Gas status'
             log_error(msg_ac, '')
 
 if __name__ == "__main__":

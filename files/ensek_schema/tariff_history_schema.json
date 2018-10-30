@@ -1,0 +1,62 @@
+[
+    {
+        "tariffName": "str|null",
+        "startDate": "str|null",
+        "endDate": "str|null",
+        "Electricity":
+        {
+            "unitRates": [
+                {
+                    "name": "str|null",
+                    "rate": "float|null",
+                    "registers": [
+                        "int|null",
+                        "..."
+                    ],
+                    "chargeableComponentUID": "str|null"
+                },
+                "..."
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "str|null",
+                    "rate": "float|null",
+                    "registers": "any|null",
+                    "chargeableComponentUID": "str|null"
+                },
+                "..."
+            ]
+        },
+        "Gas":
+        {
+            "unitRates": [
+                {
+                    "name": "str|null",
+                    "rate": "float|null",
+                    "registers": [
+                        "int|null",
+                        "..."
+                    ],
+                    "chargeableComponentUID": "str|null"
+                },
+                "..."
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "str|null",
+                    "rate": "float|null",
+                    "registers": "any|null",
+                    "chargeableComponentUID": "str|null"
+                },
+                "..."
+            ]
+        },
+        "discounts": [
+            "any|null",
+            "..."
+        ],
+        "tariffType": "str|null",
+        "exitFees": "any|null"
+    },
+    "..."
+]

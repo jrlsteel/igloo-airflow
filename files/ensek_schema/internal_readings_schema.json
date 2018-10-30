@@ -1,0 +1,25 @@
+[
+    {
+        "registerReadingId": "int|null",
+        "registerId": "int|null",
+        "accountId": "int|null",
+        "meterId": "int|null",
+        "meterPointId": "int|null",
+        "meterReadingId": "int|null",
+        "meterPointType": "str|null",
+        "meterPointNumber": "int|null",
+        "meterSerialNumber": "str|null",
+        "registerReference": "str|null",
+        "meterReadingDateTime": "str|null",
+        "readingValue": "float|null",
+        "meterReadingTypeUID": "str|null",
+        "meterReadingSourceUID": "str|null",
+        "meterReadingStatusUID": "str|null",
+        "billable": "bool|null",
+        "required": "bool|null",
+        "meterReadingCreatedDate": "str|null",
+        "hasLiveCharge": "bool|null",
+        "hasRegisterAdvance": "bool|null"
+    },
+    "..."
+]

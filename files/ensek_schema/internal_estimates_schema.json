@@ -1,0 +1,26 @@
+{
+    "Electricity": [
+        {
+            "MPAN": "int|null",
+            "RegisterId": "str|null",
+            "EffectiveFrom": "str|null",
+            "EffectiveTo": "str|null",
+            "EstimationValue": "float|null",
+            "SerialNumber": "str|null",
+            "IsLive": "bool|null"
+        },
+        "..."
+    ],
+    "Gas": [
+        {
+            "MPRN": "int|null",
+            "RegisterId": "str|null",
+            "EffectiveFrom": "str|null",
+            "EffectiveTo": "str|null",
+            "EstimationValue": "float|null",
+            "SerialNumber": "str|null",
+            "IsLive": "bool|null"
+        },
+        "..."
+    ]
+}

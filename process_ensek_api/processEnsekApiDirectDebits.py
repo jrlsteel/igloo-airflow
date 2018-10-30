@@ -1,11 +1,8 @@
 import requests
 import json
-import pandas as pd
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
-import ig_config as con
 import boto
-from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 import time
 import datetime
@@ -13,30 +10,34 @@ from requests import ConnectionError
 import csv
 import pymysql
 import multiprocessing
-from multiprocessing import Pool, freeze_support, Process
-from time import sleep
-from itertools import repeat
-from functools import partial
+from multiprocessing import freeze_support
+
+
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from conf import config as con
+
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
 
 
-# k = Key()
-
-
 # get account status api info
-def get_tariff_history_api_info(account_id):
+def get_direct_debit_api_info(account_id):
     # UAT
-    api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory'.format(account_id)
-    token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
+    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits'.format(account_id)
+    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
 
     # prod
-    # api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus'.format(account_id)
-    # token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
+    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits'.format(account_id)
+    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}
     return api_url, token, head
+
 
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
@@ -75,76 +76,19 @@ def get_api_response(api_url, token, head):
 ''' Extracting direct debit data'''
 
 
-def extract_tariff_history_json(data, account_id, k):
-    # global k,
-    meta_tariff_history = ['tariffName', 'startDate', 'endDate', 'discounts', 'tariffType', 'exitFees', 'account_id']
+def extract_direct_debit_json(data, account_id, k):
+    # global k
 
-    df_tariff_history = json_normalize(data)
-    df_tariff_history['account_id'] = account_id
-    df_tariff_history1 = df_tariff_history[meta_tariff_history]
+    df_direct_debit = json_normalize(data)
+    df_direct_debit['account_id'] = account_id
+    # print(df_direct_debit.to_string)
+    filename_direct_debit = 'direct_debit' + str(account_id) + '.csv'
+    df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
+    k.key = 'ensek-meterpoints/DirectDebit/' + filename_direct_debit
+    k.set_contents_from_string(df_direct_debit_string)
 
-    filename_tariff_history = 'df_tariff_history_' + str(account_id) + '.csv'
-    df_tariff_history_string = df_tariff_history1.to_csv(None, index=False)
-    k.key = 'ensek-meterpoints/TariffHistory/' + filename_tariff_history
-    k.set_contents_from_string(df_tariff_history_string)
-
-    # Elec
-    if ('Electricity' in df_tariff_history.columns and not df_tariff_history['Electricity'].isnull) or not ('Electricity' in df_tariff_history.columns):
-        # UnitRates
-        meta_elec_unitrates = ['tariffName', 'startDate', 'endDate']
-        df_elec_unit_rates = json_normalize(data, record_path=[['Electricity', 'unitRates']], meta=meta_elec_unitrates)
-
-        if not df_elec_unit_rates.empty:
-            df_elec_unit_rates['account_id'] = account_id
-            filename_elec_unit_rates = 'th_elec_unitrates_' + str(account_id) + '.csv'
-            df_elec_unit_rates_string = df_elec_unit_rates.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryElecUnitRates/' + filename_elec_unit_rates
-            k.set_contents_from_string(df_elec_unit_rates_string)
-            # print(df_elec_unit_rates_string)
-
-        #  StandingCharge
-        meta_elec_standing_charge = ['tariffName', 'startDate', 'endDate']
-        df_elec_standing_charge = json_normalize(data, record_path=[['Electricity', 'standingChargeRates']], meta=meta_elec_standing_charge)
-
-        if not df_elec_standing_charge.empty:
-            df_elec_standing_charge['account_id'] = account_id
-
-            filename_elec_standing_charge = 'th_elec_standingcharge_' + str(account_id) + '.csv'
-            df_elec_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryElecStandCharge/' + filename_elec_standing_charge
-            k.set_contents_from_string(df_elec_standing_charge_string)
-            # print(df_elec_standing_charge_string)
-
-    # Gas
-    if ('Gas' in df_tariff_history.columns and not df_tariff_history['Gas'].isnull) or not ('Gas' in df_tariff_history.columns):
-        # UnitRates
-        meta_gas_unitrates = ['tariffName', 'startDate', 'endDate']
-        df_gas_unit_rates = json_normalize(data, record_path=[['Gas', 'unitRates']], meta=meta_gas_unitrates)
-
-        if not df_gas_unit_rates.empty:
-            df_gas_unit_rates['account_id'] = account_id
-
-            filename_gas_unit_rates = 'th_gas_unitrates_' + str(account_id) + '.csv'
-            df_gas_unit_rates_string = df_gas_unit_rates.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryGasUnitRates/' + filename_gas_unit_rates
-            k.set_contents_from_string(df_gas_unit_rates_string)
-            # print(df_gas_unit_rates_string)
-
-        # StandingCharge
-        meta_gas_standing_charge = ['tariffName', 'startDate', 'endDate']
-        df_elec_standing_charge = json_normalize(data, record_path=[['Gas', 'standingChargeRates']], meta=meta_gas_standing_charge)
-
-        if not df_elec_standing_charge.empty:
-            df_elec_standing_charge['account_id'] = account_id
-
-            filename_gas_standing_charge = 'th_gas_standingcharge_' + str(account_id) + '.csv'
-            df_gas_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryGasStandCharge/' + filename_gas_standing_charge
-            k.set_contents_from_string(df_gas_standing_charge_string)
-            # print(df_gas_standing_charge_string)
 
 '''Get S3 connection'''
-
 
 
 def get_S3_Connections():
@@ -185,7 +129,10 @@ def format_json_response(data):
 
 
 def log_error(error_msg, error_code=''):
-    with open('meterpoint_logs' + time.strftime('%m%d%Y') + '.csv', mode='a') as errorlog:
+    logs_dir_path = sys.path[0] + '/logs/'
+    if not os.path.exists(logs_dir_path):
+        os.makedirs(logs_dir_path)
+    with open(logs_dir_path + 'direct_debit_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
@@ -208,12 +155,14 @@ def processAccounts(account_ids, k):
         t = con.api_config['total_no_of_calls']
         # Get Account Staus
         print('ac: ' + str(account_id))
-        api_url, token, head = get_tariff_history_api_info(account_id)
-        th_response = get_api_response(api_url, token, head)
-        if th_response:
-            formatted_tariff_history = format_json_response(th_response)
-            # print(json.dumps(formatted_tariff_history))
-            extract_tariff_history_json(formatted_tariff_history, account_id, k)
+        msg_ac = 'ac:' + str(account_id)
+        log_error(msg_ac, '')
+        api_url, token, head = get_direct_debit_api_info(account_id)
+        dd_response = get_api_response(api_url, token, head)
+        if dd_response:
+            formatted_dd = format_json_response(dd_response)
+            # print(json.dumps(formatted_dd))
+            extract_direct_debit_json(formatted_dd, account_id, k)
         else:
             print('ac:' + str(account_id) + ' has no data')
             msg_ac = 'ac:' + str(account_id) + ' has no data'

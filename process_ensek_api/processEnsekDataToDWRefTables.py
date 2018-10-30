@@ -34,10 +34,10 @@ all_results =  rr.fetchall()
 
 def pretty(all_results):
     for row in all_results :
-        print "row start >>>>>>>>>>>>>>>>>>>>"
+        print("row start >>>>>>>>>>>>>>>>>>>>")
         for r in row :
-            print " ----" , r
-        print "row end >>>>>>>>>>>>>>>>>>>>>>"
+            print (" ----" , r)
+        print ("row end >>>>>>>>>>>>>>>>>>>>>>")
 
 
 pretty(all_results)

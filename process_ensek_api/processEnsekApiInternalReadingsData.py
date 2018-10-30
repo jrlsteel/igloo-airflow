@@ -2,7 +2,6 @@ import requests
 import json
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
-import ig_config as con
 import boto
 from boto.s3.key import Key
 import time
@@ -11,25 +10,37 @@ from requests import ConnectionError
 import csv
 import pymysql
 import multiprocessing
-from multiprocessing import Pool, freeze_support, Process
+from multiprocessing import freeze_support
+
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from conf import config as con
+
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
 
 
+# k = Key()
+
 # get meter point api info
-def get_estimates_internal_api_info(account_id, token):
+def get_readings_internal_api_info(account_id, token):
     # UAT
     # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints'.format(account_id)
     # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
 
     # prod
-    api_url = 'https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage'.format(account_id)
+    api_url = 'https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending'.format(
+        account_id)
     head = {'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
             'Referrer': 'https://igloo.ignition.ensek.co.uk',
             'Authorization': 'Bearer {0}'.format(token)}
     return api_url, head
+
 
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
@@ -42,7 +53,7 @@ def get_auth_code():
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
-        'Referrer': 'https: // igloo.ignition.ensek.co.uk'
+        'Referrer': 'https://igloo.ignition.ensek.co.uk'
     }
     response = requests.post(oauth_url, data=data, headers=headers)
     response = response.json()
@@ -52,9 +63,9 @@ def get_auth_code():
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
 def get_api_response(api_url, head):
-    """
+    '''
         get the response for the respective url that is passed as part of this function
-    """
+   '''
     session = requests.Session()
     start_time = time.time()
     timeout = con.api_config['connection_timeout']
@@ -62,22 +73,28 @@ def get_api_response(api_url, head):
     i = 0
     while True:
         try:
-            response = session.get(api_url, headers=head)
+            response = session.post(api_url, headers=head, params={'page': 1})
+
             if response.status_code == 200:
                 response_json = json.loads(response.content.decode('utf-8'))
-                response_items_elec = response_json['Electricity']
-                response_items_gas = response_json['Gas']
-                return response_items_elec, response_items_gas
+                total_pages = response_json['totalPages']
+                response_items = response_json['items']
+
+                for page in range(2, total_pages + 1):
+                    response_next_page = session.post(api_url, headers=head, params={'page': page})
+                    response_next_page_json = json.loads(response_next_page.content.decode('utf-8'))['items']
+                    response_items.extend(response_next_page_json)
+                return response_items
             else:
                 print('Problem Grabbing Data: ', response.status_code)
                 log_error('Response Error: Problem grabbing data', response.status_code)
-                return None, None
                 break
 
         except ConnectionError:
             if time.time() > start_time + timeout:
                 print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                 log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+
                 break
             else:
                 print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
@@ -87,33 +104,17 @@ def get_api_response(api_url, head):
         i = i + retry_in_secs
 
 
-def extract_internal_data_response_elec(data, account_id, k):
+def extract_internal_data_response(data, account_id, k):
     ''' Processing meter points data'''
-    # meta_meters = ['associationStartDate', 'associationEndDate', 'supplyStartDate', 'supplyEndDate', 'isSmart', 'isSmartCommunicating', 'id', 'meterPointNumber', 'meterPointType']
     df_internal_readings = json_normalize(data)
     # print(df_internal_readings)
     if (df_internal_readings.empty):
         print(" - has no readings data")
     else:
-        df_internal_readings['account_id'] = account_id
         df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
-        file_name_internal_readings = 'internal_estimates_elec_' + str(account_id) + '.csv'
-        k.key = 'ensek-meterpoints/EstimatesElecInternal/' + file_name_internal_readings
-        k.set_contents_from_string(df_internal_readings_string)
-
-
-def extract_internal_data_response_gas(data, account_id, k):
-    ''' Processing meter points data'''
-    # meta_meters = ['associationStartDate', 'associationEndDate', 'supplyStartDate', 'supplyEndDate', 'isSmart', 'isSmartCommunicating', 'id', 'meterPointNumber', 'meterPointType']
-    df_internal_readings = json_normalize(data)
-    # print(df_internal_readings)
-    if (df_internal_readings.empty):
-        print(" - has no readings data")
-    else:
-        df_internal_readings['account_id'] = account_id
-        df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
-        file_name_internal_readings = 'internal_estimates_gas_' + str(account_id) + '.csv'
-        k.key = 'ensek-meterpoints/EstimatesGasInternal/' + file_name_internal_readings
+        # print(df_internal_readings_string)
+        file_name_internal_readings = 'internal_readings_' + str(account_id) + '.csv'
+        k.key = 'ensek-meterpoints/ReadingsInternal/' + file_name_internal_readings
         k.set_contents_from_string(df_internal_readings_string)
 
 
@@ -158,7 +159,10 @@ def format_json_response(data):
 
 
 def log_error(error_msg, error_code=''):
-    with open('estimates_logs_' + time.strftime('%m%d%Y') + '.csv', mode='a') as errorlog:
+    logs_dir_path = sys.path[0] + '/logs/'
+    if not os.path.exists(logs_dir_path):
+        os.makedirs(logs_dir_path)
+    with open(sys.path[0] + '/logs/' + 'internal_readings_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
         employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         employee_writer.writerow([error_msg, error_code])
 
@@ -182,21 +186,17 @@ def processAccounts(account_ids, k, token):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
         # run for configured account ids
-        api_url, head = get_estimates_internal_api_info(account_id, token)
+        api_url, head = get_readings_internal_api_info(account_id, token)
         # print('ac:' + str(account_id) + str(multiprocessing.current_process()))
         print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
-        internal_data_response_elec, internal_data_response_gas = get_api_response(api_url, head)
-        # print(json.dumps(internal_data_response_elec, indent=4))
 
-        if internal_data_response_elec:
-            formatted_internal_data_elec = format_json_response(internal_data_response_elec)
-            extract_internal_data_response_elec(formatted_internal_data_elec, account_id, k)
+        internal_data_response = get_api_response(api_url, head)
+        # print(json.dumps(internal_data_response, indent=4))
 
-        if internal_data_response_gas:
-            formatted_internal_data_gas = format_json_response(internal_data_response_gas)
-            extract_internal_data_response_gas(formatted_internal_data_gas, account_id, k)
+        formatted_internal_data = format_json_response(internal_data_response)
+        extract_internal_data_response(formatted_internal_data, account_id, k)
 
 
 if __name__ == "__main__":
@@ -215,12 +215,6 @@ if __name__ == "__main__":
 
     if con.test_config['enable_db'] == 'Y':
         account_ids = get_accountID_fromDB()
-
-    # threads = 5
-    # chunksize = 100
-
-    # with Pool(threads) as pool:
-    #     pool.starmap(processAccounts, zip(account_ids), chunksize)
 
     print(len(account_ids))
     print(int(len(account_ids) / 12))

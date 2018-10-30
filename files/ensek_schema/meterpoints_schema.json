@@ -1,0 +1,62 @@
+[
+    {
+        "associationStartDate": "str|null",
+        "associationEndDate": "str|null",
+        "supplyStartDate": "str|null",
+        "supplyEndDate": "str|null",
+        "isSmart": "bool|null",
+        "isSmartCommunicating": "bool|null",
+        "id": "int|null",
+        "meterPointNumber": "int|null",
+        "meterPointType": "str|null",
+        "meters": [
+            {
+                "meterId": "int|null",
+                "meterSerialNumber": "str|null",
+                "installedDate": "str|null",
+                "removedDate": "str|null",
+                "registers": [
+                    {
+                        "id": "int|null",
+                        "registerReference": "str|null",
+                        "tariffComponent": "str|null",
+                        "attributes": [
+                            {
+                                "attributeName": "str|null",
+                                "attributeValue": "str|null",
+                                "attributeDescription": "str|null"
+                            },
+                            "..."
+                        ],
+                        "tpr": "str|null",
+                        "tprPeriodDescription": "str|null",
+                        "eacAq": "float|null",
+                        "sourceIdType": "str|null"
+                    },
+                    "..."
+                ],
+                "attributes": [
+                    {
+                        "attributeName": "str|null",
+                        "attributeValue": "str|null",
+                        "attributeDescription": "str|null"
+                    },
+                    "..."
+                ]
+            },
+            "..."
+        ],
+        "attributes": [
+            {
+                "attributeName": "str|null",
+                "attributeValue": "str|null",
+                "effectiveFromDate": "str|null",
+                "effectiveToDate": "str|null",
+                "attributeDescription": "str|null"
+            },
+            "..."
+        ]
+    },
+    "..."
+
+]
