@@ -131,18 +131,33 @@ def validateSchema(response_json, api, account_id):
         meterpoints_schema = schemafile.read()
 
     js = json_schema.loads(meterpoints_schema)
+    # print(json_schema.match(meterpoints_string, meterpoints_schema))
+
     if js == meterpoints_string:
         print('true')
         schema_valid = True
     else:
         print('false')
-        js.full_check(meterpoints_string)
-        print(meterpoints_string)
         schema_valid = False
-        msg_error = time.strftime('%d-%m-%Y-%H:%M:%S') + " - " +api + ' api has invalid schema for account id ' + str(account_id) + "\n" + meterpoints_string
+        error_json = full_check(meterpoints_string, js)
+        print(error_json)
+        print(meterpoints_string)
+
+        msg_error = time.strftime('%d-%m-%Y-%H:%M:%S') + " - " + api + ' api has invalid schema for account id ' + str(account_id) + "\n" + error_json
         log_error(msg_error, '')
 
     return schema_valid
+
+
+def full_check(json_string, json_schema):
+    my_json = json.loads(json_string)
+    e = json_schema._comparar(my_json, json_schema.schema_dict)
+    t = json.dumps(e, indent=4)
+    t = t.replace("\\u001b[91m", "\033[91m").replace("\\u001b[92m", "\033[92m")
+
+    error_json = "\033[92m%s\033[0m" % t
+
+    return error_json
 
 
 def processAccounts(account_id_s):

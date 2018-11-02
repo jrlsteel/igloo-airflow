@@ -131,7 +131,6 @@ def processAccounts(account_id_s):
                 generateSchema(api_response, api)
 
 
-
 if __name__ == "__main__":
 
     '''Enable this to test for 1 account id'''
