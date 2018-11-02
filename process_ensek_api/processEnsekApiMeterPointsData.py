@@ -122,7 +122,7 @@ def extract_meter_point_json(data, account_id, k):
         df_meterpoints1.rename(columns={'id': 'meter_point_id'}, inplace=True)
         # meter_point_ids = df_meterpoints1['meter_point_id']
         df_meter_points_string = df_meterpoints1.to_csv(None, index=False)
-        print(df_meter_points_string)
+        # print(df_meter_points_string)
         file_name_meterpoints = 'meter_points_' + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/MeterPoints/' + file_name_meterpoints
         k.set_contents_from_string(df_meter_points_string)
@@ -333,7 +333,7 @@ def processAccounts(account_ids, k):
 
         # run for configured account ids
         api_url, token, head = get_meter_point_api_info(account_id)
-        print('ac:' + str(account_id) + str(multiprocessing.current_process()))
+        print('ac:' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
         meter_info_response = get_api_response(api_url, token, head)
