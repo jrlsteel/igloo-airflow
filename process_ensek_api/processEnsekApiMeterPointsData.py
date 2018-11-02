@@ -118,11 +118,11 @@ def extract_meter_point_json(data, account_id, k):
         print(" - has no meters points data")
     else:
         df_meterpoints['account_id'] = account_id
-        df_meterpoints2 = df_meterpoints[meta_meters + ['account_id']]
-        df_meterpoints1 = df_meterpoints2.rename(columns={'id': 'meter_point_id'})
-        meter_point_ids = df_meterpoints1['meter_point_id']
-        df_meter_points_string = df_meterpoints.to_csv(None, index=False)
-        # print(df_meter_points_string)
+        df_meterpoints1 = df_meterpoints[meta_meters + ['account_id']]
+        df_meterpoints1.rename(columns={'id': 'meter_point_id'}, inplace=True)
+        # meter_point_ids = df_meterpoints1['meter_point_id']
+        df_meter_points_string = df_meterpoints1.to_csv(None, index=False)
+        print(df_meter_points_string)
         file_name_meterpoints = 'meter_points_' + str(account_id) + '.csv'
         k.key = 'ensek-meterpoints/MeterPoints/' + file_name_meterpoints
         k.set_contents_from_string(df_meter_points_string)
