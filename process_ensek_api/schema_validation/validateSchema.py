@@ -6,6 +6,9 @@ import pymysql
 import time
 import sys
 import os
+import psycopg2
+
+from sshtunnel import SSHTunnelForwarder, create_logger
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
@@ -91,7 +94,7 @@ def get_api_response_pages(api_url, head):
 
 def format_json_response(data, api):
 
-    data_str = json.dumps(data, indent=4).replace('null', '""')
+    data_str = json.dumps(data, indent=4)
 
     if api == 'tariff_history':
         for k in data:
@@ -124,7 +127,28 @@ def get_accountID_fromDB():
     return account_ids
 
 
+def get_accountID_from_Redshift():
+    conn = psycopg2.connect(host=con.redshift_config['host'],
+                            port=con.redshift_config['port'],
+                            user=con.redshift_config['user'],
+                            password=con.redshift_config['pwd'],
+                            dbname=con.redshift_config['db'])
+
+    cur = conn.cursor()
+
+    cur.execute(con.test_config['schema_account_ids_sql'])
+
+    account_ids = [row[0] for row in cur]
+    cur.close()
+    conn.close()
+    # server.stop()
+    return account_ids
+
+
 def validateSchema(response_json, api, account_id):
+    schema_valid = False
+    error_json = ''
+
     meterpoints_string = json.dumps(response_json, indent=4)
     filename = sys.path[0] + '/files/ensek_schema/' + api + '_schema' + '.json'
     with open(filename, 'r') as schemafile:
@@ -134,19 +158,19 @@ def validateSchema(response_json, api, account_id):
     # print(json_schema.match(meterpoints_string, meterpoints_schema))
 
     if js == meterpoints_string:
-        print('true')
         schema_valid = True
     else:
-        print('false')
         schema_valid = False
         error_json = full_check(meterpoints_string, js)
-        print(error_json)
-        print(meterpoints_string)
 
-        msg_error = time.strftime('%d-%m-%Y-%H:%M:%S') + " - " + api + ' api has invalid schema for account id ' + str(account_id) + "\n" + error_json
-        log_error(msg_error, '')
-
-    return schema_valid
+    schema_validation_details = {
+                                'api': api,
+                                'account_id': account_id,
+                                'valid': schema_valid,
+                                'error': error_json,
+                                'error_json': meterpoints_string
+                                }
+    return schema_validation_details
 
 
 def full_check(json_string, json_schema):
@@ -160,39 +184,49 @@ def full_check(json_string, json_schema):
     return error_json
 
 
-def processAccounts(account_id_s):
-    apis = ['meterpoints', 'direct_debits', 'internal_estimates', 'internal_readings', 'account_status', 'elec_status', 'gas_status', 'tariff_history']
-    schema_valid_response1 = []
-    for api in apis:
-        print(api)
-        for account_id in account_id_s:
-            api_url, head = get_api_info(account_id, api)
+def processAccounts():
+    try:
+        account_ids = []
+        '''Enable this to test for 1 account id'''
+        if con.test_config['enable_manual'] == 'Y':
+            account_ids = con.test_config['account_ids']
 
-            if api in ['internal_readings']:
-                api_response = get_api_response_pages(api_url, head)
-            else:
-                api_response = get_api_response(api_url, head)
+        if con.test_config['enable_db'] == 'Y':
+            # server = redshift_connection()
+            account_ids = get_accountID_from_Redshift()
 
-            if api_response:
-                print(account_id)
-                # print(api_response)
-                formatted_json_response = format_json_response(api_response, api)
-                schema_valid_response = validateSchema(formatted_json_response, api, account_id)
-                schema_valid_response1 += [{'api': api, 'account_id': account_id, 'valid': schema_valid_response}]
-    return schema_valid_response1
+        apis = ['meterpoints', 'direct_debits', 'internal_estimates', 'internal_readings', 'account_status', 'elec_status', 'gas_status', 'tariff_history']
+
+        for api in apis:
+            print(api)
+            for account_id in account_ids:
+                api_url, head = get_api_info(account_id, api)
+
+                if api in ['internal_readings']:
+                    api_response = get_api_response_pages(api_url, head)
+                else:
+                    api_response = get_api_response(api_url, head)
+
+                if api_response:
+                    formatted_json_response = format_json_response(api_response, api)
+                    validate_schema_response = validateSchema(formatted_json_response, api, account_id)
+                    if validate_schema_response['valid']:
+                        print(str(account_id) + ': ' + str(validate_schema_response['valid']))
+                    else:
+                        print(str(account_id) + ': ' + str(validate_schema_response['valid']))
+                        msg_error = time.strftime('%d-%m-%Y-%H:%M:%S') + " - " + api + ' api has invalid schema for account id ' + str(account_id) + "\n" + validate_schema_response['error'] + validate_schema_response['error_json']
+                        log_error(msg_error, '')
+                        # print(msg_error)
+                        raise Exception(" schema Error : {0}".format(msg_error))
+        return True
+
+    except:
+        raise
 
 
 if __name__ == "__main__":
-    account_ids = []
-    '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
 
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = get_accountID_fromDB()
-
-    schema_valid_response = processAccounts(account_ids)
-    # processAccounts(account_ids)
+        schema_valid_response_main = processAccounts()
 
 
 
