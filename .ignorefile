@@ -1,4 +1,4 @@
 .conf/
 .logs/
 .files/sample_schema/
-**.__pycache__/
+.files/__pycache__/
