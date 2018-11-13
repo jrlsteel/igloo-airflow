@@ -99,8 +99,8 @@ def format_json_response(data, api):
     if api == 'tariff_history':
         for k in data:
             if k['Gas'] is None:
-                # print(data_str.replace('"Gas": ""', '"Gas": {"unitRates": [], "standingChargeRates": []}'))
-                data_str = data_str.replace('"Gas": ""', '"Gas": {"unitRates": [], "standingChargeRates": []}')
+                # print(data_str.replace('"Gas": null', '"Gas": {"unitRates": [], "standingChargeRates": []}'))
+                data_str = data_str.replace('"Gas": null', '"Gas": {"unitRates": [], "standingChargeRates": []}')
 
     data_json = json.loads(data_str)
     return data_json
@@ -117,12 +117,14 @@ def get_accountID_fromDB():
                            passwd=con.rds_config['pwd'], db=con.rds_config['db'])
 
     cur = conn.cursor()
+    print("connected to rds..")
 
-    cur.execute(con.test_config['schema_account_ids_sql'])
+    cur.execute(con.test_config['schema_account_ids_sql_rds'])
 
     account_ids = [row[0] for row in cur]
     cur.close()
     conn.close()
+    print("connection to rds closed..")
 
     return account_ids
 
@@ -135,12 +137,15 @@ def get_accountID_from_Redshift():
                             dbname=con.redshift_config['db'])
 
     cur = conn.cursor()
+    print("connected to redshift..")
 
     cur.execute(con.test_config['schema_account_ids_sql'])
 
     account_ids = [row[0] for row in cur]
     cur.close()
     conn.close()
+    print("connection to redshift closed..")
+
     # server.stop()
     return account_ids
 
@@ -193,7 +198,9 @@ def processAccounts():
 
         if con.test_config['enable_db'] == 'Y':
             # server = redshift_connection()
-            account_ids = get_accountID_from_Redshift()
+
+            # account_ids = get_accountID_from_Redshift()
+            account_ids = get_accountID_fromDB()
 
         apis = ['meterpoints', 'direct_debits', 'internal_estimates', 'internal_readings', 'account_status', 'elec_status', 'gas_status', 'tariff_history']
 
