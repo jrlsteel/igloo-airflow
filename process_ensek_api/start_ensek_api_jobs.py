@@ -102,8 +102,8 @@ def process_ensek_api_jobs():
         submit_ensek_counts()
         print("CustomerDB Jobs running...")
         submit_customerdb_job()
-        # wait for 3 minutes before starting the next run
-        sleep(240)
+        # wait for 10 minutes before starting the next run
+        sleep(600)
         print("All jobs completed successfully")
 
 
