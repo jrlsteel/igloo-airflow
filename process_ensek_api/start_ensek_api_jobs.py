@@ -1,5 +1,6 @@
 import sys
 import os
+from time import sleep
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -99,8 +100,10 @@ def process_ensek_api_jobs():
         submit_staging_job()
         print("Ensek Counts running...")
         submit_ensek_counts()
-        print("CustomerDB Jobs Running...")
+        print("CustomerDB Jobs running...")
         submit_customerdb_job()
+        # wait for 3 minutes before starting the next run
+        sleep(240)
         print("All jobs completed successfully")
 
 
