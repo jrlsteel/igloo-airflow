@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from process_ensek_api.schema_validation import validateSchema as vs
 from process_ensek_api import processAllEnsekScripts as ae
 from process_ensek_api import submit_staging_job as ss
+from process_ensek_api import submit_customerdb_job as scdb
 from process_ensek_api import processEnsekApiCounts as ec
 
 
@@ -69,6 +70,21 @@ def submit_ensek_counts():
         sys.exit(1)
 
 
+def submit_customerdb_job():
+    try:
+        staging_job_response = scdb.process_customerdb_job()
+        if staging_job_response:
+            print("CustomerDB Job Completed successfully")
+            # return staging_job_response
+        else:
+            print("Error occurred in CustomerDB Job")
+            # return staging_job_response
+            raise Exception
+    except Exception as e:
+        print("Error in Customer DB Job :- " + str(e))
+        sys.exit(1)
+
+
 def process_ensek_api_jobs():
 
     while True:
@@ -83,6 +99,8 @@ def process_ensek_api_jobs():
         submit_staging_job()
         print("Ensek Counts running...")
         submit_ensek_counts()
+        print("CustomerDB Jobs Running...")
+        submit_customerdb_job()
         print("All jobs completed successfully")
 
 
