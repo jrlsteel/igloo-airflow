@@ -139,7 +139,7 @@ def get_accountID_from_Redshift():
     cur = conn.cursor()
     print("connected to redshift..")
 
-    cur.execute(con.test_config['schema_account_ids_sql'])
+    cur.execute(con.test_config['schema_account_ids_sql_redshift'])
 
     account_ids = [row[0] for row in cur]
     cur.close()
