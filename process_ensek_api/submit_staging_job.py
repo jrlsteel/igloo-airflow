@@ -1,6 +1,9 @@
 import boto3
 from time import sleep
+import sys
 
+sys.path.append('..')
+from conf import config as con
 
 def get_job_status(glue, job_run_id):
     coalesce_job = glue.get_job_run(JobName='process_staging_files', RunId=job_run_id, PredecessorsIncluded=False)
@@ -19,7 +22,7 @@ def process_staging_job():
         job_status = ''
         job_execution_time = 0
         # connect to aws glue
-        glue_client = boto3.client(service_name='glue', region_name='eu-west-1')
+        glue_client = boto3.client(service_name='glue', region_name='eu-west-1', aws_access_key_id=con.s3_config['access_key'], aws_secret_access_key=con.s3_config['secret_key'])
 
         # Check if already a job is running state
         current_job = glue_client.get_job_runs(JobName='process_staging_files', MaxResults=1)
