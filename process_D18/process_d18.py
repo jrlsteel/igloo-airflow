@@ -11,6 +11,7 @@ from connections import connect_db as db
 class ProcessD18:
 
     def __init__(self):
+
         self.bucket_name = 'igloo-uat-bucket'
         self.prefix = 'D018/'
         self.suffix = '.flw'
@@ -85,17 +86,14 @@ class ProcessD18:
 
         except:
             raise
-        # finally:
-            # f_BPP.close()
-            # f_PPC.close()
 
     def get_keys_from_s3(self):
-        d18_keys_s3 = []
+        d18_keys = []
         # get all the files in D018 object
         for obj in self.s3.list_objects(Bucket=self.bucket_name, Prefix=self.prefix)['Contents']:
             if obj['Key'].endswith(self.suffix):
-                d18_keys_s3.append(obj['Key'])
-        return d18_keys_s3
+                d18_keys.append(obj['Key'])
+        return d18_keys
 
 
 if __name__ == "__main__":
