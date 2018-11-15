@@ -4,7 +4,6 @@ import multiprocessing
 
 sys.path.append('..')
 
-from conf import config as con
 from connections import connect_db as db
 
 
