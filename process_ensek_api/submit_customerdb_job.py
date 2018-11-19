@@ -28,7 +28,7 @@ def process_customerdb_job():
                                    aws_secret_access_key=con.s3_config['secret_key'])
         # Start the custormer db trigger
         # response = glue_client.start_trigger(JobName='ensek-customerdb-ondemand')
-        response = glue_client.start_trigger(Name='sample_trigger')
+        response = glue_client.start_trigger(Name='ensek-customerdb-ondemand')
 
         # Check if already a job is running state
         # current_trigger = glue_client.get_trigger(JobName='ensek-customerdb-ondemand')

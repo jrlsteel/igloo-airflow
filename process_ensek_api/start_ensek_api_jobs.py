@@ -98,8 +98,8 @@ def process_ensek_api_jobs():
         # run staging glue job
         print("Staging Job running...")
         submit_staging_job()
-       # print("Ensek Counts running...")
-       # submit_ensek_counts()
+        print("Ensek Counts running...")
+        submit_ensek_counts()
         print("CustomerDB Jobs running...")
         submit_customerdb_job()
         # wait for 10 minutes before starting the next run
