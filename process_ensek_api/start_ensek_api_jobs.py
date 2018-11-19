@@ -88,23 +88,22 @@ def submit_customerdb_job():
 
 def process_ensek_api_jobs():
 
-    while True:
-        # run schema validation job
-        print("schema validation running...")
-        submit_schema_validations()
-        # run all ensek scripts
-        print("Ensek Scripts running...")
-        submit_all_ensek_scripts()
-        # run staging glue job
-        print("Staging Job running...")
-        submit_staging_job()
-        # print("Ensek Counts running...")
-        # submit_ensek_counts()
-        print("CustomerDB Jobs running...")
-        submit_customerdb_job()
-        # wait for 10 minutes before starting the next run
-        sleep(600)
-        print("All jobs completed successfully")
+    # run schema validation job
+    print("schema validation running...")
+    submit_schema_validations()
+    # run all ensek scripts
+    print("Ensek Scripts running...")
+    submit_all_ensek_scripts()
+    # run staging glue job
+    print("Staging Job running...")
+    submit_staging_job()
+    # print("Ensek Counts running...")
+    # submit_ensek_counts()
+    print("CustomerDB Jobs running...")
+    submit_customerdb_job()
+    # wait for 10 minutes before starting the next run
+    sleep(600)
+    print("All jobs completed successfully")
 
 
 if __name__ == '__main__':
