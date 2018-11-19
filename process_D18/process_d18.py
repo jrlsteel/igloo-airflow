@@ -21,16 +21,16 @@ class ProcessD18:
         self.upload_key_BPP = 'D018CSV/D18BPP/'
         self.upload_key_PPC = 'D018CSV/D18PPC/'
         self.D018_dir = sys.path[0] + '/files/D018/'
-        self.s3 = db.get_S3_Connections_client()
+
 
     def process_d18_data(self, d18_keys):
-
+        s31 = db.get_S3_Connections_client()
         try:
             # loop each file
             for d18key in d18_keys:
                 print(d18key)
 
-                obj = self.s3.get_object(Bucket=self.bucket_name, Key=d18key)
+                obj = s31.get_object(Bucket=self.bucket_name, Key=d18key)
 
                 obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
 
@@ -86,8 +86,8 @@ class ProcessD18:
 
 
                 # upload to s3
-                self.s3.put_object(Bucket=self.bucket_name, Key=self.upload_key_BPP + fileBPP_csv, Body=line_BPP_2)
-                self.s3.put_object(Bucket=self.bucket_name, Key=self.upload_key_PPC + filePPC_csv, Body=line_PPC_2)
+                s31.put_object(Bucket=self.bucket_name, Key=self.upload_key_BPP + fileBPP_csv, Body=line_BPP_2)
+                s31.put_object(Bucket=self.bucket_name, Key=self.upload_key_PPC + filePPC_csv, Body=line_PPC_2)
 
                 # archive d18
                 copy_source = {
@@ -95,15 +95,15 @@ class ProcessD18:
                                 'Key': d18key
                               }
 
-                self.s3.copy(copy_source, self.bucket_name, self.d018_archive_key + '/' + filename)
+                s31.copy(copy_source, self.bucket_name, self.d018_archive_key + '/' + filename)
 
         except:
             raise
 
-    def get_keys_from_s3(self):
+    def get_keys_from_s3(self, s3):
         d18_keys = []
         # get all the files in D018 object
-        for obj in self.s3.list_objects(Bucket=self.bucket_name, Prefix=self.prefix)['Contents']:
+        for obj in s3.list_objects(Bucket=self.bucket_name, Prefix=self.prefix)['Contents']:
             if obj['Key'].endswith(self.suffix):
                 d18_keys.append(obj['Key'])
         return d18_keys
@@ -112,9 +112,9 @@ class ProcessD18:
 if __name__ == "__main__":
 
     freeze_support()
-
+    s3 = db.get_S3_Connections_client()
     p = ProcessD18()
-    d18_keys_s3 = p.get_keys_from_s3()
+    d18_keys_s3 = p.get_keys_from_s3(s3)
     k = int(len(d18_keys_s3) / 3)
     processes = []
     l = 0
