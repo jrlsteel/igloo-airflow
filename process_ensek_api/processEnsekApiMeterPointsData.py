@@ -8,7 +8,6 @@ import time
 import datetime
 from requests import ConnectionError
 import csv
-import pymysql
 import multiprocessing
 from multiprocessing import freeze_support
 from process_ensek_api import get_account_ids as g

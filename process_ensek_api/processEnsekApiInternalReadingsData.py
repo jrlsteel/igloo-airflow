@@ -5,7 +5,6 @@ from ratelimit import limits, sleep_and_retry
 import boto
 from boto.s3.key import Key
 import time
-import datetime
 from requests import ConnectionError
 import csv
 import multiprocessing
