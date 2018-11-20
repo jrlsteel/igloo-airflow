@@ -2,10 +2,23 @@ import pandas_redshift as pr
 import sys
 import os
 import boto3
+import pymysql as psql
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from conf import config as con
+
+
+def get_rds_connection():
+    conn = psql.connect(host=con.rds_config['host'], port=con.rds_config['port'], user=con.rds_config['user'],
+                           passwd=con.rds_config['pwd'], db=con.rds_config['db'])
+
+    return conn
+
+def close_rds_connection(cursor, connection):
+    cursor.close()
+    connection.close()
+
 
 
 def get_redshift_connection():

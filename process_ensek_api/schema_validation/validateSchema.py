@@ -7,8 +7,8 @@ import time
 import sys
 import os
 import psycopg2
-
-from sshtunnel import SSHTunnelForwarder, create_logger
+import timeit
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
@@ -191,21 +191,22 @@ def full_check(json_string, json_schema):
 
 def processAccounts():
     try:
+        start = timeit.default_timer()
         account_ids = []
         '''Enable this to test for 1 account id'''
         if con.test_config['enable_manual'] == 'Y':
             account_ids = con.test_config['account_ids']
 
-        if con.test_config['enable_db'] == 'Y':
-            # server = redshift_connection()
-
-            # account_ids = get_accountID_from_Redshift()
-            account_ids = get_accountID_fromDB()
+        # if con.test_config['enable_db'] == 'Y':
+        # server = redshift_connection()
+        # account_ids = get_accountID_from_Redshift()
+        account_ids = get_accountID_fromDB()
 
         apis = ['meterpoints', 'direct_debits', 'internal_estimates', 'internal_readings', 'account_status', 'elec_status', 'gas_status', 'tariff_history']
 
         for api in apis:
-            print(api)
+            start_api = timeit.default_timer()
+            print("{0}: >>>>>> {1} <<<<<<<".format(datetime.now().strftime('%H:%M:%S'), api.upper()))
             for account_id in account_ids:
                 api_url, head = get_api_info(account_id, api)
 
@@ -218,13 +219,17 @@ def processAccounts():
                     formatted_json_response = format_json_response(api_response, api)
                     validate_schema_response = validateSchema(formatted_json_response, api, account_id)
                     if validate_schema_response['valid']:
-                        print(str(account_id) + ': ' + str(validate_schema_response['valid']))
+                        # print(str(account_id) + ': ' + str(validate_schema_response['valid']))
+                        pass
                     else:
-                        print(str(account_id) + ': ' + str(validate_schema_response['valid']))
+                        # print(str(account_id) + ': ' + str(validate_schema_response['valid']))
                         msg_error = time.strftime('%d-%m-%Y-%H:%M:%S') + " - " + api + ' api has invalid schema for account id ' + str(account_id) + "\n" + validate_schema_response['error'] + validate_schema_response['error_json']
                         log_error(msg_error, '')
                         # print(msg_error)
                         raise Exception(" schema Error : {0}".format(msg_error))
+            print("{0}: Completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start_api)))
+        print("{0}: Schema Validation completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+
         return True
 
     except:

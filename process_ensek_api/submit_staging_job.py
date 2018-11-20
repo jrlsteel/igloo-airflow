@@ -46,7 +46,7 @@ def process_staging_job():
         # Check Job status for every 3 minutes until it is STOPPED/SUCCEEDED/FAILED/TIMEOUT
         # 'JobRunState': 'STARTING' | 'RUNNING' | 'STOPPING' | 'STOPPED' | 'SUCCEEDED' | 'FAILED' | 'TIMEOUT'
         while job_status.upper() not in ['STOPPED', 'SUCCEEDED', 'FAILED', 'TIMEOUT']:
-            sleep(3)
+            sleep(180)
             job_status, job_execution_time = get_job_status(glue_client, job_run_id)
             if job_status.upper() in ['STOPPED', 'FAILED', 'TIMEOUT']:
                 raise Exception("Job stopped with status {0}. Please check the job id - {1}".format(job_status.upper(), job_run_id))

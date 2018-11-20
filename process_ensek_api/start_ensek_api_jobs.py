@@ -1,6 +1,7 @@
 import sys
 import os
 from time import sleep
+from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -15,7 +16,7 @@ def submit_schema_validations():
     try:
         schema_validation_response = vs.processAccounts()
         if schema_validation_response:
-            print("Schema Validation job completed successfully")
+            print("{0}: Schema Validation job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return schema_validation_response
         else:
             print("Error occurred in Schema Validation job")
@@ -30,7 +31,7 @@ def submit_all_ensek_scripts():
     try:
         all_ensek_scripts_response = ae.process_all_ensek_scripts()
         if all_ensek_scripts_response:
-            print("All Ensek Scripts job completed successfully")
+            print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return all_ensek_scripts_response
         else:
             print("Error occurred in All Ensek Scripts job")
@@ -45,7 +46,7 @@ def submit_staging_job():
     try:
         staging_job_response = ss.process_staging_job()
         if staging_job_response:
-            print("Staging Job Completed successfully")
+            print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return staging_job_response
         else:
             print("Error occurred in Staging Job")
@@ -60,7 +61,7 @@ def submit_ensek_counts():
     try:
         ensek_counts_response = ec.process_count()
         if ensek_counts_response:
-            print("Ensek Counts Job Completed successfully")
+            print("{0}: Ensek Counts Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return ensek_counts_response
         else:
             print("Error occurred in Ensek Count Job")
@@ -75,7 +76,7 @@ def submit_customerdb_job():
     try:
         staging_job_response = scdb.process_customerdb_job()
         if staging_job_response:
-            print("CustomerDB Job Completed successfully")
+            print("{0}: CustomerDB Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return staging_job_response
         else:
             print("Error occurred in CustomerDB Job")
@@ -89,21 +90,21 @@ def submit_customerdb_job():
 def process_ensek_api_jobs():
 
     # run schema validation job
-    print("schema validation running...")
+    print("{0}: Schema validation running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_schema_validations()
     # run all ensek scripts
-    print("Ensek Scripts running...")
+    print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_all_ensek_scripts()
     # run staging glue job
-    print("Staging Job running...")
+    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_staging_job()
-    # print("Ensek Counts running...")
+    # print("Ensek Counts running...".format(datetime.now().strftime('%H:%M:%S')))
     # submit_ensek_counts()
-    print("CustomerDB Jobs running...")
+    print("{0}: CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_customerdb_job()
     # wait for 10 minutes before starting the next run
     sleep(600)
-    print("All jobs completed successfully")
+    print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
 
 if __name__ == '__main__':

@@ -8,9 +8,10 @@ import time
 import datetime
 from requests import ConnectionError
 import csv
-import pymysql
 import multiprocessing
 from multiprocessing import freeze_support
+from process_ensek_api import get_account_ids as g
+
 
 import sys
 import os
@@ -167,21 +168,6 @@ def log_error(error_msg, error_code=''):
         employee_writer.writerow([error_msg, error_code])
 
 
-def get_accountID_fromDB():
-    conn = pymysql.connect(host=con.rds_config['host'], port=con.rds_config['port'], user=con.rds_config['user'],
-                           passwd=con.rds_config['pwd'], db=con.rds_config['db'])
-
-    cur = conn.cursor()
-
-    cur.execute(con.test_config['account_ids_sql'])
-
-    account_ids = [row[0] for row in cur]
-    cur.close()
-    conn.close()
-
-    return account_ids
-
-
 def processAccounts(account_ids, k, token):
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
@@ -214,7 +200,10 @@ if __name__ == "__main__":
         account_ids = get_Users(k)
 
     if con.test_config['enable_db'] == 'Y':
-        account_ids = get_accountID_fromDB()
+        account_ids = g.get_accountID_fromDB(False)
+
+    if con.test_config['enable_db_max'] == 'Y':
+        account_ids = g.get_accountID_fromDB(True)
 
     print(len(account_ids))
     print(int(len(account_ids) / 12))
@@ -222,7 +211,6 @@ if __name__ == "__main__":
 
     # print(account_ids)
 
-    start_time = datetime.datetime.now()
     p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k, t))
     p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k, t))
     p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k, t))
@@ -235,9 +223,7 @@ if __name__ == "__main__":
     p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k, t))
     p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k, t))
     p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k, t))
-    end_time = datetime.datetime.now()
 
-    diff = end_time - start_time
     p1.start()
     p2.start()
     p3.start()
@@ -264,4 +250,3 @@ if __name__ == "__main__":
     p11.join()
     p12.join()
 
-    print("Process completed. Time taken: " + str(diff))
