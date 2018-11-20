@@ -18,8 +18,8 @@ def get_accountID_fromDB(get_max):
 
     # logic to get max external id and process all the id within them
     if get_max:
-        # account_ids = list(range(1, max(account_ids)+1))
-        account_ids = list(range(max(account_ids)-10, max(account_ids)+1))
+        account_ids = list(range(1, max(account_ids)+1))
+        # account_ids = list(range(max(account_ids)-10, max(account_ids)+1))
 
     db.close_rds_connection(cur, conn)
 
