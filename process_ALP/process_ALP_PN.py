@@ -15,11 +15,10 @@ class  ProcessALPPN:
     def __init__(self):
 
         self.bucket_name = 'igloo-uat-bucket'
-        self.prefix = 'ensek-meterpoints/alp'
+        self.prefix = 'ensek-meterpoints/alp/AlpPNRaw'
         self.suffix = '.LPA'
-        self.alp_pn_archive_key = 'ensek-meterpoints/alp/alp-pn-archive'
-        self.upload_key_alp_pn = 'ensek-meterpoints/alp/alp-pn-csv/'
-        self.alp_pn_dir = sys.path[0] + '/files/alp/'
+        self.alp_pn_archive_key = 'ensek-meterpoints/alp/AlpPNArchive'
+        self.upload_key_alp_pn = 'ensek-meterpoints/alp/AlpPN'
 
 
     def process_alp_pn_data(self, alp_pn_keys):
@@ -33,10 +32,7 @@ class  ProcessALPPN:
 
                 obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
 
-                if not os.path.exists(self.alp_pn_dir):
-                    os.makedirs(self.alp_pn_dir)
-
-                filename = alp_pn_key.replace('ensek-meterpoints/alp/alp-pn/', '')
+                filename = alp_pn_key.replace('ensek-meterpoints/alp/AlpPNRaw', '')
                 file_alp_pn_csv = filename.replace('.LPA', '_alp_pn.csv')
 
                 # initializing variables
@@ -63,8 +59,8 @@ class  ProcessALPPN:
                                  'Key': alp_pn_key
                                }
 
-                s31.copy(copy_source, self.bucket_name, self.alp_pn_archive_key + '/' + filename)
-                #print(self.alp_pn_archive_key + '/' + filename)
+                s31.copy(copy_source, self.bucket_name, self.alp_pn_archive_key  + filename)
+                #print(self.alp_pn_archive_key + filename)
 
         except:
             raise
