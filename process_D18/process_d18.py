@@ -84,7 +84,6 @@ class ProcessD18:
                         line_PPC_2 += line_PPC_1 + '\n'
                         # print(line_PPC_1)
 
-
                 # upload to s3
                 s31.put_object(Bucket=self.bucket_name, Key=self.upload_key_BPP + fileBPP_csv, Body=line_BPP_2)
                 s31.put_object(Bucket=self.bucket_name, Key=self.upload_key_PPC + filePPC_csv, Body=line_PPC_2)
@@ -115,17 +114,17 @@ if __name__ == "__main__":
     s3 = db.get_S3_Connections_client()
     p = ProcessD18()
     d18_keys_s3 = p.get_keys_from_s3(s3)
-    k = int(len(d18_keys_s3) / 3)
+    k = int(len(d18_keys_s3) / 12)
     processes = []
     l = 0
     start = timeit.default_timer()
 
     # p.process_d18_data(d18_keys_s3)
-    for i in range(6):
+    for i in range(13):
         p1 = ProcessD18()
         print(i)
         u = i * k
-        if i == 5:
+        if i == 12:
             # print(d18_keys_s3[l:])
             t = multiprocessing.Process(target=p1.process_d18_data, args=(d18_keys_s3[l:],))
         else:
