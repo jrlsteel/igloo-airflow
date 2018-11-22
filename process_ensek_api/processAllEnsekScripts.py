@@ -19,11 +19,10 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Meter Points <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonalias, "processEnsekApiMeterPointsData.py"], shell=True)
+        subprocess.run([pythonalias, "processEnsekApiMeterPointsData.py"])
         print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
-
 
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:

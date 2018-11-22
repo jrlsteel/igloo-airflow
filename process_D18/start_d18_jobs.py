@@ -1,17 +1,23 @@
 import sys
-from time import sleep
 from datetime import datetime
 import timeit
 import subprocess
+import platform
 
 sys.path.append('..')
 
 
 def submit_download_d18_job():
+
+    if platform.system() == 'Windows':
+        pythonalias = 'python'
+    else:
+        pythonalias = 'python3'
+
     print("{0}: >>>> Downloading D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run(["python3", "download_d18.py"], shell=False)
+        subprocess.run([pythonalias, "download_d18.py"])
         print("{0}: download_d18 completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except Exception as e:
         print("Error in download_d18 process :- " + str(e))
@@ -19,10 +25,15 @@ def submit_download_d18_job():
 
 
 def submit_process_d18_job():
+    if platform.system() == 'Windows':
+        pythonalias = 'python'
+    else:
+        pythonalias = 'python3'
+
     print("{0}: >>>> Process D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run(["python3", "process_d18.py"], shell=False)
+        subprocess.run([pythonalias, "process_d18.py"])
         print("{0}: Process D18 files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except Exception as e:
         print("Error in download_d18 process :- " + str(e))
