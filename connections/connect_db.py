@@ -1,11 +1,11 @@
 import pandas_redshift as pr
 import sys
-import os
 import boto3
 import pymysql as psql
+import pysftp
+import paramiko
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+sys.path.append('..')
 from conf import config as con
 
 
@@ -54,6 +54,23 @@ def get_S3_Connections_client():
 
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
+
+
+def get_ensek_sftp_connection():
+    try:
+        ensek_sftp = con.ensek_sftp_config
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
+
+        # print(ensek_sftp)
+        sftp = pysftp.Connection(host=ensek_sftp['host'], username=ensek_sftp['username'], password=ensek_sftp['password'], cnopts=cnopts)
+
+        # transport = paramiko.Transport((ensek_sftp['host'], 22))
+        # sftp = paramiko.SFTPClient.from_transport(transport)
+
+        return sftp
+    except Exception as e:
+        print("Error: " + str(e))
 
 
 if __name__ == "__main__":
