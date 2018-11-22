@@ -34,7 +34,8 @@ def process_staging_job():
         current_job_run_id = current_job['JobRuns'][0]['Id']
         current_job_status = current_job['JobRuns'][0]['JobRunState']
 
-        # Start the process_staging_files job if it is not already  running state ie. NOT in status 'STARTING'|'RUNNING'|'STOPPING'
+        # Start the process_staging_files job if it is not already  running state ie.
+        # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
         if current_job_status.upper() not in ['STARTING', 'RUNNING', 'STOPPING']:
             response = glue_client.start_job_run(JobName='process_staging_files')
             job_run_id = response['JobRunId']
