@@ -47,7 +47,7 @@ class GetD18Files:
                     s3.put_object(Bucket=self.bucket_name, Key=self.upload_key + filename, Body=file_data)
 
                 i = i+1
-                break
+                # break
 
         except Exception as e:
             print("Error :" + str(e))

@@ -23,15 +23,14 @@ class ProcessD18:
 
     def process_d18_data(self, d18_keys):
 
-        '''
+        """
         :param d18_keys: list of D18 files stored in s3
-        :param s31: holds the s3 connection
         :return: None
 
         This function copies the D18 data that is being loaded into D18Raw folder and
             1. Splits the data into BPP and PPC in .csv format and stores back in s3.
             2. Also the data is archived in s3
-        '''
+        """
 
         try:
             s31 = db.get_S3_Connections_client()
@@ -105,7 +104,7 @@ class ProcessD18:
 
                 # archive d18
                 s31.copy(copy_source, self.bucket_name, self.d018_archive_key + filename)
-                break
+                # break
 
         except Exception as e:
             print(" Error :" + str(e))
@@ -163,5 +162,6 @@ if __name__ == "__main__":
 
     for process in processes:
         process.join()
+    ####### multiprocessing Ends #########
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
