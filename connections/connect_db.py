@@ -15,10 +15,10 @@ def get_rds_connection():
 
     return conn
 
+
 def close_rds_connection(cursor, connection):
     cursor.close()
     connection.close()
-
 
 
 def get_redshift_connection():
@@ -65,10 +65,19 @@ def get_ensek_sftp_connection():
         # print(ensek_sftp)
         sftp = pysftp.Connection(host=ensek_sftp['host'], username=ensek_sftp['username'], password=ensek_sftp['password'], cnopts=cnopts)
 
-        # transport = paramiko.Transport((ensek_sftp['host'], 22))
-        # sftp = paramiko.SFTPClient.from_transport(transport)
-
         return sftp
+    except Exception as e:
+        print("Error: " + str(e))
+
+
+def get_glue_connection():
+    try:
+        glue_client = boto3.client(service_name='glue',
+                                   region_name='eu-west-1',
+                                   aws_access_key_id=con.s3_config['access_key'],
+                                   aws_secret_access_key=con.s3_config['secret_key'])
+        return glue_client
+
     except Exception as e:
         print("Error: " + str(e))
 

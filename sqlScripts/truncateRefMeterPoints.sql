@@ -1,1 +1,0 @@
-truncate ref_meterpoints;

@@ -7,9 +7,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from process_ensek_api.schema_validation import validateSchema as vs
 from process_ensek_api import processAllEnsekScripts as ae
-from process_ensek_api import submit_staging_job as ss
-from process_ensek_api import submit_customerdb_job as scdb
 from process_ensek_api import processEnsekApiCounts as ec
+from common import process_glue_job as glue
 
 
 def submit_schema_validations():
@@ -44,7 +43,8 @@ def submit_all_ensek_scripts():
 
 def submit_staging_job():
     try:
-        staging_job_response = ss.process_staging_job()
+        obj_stage = glue.ProcessGlueJob(job_name='process_staging_files', input_files='ensek_files')
+        staging_job_response = obj_stage.run_glue_job()
         if staging_job_response:
             print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return staging_job_response
@@ -74,9 +74,10 @@ def submit_ensek_counts():
 
 def submit_customerdb_job():
     try:
-        staging_job_response = scdb.process_customerdb_job()
-        if staging_job_response:
-            print("{0}: CustomerDB Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+        obj_trigger = glue.ProcessGlueJob(trigger_name='ensek-customerdb-ondemand')
+        trigger_job_response = obj_trigger.run_glue_trigger()
+        if trigger_job_response:
+            print("{0}: CustomerDB Glue trigger started successfully".format(datetime.now().strftime('%H:%M:%S')))
             # return staging_job_response
         else:
             print("Error occurred in CustomerDB Job")
@@ -92,18 +93,24 @@ def process_ensek_api_jobs():
     # run schema validation job
     print("{0}: Schema validation running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_schema_validations()
+
     # run all ensek scripts
     print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_all_ensek_scripts()
+
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_staging_job()
+
+    """disabled for now as we cannot ssh access to igloo-dwh from EC2
     # print("Ensek Counts running...".format(datetime.now().strftime('%H:%M:%S')))
-    # submit_ensek_counts()
+    submit_ensek_counts() """
+
     print("{0}: CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_customerdb_job()
-    # wait for 10 minutes before starting the next run
-    sleep(600)
+    # # wait for 10 minutes before starting the next run
+    # sleep(600)
+
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
 
