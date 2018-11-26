@@ -1,1 +1,0 @@
-truncate ref_account_status;

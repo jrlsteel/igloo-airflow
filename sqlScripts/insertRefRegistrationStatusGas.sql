@@ -1,2 +1,0 @@
-insert into ref_registrations_status_gas
-(select account_id, status from aws_s3_ensec_api_extracts.cdb_registrationsgas);
