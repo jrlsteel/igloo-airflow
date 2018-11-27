@@ -203,7 +203,7 @@ def extract_meter_readings_json(data, account_id, meter_point_id, k, _dir_s3):
 
     df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
     # k.key = 'ensek-meterpoints/Readings/' + filename_readings
-    k.key = dir_s3['s3_key']['Readings'] + filename_readings
+    k.key = _dir_s3['s3_key']['Readings'] + filename_readings
     k.set_contents_from_string(df_meter_readings_string)
     # print(df_meter_readings_string)
     # print(filename_readings)
@@ -222,7 +222,7 @@ def extract_meter_readings_billeable_json(data, account_id, meter_point_id, k, _
     filename_readings = 'mp_readings_billeable_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
     df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
     # k.key = 'ensek-meterpoints/ReadingsBilleable/' + filename_readings
-    k.key = dir_s3['s3_key']['ReadingsBilleable'] + filename_readings
+    k.key = _dir_s3['s3_key']['ReadingsBilleable'] + filename_readings
     k.set_contents_from_string(df_meter_readings_string)
     # print(df_meter_readings_string)
     # print(filename_readings)
