@@ -113,7 +113,7 @@ def extract_meter_point_json(data, account_id, k, dir_s3):
         df_attributes['account_id'] = account_id
         # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
         df_attributes_string = df_attributes.to_csv(None, index=False)
-        filename_attributes = 'attributes_' + str(account_id) + '.csv'
+        filename_attributes = 'mp_attributes_' + str(account_id) + '.csv'
         # k.key = 'ensek-meterpoints/Attributes/' + filename_attributes
         k.key = dir_s3['s3_key']['MeterPointsAttributes'] + filename_attributes
         k.set_contents_from_string(df_attributes_string)
@@ -165,7 +165,7 @@ def extract_meter_point_json(data, account_id, k, dir_s3):
         k.set_contents_from_string(df_registersAttributes_string)
         # print(df_registersAttributes_string)
 
-    ''' Prcessing Meters -> attributes data '''
+    ''' Prcessing Meters -> attributes data'''
     df_metersAttributes = json_normalize(data, record_path=['meters', 'attributes'], meta=[['meters', 'meterId'], 'id'],
                                          meta_prefix='meter_point_', record_prefix='metersAttributes_', sep='_')
     if df_metersAttributes.empty:
