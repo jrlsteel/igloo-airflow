@@ -9,22 +9,24 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from conf import config as con
+from conf import directories as dir
 
 
 def get_meter_point_api_info(account_id, api):
+    global env
     env_conf = con.environment_config['environment']
     if env_conf == 'uat':
-        env = con.uat
+        env = dir.uat
     if env_conf == 'prod':
-        env = con.prod
+        env = dir.prod
 
-    env_api = env[api]
+    env_api = env['apis'][api]
     api_url = env_api['api_url'].format(account_id)
 
     if api in ['internal_estimates', 'internal_readings']:
         token = get_auth_code()
     else:
-        token = env['token']
+        token = env['apis']['token']
 
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}
@@ -48,6 +50,7 @@ def get_auth_code():
     response = requests.post(oauth_url, data=data, headers=headers)
     response = response.json()
     return response.get('access_token')
+
 
 def get_api_response(api_url, head):
     """
@@ -92,7 +95,7 @@ def get_accountID_fromDB():
 
     cur = conn.cursor()
 
-    cur.execute(con.test_config['schema_account_ids_sql'])
+    cur.execute(con.test_config['schema_account_ids_sql_rds'])
 
     account_ids = [row[0] for row in cur]
     cur.close()
@@ -132,12 +135,13 @@ def processAccounts(account_id_s):
 
 
 if __name__ == "__main__":
+    account_ids = []
 
     '''Enable this to test for 1 account id'''
     if con.test_config['enable_manual'] == 'Y':
         account_ids = con.test_config['account_ids']
 
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = get_accountID_fromDB()
+    # if con.test_config['enable_db'] == 'Y':
+    account_ids = get_accountID_fromDB()
 
     processAccounts(account_ids)

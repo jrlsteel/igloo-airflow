@@ -3,7 +3,8 @@ import sys
 import boto3
 import pymysql as psql
 import pysftp
-import paramiko
+import boto
+from boto.s3.key import Key
 
 sys.path.append('..')
 from conf import config as con
@@ -80,6 +81,19 @@ def get_glue_connection():
 
     except Exception as e:
         print("Error: " + str(e))
+
+
+def get_boto_S3_Connections(bucket_name):
+    # global k
+    access_key = con.s3_config['access_key']
+    secret_key = con.s3_config['secret_key']
+    # print(access_key)
+    # print(secret_key)
+
+    s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    bucket = s3.get_bucket(bucket_name)
+    k = Key(bucket)
+    return k
 
 
 if __name__ == "__main__":
