@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from conf import config as con
-from conf import directories as dir
+from common import directories as dir
 
 
 def get_meter_point_api_info(account_id, api):

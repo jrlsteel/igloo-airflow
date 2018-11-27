@@ -6,7 +6,7 @@ from connections import connect_db as db
 sys.path.append('..')
 
 from conf import config as con
-from conf import directories as dirs3
+from common import directories as dirs3
 
 
 def get_environment():
