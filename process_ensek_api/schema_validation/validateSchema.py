@@ -13,6 +13,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from conf import config as con
+from common import directories as dir
 
 
 def get_api_info(account_id, api):
@@ -20,17 +21,17 @@ def get_api_info(account_id, api):
     global env
     env_conf = con.environment_config['environment']
     if env_conf == 'uat':
-        env = con.uat
+        env = dir.uat
     if env_conf == 'prod':
-        env = con.prod
+        env = dir.prod
 
-    env_api = env[api]
+    env_api = env['apis'][api]
     api_url = env_api['api_url'].format(account_id)
 
     if api in ['internal_estimates', 'internal_readings']:
         token = get_auth_code()
     else:
-        token = env['token']
+        token = env['apis']['token']
 
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}

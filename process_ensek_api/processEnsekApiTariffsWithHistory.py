@@ -2,48 +2,28 @@ import requests
 import json
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
-import boto
-from boto.s3.key import Key
 import time
 from requests import ConnectionError
 import csv
 import multiprocessing
 from multiprocessing import freeze_support
-from process_ensek_api import get_account_ids as g
-
 
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append('..')
 
+from common import utils as util
 from conf import config as con
+from connections.connect_db import get_boto_S3_Connections as s3_con
 
 
 max_calls = con.api_config['max_api_calls']
 rate = con.api_config['allowed_period_in_secs']
 
-
-# k = Key()
-
-
-# get account status api info
-def get_tariff_history_api_info(account_id):
-    # UAT
-    # api_url = 'https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory'.format(account_id)
-    # token = 'QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=='
-
-    # prod
-    # UAT
-    api_url = 'https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory'.format(account_id)
-    token = 'Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=='
-    head = {'Content-Type': 'application/json',
-            'Authorization': 'Bearer {0}'.format(token)}
-    return api_url, token, head
-
 @sleep_and_retry
 @limits(calls=max_calls, period=rate)
-def get_api_response(api_url, token, head):
+def get_api_response(api_url, head):
     '''
          get the response for the respective url that is passed as part of this function
     '''
@@ -78,7 +58,7 @@ def get_api_response(api_url, token, head):
 ''' Extracting direct debit data'''
 
 
-def extract_tariff_history_json(data, account_id, k):
+def extract_tariff_history_json(data, account_id, k, dir_s3):
     # global k,
     meta_tariff_history = ['tariffName', 'startDate', 'endDate', 'discounts', 'tariffType', 'exitFees', 'account_id']
 
@@ -88,7 +68,8 @@ def extract_tariff_history_json(data, account_id, k):
 
     filename_tariff_history = 'df_tariff_history_' + str(account_id) + '.csv'
     df_tariff_history_string = df_tariff_history1.to_csv(None, index=False)
-    k.key = 'ensek-meterpoints/TariffHistory/' + filename_tariff_history
+    # k.key = 'ensek-meterpoints/TariffHistory/' + filename_tariff_history
+    k.key = dir_s3['s3_key']['TariffHistory'] + filename_tariff_history
     k.set_contents_from_string(df_tariff_history_string)
 
     # Elec
@@ -101,7 +82,8 @@ def extract_tariff_history_json(data, account_id, k):
             df_elec_unit_rates['account_id'] = account_id
             filename_elec_unit_rates = 'th_elec_unitrates_' + str(account_id) + '.csv'
             df_elec_unit_rates_string = df_elec_unit_rates.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryElecUnitRates/' + filename_elec_unit_rates
+            # k.key = 'ensek-meterpoints/TariffHistoryElecUnitRates/' + filename_elec_unit_rates
+            k.key = dir_s3['s3_key']['TariffHistoryElecUnitRates'] + filename_elec_unit_rates
             k.set_contents_from_string(df_elec_unit_rates_string)
             # print(df_elec_unit_rates_string)
 
@@ -114,7 +96,8 @@ def extract_tariff_history_json(data, account_id, k):
 
             filename_elec_standing_charge = 'th_elec_standingcharge_' + str(account_id) + '.csv'
             df_elec_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryElecStandCharge/' + filename_elec_standing_charge
+            # k.key = 'ensek-meterpoints/TariffHistoryElecStandCharge/' + filename_elec_standing_charge
+            k.key = dir_s3['s3_key']['TariffHistoryElecStandCharge'] + filename_elec_standing_charge
             k.set_contents_from_string(df_elec_standing_charge_string)
             # print(df_elec_standing_charge_string)
 
@@ -129,7 +112,8 @@ def extract_tariff_history_json(data, account_id, k):
 
             filename_gas_unit_rates = 'th_gas_unitrates_' + str(account_id) + '.csv'
             df_gas_unit_rates_string = df_gas_unit_rates.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryGasUnitRates/' + filename_gas_unit_rates
+            # k.key = 'ensek-meterpoints/TariffHistoryGasUnitRates/' + filename_gas_unit_rates
+            k.key = dir_s3['s3_key']['TariffHistoryGasUnitRates'] + filename_gas_unit_rates
             k.set_contents_from_string(df_gas_unit_rates_string)
             # print(df_gas_unit_rates_string)
 
@@ -142,25 +126,10 @@ def extract_tariff_history_json(data, account_id, k):
 
             filename_gas_standing_charge = 'th_gas_standingcharge_' + str(account_id) + '.csv'
             df_gas_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
-            k.key = 'ensek-meterpoints/TariffHistoryGasStandCharge/' + filename_gas_standing_charge
+            # k.key = 'ensek-meterpoints/TariffHistoryGasStandCharge/' + filename_gas_standing_charge
+            k.key = dir_s3['s3_key']['TariffHistoryGasStandCharge'] + filename_gas_standing_charge
             k.set_contents_from_string(df_gas_standing_charge_string)
             # print(df_gas_standing_charge_string)
-
-'''Get S3 connection'''
-
-
-
-def get_S3_Connections():
-    # global k
-    access_key = con.s3_config['access_key']
-    secret_key = con.s3_config['secret_key']
-    # print(access_key)
-    # print(secret_key)
-
-    s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    bucket = s3.get_bucket('igloo-uat-bucket')
-    k = Key(bucket)
-    return k
 
 
 '''Read Users from S3'''
@@ -196,19 +165,20 @@ def log_error(error_msg, error_code=''):
         employee_writer.writerow([error_msg, error_code])
 
 
-def processAccounts(account_ids, k):
+def processAccounts(account_ids, k, dir_s3):
+    api_url, head = util.get_ensek_api_info1('tariff_history')
     for account_id in account_ids:
         t = con.api_config['total_no_of_calls']
         # Get Account Staus
         print('ac: ' + str(account_id))
         msg_ac = 'ac:' + str(account_id)
         log_error(msg_ac, '')
-        api_url, token, head = get_tariff_history_api_info(account_id)
-        th_response = get_api_response(api_url, token, head)
+        api_url1 = api_url.format(account_id)
+        th_response = get_api_response(api_url1, head)
         if th_response:
             formatted_tariff_history = format_json_response(th_response)
             # print(json.dumps(formatted_tariff_history))
-            extract_tariff_history_json(formatted_tariff_history, account_id, k)
+            extract_tariff_history_json(formatted_tariff_history, account_id, k, dir_s3)
         else:
             print('ac:' + str(account_id) + ' has no data')
             msg_ac = 'ac:' + str(account_id) + ' has no data'
@@ -218,7 +188,10 @@ def processAccounts(account_ids, k):
 if __name__ == "__main__":
     freeze_support()
 
-    k = get_S3_Connections()
+    dir_s3 = util.get_environment()
+    bucket_name = dir_s3['s3_bucket']
+
+    k = s3_con(bucket_name)
 
     '''Enable this to test for 1 account id'''
     if con.test_config['enable_manual'] == 'Y':
@@ -228,10 +201,10 @@ if __name__ == "__main__":
         account_ids = get_Users(k)
 
     if con.test_config['enable_db'] == 'Y':
-        account_ids = g.get_accountID_fromDB(False)
+        account_ids = util.get_accountID_fromDB(False)
 
     if con.test_config['enable_db_max'] == 'Y':
-        account_ids = g.get_accountID_fromDB(True)
+        account_ids = util.get_accountID_fromDB(True)
 
     # threads = 5
     # chunksize = 100
@@ -244,19 +217,19 @@ if __name__ == "__main__":
     p = int(len(account_ids) / 12)
 
     # print(account_ids)
-
-    p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k))
-    p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k))
-    p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k))
-    p4 = multiprocessing.Process(target=processAccounts, args=(account_ids[3 * p:4 * p], k))
-    p5 = multiprocessing.Process(target=processAccounts, args=(account_ids[4 * p:5 * p], k))
-    p6 = multiprocessing.Process(target=processAccounts, args=(account_ids[5 * p:6 * p], k))
-    p7 = multiprocessing.Process(target=processAccounts, args=(account_ids[6 * p:7 * p], k))
-    p8 = multiprocessing.Process(target=processAccounts, args=(account_ids[7 * p:8 * p], k))
-    p9 = multiprocessing.Process(target=processAccounts, args=(account_ids[8 * p:9 * p], k))
-    p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k))
-    p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k))
-    p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k))
+    ######### Multiprocessing starts  ##########
+    p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k, dir_s3))
+    p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k, dir_s3))
+    p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k, dir_s3))
+    p4 = multiprocessing.Process(target=processAccounts, args=(account_ids[3 * p:4 * p], k, dir_s3))
+    p5 = multiprocessing.Process(target=processAccounts, args=(account_ids[4 * p:5 * p], k, dir_s3))
+    p6 = multiprocessing.Process(target=processAccounts, args=(account_ids[5 * p:6 * p], k, dir_s3))
+    p7 = multiprocessing.Process(target=processAccounts, args=(account_ids[6 * p:7 * p], k, dir_s3))
+    p8 = multiprocessing.Process(target=processAccounts, args=(account_ids[7 * p:8 * p], k, dir_s3))
+    p9 = multiprocessing.Process(target=processAccounts, args=(account_ids[8 * p:9 * p], k, dir_s3))
+    p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k, dir_s3))
+    p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k, dir_s3))
+    p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k, dir_s3))
 
     p1.start()
     p2.start()
@@ -283,4 +256,5 @@ if __name__ == "__main__":
     p10.join()
     p11.join()
     p12.join()
+    ####### Multiprocessing Ends ########
 
