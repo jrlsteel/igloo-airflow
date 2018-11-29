@@ -42,6 +42,9 @@ uat = {
                             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory",
                         },
 
+                        "account_messages": {
+                            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Messages",
+                        },
                         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=="
     },
 
@@ -102,6 +105,7 @@ uat = {
             "TariffHistoryElecUnitRates": "ensek-meterpoints/TariffHistoryElecUnitRates/",
             "TariffHistoryGasStandCharge": "ensek-meterpoints/TariffHistoryGasStandCharge/",
             "TariffHistoryGasUnitRates": "ensek-meterpoints/TariffHistoryGasUnitRates/",
+            "AccountMessages": "ensek-meterpoints/AccountMessages/",
             "DirectDebit": "ensek-meterpoints/DirectDebit/",
             "ReadingsBilleable": "ensek-meterpoints/ReadingsBilleable/"
     }
@@ -147,6 +151,10 @@ prod = {
 
                         "tariff_history": {
                             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory",
+                        },
+
+                        "account_messages": {
+                            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Messages",
                         },
 
                         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=="
