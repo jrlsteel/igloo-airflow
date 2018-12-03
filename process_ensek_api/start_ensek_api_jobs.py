@@ -1,24 +1,21 @@
 import sys
-import os
-from time import sleep
 from datetime import datetime
 
 sys.path.append('..')
 
 from process_ensek_api.schema_validation import validateSchema as vs
 from process_ensek_api import processAllEnsekScripts as ae
-from process_ensek_api import processEnsekApiCounts as ec
+# from process_ensek_api import processEnsekApiCounts as ec
 from common import process_glue_job as glue
 
-from conf import config as conf
-from common import directories as dir
+from common import utils as util
 
 
 class StartEnsekJobs:
 
-    def __init__(self, env, dir):
-        self.env = env
-        self.dir = dir
+    def __init__(self):
+        self.env = util.get_env()
+        self.dir = util.get_dir()
 
     def submit_schema_validations(self):
         try:
@@ -48,13 +45,13 @@ class StartEnsekJobs:
             print("Error in Ensek Scripts :- " + str(e))
             sys.exit(1)
 
-    def submit_staging_job(self):
+    def submit_ensek_staging_Gluejob(self):
         try:
-            jobname = self.dir['glue_staging_job_name']
+            jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_stage = glue.ProcessGlueJob(job_name=jobname, input_files='ensek_files', s3_bucket=s3_bucket, environment=environment)
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='ensek')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -67,13 +64,13 @@ class StartEnsekJobs:
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
-    def submit_customerDB_job(self):
+    def submit_customerDB_Gluejob(self):
         try:
             jobname = self.dir['glue_customerDB_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_customerDB = glue.ProcessGlueJob(job_name=jobname, input_files='', s3_bucket=s3_bucket, environment=environment)
+            obj_customerDB = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='')
             job_response = obj_customerDB.run_glue_job()
             if job_response:
                 print("{0}: CustomerDB Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -86,19 +83,19 @@ class StartEnsekJobs:
             print("Error in Customer DB Job :- " + str(e))
             sys.exit(1)
 
-    def submit_Ensek_job(self):
+    def submit_Ensek_Gluejob(self):
         try:
             jobname = self.dir['glue_ensek_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_customerDB = glue.ProcessGlueJob(job_name=jobname, input_files='', s3_bucket=s3_bucket, environment=environment)
-            job_response = obj_customerDB.run_glue_job()
+            obj_ensek = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='ensek')
+            job_response = obj_ensek.run_glue_job()
             if job_response:
-                print("{0}: CustomerDB Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: Ensek Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
-                print("Error occurred in CustomerDB Glue Job")
+                print("Error occurred in Ensek Glue Job")
                 # return staging_job_response
                 raise Exception
         except Exception as e:
@@ -122,15 +119,7 @@ class StartEnsekJobs:
 
 if __name__ == '__main__':
 
-    env = conf.environment_config['environment']
-
-    _dir = None
-    if env == "uat":
-        _dir = dir.uat
-    if env == 'prod':
-        _dir = dir.prod
-
-    s = StartEnsekJobs(env, _dir)
+    s = StartEnsekJobs()
 
     # run schema validation job
     print("{0}: Schema validation running...".format(datetime.now().strftime('%H:%M:%S')))
@@ -142,19 +131,17 @@ if __name__ == '__main__':
 
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_staging_job()
+    s.submit_ensek_staging_Gluejob()
 
     """disabled for now as we cannot ssh access to igloo-dwh from EC2
     # print("Ensek Counts running...".format(datetime.now().strftime('%H:%M:%S')))
     submit_ensek_counts() """
 
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_customerDB_job()
+    s.submit_customerDB_Gluejob()
 
     print("{0}: Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_Ensek_job()
-    # # wait for 10 minutes before starting the next run
-    # sleep(600)
+    s.submit_Ensek_Gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 

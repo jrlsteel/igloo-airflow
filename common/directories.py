@@ -180,7 +180,17 @@ prod = {
         "ReadingsBilleable": "stage1/ReadingsBilleable/"
     },
 
-    "glue_ensek_job_name": "_process_ref_ensek_prod",
+    "s3_d18_key": {
+        "D18Raw": "stage1/D18/D18Raw/",
+        "D18BPP": "stage1/D18/D18BPP/",
+        "D18PPC": "stage1/D18/D18PPC/",
+        "D18_SFTP": "D18",
+        "D18Archive": "stage1/D18/D18Archive/",
+        "D18Suffix": ".flw"
+    },
+
+    "glue_ensek_job_name": "_process_ref_table_prod",
+    "glue_d18_job_name": "_process_ref_table_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod"
 

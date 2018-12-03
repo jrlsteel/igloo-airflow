@@ -8,15 +8,16 @@ from connections import connect_db as db
 
 class ProcessGlueJob:
     """
-    This is a common routine to run a single glue job/triggers which will accept the below parameters.
-    :param glue_job_name: Name of the glue job.
+    This is a common routine to run a single glue job/trigger which will accept the below parameters.
+    This program will not EXIT until the job finishes. Checks and Returns the status for every 180 seconds(3 minutes).
+    :param job_name: Name of the glue job.
     :param input_files: Optional parameter should be specified if called for "staging job"
     :param trigger_name: Name of the trigger to be submitted
 
     """
-    def __init__(self, job_name='', input_files='', s3_bucket='', environment='', trigger_name=''):
+    def __init__(self, job_name='', s3_bucket='', environment='', trigger_name='', processJob=''):
         self.job_name = job_name
-        self.input_files = input_files
+        self.process_job = processJob
         self.trigger_name = trigger_name
         self.s3_bucket = s3_bucket
         self.environment = environment
@@ -46,7 +47,7 @@ class ProcessGlueJob:
             # Start the job if it is not already  running state ie.
             # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
             if current_job_status.upper() not in ['STARTING', 'RUNNING', 'STOPPING']:
-                response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--input_files': self.input_files,
+                response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--process_job': self.process_job,
                                                                                             '--s3_bucket': self.s3_bucket,
                                                                                             '--environment': self.environment})
                 job_run_id = response['JobRunId']

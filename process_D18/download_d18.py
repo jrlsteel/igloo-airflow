@@ -7,14 +7,15 @@ import timeit
 sys.path.append('..')
 
 from connections import connect_db as db
-
+from common import utils as util
 
 class GetD18Files:
 
     def __init__(self):
-        self.bucket_name = 'igloo-uat-bucket'
-        self.upload_key = 'ensek-meterpoints/D18/D18Raw/'
-        self.sftp_d18_dir = 'D18'
+        self.dir = util.get_dir()
+        self.bucket_name = self.dir['s3_bucket']
+        self.upload_key = self.dir['s3_d18_key']['D18Raw']
+        self.sftp_d18_dir = self.dir['s3_d18_key']['D18_SFTP']
 
     def sftp_to_Ensek(self, d18_files, s3):
         """
@@ -59,7 +60,6 @@ class GetD18Files:
 
     def get_all_d18_files(self):
         """
-
         :return: All the files from Ensek D18 folder through SFTP
         """
 

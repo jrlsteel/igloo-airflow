@@ -8,18 +8,19 @@ import timeit
 sys.path.append('..')
 
 from connections import connect_db as db
+from common import utils as util
 
 
 class ProcessD18:
 
     def __init__(self):
-
-        self.bucket_name = 'igloo-uat-bucket'
-        self.prefix = 'ensek-meterpoints/D18/D18Raw/'
-        self.suffix = '.flw'
-        self.d018_archive_key = 'ensek-meterpoints/D18/D18Archive/'
-        self.upload_key_BPP = 'ensek-meterpoints/D18/D18BPP/'
-        self.upload_key_PPC = 'ensek-meterpoints/D18/D18PPC/'
+        self.dir = util.get_dir()
+        self.bucket_name = self.dir['s3_bucket']
+        self.prefix = self.dir['s3_d18_key']['D18Raw']
+        self.suffix = self.dir['s3_d18_key']['D18Suffix']
+        self.d018_archive_key = self.dir['s3_d18_key']['D18Archive']
+        self.upload_key_BPP = self.dir['s3_d18_key']['D18BPP']
+        self.upload_key_PPC = self.dir['s3_d18_key']['D18PPC']
 
     def process_d18_data(self, d18_keys):
 
@@ -43,10 +44,10 @@ class ProcessD18:
 
                 obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
                 # get the filename from the key
-                filename = d18key.replace('ensek-meterpoints/D18/D18Raw/', '')
+                filename = d18key.replace(self.prefix, '')
 
-                fileBPP_csv = filename.replace('.flw', '_BPP.csv')
-                filePPC_csv = filename.replace('.flw', '_PPC.csv')
+                fileBPP_csv = filename.replace(self.suffix, '_BPP.csv')
+                filePPC_csv = filename.replace(self.suffix, '_PPC.csv')
 
                 # initializing variables
                 prev_line_PPC = prev_line_BPP = line_ZPD = line_GSP = line_PCL = line_PFL = line_BPP = line_PPC = line_SSC = line_VMR = ''
@@ -131,7 +132,7 @@ if __name__ == "__main__":
     p = ProcessD18()
     d18_keys_s3 = p.get_keys_from_s3(s3)
 
-    # p.process_d18_data(d18_keys_s3, s3) ##### Enable this to test without multiprocessing
+    # p.process_d18_data(d18_keys_s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
     n = 5  # number of process to run in parallel
     print(len(d18_keys_s3))

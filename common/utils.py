@@ -1,5 +1,5 @@
 import requests
-
+import platform
 import sys
 from connections import connect_db as db
 
@@ -9,15 +9,33 @@ from conf import config as con
 from common import directories as dirs3
 
 
-def get_environment():
-
+def get_env():
     env_conf = con.environment_config['environment']
-    if env_conf == 'uat':
-        env = dirs3.uat
-    if env_conf == 'prod':
-        env = dirs3.prod
+    return env_conf
 
-    return env
+
+def get_dir():
+
+    dir = ''
+    env_conf = get_env()
+    if env_conf == 'uat':
+        dir = dirs3.uat
+    if env_conf == 'prod':
+        dir = dirs3.prod
+
+    return dir
+
+
+def get_Users_from_s3(k):
+    # global k
+    filename_Users = 'users.csv'
+    k.key = 'ensek-meterpoints/Users/' + filename_Users
+    k.open()
+    l = k.read()
+    s = l.decode('utf-8')
+    p = s.splitlines()
+    # print(len(p))
+    return p
 
 
 def get_accountID_fromDB(get_max):
@@ -39,8 +57,7 @@ def get_accountID_fromDB(get_max):
 
 def get_ensek_api_info(api, account_id):
 
-    env = get_environment()
-
+    env = get_dir()
     env_api = env['apis'][api]
     api_url = env_api['api_url'].format(account_id)
 
@@ -56,19 +73,20 @@ def get_ensek_api_info(api, account_id):
 
 def get_ensek_api_info1(api):
 
-    env = get_environment()
+    dir = get_dir()
 
-    env_api = env['apis'][api]
+    env_api = dir['apis'][api]
     api_url = env_api['api_url']
 
     if api in ['internal_estimates', 'internal_readings']:
         token = get_auth_code()
     else:
-        token = env['apis']['token']
+        token = dir['apis']['token']
 
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}
     return api_url, head
+
 
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
@@ -87,3 +105,11 @@ def get_auth_code():
     response = response.json()
     return response.get('access_token')
 
+
+def get_pythonAlias():
+    if platform.system() == 'Windows':
+        pythonAlias = 'python'
+    else:
+        pythonAlias = 'python3'
+
+    return pythonAlias

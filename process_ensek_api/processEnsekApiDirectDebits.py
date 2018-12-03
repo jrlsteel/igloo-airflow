@@ -1,9 +1,10 @@
+import timeit
+
 import requests
 import json
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import time
-import datetime
 from requests import ConnectionError
 import csv
 import multiprocessing
@@ -18,186 +19,151 @@ from conf import config as con
 from common import utils as util
 from connections.connect_db import get_boto_S3_Connections as s3_con
 
-max_calls = con.api_config['max_api_calls']
-rate = con.api_config['allowed_period_in_secs']
+
+class DirectDebit:
+
+    max_calls = con.api_config['max_api_calls']
+    rate = con.api_config['allowed_period_in_secs']
+
+    def __init__(self):
+        pass
 
 
-@sleep_and_retry
-@limits(calls=max_calls, period=rate)
-def get_api_response(api_url, head):
-    '''
-         get the response for the respective url that is passed as part of this function
-    '''
-    start_time = time.time()
-    timeout = con.api_config['connection_timeout']
-    retry_in_secs = con.api_config['retry_in_secs']
-    i = 0
-    while True:
-        try:
-            response = requests.get(api_url, headers=head)
-            if response.status_code == 200:
-                return json.loads(response.content.decode('utf-8'))
+    @sleep_and_retry
+    @limits(calls=max_calls, period=rate)
+    def get_api_response(self, api_url, head):
+        '''
+             get the response for the respective url that is passed as part of this function
+        '''
+        start_time = time.time()
+        timeout = con.api_config['connection_timeout']
+        retry_in_secs = con.api_config['retry_in_secs']
+        i = 0
+        while True:
+            try:
+                response = requests.get(api_url, headers=head)
+                if response.status_code == 200:
+                    return json.loads(response.content.decode('utf-8'))
+                else:
+                    print ('Problem Grabbing Data: ', response.status_code)
+                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    break
+
+            except ConnectionError:
+                if time.time() > start_time + timeout:
+                    print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+
+                    break
+                else:
+                    print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+
+                    time.sleep(retry_in_secs)
+            i = i + retry_in_secs
+
+    def extract_direct_debit_json(self, data, account_id, k, dir_s3_key):
+        # global k
+
+        df_direct_debit = json_normalize(data)
+        df_direct_debit['account_id'] = account_id
+        # print(df_direct_debit.to_string)
+        filename_direct_debit = 'direct_debit' + str(account_id) + '.csv'
+        df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
+        # k.key = 'ensek-meterpoints/DirectDebit/' + filename_direct_debit
+        k.key = dir_s3_key['s3_key']['DirectDebit'] + filename_direct_debit
+        k.set_contents_from_string(df_direct_debit_string)
+
+    def format_json_response(self, data):
+        data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_json = json.loads(data_str)
+        return data_json
+
+    def log_error(self, error_msg, error_code=''):
+        logs_dir_path = sys.path[0] + '/logs/'
+        if not os.path.exists(logs_dir_path):
+            os.makedirs(logs_dir_path)
+        with open(logs_dir_path + 'direct_debit_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
+            employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            employee_writer.writerow([error_msg, error_code])
+
+    def processAccounts(self, account_ids, k, dir_s3):
+        api_url, head = util.get_ensek_api_info1('direct_debits')
+        for account_id in account_ids:
+            t = con.api_config['total_no_of_calls']
+            # Get Account Staus
+            print('ac: ' + str(account_id))
+            msg_ac = 'ac:' + str(account_id)
+            self.log_error(msg_ac, '')
+            api_url1 = api_url.format(account_id)
+            dd_response = self.get_api_response(api_url1, head)
+            if dd_response:
+                formatted_dd = self.format_json_response(dd_response)
+                # print(json.dumps(formatted_dd))
+                self.extract_direct_debit_json(formatted_dd, account_id, k, dir_s3)
             else:
-                print ('Problem Grabbing Data: ', response.status_code)
-                log_error('Response Error: Problem grabbing data', response.status_code)
-                break
-
-        except ConnectionError:
-            if time.time() > start_time + timeout:
-                print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-
-                break
-            else:
-                print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-
-                time.sleep(retry_in_secs)
-        i = i + retry_in_secs
-
-
-''' Extracting direct debit data'''
-
-
-def extract_direct_debit_json(data, account_id, k, dir_s3_key):
-    # global k
-
-    df_direct_debit = json_normalize(data)
-    df_direct_debit['account_id'] = account_id
-    # print(df_direct_debit.to_string)
-    filename_direct_debit = 'direct_debit' + str(account_id) + '.csv'
-    df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
-    # k.key = 'ensek-meterpoints/DirectDebit/' + filename_direct_debit
-    k.key = dir_s3_key['s3_key']['DirectDebit'] + filename_direct_debit
-    k.set_contents_from_string(df_direct_debit_string)
-
-
-'''Read Users from S3'''
-
-
-def get_Users(k):
-    # global k
-    filename_Users = 'users.csv'
-    k.key = 'ensek-meterpoints/Users/' + filename_Users
-    k.open()
-    l = k.read()
-    s = l.decode('utf-8')
-    p = s.splitlines()
-    # print(len(p))
-    return p
-
-
-'''Format Json to handle null values'''
-
-
-def format_json_response(data):
-    data_str = json.dumps(data, indent=4).replace('null', '""')
-    data_json = json.loads(data_str)
-    return data_json
-
-
-def log_error(error_msg, error_code=''):
-    logs_dir_path = sys.path[0] + '/logs/'
-    if not os.path.exists(logs_dir_path):
-        os.makedirs(logs_dir_path)
-    with open(logs_dir_path + 'direct_debit_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
-        employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        employee_writer.writerow([error_msg, error_code])
-
-
-def processAccounts(account_ids, k, dir_s3):
-    api_url, head = util.get_ensek_api_info1('direct_debits')
-    for account_id in account_ids:
-        t = con.api_config['total_no_of_calls']
-        # Get Account Staus
-        print('ac: ' + str(account_id))
-        msg_ac = 'ac:' + str(account_id)
-        log_error(msg_ac, '')
-        api_url1 = api_url.format(account_id)
-        dd_response = get_api_response(api_url1, head)
-        if dd_response:
-            formatted_dd = format_json_response(dd_response)
-            # print(json.dumps(formatted_dd))
-            extract_direct_debit_json(formatted_dd, account_id, k, dir_s3)
-        else:
-            print('ac:' + str(account_id) + ' has no data')
-            msg_ac = 'ac:' + str(account_id) + ' has no data'
-            log_error(msg_ac, '')
+                print('ac:' + str(account_id) + ' has no data')
+                msg_ac = 'ac:' + str(account_id) + ' has no data'
+                self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":
     freeze_support()
 
-    dir_s3 = util.get_environment()
+    dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
 
-    k = s3_con(bucket_name)
+    s3 = s3_con(bucket_name)
 
+    account_ids = []
     '''Enable this to test for 1 account id'''
     if con.test_config['enable_manual'] == 'Y':
         account_ids = con.test_config['account_ids']
 
     if con.test_config['enable_file'] == 'Y':
-        account_ids = get_Users(k)
+        account_ids = util.get_Users_from_s3(s3)
 
     if con.test_config['enable_db'] == 'Y':
         account_ids = util.get_accountID_fromDB(False)
-
+    #
     if con.test_config['enable_db_max'] == 'Y':
         account_ids = util.get_accountID_fromDB(True)
 
+    # Enable to test without multiprocessing.
+    # p = DirectDebit()
+    # p.processAccounts(account_ids, s3, dir_s3)
 
-    # threads = 5
-    # chunksize = 100
-
-    # with Pool(threads) as pool:
-    #     pool.starmap(processAccounts, zip(account_ids), chunksize)
+    ###### Multiprocessing Starts #########
+    n = 5  # number of process to run in parallel
+    k = int(len(account_ids) / n)  # get equal no of files for each process
 
     print(len(account_ids))
-    print(int(len(account_ids) / 12))
-    p = int(len(account_ids) / 12)
+    print(k)
 
-    # print(account_ids)
-    # processAccounts(account_ids, k, dir_s3)
-    ######### Multiprocessing starts  ##########
-    p1 = multiprocessing.Process(target=processAccounts, args=(account_ids[0:p], k, dir_s3))
-    p2 = multiprocessing.Process(target=processAccounts, args=(account_ids[p:2 * p], k, dir_s3))
-    p3 = multiprocessing.Process(target=processAccounts, args=(account_ids[2 * p:3 * p], k, dir_s3))
-    p4 = multiprocessing.Process(target=processAccounts, args=(account_ids[3 * p:4 * p], k, dir_s3))
-    p5 = multiprocessing.Process(target=processAccounts, args=(account_ids[4 * p:5 * p], k, dir_s3))
-    p6 = multiprocessing.Process(target=processAccounts, args=(account_ids[5 * p:6 * p], k, dir_s3))
-    p7 = multiprocessing.Process(target=processAccounts, args=(account_ids[6 * p:7 * p], k, dir_s3))
-    p8 = multiprocessing.Process(target=processAccounts, args=(account_ids[7 * p:8 * p], k, dir_s3))
-    p9 = multiprocessing.Process(target=processAccounts, args=(account_ids[8 * p:9 * p], k, dir_s3))
-    p10 = multiprocessing.Process(target=processAccounts, args=(account_ids[9 * p:10 * p], k, dir_s3))
-    p11 = multiprocessing.Process(target=processAccounts, args=(account_ids[10 * p:11 * p], k, dir_s3))
-    p12 = multiprocessing.Process(target=processAccounts, args=(account_ids[11 * p:], k, dir_s3))
-    end_time = datetime.datetime.now()
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
 
-    p1.start()
-    p2.start()
-    p3.start()
-    p4.start()
-    p5.start()
-    p6.start()
-    p7.start()
-    p8.start()
-    p9.start()
-    p10.start()
-    p11.start()
-    p12.start()
+    for i in range(n + 1):
+        p1 = DirectDebit()
+        print(i)
+        uv = i * k
+        if i == n:
+            # print(d18_keys_s3[l:])
+            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+        else:
+            # print(d18_keys_s3[l:u])
+            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+        lv = uv
 
-    p1.join()
-    p2.join()
-    p3.join()
-    p4.join()
-    p5.join()
-    p6.join()
-    p7.join()
-    p8.join()
-    p9.join()
-    p10.join()
-    p11.join()
-    p12.join()
-    ####### Multiprocessing Ends ########
+        processes.append(t)
 
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### Multiprocessing Ends #########
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
