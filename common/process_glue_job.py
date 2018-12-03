@@ -14,10 +14,12 @@ class ProcessGlueJob:
     :param trigger_name: Name of the trigger to be submitted
 
     """
-    def __init__(self, job_name='', input_files='', trigger_name =''):
+    def __init__(self, job_name='', input_files='', s3_bucket='', environment='', trigger_name=''):
         self.job_name = job_name
         self.input_files = input_files
         self.trigger_name = trigger_name
+        self.s3_bucket = s3_bucket
+        self.environment = environment
         self.glue_client = db.get_glue_connection()  # connect to aws glue
 
     def get_job_status(self, glue, job_run_id):
@@ -44,7 +46,9 @@ class ProcessGlueJob:
             # Start the job if it is not already  running state ie.
             # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
             if current_job_status.upper() not in ['STARTING', 'RUNNING', 'STOPPING']:
-                response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--input_files': self.input_files})
+                response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--input_files': self.input_files,
+                                                                                            '--s3_bucket': self.s3_bucket,
+                                                                                            '--environment': self.environment})
                 job_run_id = response['JobRunId']
                 print("{0} job started... Job Id: {1}".format(self.job_name, job_run_id))
             else:

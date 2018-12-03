@@ -171,7 +171,7 @@ def processAccounts(account_ids,k, dir_s3):
 
         if account_elec_response:
             formated_elec = account_elec_response
-            extract_reg_elec_json(formated_elec,account_id,k, dir_s3)
+            extract_reg_elec_json(formated_elec,account_id, k, dir_s3)
         else:
             print('ac:' + str(account_id) + ' has no data for Elec status')
             msg_ac = 'ac:' + str(account_id) + ' has no data for Elec status'

@@ -11,7 +11,6 @@ from common import directories as dirs3
 
 def get_environment():
 
-    env = ''
     env_conf = con.environment_config['environment']
     if env_conf == 'uat':
         env = dirs3.uat
