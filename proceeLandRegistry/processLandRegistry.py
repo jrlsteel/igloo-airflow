@@ -18,7 +18,7 @@ SEARCH_URL = "http://landregistry.data.gov.uk/data/ppi/transaction-record"  # &p
 
 def get_addresses(table_name, schema):
     # sql to count
-    sql = '''SELECT id, sub_building_name_number, building_name_number, dependent_thoroughfare, thoroughfare, double_dependent_locality, dependent_locality, post_town, county, postcode, uprn, created_at, updated_at FROM ref_cdb_addresses limit 10''' #+ schema + table_name
+    sql = '''SELECT id, sub_building_name_number, building_name_number, dependent_thoroughfare, thoroughfare, double_dependent_locality, dependent_locality, post_town, county, postcode, uprn, created_at, updated_at FROM ref_cdb_addresses''' #+ schema + table_name
     addresses_df = pr.redshift_to_pandas(sql)
     #print(addresses_df)
     return addresses_df
