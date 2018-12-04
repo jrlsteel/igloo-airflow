@@ -189,8 +189,8 @@ prod = {
         "D18Suffix": ".flw"
     },
 
-    "glue_ensek_job_name": "_process_ref_table_prod",
-    "glue_d18_job_name": "_process_ref_table_prod",
+    "glue_ensek_job_name": "_process_ref_tables_prod",
+    "glue_d18_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod"
 
