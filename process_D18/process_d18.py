@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     # p.process_d18_data(d18_keys_s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
-    n = 5  # number of process to run in parallel
+    n = 12  # number of process to run in parallel
     print(len(d18_keys_s3))
     k = int(len(d18_keys_s3) / n)  # get equal no of files for each process
     print(k)

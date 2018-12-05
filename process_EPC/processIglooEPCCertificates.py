@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    postcode_sector_sql = con.test_config['epc_postcode_sql']
+    postcode_sector_sql = con.test_config['epc_certificates_postcode_sql']
     postcode_sectors = p.get_epc_postcode(postcode_sector_sql)
 
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     start = timeit.default_timer()
 
     for i in range(n + 1):
-        p1 = IglooEPC()
+        p1 = IglooEPCCertificates()
         print(i)
         uv = i * k
         if i == n:

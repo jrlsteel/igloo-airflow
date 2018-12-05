@@ -142,6 +142,10 @@ prod = {
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
         "igloo_epc_certificates": {
+            "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
+            "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
+        },
+        "igloo_epc_recommendations": {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/search?postcode={0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
