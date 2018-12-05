@@ -101,7 +101,7 @@ class IglooEPCCertificates:
 
     def processAccounts(self, postcode_sectors, k, _dir_s3):
 
-        api_url, head = util. get_epc_api_info('igloo_epc_certificates')
+        api_url, head = util.get_epc_api_info('igloo_epc_certificates')
         for postcode_sector in postcode_sectors:
             t = con.api_config['total_no_of_calls']
             print('postcode:' + str(postcode_sector))

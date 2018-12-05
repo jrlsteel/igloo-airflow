@@ -102,13 +102,14 @@ class IglooEPCRecommendations:
 
     def processAccounts(self, lmkkey_sectors, k, _dir_s3):
 
-        api_url, head = util. get_epc_api_info('igloo_epc_recommendations')
+        api_url, head = util.get_epc_api_info('igloo_epc_recommendations')
         for lmkkey_sector in lmkkey_sectors:
             t = con.api_config['total_no_of_calls']
-            print('postcode:' + str(lmkkey_sector))
+            print('lmkkey:' + str(lmkkey_sector))
             msg_ac = 'ac:' + str(lmkkey_sector)
             self.log_error(msg_ac, '')
             api_url1 = api_url.format(lmkkey_sector)
+            print(api_url1)
             epc_data_response = self.get_api_response(api_url1, head)
 
             if epc_data_response:
