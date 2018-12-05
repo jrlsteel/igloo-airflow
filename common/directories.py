@@ -44,42 +44,6 @@ uat = {
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=="
     },
 
-    # "apis": {
-    #                     "meterpoints": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints",
-    #                     },
-    #
-    #                     "direct_debits": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits",
-    #                     },
-    #
-    #                     "internal_estimates": {
-    #                         "api_url": "https://igloo.uat.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage",
-    #                     },
-    #
-    #                     "internal_readings": {
-    #                         "api_url": "https://igloo.uat.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
-    #                     },
-    #
-    #                     "account_status": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus",
-    #                     },
-    #
-    #                     "elec_status": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec",
-    #                     },
-    #
-    #                     "gas_status": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas",
-    #                     },
-    #
-    #                     "tariff_history": {
-    #                         "api_url": "https://api.uat.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory",
-    #                     },
-    #
-    #                     "token": "QUtYcjkhJXkmVmVlUEJwNnAxJm1Md1kjU2RaTkRKcnZGVzROdHRiI0deS0EzYVpFS3ZYdCFQSEs0elNrMmxDdQ=="
-    # },
-
     "s3_bucket": "igloo-uat-bucket",
 
     "s3_key": {
