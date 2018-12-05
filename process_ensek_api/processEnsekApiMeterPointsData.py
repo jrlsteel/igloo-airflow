@@ -320,6 +320,7 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
+    # p = MeterPoints()
     # p.processAccounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
