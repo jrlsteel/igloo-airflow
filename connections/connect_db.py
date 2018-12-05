@@ -28,6 +28,8 @@ def get_redshift_connection():
                                user=con.redshift_config['user'], password=con.redshift_config['pwd'],
                                dbname=con.redshift_config['db'])
         print("Connected to Redshift")
+        return pr
+
     except ConnectionError as e:
         sys.exit("Error : " + str(e))
 

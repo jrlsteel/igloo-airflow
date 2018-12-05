@@ -152,7 +152,13 @@ prod = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory"
         },
 
-        "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ=="
+        "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
+
+        "igloo_epc_certificates": {
+            "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/search?postcode={0}",
+            "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
+        },
+
     },
 
     "s3_bucket": "igloo-data-warehouse-prod",
@@ -187,6 +193,12 @@ prod = {
         "D18_SFTP": "D18",
         "D18Archive": "stage1/D18/D18Archive/",
         "D18Suffix": ".flw"
+    },
+
+    "s3_epc_key": {
+        "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
+        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/",
+        "D18Archive": "stage1/EPC/EPCArchive/",
     },
 
     "glue_ensek_job_name": "_process_ref_table_prod",

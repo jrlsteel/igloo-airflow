@@ -55,6 +55,7 @@ def get_accountID_fromDB(get_max):
     return account_ids
 
 
+
 def get_ensek_api_info(api, account_id):
 
     env = get_dir()
@@ -85,6 +86,21 @@ def get_ensek_api_info1(api):
 
     head = {'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(token)}
+    return api_url, head
+
+
+def get_epc_api_info(api):
+
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+
+    token = env_api['token']
+
+    head = {'Content-Type': 'application/json',
+            'authorization': 'Basic {0}'.format(token),
+            'accept': 'application/json'}
     return api_url, head
 
 
