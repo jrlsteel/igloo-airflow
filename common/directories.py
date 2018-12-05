@@ -188,8 +188,7 @@ prod = {
 
     "s3_epc_key": {
         "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
-        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/",
-        "D18Archive": "stage1/EPC/EPCArchive/",
+        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
     },
 
     "glue_ensek_job_name": "_process_ref_table_prod",
