@@ -151,7 +151,7 @@ if __name__ == "__main__":
     # p.processAccounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
-    n = 5  # number of process to run in parallel
+    n = 12  # number of process to run in parallel
     k = int(len(account_ids) / n)  # get equal no of files for each process
 
     print(len(account_ids))

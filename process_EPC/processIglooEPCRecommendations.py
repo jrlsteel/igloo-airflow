@@ -22,6 +22,7 @@ from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
 # import pandas_redshift as pr
 
+
 class IglooEPCRecommendations:
     max_calls = con.api_config['max_api_calls']
     rate = con.api_config['allowed_period_in_secs']
@@ -74,8 +75,8 @@ class IglooEPCRecommendations:
             epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
             epc_rows_df = epc_rows_df.replace('"', '', regex=True)
             epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
-            file_name_epc = 'igloo_epc_certificates' + '_' + postcode_sector.replace(' ', '') + '.csv'
-            k.key = dir_s3['s3_epc_key']['EPCCertificatesRaw'] + file_name_epc
+            file_name_epc = 'igloo_epc_recommendations' + '_' + postcode_sector.replace(' ', '') + '.csv'
+            k.key = dir_s3['s3_epc_key']['EPCRecommendationsRaw'] + file_name_epc
             # print(epc_rows_df_string)
             k.set_contents_from_string(epc_rows_df_string)
 
@@ -94,55 +95,57 @@ class IglooEPCRecommendations:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(sys.path[0] + '/logs/' + 'igloo_epc_certificates_log_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
+        with open(sys.path[0] + '/logs/' + 'igloo_epc_recommendations_log_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
 
-    def processAccounts(self, postcode_sectors, k, _dir_s3):
+    def processAccounts(self, lmkkey_sectors, k, _dir_s3):
 
-        api_url, head = util. get_epc_api_info('igloo_epc_certificates')
-        for postcode_sector in postcode_sectors:
+        api_url, head = util.get_epc_api_info('igloo_epc_recommendations')
+        for lmkkey_sector in lmkkey_sectors:
             t = con.api_config['total_no_of_calls']
-            print('postcode:' + str(postcode_sector))
-            msg_ac = 'ac:' + str(postcode_sector)
+            print('lmkkey:' + str(lmkkey_sector))
+            msg_ac = 'ac:' + str(lmkkey_sector)
             self.log_error(msg_ac, '')
-            api_url1 = api_url.format(postcode_sector)
+            api_url1 = api_url.format(lmkkey_sector)
+            print(api_url1)
             epc_data_response = self.get_api_response(api_url1, head)
 
             if epc_data_response:
                 formatted_json = self.format_json_response(epc_data_response)
-                self.extract_epc_data(formatted_json, postcode_sector, k, _dir_s3)
+                self.extract_epc_data(formatted_json, lmkkey_sector, k, _dir_s3)
 
-    def get_epc_postcode(self, config_sql):
+    def get_epc_lmkkey(self, config_sql):
         pr = db.get_redshift_connection()
-        postcode_sectors_df = pr.redshift_to_pandas(config_sql)
+        lmkkey_df = pr.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
-        postcode_sectors_list = postcode_sectors_df['postcode'].values.tolist()
+        lmkkey_list = lmkkey_df['lmk-key'].values.tolist()
 
-        return postcode_sectors_list
+        return lmkkey_list
 
 
 if __name__ == "__main__":
 
     freeze_support()
 
-    p = IglooEPC()
+    p = IglooEPCRecommendations()
 
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
 
     s3 = s3_con(bucket_name)
 
-    postcode_sector_sql = con.test_config['epc_postcode_sql']
-    postcode_sectors = p.get_epc_postcode(postcode_sector_sql)
+    lmkkey_sql = con.test_config['epc_recommendations_lmkkey_sql']
+    print(lmkkey_sql)
+    lmkkey_sectors = p.get_epc_lmkkey(lmkkey_sql)
 
 
     ####### Multiprocessing Starts #########
-    n = 24  # number of process to run in parallel
-    k = int(len(postcode_sectors) / n)  # get equal no of files for each process
+    n = 36  # number of process to run in parallel
+    k = int(len(lmkkey_sectors) / n)  # get equal no of files for each process
 
-    print(len(postcode_sectors))
+    print(len(lmkkey_sectors))
     print(k)
 
     processes = []
@@ -150,13 +153,13 @@ if __name__ == "__main__":
     start = timeit.default_timer()
 
     for i in range(n + 1):
-        p1 = IglooEPCRecomendations()
+        p1 = IglooEPCRecommendations()
         print(i)
         uv = i * k
         if i == n:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(postcode_sectors[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:], s3, dir_s3))
         else:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(postcode_sectors[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:uv], s3, dir_s3))
         lv = uv
 
         processes.append(t)
