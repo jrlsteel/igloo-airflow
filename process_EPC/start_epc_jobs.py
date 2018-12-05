@@ -23,7 +23,7 @@ class StartEPCJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}: >>>> Process EPC Certificates Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "processIglooEPCCertificates.py"])
@@ -39,7 +39,7 @@ class StartEPCJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}: >>>> Process EPC Recommendations Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "processIglooEPCRecommendations.py"])
@@ -51,6 +51,11 @@ class StartEPCJobs:
             sys.exit(1)
 
     def submit_epc_certificates_staging_gluejob(self):
+        """
+                Calls the epc staging job.
+                :return: None
+                """
+        print("{0}: >>>> Staging EPC Certificates Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
@@ -70,6 +75,11 @@ class StartEPCJobs:
             sys.exit(1)
 
     def submit_epc_recommendations_staging_gluejob(self):
+        """
+                      Calls the epc staging job.
+                      :return: None
+                      """
+        print("{0}: >>>> Staging EPC Recommendations Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
@@ -87,24 +97,25 @@ class StartEPCJobs:
         except Exception as e:
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
+
 if __name__ == '__main__':
 
     s = StartEPCJobs()
 
     # run processing epc certificates python script
-    print("{0}: process_epc job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: process_epc certificates job is running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_process_epc_certificates_job()
 
     # run staging glue job epc  certificates
-    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Staging Job  EPC Certificates is running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_epc_certificates_staging_gluejob()
 
     # run processing epc recommendations python script
-    print("{0}: process_epc job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: process_epc recommendations job is running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_process_epc_recommendations_job()
 
     # run staging glue job recommendations
-    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Staging Job  EPC Recommendations is running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_epc_recommendations_staging_gluejob()
 
     # run d18 glue job

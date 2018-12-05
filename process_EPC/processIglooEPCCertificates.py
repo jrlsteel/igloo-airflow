@@ -108,6 +108,7 @@ class IglooEPCCertificates:
             msg_ac = 'ac:' + str(postcode_sector)
             self.log_error(msg_ac, '')
             api_url1 = api_url.format(postcode_sector)
+         #   print(api_url1)
             epc_data_response = self.get_api_response(api_url1, head)
 
             if epc_data_response:
