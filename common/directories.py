@@ -90,8 +90,8 @@ uat = {
         "D18Archive": "stage1/EPC/EPCArchive/",
     },
 
-    "glue_ensek_job_name": "_process_ref_table_uat",
-    "glue_d18_job_name": "_process_ref_table_uat",
+    "glue_ensek_job_name": "_process_ref_tables_uat",
+    "glue_d18_job_name": "_process_ref_tables_uat",
     "glue_customerDB_job_name": "_process_ref_customerdb_uat",
     "glue_staging_job_name": "process_staging_files_uat"
 
@@ -191,8 +191,8 @@ prod = {
         "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
     },
 
-    "glue_ensek_job_name": "_process_ref_table_prod",
-    "glue_d18_job_name": "_process_ref_table_prod",
+    "glue_ensek_job_name": "_process_ref_tables_prod",
+    "glue_d18_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod"
 
