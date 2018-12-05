@@ -89,7 +89,8 @@ class StartEnsekJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_ensek = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='ensek')
+            obj_ensek = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
+                                            processJob='ensek')
             job_response = obj_ensek.run_glue_job()
             if job_response:
                 print("{0}: Ensek Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -99,26 +100,26 @@ class StartEnsekJobs:
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            print("Error in Customer DB Job :- " + str(e))
+            print("Error in Ensek Job :- " + str(e))
             sys.exit(1)
 
-   # def submit_ensek_counts(self):
-   #      try:
-   #          ensek_counts_response = ec.process_count()
-   #          if ensek_counts_response:
-   #              print("{0}: Ensek Counts Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-   #              # return ensek_counts_response
-   #          else:
-   #              print("Error occurred in Ensek Count Job")
-   #              # return ensek_counts_response
-   #              raise Exception
-   #      except Exception as e:
-   #          print("Error in Ensek Counts job :- " + str(e))
-   #          sys.exit(1)
+
+# def submit_ensek_counts(self):
+#      try:
+#          ensek_counts_response = ec.process_count()
+#          if ensek_counts_response:
+#              print("{0}: Ensek Counts Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+#              # return ensek_counts_response
+#          else:
+#              print("Error occurred in Ensek Count Job")
+#              # return ensek_counts_response
+#              raise Exception
+#      except Exception as e:
+#          print("Error in Ensek Counts job :- " + str(e))
+#          sys.exit(1)
 
 
 if __name__ == '__main__':
-
     s = StartEnsekJobs()
 
     # run schema validation job
@@ -144,5 +145,3 @@ if __name__ == '__main__':
     s.submit_Ensek_Gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-
-

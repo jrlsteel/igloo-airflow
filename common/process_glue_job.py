@@ -28,11 +28,12 @@ class ProcessGlueJob:
         coalesce_job = glue.get_job_run(JobName=self.job_name, RunId=job_run_id, PredecessorsIncluded=False)
         cjob_status = coalesce_job['JobRun']['JobRunState']
         cjob_execution_time = coalesce_job['JobRun']['ExecutionTime']
+        cjob_running_name = coalesce_job['JobRun']['Arguments']['--process_job']
 
         print("status: " + cjob_status)
         print("execution time: " + str(cjob_execution_time))
 
-        return cjob_status, cjob_execution_time
+        return cjob_status, cjob_execution_time, cjob_running_name
 
     def run_glue_job(self):
         try:
@@ -43,26 +44,38 @@ class ProcessGlueJob:
             current_job = self.glue_client.get_job_runs(JobName=self.job_name, MaxResults=1)
             current_job_run_id = current_job['JobRuns'][0]['Id']
             current_job_status = current_job['JobRuns'][0]['JobRunState']
+            current_job_name = current_job['JobRuns'][0]['Arguments']['--process_job']
 
             # Start the job if it is not already  running state ie.
             # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
             if current_job_status.upper() not in ['STARTING', 'RUNNING', 'STOPPING']:
-                response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--process_job': self.process_job,
-                                                                                            '--s3_bucket': self.s3_bucket,
-                                                                                            '--environment': self.environment})
+                sleep(25) # sleep to avoid concurrent execution
+                response = self.start_glue_job()
+
                 job_run_id = response['JobRunId']
-                print("{0} job started... Job Id: {1}".format(self.job_name, job_run_id))
+                print("{0} job started for {1}... Job Id: {2}".format(self.job_name, self.process_job, job_run_id))
+
             else:
-                print("{0} job already running... Job Id: {1}".format(self.job_name, current_job_run_id))
+                print("{0} job already running for {1}... Job Id: {2}".format(self.job_name, current_job_name, current_job_run_id))
                 job_run_id = current_job_run_id
 
             # Check Job status for every 3 minutes until it is STOPPED/SUCCEEDED/FAILED/TIMEOUT
             # 'JobRunState': 'STARTING' | 'RUNNING' | 'STOPPING' | 'STOPPED' | 'SUCCEEDED' | 'FAILED' | 'TIMEOUT'
-            while job_status.upper() not in ['STOPPED', 'SUCCEEDED', 'FAILED', 'TIMEOUT']:
-                sleep(180)
-                job_status, job_execution_time = self.get_job_status(self.glue_client, job_run_id)
-                if job_status.upper() in ['STOPPED', 'FAILED', 'TIMEOUT']:
+            job_completed_state = ['STOPPED', 'SUCCEEDED', 'FAILED', 'TIMEOUT']
+            exception_state = ['STOPPED', 'FAILED', 'TIMEOUT']
+
+            while job_status.upper() not in job_completed_state:
+                sleep(10)
+                job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
+                if job_status.upper() in exception_state and self.process_job == running_job:
                     raise Exception("Job stopped with status {0}. Please check the job id - {1}".format(job_status.upper(), job_run_id))
+
+                if job_status.upper() in job_completed_state and self.process_job != running_job:
+                    sleep(25)  # sleep to avoid concurrent execution
+                    response = self.start_glue_job()
+                    job_run_id = response['JobRunId']
+                    job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
+                    print("{0} job started for {1}... Job Id: {2}".format(self.job_name, running_job, job_run_id))
 
             job_response = {
                 'job_run_id': job_run_id,
@@ -73,6 +86,12 @@ class ProcessGlueJob:
 
         except:
             raise
+
+    def start_glue_job(self):
+        response = self.glue_client.start_job_run(JobName=self.job_name, Arguments={'--process_job': self.process_job,
+                                                                                    '--s3_bucket': self.s3_bucket,
+                                                                                    '--environment': self.environment})
+        return response
 
     def run_glue_trigger(self):
         try:

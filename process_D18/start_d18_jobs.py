@@ -77,14 +77,14 @@ class StartD18Jobs:
             obj_d18 = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='d18')
             d18_job_response = obj_d18.run_glue_job()
             if d18_job_response:
-                print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: D18 Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
-                print("Error occurred in Staging Job")
+                print("Error occurred in D18 Job")
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            print("Error in Staging Job :- " + str(e))
+            print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
 
