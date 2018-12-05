@@ -200,7 +200,7 @@ def processAccounts():
 
         # if con.test_config['enable_db'] == 'Y':
         # server = redshift_connection()
-        # account_ids = get_accountID_from_Redshift()
+        account_ids = get_accountID_from_Redshift()
         account_ids = get_accountID_fromDB()
 
         apis = ['meterpoints', 'direct_debits', 'internal_estimates', 'internal_readings', 'account_status', 'elec_status', 'gas_status', 'tariff_history']
