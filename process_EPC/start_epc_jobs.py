@@ -17,21 +17,21 @@ class StartEPCJobs:
 
 
 
-    def submit_process_epc_job(self):
-        """
-        Calls the d18 process_d18.py script to which processes the downloaded data from s3 and extracts the BPP and PPC co efficients.
-        :return: None
-        """
-
-        print("{0}: >>>> Process D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
-        try:
-            start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processIglooEpc.py"])
-            print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-                                                                               float(timeit.default_timer() - start)))
-        except Exception as e:
-            print("Error in EPC Certificates process :- " + str(e))
-            sys.exit(1)
+    # def submit_process_epc_job(self):
+    #     """
+    #     Calls the d18 process_d18.py script to which processes the downloaded data from s3 and extracts the BPP and PPC co efficients.
+    #     :return: None
+    #     """
+    #
+    #     print("{0}: >>>> Process D18 files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    #     try:
+    #         start = timeit.default_timer()
+    #         subprocess.run([self.pythonAlias, "processIglooEPCCertificates.py"])
+    #         print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+    #                                                                            float(timeit.default_timer() - start)))
+    #     except Exception as e:
+    #         print("Error in EPC Certificates process :- " + str(e))
+    #         sys.exit(1)
 
     def submit_epc_staging_gluejob(self):
         try:
@@ -39,7 +39,7 @@ class StartEPCJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='d18')
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc')
             staging_job_response = obj_stage.run_glue_job()
             if staging_job_response:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -77,8 +77,8 @@ if __name__ == '__main__':
     s = StartEPCJobs()
 
     # run processing d18 python script
-    print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_process_epc_job()
+    #print("{0}: process_epc job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    #s.submit_process_epc_job()
 
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))

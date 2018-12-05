@@ -22,7 +22,7 @@ from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
 # import pandas_redshift as pr
 
-class IglooEPC:
+class IglooEPCRecommendations:
     max_calls = con.api_config['max_api_calls']
     rate = con.api_config['allowed_period_in_secs']
 
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     start = timeit.default_timer()
 
     for i in range(n + 1):
-        p1 = IglooEPC()
+        p1 = IglooEPCRecomendations()
         print(i)
         uv = i * k
         if i == n:
