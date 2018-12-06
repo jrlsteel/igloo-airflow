@@ -73,7 +73,7 @@ class StartEnsekJobs:
             obj_customerDB = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='')
             job_response = obj_customerDB.run_glue_job()
             if job_response:
-                print("{0}: CustomerDB Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: CustomerDB Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
                 print("Error occurred in CustomerDB Glue Job")
