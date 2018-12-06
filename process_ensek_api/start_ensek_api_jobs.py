@@ -93,7 +93,7 @@ class StartEnsekJobs:
                                             processJob='ensek')
             job_response = obj_ensek.run_glue_job()
             if job_response:
-                print("{0}: Ensek Glue Job started successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: Ensek Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
                 print("Error occurred in Ensek Glue Job")
