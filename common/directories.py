@@ -47,7 +47,10 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/search?postcode={0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
-
+        "igloo_epc_recommendations": {
+            "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
+            "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
+        },
     },
 
     "s3_bucket": "igloo-data-warehouse-uat",
@@ -86,8 +89,7 @@ uat = {
 
     "s3_epc_key": {
         "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
-        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/",
-        "D18Archive": "stage1/EPC/EPCArchive/",
+        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
