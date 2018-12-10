@@ -75,12 +75,12 @@ if __name__ == '__main__':
 
     s = Weather()
 
-    # # run processing d18 python script
-    # print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_process_weather_job()
+    # run processing weather python script
+    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+    s.submit_process_weather_job()
 
     # run staging glue job
-    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_weather_staging_gluejob()
 
     # run d18 glue job
