@@ -93,7 +93,7 @@ class HistoricalWeather:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(sys.path[0] + '/logs/' + 'igloo_epc_certificates_log_' + time.strftime('%d%m%Y') + '.csv',
+        with open(logs_dir_path + 'histortical_weather_log' + time.strftime('%d%m%Y') + '.csv',
                   mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
@@ -148,11 +148,11 @@ if __name__ == "__main__":
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
     # print(weather_postcodes)
-    if False:
+    if True:
         p.processData(weather_postcodes, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
-    if True:
+    if False:
         n = 24  # number of process to run in parallel
         k = int(len(weather_postcodes) / n)  # get equal no of files for each process
 
