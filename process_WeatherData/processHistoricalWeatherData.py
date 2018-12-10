@@ -72,6 +72,7 @@ class HistoricalWeather:
         meta_weather = ['timezone', 'state_code', 'country_code', 'lat', 'lon', 'city_name', 'station_id', 'city_id']
         weather_df = json_normalize(data, record_path='data', meta=meta_weather)
         weather_df['sources'] = " ".join(data['sources'])
+        # weather_df['postcode'] = postcode
 
         if weather_df.empty:
             print(" - has no Weather data")
