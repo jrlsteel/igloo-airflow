@@ -26,12 +26,15 @@ class HistoricalWeather:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.start_date = '01/01/2018'
-        # self.start_date = datetime.date()
+        self.start_date = datetime.datetime.strptime('2018-01-01', '%Y-%m-%d').date()
+        self.end_date = datetime.datetime.today().date()
+        self.api_url, self.key = util.get_weather_url_token('historical_weather')
+        self.num_days_per_api_calls = 7
+
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
-    def get_api_response(self, api_url, head):
+    def get_api_response(self, api_url):
         """
             get the response for the respective url that is passed as part of this function
         """
@@ -42,7 +45,7 @@ class HistoricalWeather:
         i = 0
         while True:
             try:
-                response = session.get(api_url, headers=head)
+                response = session.get(api_url)
                 if response.status_code == 200:
                     if response.content.decode('utf-8') != '':
                         response_json = json.loads(response.content.decode('utf-8'))
@@ -65,18 +68,19 @@ class HistoricalWeather:
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
 
-    def extract_epc_data(self, data, postcode_sector, k, dir_s3):
-        epc_rows_df = json_normalize(data, 'rows')
-        if (epc_rows_df.empty):
-            print(" - has no EPC data")
+    def extract_weather_data(self, data, postcode, k, dir_s3, start_date, end_date):
+        meta_weather = ['timezone', 'state_code', 'country_code', 'lat', 'lon', 'city_name', 'station_id', 'city_id']
+        weather_df = json_normalize(data, record_path='data', meta=meta_weather)
+        weather_df['sources'] = " ".join(data['sources'])
+
+        if weather_df.empty:
+            print(" - has no Weather data")
         else:
-            epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
-            epc_rows_df = epc_rows_df.replace('"', '', regex=True)
-            epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
-            file_name_epc = 'igloo_epc_certificates' + '_' + postcode_sector.replace(' ', '') + '.csv'
-            k.key = dir_s3['s3_epc_key']['EPCCertificatesRaw'] + file_name_epc
-            # print(epc_rows_df_string)
-            k.set_contents_from_string(epc_rows_df_string)
+            weather_df_string = weather_df.to_csv(None, index=False)
+            file_name_weather = 'historical_weather' + '_' + postcode.strip() + '_' + start_date.strftime("%Y%m%d") + '_' + end_date.strftime("%Y%m%d") + '.csv'
+            k.key = dir_s3['s3_weather_key']['HistoricalWeather'] + file_name_weather
+            # print(weather_df_string)
+            k.set_contents_from_string(weather_df_string)
 
     '''Format Json to handle null values'''
 
@@ -96,20 +100,29 @@ class HistoricalWeather:
 
     def processData(self, postcodes, k, _dir_s3):
 
-        api_url, head = util.get_epc_api_info('historical_weather_api')
-
         for postcode in postcodes:
+            # postcodes[:2]:
             t = con.api_config['total_no_of_calls']
             print('postcode:' + str(postcode))
             msg_ac = 'ac:' + str(postcode)
             self.log_error(msg_ac, '')
-            # # api_url1 = api_url.format(postcode)
-            # #   print(api_url1)
-            # epc_data_response = self.get_api_response(api_url1, head)
-            #
-            # if epc_data_response:
-            #     formatted_json = self.format_json_response(epc_data_response)
-            #     self.extract_epc_data(formatted_json, postcode, k, _dir_s3)
+            _start_date = self.start_date
+            while _start_date < self.end_date:
+                # Logic to fetch date for only 7 days for each call
+                _end_date = _start_date + datetime.timedelta(days=7)
+                if _end_date > self.end_date:
+                    _end_date = self.end_date
+
+                api_url1 = self.api_url.format(postcode, _start_date, _end_date, self.key)
+                # print(api_url1)
+
+                api_response = self.get_api_response(api_url1)
+
+                if api_response:
+                    formatted_json = self.format_json_response(api_response)
+                    # print(formatted_json)
+                    self.extract_weather_data(formatted_json, postcode, k, _dir_s3, _start_date, _end_date)
+                _start_date = _end_date
 
     def get_weather_postcode(self, config_sql):
         pr = db.get_redshift_connection()
@@ -134,38 +147,40 @@ if __name__ == "__main__":
     weather_postcode_sql = con.test_config['weather_sql']
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
-    print(weather_postcodes)
-    p.processData(weather_postcodes, s3, dir_s3)
+    # print(weather_postcodes)
+    if False:
+        p.processData(weather_postcodes, s3, dir_s3)
 
-    ####### Multiprocessing Starts #########
-    # n = 24  # number of process to run in parallel
-    # k = int(len(weather_postcodes) / n)  # get equal no of files for each process
-    #
-    # print(len(weather_postcodes))
-    # print(k)
-    #
-    # processes = []
-    # lv = 0
-    # start = timeit.default_timer()
-    #
-    # for i in range(n + 1):
-    #     p1 = HistoricalWeather()
-    #     print(i)
-    #     uv = i * k
-    #     if i == n:
-    #         t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
-    #     else:
-    #         t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
-    #     lv = uv
-    #
-    #     processes.append(t)
-    #
-    # for p in processes:
-    #     p.start()
-    #     time.sleep(2)
-    #
-    # for process in processes:
-    #     process.join()
-    # ####### Multiprocessing Ends #########
-    #
-    # print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    ##### Multiprocessing Starts #########
+    if True:
+        n = 24  # number of process to run in parallel
+        k = int(len(weather_postcodes) / n)  # get equal no of files for each process
+
+        print(len(weather_postcodes))
+        print(k)
+
+        processes = []
+        lv = 0
+        start = timeit.default_timer()
+
+        for i in range(n + 1):
+            p1 = HistoricalWeather()
+            print(i)
+            uv = i * k
+            if i == n:
+                t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
+            else:
+                t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
+            lv = uv
+
+            processes.append(t)
+
+        for p in processes:
+            p.start()
+            time.sleep(2)
+
+        for process in processes:
+            process.join()
+        ####### Multiprocessing Ends #########
+
+        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')

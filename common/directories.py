@@ -51,6 +51,10 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+        "historical_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        }
     },
 
     "s3_bucket": "igloo-data-warehouse-uat",
@@ -90,6 +94,10 @@ uat = {
     "s3_epc_key": {
         "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
         "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
+    },
+
+    "s3_weather_key": {
+        "HistoricalWeather": "stage1/HistoricalWeather/"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
@@ -151,6 +159,10 @@ prod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+        "historical_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        }
 
     },
 
@@ -191,6 +203,10 @@ prod = {
     "s3_epc_key": {
         "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
         "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
+    },
+
+    "s3_weather_key": {
+        "HistoricalWeather": "stage1/HistoricalWeather/"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_prod",

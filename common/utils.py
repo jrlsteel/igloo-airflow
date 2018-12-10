@@ -104,6 +104,17 @@ def get_epc_api_info(api):
     return api_url, head
 
 
+def get_weather_url_token(api):
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+
+    token = env_api['token']
+
+    return api_url, token
+
+
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
     data = {
