@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     # p.processAccounts(postcode_sectors, s3, dir_s3)
     ###### Multiprocessing Starts #########
-    n = 12  # number of process to run in parallel
+    n = 6  # number of process to run in parallel
     k = int(len(postcode_sectors) / n)  # get equal no of files for each process
 
     print(len(postcode_sectors))

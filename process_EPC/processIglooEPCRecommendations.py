@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
 
     ####### Multiprocessing Starts #########
-    n = 12  # number of process to run in parallel
+    n = 6  # number of process to run in parallel
     k = int(len(lmkkey_sectors) / n)  # get equal no of files for each process
 
     print(len(lmkkey_sectors))
