@@ -77,8 +77,11 @@ class HistoricalWeather:
         if weather_df.empty:
             print(" - has no Weather data")
         else:
+            week_number_iso = start_date.strftime("%V")
+            year = start_date.strftime("%Y")
+
             weather_df_string = weather_df.to_csv(None, index=False)
-            file_name_weather = 'historical_weather' + '_' + postcode.strip() + '_' + start_date.strftime("%Y%m%d") + '_' + end_date.strftime("%Y%m%d") + '.csv'
+            file_name_weather = 'historical_weather' + '_' + postcode.strip() + '_' + year.strip() + '_' + week_number_iso.strip() + '.csv'
             k.key = dir_s3['s3_weather_key']['HistoricalWeather'] + file_name_weather
             # print(weather_df_string)
             k.set_contents_from_string(weather_df_string)
