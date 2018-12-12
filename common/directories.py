@@ -58,6 +58,9 @@ uat = {
         "historical_energy_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/energy?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
+        "land_registry": {
+            "api_url": "http://landregistry.data.gov.uk/data/ppi/transaction-record",
         }
     },
 
@@ -102,6 +105,9 @@ uat = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/"
+    },
+    "s3_land_reg_key": {
+        "LandRegistry": "stage1/LandRegistry/"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
@@ -170,8 +176,10 @@ prod = {
         "historical_energy_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/energy?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
+        "land_registry": {
+            "api_url": "http://landregistry.data.gov.uk/data/ppi/transaction-record",
         }
-
     },
 
     "s3_bucket": "igloo-data-warehouse-prod",
@@ -215,6 +223,9 @@ prod = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/"
+    },
+    "s3_land_reg_key": {
+        "LandRegistry": "stage1/LandRegistry"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_prod",

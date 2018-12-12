@@ -115,6 +115,28 @@ def get_weather_url_token(api):
     return api_url, token
 
 
+def get_api_info(api=None, auth_type=None, token_required=False, header_type=None):
+    dir = get_dir()
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+
+    token = ''
+    if token_required:
+        token = env_api['token']
+
+    head = {}
+    if auth_type == 'basic':
+        head['authorization'] = 'Basic {0}'.format(token)
+
+    if auth_type == 'bearer':
+        head['authorization'] = 'Bearer {0}'.format(token)
+
+    if header_type == 'json':
+        head['accept'] = 'application/json'
+
+    return api_url, head, token
+
+
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
     data = {
