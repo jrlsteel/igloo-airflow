@@ -54,6 +54,10 @@ uat = {
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
+        "historical_energy_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/history/energy?postal_code={0}&start_date={1}&end_date={2}&key={3}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
         }
     },
 
@@ -161,6 +165,10 @@ prod = {
         },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
+        "historical_energy_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/history/energy?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
         }
 
