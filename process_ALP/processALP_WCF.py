@@ -27,7 +27,7 @@ class ALPHistoricalWCF:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.start_date = datetime.datetime.strptime('2017-04-01', '%Y-%m-%d').date()
+        self.start_date = datetime.datetime.strptime('2017-01-01', '%Y-%m-%d').date()
         #self.end_date = datetime.datetime.strptime('2018-07-01', '%Y-%m-%d').date()
         self.end_date = datetime.datetime.today().date()
         self.api_url, self.key = util.get_gas_historical_wcf_api_info('gas_historical')
@@ -138,7 +138,7 @@ class ALPHistoricalWCF:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(logs_dir_path + 'histortical_weather_log' + time.strftime('%d%m%Y') + '.csv',
+        with open(logs_dir_path + 'historical_wcf_log' + time.strftime('%d%m%Y') + '.csv',
                   mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])

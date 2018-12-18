@@ -110,10 +110,10 @@ uat = {
         "HistoricalWeather": "stage1/HistoricalWeather/"
     },
     "s3_alp_wcf": {
-        "AlpWCF": "stage1/ALP/WCF/"
+        "AlpWCF": "stage1/ALP/AlpWCF/"
     },
     "s3_alp_cv": {
-        "AlpCV": "stage1/ALP/CV/"
+        "AlpCV": "stage1/ALP/AlpCV/"
     },
 
     "s3_land_reg_key": {
