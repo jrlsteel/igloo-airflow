@@ -27,7 +27,8 @@ class HistoricalWeather:
 
     def __init__(self):
         self.start_date = datetime.datetime.strptime('2018-01-01', '%Y-%m-%d').date()
-        self.end_date = datetime.datetime.today().date()
+        self.end_date = datetime.datetime.strptime('2018-07-01', '%Y-%m-%d').date()
+        #self.end_date = datetime.datetime.today().date()
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
 
@@ -157,7 +158,7 @@ if __name__ == "__main__":
 
     ##### Multiprocessing Starts #########
     if True:
-        n = 24  # number of process to run in parallel
+        n = 36  # number of process to run in parallel
         k = int(len(weather_postcodes) / n)  # get equal no of files for each process
 
         print(len(weather_postcodes))
