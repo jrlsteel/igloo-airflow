@@ -38,6 +38,7 @@ class HistoricalWeather:
         self.num_days_per_api_calls = 7
 
 
+
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
     def get_api_response(self, api_url):
@@ -152,8 +153,9 @@ if __name__ == "__main__":
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
 
-    s3 = s3_con(bucket_name)
 
+    s3 = s3_con(bucket_name)
+    #weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SW1Y', 'IV15','AB13','BT79','L66') group by left(postcode, len(postcode) - 3)",
     weather_postcode_sql = con.test_config['weather_sql']
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
@@ -162,35 +164,40 @@ if __name__ == "__main__":
     #     p.processData(weather_postcodes, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
-    if True:
-        n = 24  # number of process to run in parallel
-        k = int(len(weather_postcodes) / n)  # get equal no of files for each process
+    env = util.get_env()
 
-        print(len(weather_postcodes))
-        print(k)
+    if env == 'UAT':
+        n = 6  # number of process to run in parallel
+    else:
+        n = 24
 
-        processes = []
-        lv = 0
-        start = timeit.default_timer()
+    k = int(len(weather_postcodes) / n)  # get equal no of files for each process
 
-        for i in range(n + 1):
-            p1 = HistoricalWeather()
-            print(i)
-            uv = i * k
-            if i == n:
-                t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
-            else:
-                t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
-            lv = uv
+    print(len(weather_postcodes))
+    print(k)
 
-            processes.append(t)
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
 
-        for p in processes:
-            p.start()
-            time.sleep(2)
+    for i in range(n + 1):
+        p1 = HistoricalWeather()
+        print(i)
+        uv = i * k
+        if i == n:
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
+        else:
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
+        lv = uv
 
-        for process in processes:
-            process.join()
-        ####### Multiprocessing Ends #########
+        processes.append(t)
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### Multiprocessing Ends #########
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')

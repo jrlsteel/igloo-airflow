@@ -82,7 +82,11 @@ if __name__ == '__main__':
 
     # s.sftp_to_Ensek(d18_files, s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
-    n = 12  # number of process to run in parallel
+    env = util.get_env()
+    if env == 'UAT':
+        n = 6  # number of process to run in parallel
+    else:
+        n = 24
     print(len(d18_files))
     k = int(len(d18_files) / n)  # get equal no of files for each process
     print(k)

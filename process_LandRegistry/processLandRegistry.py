@@ -181,35 +181,40 @@ if __name__ == "__main__":
     #     p.processData(addresses_df, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
-    if True:
-        n = 24  # number of process to run in parallel
-        k = int(len(addresses_df) / n)  # get equal no of files for each process
 
-        print(len(addresses_df))
-        print(k)
+    env = util.get_env()
+    if env == 'UAT':
+        n = 6  # number of process to run in parallel
+    else:
+        n = 24
 
-        processes = []
-        lv = 0
-        start = timeit.default_timer()
+    k = int(len(addresses_df) / n)  # get equal no of files for each process
 
-        for i in range(n + 1):
-            p1 = LandRegistry()
-            print(i)
-            uv = i * k
-            if i == n:
-                t = multiprocessing.Process(target=p1.processData, args=(addresses_df[lv:], s3, dir_s3))
-            else:
-                t = multiprocessing.Process(target=p1.processData, args=(addresses_df[lv:uv], s3, dir_s3))
-            lv = uv
+    print(len(addresses_df))
+    print(k)
 
-            processes.append(t)
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
 
-        for p in processes:
-            p.start()
-            time.sleep(2)
+    for i in range(n + 1):
+        p1 = LandRegistry()
+        print(i)
+        uv = i * k
+        if i == n:
+            t = multiprocessing.Process(target=p1.processData, args=(addresses_df[lv:], s3, dir_s3))
+        else:
+            t = multiprocessing.Process(target=p1.processData, args=(addresses_df[lv:uv], s3, dir_s3))
+        lv = uv
 
-        for process in processes:
-            process.join()
-        ####### Multiprocessing Ends #########
+        processes.append(t)
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### Multiprocessing Ends #########
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')

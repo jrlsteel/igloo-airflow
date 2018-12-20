@@ -140,7 +140,13 @@ if __name__ == "__main__":
 
 
     ####### Multiprocessing Starts #########
-    n = 24  # number of process to run in parallel
+
+    env = util.get_env()
+    if env == 'UAT':
+        n = 6  # number of process to run in parallel
+    else:
+        n = 24
+
     k = int(len(postcode_sectors) / n)  # get equal no of files for each process
 
     print(len(postcode_sectors))
