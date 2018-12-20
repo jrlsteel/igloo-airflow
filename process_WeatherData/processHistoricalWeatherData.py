@@ -120,7 +120,7 @@ class HistoricalWeather:
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call
-                _end_date = _start_date + datetime.timedelta(days=7)
+                _end_date = _start_date + timedelta(days=7)
                 if _end_date > self.end_date:
                     _end_date = self.end_date
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     env = util.get_env()
 
     if env == 'uat':
-        n = 6  # number of process to run in parallel
+        n = 36  # number of process to run in parallel
     else:
         n = 24
 
