@@ -119,8 +119,8 @@ if __name__ == '__main__':
     s.submit_epc_recommendations_staging_gluejob()
 
     # run d18 glue job
-    # print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_d18_gluejob()
-    #
-    # print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_d18_gluejob()
+
+    print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
