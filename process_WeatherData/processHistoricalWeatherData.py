@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
 
     s3 = s3_con(bucket_name)
-    #weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SW1Y', 'IV15','AB13','BT79','L66') group by left(postcode, len(postcode) - 3)",
+    weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SW1Y', 'IV15','AB13','BT79','L66') group by left(postcode, len(postcode) - 3)",
     weather_postcode_sql = con.test_config['weather_sql']
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     env = util.get_env()
 
     if env == 'uat':
-        n = 36  # number of process to run in parallel
+        n = 12  # number of process to run in parallel
     else:
         n = 24
 

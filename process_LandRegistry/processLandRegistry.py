@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     env = util.get_env()
     if env == 'uat':
-        n = 6  # number of process to run in parallel
+        n = 12  # number of process to run in parallel
     else:
         n = 24
 

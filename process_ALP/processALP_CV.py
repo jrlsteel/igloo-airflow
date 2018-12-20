@@ -188,7 +188,7 @@ if __name__ == "__main__":
     #'''Disable if teh above is not commented out'''
 
     if env == 'uat':
-        n = 6  # number of process to run in parallel
+        n = 13  # number of process to run in parallel
     else:
         n = 13
 
