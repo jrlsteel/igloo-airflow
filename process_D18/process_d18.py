@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # p.process_d18_data(d18_keys_s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
     env = util.get_env()
-    if env == 'UAT':
+    if env == 'uat':
         n = 6  # number of process to run in parallel
     else:
         n = 24

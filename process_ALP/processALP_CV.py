@@ -186,35 +186,39 @@ if __name__ == "__main__":
 
     ##### Multiprocessing Starts #########
     #'''Disable if teh above is not commented out'''
-    if True:
-        n = 13  # number of process to run in parallel
-        k = int(len(cv_folders) / n)  # get equal no of files for each process
 
-        print(len(cv_folders))
-        print(k)
+    if env == 'uat':
+        n = 6  # number of process to run in parallel
+    else:
+        n = 13
 
-        processes = []
-        lv = 0
-        start = timeit.default_timer()
+    k = int(len(cv_folders) / n)  # get equal no of files for each process
 
-        for i in range(n + 1):
-            p1 = ALPHistoricalCV()
-            print(i)
-            uv = i * k
-            if i == n:
-                t = multiprocessing.Process(target=p1.processData, args=(cv_folders[lv:], s3, dir_s3))
-            else:
-                t = multiprocessing.Process(target=p1.processData, args=(cv_folders[lv:uv], s3, dir_s3))
-            lv = uv
+    print(len(cv_folders))
+    print(k)
 
-            processes.append(t)
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
 
-        for p in processes:
-            p.start()
-            time.sleep(2)
+    for i in range(n + 1):
+        p1 = ALPHistoricalCV()
+        print(i)
+        uv = i * k
+        if i == n:
+            t = multiprocessing.Process(target=p1.processData, args=(cv_folders[lv:], s3, dir_s3))
+        else:
+            t = multiprocessing.Process(target=p1.processData, args=(cv_folders[lv:uv], s3, dir_s3))
+        lv = uv
 
-        for process in processes:
-            process.join()
-        ####### Multiprocessing Ends #########
+        processes.append(t)
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### Multiprocessing Ends #########
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
