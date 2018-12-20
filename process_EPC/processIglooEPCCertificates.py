@@ -135,10 +135,7 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    postcode_sector_sql = 'SELECT left(postcode, len(postcode) - 3) + ' ' + right(postcode, 3) as postcode ' \
-                          'FROM ref_cdb_addresses ' \
-                          'GROUP BY  left(postcode, len(postcode) - 3) + ' ' + right(postcode, 3)' \
-                          'ORDER BY left(postcode, len(postcode) - 3) + ' ' + right(postcode, 3)'
+    postcode_sector_sql = con.test_config['epc_certificates_postcode_sql']
     postcode_sectors = p.get_epc_postcode(postcode_sector_sql)
 
 
