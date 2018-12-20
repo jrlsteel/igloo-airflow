@@ -103,6 +103,27 @@ def get_epc_api_info(api):
             'accept': 'application/json'}
     return api_url, head
 
+def get_gas_historical_wcf_api_info(api):
+
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+    head = {'Content-Type': 'application/soap+xml',
+            'charset': 'utf-8'}
+
+    return api_url, head
+
+def get_gas_historical_cv_api_info(api):
+
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+    head = {'Content-Type': 'application/soap+xml',
+            'charset': 'utf-8'}
+
+    return api_url, head
 
 def get_weather_url_token(api):
     dir = get_dir()

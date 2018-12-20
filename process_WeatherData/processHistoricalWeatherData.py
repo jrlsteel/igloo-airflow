@@ -119,7 +119,7 @@ class HistoricalWeather:
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call
-                _end_date = _start_date + timedelta(days=7)
+                _end_date = _start_date + datetime.timedelta(days=7)
                 if _end_date > self.end_date:
                     _end_date = self.end_date
 
@@ -158,11 +158,11 @@ if __name__ == "__main__":
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
     # print(weather_postcodes)
-    if True:
-        p.processData(weather_postcodes, s3, dir_s3)
+    # if False:
+    #     p.processData(weather_postcodes, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
-    if False:
+    if True:
         n = 24  # number of process to run in parallel
         k = int(len(weather_postcodes) / n)  # get equal no of files for each process
 

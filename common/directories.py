@@ -61,6 +61,9 @@ uat = {
         },
         "land_registry": {
             "api_url": "http://landregistry.data.gov.uk/data/ppi/transaction-record",
+        },
+        "gas_historical": {
+            "api_url": "http://marketinformation.natgrid.co.uk/MIPIws-public/public/publicwebservice.asmx",
         }
     },
 
@@ -106,6 +109,13 @@ uat = {
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/"
     },
+    "s3_alp_wcf": {
+        "AlpWCF": "stage1/ALP/AlpWCF/"
+    },
+    "s3_alp_cv": {
+        "AlpCV": "stage1/ALP/AlpCV/"
+    },
+
     "s3_land_reg_key": {
         "LandRegistry": "stage1/LandRegistry/"
     },
@@ -179,6 +189,9 @@ prod = {
         },
         "land_registry": {
             "api_url": "http://landregistry.data.gov.uk/data/ppi/transaction-record",
+        },
+        "gas_historical": {
+            "api_url": "http://marketinformation.natgrid.co.uk/MIPIws-public/public/publicwebservice.asmx",
         }
     },
 
