@@ -240,6 +240,12 @@ prod = {
     "s3_land_reg_key": {
         "LandRegistry": "stage1/LandRegistry"
     },
+    "s3_alp_wcf": {
+        "AlpWCF": "stage1/ALP/AlpWCF/"
+    },
+    "s3_alp_cv": {
+        "AlpCV": "stage1/ALP/AlpCV/"
+    },
 
     "glue_ensek_job_name": "_process_ref_tables_prod",
     "glue_d18_job_name": "_process_ref_tables_prod",
