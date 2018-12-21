@@ -68,7 +68,7 @@ class IglooEPCCertificates:
 
     def extract_epc_data(self, data, postcode_sector, k, dir_s3):
         epc_rows_df = json_normalize(data, 'rows')
-        if (epc_rows_df.empty):
+        if epc_rows_df.empty:
             print(" - has no EPC data")
         else:
             epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
@@ -79,16 +79,14 @@ class IglooEPCCertificates:
             # print(epc_rows_df_string)
             k.set_contents_from_string(epc_rows_df_string)
 
-
-
-
     '''Format Json to handle null values'''
 
     def format_json_response(self, data):
-        data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_null = json.dumps(data, indent=4).replace('(null)', '')
+        # data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_str = data_null.replace('null', '""')
         data_json = json.loads(data_str)
         return data_json
-
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
@@ -98,22 +96,24 @@ class IglooEPCCertificates:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
-
     def processAccounts(self, postcode_sectors, k, _dir_s3):
 
-        api_url, head = util.get_epc_api_info('igloo_epc_certificates')
-        for postcode_sector in postcode_sectors:
-            t = con.api_config['total_no_of_calls']
-            print('postcode:' + str(postcode_sector))
-            msg_ac = 'ac:' + str(postcode_sector)
-            self.log_error(msg_ac, '')
-            api_url1 = api_url.format(postcode_sector)
-         #   print(api_url1)
-            epc_data_response = self.get_api_response(api_url1, head)
-
-            if epc_data_response:
-                formatted_json = self.format_json_response(epc_data_response)
-                self.extract_epc_data(formatted_json, postcode_sector, k, _dir_s3)
+        try:
+            api_url, head = util.get_epc_api_info('igloo_epc_certificates')
+            for postcode_sector in postcode_sectors:
+                t = con.api_config['total_no_of_calls']
+                print('postcode:' + str(postcode_sector))
+                msg_ac = 'ac:' + str(postcode_sector)
+                self.log_error(msg_ac, '')
+                api_url1 = api_url.format(postcode_sector)
+                # print(api_url1)
+                epc_data_response = self.get_api_response(api_url1, head)
+                # print(epc_data_response)
+                if epc_data_response:
+                    formatted_json = self.format_json_response(epc_data_response)
+                    self.extract_epc_data(formatted_json, postcode_sector, k, _dir_s3)
+        except Exception as e:
+            print("Exception in EPC Certificates" + str(e))
 
     def get_epc_postcode(self, config_sql):
         pr = db.get_redshift_connection()
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     postcode_sector_sql = con.test_config['epc_certificates_postcode_sql']
     postcode_sectors = p.get_epc_postcode(postcode_sector_sql)
 
-
+    # p.processAccounts(postcode_sectors, s3, dir_s3)
     ####### Multiprocessing Starts #########
 
     env = util.get_env()
