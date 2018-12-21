@@ -71,11 +71,12 @@ class IglooEPCCertificates:
         if epc_rows_df.empty:
             print(" - has no EPC data")
         else:
+            epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
             epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
             epc_rows_df = epc_rows_df.replace('"', '', regex=True)
             epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
             file_name_epc = 'igloo_epc_certificates' + '_' + postcode_sector.replace(' ', '') + '.csv'
-            k.key = dir_s3['s3_epc_key']['EPCCertificatesRaw'] + file_name_epc
+            k.key = dir_s3['s3_epc_key']['EPCCertificates'] + file_name_epc
             # print(epc_rows_df_string)
             k.set_contents_from_string(epc_rows_df_string)
 

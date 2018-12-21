@@ -76,7 +76,7 @@ class IglooEPCRecommendations:
             epc_rows_df = epc_rows_df.replace('"', '', regex=True)
             epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
             file_name_epc = 'igloo_epc_recommendations' + '_' + postcode_sector.replace(' ', '') + '.csv'
-            k.key = dir_s3['s3_epc_key']['EPCRecommendationsRaw'] + file_name_epc
+            k.key = dir_s3['s3_epc_key']['EPCRecommendations'] + file_name_epc
             # print(epc_rows_df_string)
             k.set_contents_from_string(epc_rows_df_string)
 
@@ -105,7 +105,7 @@ class IglooEPCRecommendations:
         api_url, head = util.get_epc_api_info('igloo_epc_recommendations')
         for lmkkey_sector in lmkkey_sectors:
             t = con.api_config['total_no_of_calls']
-            print('lmkkey:' + str(lmkkey_sector))
+            # print('lmkkey:' + str(lmkkey_sector))
             msg_ac = 'ac:' + str(lmkkey_sector)
             self.log_error(msg_ac, '')
             api_url1 = api_url.format(lmkkey_sector)
@@ -120,7 +120,7 @@ class IglooEPCRecommendations:
         pr = db.get_redshift_connection()
         lmkkey_df = pr.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
-        lmkkey_list = lmkkey_df['lmk-key'].values.tolist()
+        lmkkey_list = lmkkey_df['lmk_key'].values.tolist()
 
         return lmkkey_list
 
@@ -138,9 +138,10 @@ if __name__ == "__main__":
 
     lmkkey_sql = con.test_config['epc_recommendations_lmkkey_sql']
     print(lmkkey_sql)
+
     lmkkey_sectors = p.get_epc_lmkkey(lmkkey_sql)
 
-
+    # p.processAccounts(lmkkey_sectors, s3, dir_s3)
     ####### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':

@@ -11,6 +11,8 @@ from common import utils as util
 
 class StartEPCJobs:
     def __init__(self):
+        self.process_epc_cert_name = "EPC Certificates"
+        self.process_epc_reco_name = "EPC Recommendations"
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
@@ -91,36 +93,57 @@ class StartEPCJobs:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
-                print("Error occurred in Staging Job")
+                print("{0}: Error occurred in Staging Job".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
                 raise Exception
         except Exception as e:
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
+
+    def submit_ref_epc_certificates_gluejob(self):
+        try:
+            jobName = self.dir['glue_epc_job_name']
+            s3_bucket = self.dir['s3_bucket']
+            environment = self.env
+
+            obj = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc_certificates')
+            job_response = obj.run_glue_job()
+            if job_response:
+                print("{0}: Ref Glue Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_epc_cert_name))
+                # return staging_job_response
+            else:
+                print("{0}: Error occurred in {1} Job".format(datetime.now().strftime('%H:%M:%S'), self.process_epc_cert_name))
+                # return staging_job_response
+                raise Exception
+        except Exception as e:
+            print("Error in Ref Glue Job :- " + str(e))
+            sys.exit(1)
+
+
 if __name__ == '__main__':
 
     s = StartEPCJobs()
 
     # run processing epc certificates python script
-    print("{0}: process_epc certificates job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_process_epc_certificates_job()
 
     # run staging glue job epc  certificates
-    print("{0}: Staging Job  EPC Certificates is running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_epc_certificates_staging_gluejob()
 
-    # run processing epc recommendations python script
-    print("{0}: process_epc recommendations job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_process_epc_recommendations_job()
+    # # run processing epc recommendations python script
+    # print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
+    # s.submit_process_epc_recommendations_job()
+    # #
+    # # # run staging glue job recommendations
+    # print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
+    # s.submit_epc_recommendations_staging_gluejob()
 
-    # run staging glue job recommendations
-    print("{0}: Staging Job  EPC Recommendations is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_epc_recommendations_staging_gluejob()
-
-    # run d18 glue job
-    print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_d18_gluejob()
+    # run EPC Certificates glue job
+    print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
+    s.submit_ref_epc_certificates_gluejob()
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
