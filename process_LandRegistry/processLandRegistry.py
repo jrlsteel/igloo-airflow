@@ -104,7 +104,7 @@ class LandRegistry:
         land_registry_df = json_normalize(data)
 
         if land_registry_df.empty:
-            print(" - has no Weather data")
+            print(" - has no land registry data")
         else:
             land_registry_df1 = land_registry_df[meta_landreg]
             land_registry_df1._is_copy = False
