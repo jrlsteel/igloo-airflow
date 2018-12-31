@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     s = LandRegistry()
 
-    # run processing weather python script
+    # run processing land regsitry python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_stage1_job()
 

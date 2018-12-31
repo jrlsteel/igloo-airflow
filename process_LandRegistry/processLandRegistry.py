@@ -134,7 +134,7 @@ class LandRegistry:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(logs_dir_path + 'histortical_weather_log' + time.strftime('%d%m%Y') + '.csv',
+        with open(logs_dir_path + 'land_registry_log' + time.strftime('%d%m%Y') + '.csv',
                   mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
