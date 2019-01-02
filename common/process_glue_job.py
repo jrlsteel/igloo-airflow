@@ -65,7 +65,7 @@ class ProcessGlueJob:
             exception_state = ['STOPPED', 'FAILED', 'TIMEOUT']
 
             while job_status.upper() not in job_completed_state:
-                sleep(10)
+                sleep(60)
                 job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
                 if job_status.upper() in exception_state and self.process_job == running_job:
                     raise Exception("Job stopped with status {0}. Please check the job id - {1}".format(job_status.upper(), job_run_id))

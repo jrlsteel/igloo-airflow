@@ -102,8 +102,8 @@ uat = {
     },
 
     "s3_epc_key": {
-        "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
-        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
+        "EPCCertificates": "stage1/EPC/EPCCertificates/",
+        "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
     },
 
     "s3_weather_key": {
@@ -122,6 +122,9 @@ uat = {
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
+    "glue_historicalweather_jobname": "_process_ref_tables_uat",
+    "glue_epc_job_name": "_process_ref_tables_uat",
+    "glue_land_registry_job_name": "_process_ref_tables_uat",
     "glue_customerDB_job_name": "_process_ref_customerdb_uat",
     "glue_staging_job_name": "process_staging_files_uat"
 
@@ -230,8 +233,8 @@ prod = {
     },
 
     "s3_epc_key": {
-        "EPCCertificatesRaw": "stage1/EPC/EPCCertificatesRaw/",
-        "EPCRecommendationsRaw": "stage1/EPC/EPCRecommendationsRaw/"
+        "EPCCertificates": "stage1/EPC/EPCCertificates/",
+        "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
     },
 
     "s3_weather_key": {
@@ -249,6 +252,9 @@ prod = {
 
     "glue_ensek_job_name": "_process_ref_tables_prod",
     "glue_d18_job_name": "_process_ref_tables_prod",
+    "glue_historicalweather_jobname": "_process_ref_tables_uat",
+    "glue_epc_job_name": "_process_ref_tables_prod",
+    "glue_land_registry_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod"
 

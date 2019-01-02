@@ -37,8 +37,6 @@ class HistoricalWeather:
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
 
-
-
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
     def get_api_response(self, api_url):
@@ -161,7 +159,7 @@ if __name__ == "__main__":
 
     # print(weather_postcodes)
     # if False:
-    #     p.processData(weather_postcodes, s3, dir_s3)
+    # p.processData(weather_postcodes, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
     env = util.get_env()

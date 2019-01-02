@@ -53,7 +53,7 @@ class Weather:
 
     def submit_ref_gluejob(self):
         try:
-            jobName = self.dir['glue_d18_job_name']
+            jobName = self.dir['glue_historicalweather_jobname']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 

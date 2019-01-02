@@ -109,9 +109,9 @@ if __name__ == '__main__':
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_cv_staging_gluejob()
 
-    # run d18 glue job
-    print("{0}: Historical Weather Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_weather_gluejob()
+    # # run d18 glue job
+    # print("{0}: Historical Weather Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_weather_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

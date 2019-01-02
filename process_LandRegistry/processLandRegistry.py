@@ -104,7 +104,7 @@ class LandRegistry:
         land_registry_df = json_normalize(data)
 
         if land_registry_df.empty:
-            print(" - has no Weather data")
+            print(" - has no land registry data")
         else:
             land_registry_df1 = land_registry_df[meta_landreg]
             land_registry_df1._is_copy = False
@@ -134,7 +134,7 @@ class LandRegistry:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(logs_dir_path + 'histortical_weather_log' + time.strftime('%d%m%Y') + '.csv',
+        with open(logs_dir_path + 'land_registry_log' + time.strftime('%d%m%Y') + '.csv',
                   mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
