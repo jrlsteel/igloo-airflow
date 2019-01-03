@@ -32,8 +32,9 @@ class HistoricalWeather:
 
         self.day_of_week = datetime.today().isoweekday()
         self.end_date = datetime.today().date() + timedelta(days=(7-self.day_of_week))
-        no_of_days = (5 * 7) # 5 weeks
-        self.start_date = self.end_date - timedelta(days=(no_of_days-1))
+        # no_of_days = (5 * 7)  # 5 weeks
+        # self.start_date = self.end_date - timedelta(days=(no_of_days-1))
+        self.start_date = datetime.strptime('2018-11-18', '%Y-%m-%d').date()
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
 
@@ -153,7 +154,8 @@ if __name__ == "__main__":
 
 
     s3 = s3_con(bucket_name)
-    weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SW1Y', 'IV15','AB13','BT79','L66') group by left(postcode, len(postcode) - 3)",
+    # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('AB14') group by left(postcode, len(postcode) - 3)"
+    # weather_postcode_sql = weather_sql
     weather_postcode_sql = con.test_config['weather_sql']
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
@@ -196,6 +198,6 @@ if __name__ == "__main__":
 
     for process in processes:
         process.join()
-    ####### Multiprocessing Ends #########
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    ####### Multiprocessing Ends #########

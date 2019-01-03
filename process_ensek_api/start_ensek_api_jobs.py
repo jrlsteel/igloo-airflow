@@ -122,9 +122,9 @@ class StartEnsekJobs:
 if __name__ == '__main__':
     s = StartEnsekJobs()
 
-    # run schema validation job
-    print("{0}: Schema validation running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_schema_validations()
+    # # run schema validation job
+    # print("{0}: Schema validation running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_schema_validations()
 
     # run all ensek scripts
     print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
