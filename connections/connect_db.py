@@ -34,6 +34,18 @@ def get_redshift_connection():
         sys.exit("Error : " + str(e))
 
 
+def get_redshift_connection_prod():
+    try:
+        pr.connect_to_redshift(host=con.redshift_config_prod['host'], port=con.redshift_config_prod['port'],
+                               user=con.redshift_config_prod['user'], password=con.redshift_config_prod['pwd'],
+                               dbname=con.redshift_config_prod['db'])
+        print("Connected to Redshift")
+        return pr
+
+    except ConnectionError as e:
+        sys.exit("Error : " + str(e))
+
+
 def close_redshift_connection():
     pr.close_up_shop()
     print("Connection to Redshift Closed")
