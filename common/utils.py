@@ -41,6 +41,7 @@ def get_Users_from_s3(k):
 def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
+    account_ids = []
     if env_conf == 'prod':
         conn = db.get_rds_connection()
         cur = conn.cursor()
