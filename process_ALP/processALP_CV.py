@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     ##### Multiprocessing Starts #########
     #'''Disable if teh above is not commented out'''
-
+    env = util.get_env()
     if env == 'uat':
         n = 13  # number of process to run in parallel
     else:
