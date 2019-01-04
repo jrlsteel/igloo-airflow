@@ -1,8 +1,3 @@
-from conf import config as con
-from common import utils as util
-from connections.connect_db import get_boto_S3_Connections as s3_con
-
-
 import timeit
 import requests
 import pandas
@@ -20,6 +15,10 @@ import sys
 import os
 
 sys.path.append('..')
+
+from conf import config as con
+from common import utils as util
+from connections.connect_db import get_boto_S3_Connections as s3_con
 
 
 class ALPHistoricalCV:
