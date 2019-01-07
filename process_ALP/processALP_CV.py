@@ -108,7 +108,7 @@ class ALPHistoricalCV:
             applicable_at = data.find('d:ApplicableAt', ns).text
             applicable_for = data.find('d:ApplicableFor', ns).text
             value = float(data.find('d:Value', ns).text)
-            print(name, applicable_at, applicable_for, value)
+            # print(name, applicable_at, applicable_for, value)
 
             alp_cv_df = pandas.DataFrame([[name,applicable_at,applicable_for,value]],columns=['name','applicable_at','applicable_for','value'])
 
@@ -121,12 +121,11 @@ class ALPHistoricalCV:
                 week_number_iso = start_date.strftime("%V")
                 year = start_date.strftime("%Y")
                 start_date_string = str(start_date)
-                print(start_date)
+                # print(start_date)
                 alp_cv_df_string = alp_cv_df.to_csv(None, index=False)
                 file_name_alp_cv = 'alp_cv_historical' + '_' + cv_folder.strip() + '_' + start_date_string + '.csv'
                 k.key = dir_s3['s3_alp_cv']['AlpCV'] + file_name_alp_cv
                 k.set_contents_from_string(alp_cv_df_string)
-            print(alp_cv_df)
 
 
     def format_xml_response(self, data):
@@ -156,6 +155,7 @@ class ALPHistoricalCV:
                     _end_date = self.end_date
 
                 api_url1 = self.api_url.format(cv_folder)
+                print(api_url1)
                 api_response = self.get_api_response(api_url1, _end_date, _start_date, cv_folder)
 
 

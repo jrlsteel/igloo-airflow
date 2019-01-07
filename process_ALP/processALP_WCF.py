@@ -108,7 +108,7 @@ class ALPHistoricalWCF:
             applicable_at = data.find('d:ApplicableAt', ns).text
             applicable_for = data.find('d:ApplicableFor', ns).text
             value = float(data.find('d:Value', ns).text)
-            print(name, applicable_at, applicable_for, value)
+            # print(name, applicable_at, applicable_for, value)
 
             alp_wcf_df = pandas.DataFrame([[name,applicable_at,applicable_for,value]],columns=['name','applicable_at','applicable_for','value'])
 
@@ -170,9 +170,9 @@ if __name__ == "__main__":
 
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
-    # print(bucket_name)
+    print(bucket_name)
     s3 = s3_con(bucket_name)
-    # print(s3)
+    print(s3)
     wcf_folders = []
 
     wcf_folders = con.test_config['WCFFolders']
