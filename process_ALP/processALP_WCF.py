@@ -112,7 +112,6 @@ class ALPHistoricalWCF:
 
             alp_wcf_df = pandas.DataFrame([[name,applicable_at,applicable_for,value]],columns=['name','applicable_at','applicable_for','value'])
 
-        #
             if alp_wcf_df.empty:
                  print(" - has no Weather data")
             else:
@@ -121,13 +120,11 @@ class ALPHistoricalWCF:
                 week_number_iso = start_date.strftime("%V")
                 year = start_date.strftime("%Y")
                 start_date_string = str(start_date)
-                print(start_date)
+                # print(start_date)
                 alp_wcf_df_string = alp_wcf_df.to_csv(None, index=False)
                 file_name_alp_wcf = 'alp_wcf_historical' + '_' + wcf_folder.strip() + '_' + start_date_string + '.csv'
                 k.key = dir_s3['s3_alp_wcf']['AlpWCF'] + file_name_alp_wcf
                 k.set_contents_from_string(alp_wcf_df_string)
-            print(alp_wcf_df)
-
 
     def format_xml_response(self, data):
         data_xml = etree.fromstring(data)
@@ -154,8 +151,8 @@ class ALPHistoricalWCF:
                 _end_date = _start_date + datetime.timedelta(days=1)
                 if _end_date > self.end_date:
                     _end_date = self.end_date
-
                 api_url1 = self.api_url.format(wcf_folder)
+                print(api_url1)
                 api_response = self.get_api_response(api_url1, _end_date, _start_date, wcf_folder)
 
 
@@ -173,9 +170,9 @@ if __name__ == "__main__":
 
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
-    print(bucket_name)
+    # print(bucket_name)
     s3 = s3_con(bucket_name)
-    print(s3)
+    # print(s3)
     wcf_folders = []
 
     wcf_folders = con.test_config['WCFFolders']
