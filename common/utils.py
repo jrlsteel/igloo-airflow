@@ -65,7 +65,8 @@ def get_accountID_fromDB(get_max):
         if get_max:
             account_ids = list(range(1, max(account_id_list1) + 1))
             # account_ids = list(range(max(account_ids)-10, max(account_ids)+1))
-
+        else:
+            account_ids = account_id_list1
     return account_ids
 
 

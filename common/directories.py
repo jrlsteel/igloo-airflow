@@ -41,6 +41,14 @@ uat = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory"
         },
 
+        "live_balances": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalances"
+        },
+
+        "live_balances_with_detail": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalancesWithDetail"
+        },
+
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
         "igloo_epc_certificates": {
@@ -89,7 +97,9 @@ uat = {
         "TariffHistoryGasStandCharge": "stage1/TariffHistoryGasStandCharge/",
         "TariffHistoryGasUnitRates": "stage1/TariffHistoryGasUnitRates/",
         "DirectDebit": "stage1/DirectDebit/",
-        "ReadingsBilleable": "stage1/ReadingsBilleable/"
+        "ReadingsBilleable": "stage1/ReadingsBilleable/",
+        "LiveBalances": "stage1/LiveBalances/",
+        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/"
     },
 
     "s3_d18_key": {
@@ -172,6 +182,13 @@ prod = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory"
         },
 
+        "live_balances": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalances"
+        },
+        "live_balances_with_detail": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalancesWithDetail"
+        },
+
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
         "igloo_epc_certificates": {
@@ -220,7 +237,9 @@ prod = {
         "TariffHistoryGasStandCharge": "stage1/TariffHistoryGasStandCharge/",
         "TariffHistoryGasUnitRates": "stage1/TariffHistoryGasUnitRates/",
         "DirectDebit": "stage1/DirectDebit/",
-        "ReadingsBilleable": "stage1/ReadingsBilleable/"
+        "ReadingsBilleable": "stage1/ReadingsBilleable/",
+        "LiveBalances": "stage1/LiveBalances/",
+        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/"
     },
 
     "s3_d18_key": {
@@ -241,7 +260,7 @@ prod = {
         "HistoricalWeather": "stage1/HistoricalWeather/"
     },
     "s3_land_reg_key": {
-        "LandRegistry": "stage1/LandRegistry"
+        "LandRegistry": "stage1/LandRegistry/"
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
