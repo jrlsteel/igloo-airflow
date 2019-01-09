@@ -98,7 +98,7 @@ class LiveBalances:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(sys.path[0] + '/logs/' + 'live_balance_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
+        with open(sys.path[0] + '/logs/' + 'live_balances_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     ####### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':
-        n = 24  # number of process to run in parallel
+        n = 12  # number of process to run in parallel
     else:
         n = 24
 
