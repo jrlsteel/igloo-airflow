@@ -5,6 +5,10 @@ uat = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
         },
 
+        "meterpoints_history": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints?includeHistory=true"
+        },
+
         "meterpoints_readings": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints/{1}/Readings"
         },
@@ -99,8 +103,18 @@ uat = {
         "DirectDebit": "stage1/DirectDebit/",
         "ReadingsBilleable": "stage1/ReadingsBilleable/",
         "LiveBalances": "stage1/LiveBalances/",
-        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/"
+        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/",
+
+        "MeterPointsHistory": "stage1/MeterPointsHistory/",
+        "MeterPointsAttributesHistory": "stage1/MeterPointsAttributesHistory/",
+        "MetersHistory": "stage1/MetersHistory/",
+        "MetersAttributesHistory": "stage1/MetersAttributesHistory/",
+        "RegistersHistory": "stage1/RegistersHistory/",
+        "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
+        "ReadingsHistory": "stage1/ReadingsHistory/",
+        "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
     },
+
 
     "s3_d18_key": {
         "D18Raw": "stage1/D18/D18Raw/",
@@ -144,6 +158,10 @@ prod = {
     "apis": {
         "meterpoints": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
+        },
+
+        "meterpoints_history": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints?includeHistory=true"
         },
 
         "meterpoints_readings": {
@@ -239,7 +257,16 @@ prod = {
         "DirectDebit": "stage1/DirectDebit/",
         "ReadingsBilleable": "stage1/ReadingsBilleable/",
         "LiveBalances": "stage1/LiveBalances/",
-        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/"
+        "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/",
+
+        "MeterPointsHistory": "stage1/MeterPointsHistory/",
+        "MeterPointsAttributesHistory": "stage1/MeterPointsAttributesHistory/",
+        "MetersHistory": "stage1/MetersHistory/",
+        "MetersAttributesHistory": "stage1/MetersAttributesHistory/",
+        "RegistersHistory": "stage1/RegistersHistory/",
+        "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
+        "ReadingsHistory": "stage1/ReadingsHistory/",
+        "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
     },
 
     "s3_d18_key": {
