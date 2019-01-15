@@ -63,6 +63,15 @@ def process_all_ensek_scripts():
     except:
         raise
 
+    print("{0}: >>>> Live Balances <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekApiAccountsLiveBalances.py"])
+        print("{0}: Live Balances completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                       float(timeit.default_timer() - start)))
+    except:
+        raise
+
     return True
 
 
