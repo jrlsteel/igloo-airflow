@@ -1,5 +1,4 @@
-import timeit
-
+import multiprocessing
 import requests
 import json
 from pandas.io.json import json_normalize
@@ -7,8 +6,8 @@ from ratelimit import limits, sleep_and_retry
 import time
 from requests import ConnectionError
 import csv
-import multiprocessing
 from multiprocessing import freeze_support
+import timeit
 
 import sys
 import os
@@ -74,6 +73,18 @@ class DirectDebit:
         k.key = dir_s3_key['s3_key']['DirectDebit'] + filename_direct_debit
         k.set_contents_from_string(df_direct_debit_string)
 
+    def extract_direct_debit_health_check_json(self, data, account_id, k, dir_s3_key):
+        # global k
+        meta_data_subscription = ['DirectDebitType', 'BankAccountIsActive', 'DirectDebitStatus', 'NextAvailablePaymentDate', 'AccountName', 'Amount', 'BankName', 'BankAccount', 'PaymentDate',
+                                  'Reference', 'SortCode']
+        df_direct_debit = json_normalize(data, record_path=['SubscriptionDetails'], meta=meta_data_subscription)
+        df_direct_debit['account_id'] = account_id
+        filename_direct_debit = 'dd_heath_check_' + str(account_id) + '.csv'
+        df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
+        # print(df_direct_debit_string)
+        k.key = dir_s3_key['s3_key']['DirectDebitHealthCheck'] + filename_direct_debit
+        k.set_contents_from_string(df_direct_debit_string)
+
     def format_json_response(self, data):
         data_str = json.dumps(data, indent=4).replace('null', '""')
         data_json = json.loads(data_str)
@@ -89,9 +100,11 @@ class DirectDebit:
 
     def processAccounts(self, account_ids, k, dir_s3):
         api_url, head = util.get_ensek_api_info1('direct_debits')
+        api_url_ddh, head_ddh = util.get_ensek_api_info1('direct_debits_heath_check')
+
         for account_id in account_ids:
             t = con.api_config['total_no_of_calls']
-            # Get Account Staus
+            # Get Direct Debit
             print('ac: ' + str(account_id))
             msg_ac = 'ac:' + str(account_id)
             self.log_error(msg_ac, '')
@@ -101,6 +114,21 @@ class DirectDebit:
                 formatted_dd = self.format_json_response(dd_response)
                 # print(json.dumps(formatted_dd))
                 self.extract_direct_debit_json(formatted_dd, account_id, k, dir_s3)
+            else:
+                print('ac:' + str(account_id) + ' has no data')
+                msg_ac = 'ac:' + str(account_id) + ' has no data'
+                self.log_error(msg_ac, '')
+
+            # Get Direct Debit Health Check
+            print('ac: ' + str(account_id))
+            msg_ac = 'ac:' + str(account_id)
+            self.log_error(msg_ac, '')
+            api_url_ddh1 = api_url_ddh.format(account_id)
+            ddh_response = self.get_api_response(api_url_ddh1, head_ddh)
+            if ddh_response:
+                formatted_ddh = self.format_json_response(ddh_response)
+                # print(json.dumps(formatted_dd))
+                self.extract_direct_debit_health_check_json(formatted_ddh, account_id, k, dir_s3)
             else:
                 print('ac:' + str(account_id) + ' has no data')
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
@@ -136,7 +164,7 @@ if __name__ == "__main__":
     ###### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':
-        n = 12  # number of process to run in parallel
+        n = 24  # number of process to run in parallel
     else:
         n = 24
     k = int(len(account_ids) / n)  # get equal no of files for each process
