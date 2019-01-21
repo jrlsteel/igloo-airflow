@@ -56,7 +56,9 @@ uat = {
         "live_balances_with_detail": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalancesWithDetail"
         },
-
+        "account_transactions": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Transactions"
+        },
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
         "igloo_epc_certificates": {
@@ -108,7 +110,7 @@ uat = {
         "ReadingsBilleable": "stage1/ReadingsBilleable/",
         "LiveBalances": "stage1/LiveBalances/",
         "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/",
-
+        "AccountTransactions": "stage1/AccountTransactions/",
         "MeterPointsHistory": "stage1/MeterPointsHistory/",
         "MeterPointsAttributesHistory": "stage1/MeterPointsAttributesHistory/",
         "MetersHistory": "stage1/MetersHistory/",
@@ -214,6 +216,9 @@ prod = {
         "live_balances_with_detail": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/LiveBalancesWithDetail"
         },
+        "account_transactions": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Transactions"
+        },
 
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
@@ -266,7 +271,7 @@ prod = {
         "ReadingsBilleable": "stage1/ReadingsBilleable/",
         "LiveBalances": "stage1/LiveBalances/",
         "LiveBalancesWithDetail": "stage1/LiveBalancesWithDetail/",
-
+        "AccountTransactions": "stage1/AccountTransactions/",
         "MeterPointsHistory": "stage1/MeterPointsHistory/",
         "MeterPointsAttributesHistory": "stage1/MeterPointsAttributesHistory/",
         "MetersHistory": "stage1/MetersHistory/",
