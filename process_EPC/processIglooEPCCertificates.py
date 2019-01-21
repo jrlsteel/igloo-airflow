@@ -5,7 +5,6 @@ import json
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import time
-import datetime
 from requests import ConnectionError
 import csv
 import multiprocessing

@@ -2,7 +2,6 @@ import sys
 from datetime import datetime
 import timeit
 import subprocess
-import platform
 
 sys.path.append('..')
 from common import process_glue_job as glue
