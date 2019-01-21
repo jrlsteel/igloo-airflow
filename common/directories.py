@@ -21,6 +21,10 @@ uat = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits"
         },
 
+        "direct_debits_heath_check": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits/HealthCheck"
+        },
+
         "internal_estimates": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/accounts/{0}/estimatedusage"
         },
@@ -174,6 +178,10 @@ prod = {
 
         "direct_debits": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits"
+        },
+
+        "direct_debits_heath_check": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/DirectDebits/HealthCheck"
         },
 
         "internal_estimates": {
