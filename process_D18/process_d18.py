@@ -1,5 +1,4 @@
 import sys
-import os
 import multiprocessing
 from time import sleep
 from multiprocessing import freeze_support
