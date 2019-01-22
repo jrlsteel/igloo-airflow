@@ -73,7 +73,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Account Transactions <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiAccountTrsanctions.py"])
+        subprocess.run([pythonAlias, "processEnsekApiTransactions.py"])
         print("{0}: Account Transactions completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                        float(timeit.default_timer() - start)))
     except:
