@@ -103,7 +103,7 @@ class AccountTransactions:
             api_response_at = self.get_api_response(api_url_at1, head_lb)
 
             if api_response_at:
-                formatted_reponse_at = api_response_at
+                formatted_reponse_at = self.format_json_response(api_response_at)
                 self.extract_account_transactions_json(formatted_reponse_at, account_id, k, dir_s3)
             else:
                 print('ac:' + str(account_id) + ' has no data for Account Transactions')
