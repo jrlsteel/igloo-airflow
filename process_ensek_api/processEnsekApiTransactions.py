@@ -68,7 +68,7 @@ class AccountTransactions:
         df_account_transactions['account_id'] = account_id
         filename_account_transactions = 'account_transactions_' + str(account_id) + '.csv'
         df_account_transactions_string = df_account_transactions.to_csv(None, index=False)
-        # print(df_live_balances_string)
+        # print(df_account_transactions_string)
 
         k.key = dir_s3['s3_key']['AccountTransactions'] + filename_account_transactions
         k.set_contents_from_string(df_account_transactions_string)
@@ -99,8 +99,8 @@ class AccountTransactions:
             print('ac: ' + str(account_id))
 
             # Get Accounts Transactions
-            api_url_at = api_url_at.format(account_id)
-            api_response_at = self.get_api_response(api_url_at, head_lb)
+            api_url_at1 = api_url_at.format(account_id)
+            api_response_at = self.get_api_response(api_url_at1, head_lb)
 
             if api_response_at:
                 formatted_reponse_at = api_response_at
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
-    # p = LiveBalances()
+    # p = AccountTransactions()
     # p.processAccounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
@@ -146,7 +146,6 @@ if __name__ == "__main__":
         n = 24
 
     k = int(len(account_ids) / n)  # get equal no of files for each process
-
 
     print(len(account_ids))
     print(k)
