@@ -86,26 +86,6 @@ class StartD18Jobs:
             print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
-    def submit_eac_gluejob(self):
-        try:
-            jobName = self.dir['glue_eac_job_name']
-            s3_bucket = self.dir['s3_bucket']
-            environment = self.env
-
-            obj_d18 = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                          processJob='eac')
-            d18_job_response = obj_d18.run_glue_job()
-            if d18_job_response:
-                print("{0}: EAC Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                # return staging_job_response
-            else:
-                print("Error occurred in EAC Job")
-                # return staging_job_response
-                raise Exception
-        except Exception as e:
-            print("Error in EAC Job :- " + str(e))
-            sys.exit(1)
-
 
 if __name__ == '__main__':
 
@@ -126,10 +106,6 @@ if __name__ == '__main__':
     # run d18 glue job
     print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_gluejob()
-
-    # run eac calculation job
-    print("{0}: EAC Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_eac_gluejob()
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
