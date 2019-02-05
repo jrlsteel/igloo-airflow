@@ -36,7 +36,7 @@ class ProcessALPDAF:
                 if not os.path.exists(self.alp_daf_dir):
                     os.makedirs(self.alp_daf_dir)
 
-                filename = alp_pn_key.replace('ensek-meterpoints/alp/alp-daf/', '')
+                filename = alp_daf_key.replace('ensek-meterpoints/alp/alp-daf/', '')
                 file_alp_daf_csv = filename.replace('.LPA', '_alp_daf.csv')
 
                 # initializing variables
