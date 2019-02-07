@@ -43,17 +43,31 @@ def get_accountID_fromDB(get_max):
 
     account_ids = []
     if env_conf == 'prod':
-        conn = db.get_rds_connection()
-        cur = conn.cursor()
-        cur.execute(con.test_config['account_ids_sql'])
-        account_ids = [row[0] for row in cur]
+        # NOTE Fudge from home vpn
 
+        # conn = db.get_rds_connection()
+        # cur = conn.cursor()
+        # cur.execute(con.test_config['account_ids_sql'])
+        # account_ids = [row[0] for row in cur]
+        #
+        # # logic to get max external id and process all the id within them
+        # if get_max:
+        #     account_ids = list(range(1, max(account_ids)+200))
+        #     # account_ids = list(range(max(account_ids)-10, max(account_ids)+1))
+        #
+        # db.close_rds_connection(cur, conn)
+        rd_conn = db.get_redshift_connection_prod()
+        config_sql = con.test_config['account_ids_sql_prod']
+        account_id_df = rd_conn.redshift_to_pandas(config_sql)
+        db.close_redshift_connection()
+        account_id_list = account_id_df.values.tolist()
+        account_id_list1 = [row[0] for row in account_id_list]
         # logic to get max external id and process all the id within them
         if get_max:
-            account_ids = list(range(1, max(account_ids)+1))
+            account_ids = list(range(1, max(account_id_list1) + 1))
             # account_ids = list(range(max(account_ids)-10, max(account_ids)+1))
-
-        db.close_rds_connection(cur, conn)
+        else:
+            account_ids = account_id_list1
     else:
         rd_conn = db.get_redshift_connection_prod()
         config_sql = con.test_config['account_ids_sql_prod']

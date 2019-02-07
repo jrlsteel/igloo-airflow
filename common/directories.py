@@ -1,6 +1,9 @@
 ############ Url and token for Ensek Api's ##############
 uat = {
     "apis": {
+        "accounts": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}"
+        },
         "meterpoints": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
         },
@@ -82,12 +85,16 @@ uat = {
         },
         "gas_historical": {
             "api_url": "http://marketinformation.natgrid.co.uk/MIPIws-public/public/publicwebservice.asmx",
+        },
+        "igloo_zendesk_user_tickets": {
+            "api_url": "https://iglooenergy.zendesk.com/api/v2/users/{0}/tickets/requested.json",
         }
     },
 
     "s3_bucket": "igloo-data-warehouse-uat",
 
     "s3_key": {
+        "Accounts": "stage1/Accounts/",
         "MeterPoints": "stage1/MeterPoints/",
         "MeterPointsAttributes": "stage1/MeterPointsAttributes/",
         "Meters": "stage1/Meters/",
@@ -135,6 +142,10 @@ uat = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_zendesk_igloo_key": {
+        "ZendeskUserTickets": "stage1/Zendesk/UserTickets/"
     },
 
     "s3_weather_key": {
@@ -153,6 +164,7 @@ uat = {
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
+    "glue_zendesk_job_name": "_process_ref_tables_uat",
     "glue_historicalweather_jobname": "_process_ref_tables_uat",
     "glue_eac_aq_job_name": "_process_ref_tables_uat",
     "glue_epc_job_name": "_process_ref_tables_uat",
@@ -165,6 +177,9 @@ uat = {
 
 prod = {
     "apis": {
+        "accounts": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}"
+        },
         "meterpoints": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
         },
@@ -246,12 +261,16 @@ prod = {
         },
         "gas_historical": {
             "api_url": "http://marketinformation.natgrid.co.uk/MIPIws-public/public/publicwebservice.asmx",
+        },
+        "igloo_zendesk_historical": {
+            "api_url": "https://iglooenergy.zendesk.com/api/v2/users/{0}/tickets/requested.json",
         }
     },
 
     "s3_bucket": "igloo-data-warehouse-prod",
 
     "s3_key": {
+        "Accounts": "stage1/Accounts/",
         "MeterPoints": "stage1/MeterPoints/",
         "MeterPointsAttributes": "stage1/MeterPointsAttributes/",
         "Meters": "stage1/Meters/",
@@ -298,6 +317,10 @@ prod = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_zendesk_igloo_key": {
+        "ZendeskUserTickets": "stage1/Zendesk/UserTickets/"
     },
 
     "s3_weather_key": {
