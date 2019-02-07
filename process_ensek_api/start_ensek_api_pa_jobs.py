@@ -4,8 +4,6 @@ from datetime import datetime
 sys.path.append('..')
 
 from process_ensek_api import processAllEnsekPAScripts as ae
-from process_D18 import start_d18_jobs as d18
-from process_ALP import start_alp_historical_jobs as alp
 from common import process_glue_job as glue
 
 from common import utils as util
@@ -31,21 +29,6 @@ class StartEnsekPAJobs:
             print("Error in Ensek Scripts :- " + str(e))
             sys.exit(1)
 
-    def submit_all_d18_scripts(self):
-        try:
-            d18_job = d18.StartD18Jobs()
-            d18_job.main(d18_job)
-        except Exception as e:
-            print("Error in D181 Job :- " + str(e))
-            sys.exit(1)
-
-    def submit_all_alp_scripts(self):
-        try:
-            alp_job = alp.ALP()
-            alp_job.main(alp_job)
-        except Exception as e:
-            print("Error in ALP Job :- " + str(e))
-            sys.exit(1)
 
     def submit_ensek_staging_Gluejob(self):
         try:
@@ -135,6 +118,10 @@ if __name__ == '__main__':
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_customerDB_Gluejob()
 
+    # run PA Ensek Jobs
+    print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_all_ensek_pa_scripts()
+
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
@@ -142,8 +129,8 @@ if __name__ == '__main__':
     print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
 
-    # run eac and aq calculation job
-    print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_eac_aq_gluejob()
+    # # run eac and aq calculation job
+    # print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_eac_aq_gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
