@@ -34,7 +34,7 @@ class StartEnsekPAJobs:
     def submit_all_d18_scripts(self):
         try:
             d18_job = d18.StartD18Jobs()
-            d18_job.main()
+            d18_job.main(d18_job)
         except Exception as e:
             print("Error in D181 Job :- " + str(e))
             sys.exit(1)
@@ -42,7 +42,7 @@ class StartEnsekPAJobs:
     def submit_all_alp_scripts(self):
         try:
             alp_job = alp.ALP()
-            alp_job.main()
+            alp_job.main(alp_job)
         except Exception as e:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)

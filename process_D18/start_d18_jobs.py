@@ -86,7 +86,7 @@ class StartD18Jobs:
             print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
-    def main(self):
+    def main(self, s):
         # run download d18 python script
         print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_download_d18_job()
@@ -108,6 +108,6 @@ class StartD18Jobs:
 if __name__ == '__main__':
 
     s = StartD18Jobs()
-    s.main()
+    s.main(s)
 
 

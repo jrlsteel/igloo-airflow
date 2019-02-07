@@ -107,7 +107,7 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
-    def main(self):
+    def main(self, s):
         # run processing weather python script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         s.submit_process_alp_wcf_job()
@@ -134,7 +134,7 @@ class ALP:
 if __name__ == '__main__':
 
     s = ALP()
-    s.main()
+    s.main(s)
 
 
 
