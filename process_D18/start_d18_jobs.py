@@ -86,28 +86,26 @@ class StartD18Jobs:
             print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
-    def main(self, s):
-        # run download d18 python script
-        print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_download_d18_job()
-
-        # run processing d18 python script
-        print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_process_d18_job()
-
-        # run staging glue job
-        print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_d18_staging_gluejob()
-
-        # run d18 glue job
-        print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_d18_gluejob()
-
-        print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
 if __name__ == '__main__':
 
     s = StartD18Jobs()
-    s.main(s)
 
+    # run download d18 python script
+    print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_download_d18_job()
+
+    # run processing d18 python script
+    print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_process_d18_job()
+
+    # run staging glue job
+    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_d18_staging_gluejob()
+
+    # run d18 glue job
+    print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_d18_gluejob()
+
+    print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
