@@ -130,17 +130,10 @@ class StartEnsekPAJobs:
 if __name__ == '__main__':
     s = StartEnsekPAJobs()
 
-    # # run Customer DB
+
+    # run Customer DB
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_customerDB_Gluejob()
-
-    # # run d18
-    print("{0}:  D18 Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_all_d18_scripts()
-
-    # run ALP
-    print("{0}: ALP Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_all_alp_scripts()
 
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
