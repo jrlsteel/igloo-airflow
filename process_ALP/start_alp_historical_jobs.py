@@ -107,30 +107,34 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
+    def main(self):
+        # run processing weather python script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_process_alp_wcf_job()
+
+        # run processing weather python script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_process_alp_cv_job()
+
+        # run staging glue job
+        print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_alp_wcf_staging_gluejob()
+
+        # run staging glue job
+        print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_alp_cv_staging_gluejob()
+
+        # run alp glue job
+        print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_alp_gluejob()
+
+        print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+
 
 if __name__ == '__main__':
 
     s = ALP()
+    s.main()
 
-    # run processing weather python script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_process_alp_wcf_job()
 
-    # run processing weather python script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_process_alp_cv_job()
-
-    # run staging glue job
-    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_alp_wcf_staging_gluejob()
-
-    # run staging glue job
-    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_alp_cv_staging_gluejob()
-
-    # run alp glue job
-    print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_alp_gluejob()
-
-    print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

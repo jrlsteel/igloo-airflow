@@ -4,6 +4,8 @@ from datetime import datetime
 sys.path.append('..')
 
 from process_ensek_api import processAllEnsekPAScripts as ae
+from process_D18 import start_d18_jobs as d18
+from process_ALP import start_alp_historical_jobs as alp
 from common import process_glue_job as glue
 
 from common import utils as util
@@ -27,6 +29,22 @@ class StartEnsekPAJobs:
                 raise Exception
         except Exception as e:
             print("Error in Ensek Scripts :- " + str(e))
+            sys.exit(1)
+
+    def submit_all_d18_scripts(self):
+        try:
+            d18_job = d18.StartD18Jobs()
+            d18_job.main()
+        except Exception as e:
+            print("Error in D181 Job :- " + str(e))
+            sys.exit(1)
+
+    def submit_all_alp_scripts(self):
+        try:
+            alp_job = alp.ALP()
+            alp_job.main()
+        except Exception as e:
+            print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
     def submit_ensek_staging_Gluejob(self):
@@ -116,15 +134,19 @@ if __name__ == '__main__':
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_customerDB_Gluejob()
 
-    # run all ensek scripts
-    print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_all_ensek_pa_scripts()
+    # # run d18
+    print("{0}:  D18 Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_all_d18_scripts()
+
+    # run ALP
+    print("{0}: ALP Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_all_alp_scripts()
 
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
 
-    print("{0}: Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
 
     # run eac and aq calculation job

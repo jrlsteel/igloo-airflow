@@ -149,10 +149,10 @@ if __name__ == '__main__':
     s.submit_all_ensek_scripts()
 
     # run staging glue job
-    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Ensek Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
 
-    print("{0}: Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
