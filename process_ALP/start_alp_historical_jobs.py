@@ -107,30 +107,54 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
+    def submit_eac_aq_gluejob(self):
+        try:
+            jobName = self.dir['glue_eac_aq_job_name']
+            s3_bucket = self.dir['s3_bucket']
+            environment = self.env
+
+            obj_d18 = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
+                                          processJob='eac_aq')
+            d18_job_response = obj_d18.run_glue_job()
+            if d18_job_response:
+                print("{0}: EAC and AQ Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                # return staging_job_response
+            else:
+                print("Error occurred in EAC and AQ Job")
+                # return staging_job_response
+                raise Exception
+        except Exception as e:
+            print("Error in EAC and AQ Job :- " + str(e))
+            sys.exit(1)
+
 
 if __name__ == '__main__':
 
     s = ALP()
 
-    # run processing weather python script
+    # run processing alp wcf script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_process_alp_wcf_job()
 
-    # run processing weather python script
+    # run alp cv python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_process_alp_cv_job()
 
-    # run staging glue job
+    # run alp wcf staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_wcf_staging_gluejob()
 
-    # run staging glue job
+    # run alp cv staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_cv_staging_gluejob()
 
-    # run alp glue job
+    # run reference alp glue job
     print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_alp_gluejob()
+
+    # run eac and aq calculation job
+    print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_eac_aq_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

@@ -13,27 +13,23 @@ def process_all_ensek_scripts():
     # Aliases are different on different OS
     pythonAlias = util.get_pythonAlias()
 
+
+    # not related to PA
     print("{0}: >>>> Meter Points <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiMeterPointsData.py"])
-        print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        subprocess.run([pythonAlias, "processEnsekApiMeterPointsDataHistory.py"])
+        print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                      float(timeit.default_timer() - start)))
     except:
         raise
+
 
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
         subprocess.run([pythonAlias, "processEnsekApiStatusRegistrationsData.py"])
         print("{0}: Status Registrations completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
-    except:
-        raise
-
-    print("{0}: >>>> Internal Readings <<<<".format(datetime.now().strftime('%H:%M:%S')))
-    try:
-        start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiInternalReadingsData.py"])
-        print("{0}: Internal Readings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
 
