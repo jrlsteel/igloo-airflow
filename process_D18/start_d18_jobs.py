@@ -103,7 +103,7 @@ if __name__ == '__main__':
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_staging_gluejob()
 
-    # run refe d18 glue job
+    # run reference d18 glue job
     print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_gluejob()
 
