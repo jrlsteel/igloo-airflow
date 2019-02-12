@@ -65,14 +65,15 @@ class Accounts:
 
         df_accounts = json_normalize(data)
         df_accounts.columns = df_accounts.columns.str.replace('.', '_')
+        df_accounts.drop(columns=['displayName'])
         df_accounts.replace(',', ' ', regex=True)
         df_accounts['account_id'] = account_id
         filename_accounts = 'accounts_' + str(account_id) + '.csv'
         df_accounts_string = df_accounts.to_csv(None, index=False)
-        # print(df_account_transactions_string)
+        print(df_accounts_string)
 
-        k.key = dir_s3['s3_key']['Accounts'] + filename_accounts
-        k.set_contents_from_string(df_accounts_string)
+        # k.key = dir_s3['s3_key']['Accounts'] + filename_accounts
+        # k.set_contents_from_string(df_accounts_string)
 
     def format_json_response(self, data):
         """
@@ -136,46 +137,46 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
-    # p = Accounts()
-    # p.processAccounts(account_ids, s3, dir_s3)
+    p = Accounts()
+    p.processAccounts(account_ids, s3, dir_s3)
 
-    ####### Multiprocessing Starts #########
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
-    else:
-        n = 24
-
-    k = int(len(account_ids) / n)  # get equal no of files for each process
-
-    print(len(account_ids))
-    print(k)
-
-    processes = []
-    lv = 0
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        p1 = Accounts()
-        print(i)
-        uv = i * k
-        if i == n:
-            # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
-        else:
-            # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
-    ###### Multiprocessing Ends #########
+    # ####### Multiprocessing Starts #########
+    # env = util.get_env()
+    # if env == 'uat':
+    #     n = 12  # number of process to run in parallel
+    # else:
+    #     n = 24
+    #
+    # k = int(len(account_ids) / n)  # get equal no of files for each process
+    #
+    # print(len(account_ids))
+    # print(k)
+    #
+    # processes = []
+    # lv = 0
+    # start = timeit.default_timer()
+    #
+    # for i in range(n + 1):
+    #     p1 = Accounts()
+    #     print(i)
+    #     uv = i * k
+    #     if i == n:
+    #         # print(d18_keys_s3[l:])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+    #     else:
+    #         # print(d18_keys_s3[l:u])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+    #     lv = uv
+    #
+    #     processes.append(t)
+    #
+    # for p in processes:
+    #     p.start()
+    #     time.sleep(2)
+    #
+    # for process in processes:
+    #     process.join()
+    # ###### Multiprocessing Ends #########
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
 
