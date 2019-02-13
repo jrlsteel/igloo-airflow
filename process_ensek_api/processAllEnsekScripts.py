@@ -15,7 +15,7 @@ def process_all_ensek_scripts():
 
 
     # not related to PA
-    print("{0}: >>>> Meter Points <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: >>>> Meter Points History<<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
         subprocess.run([pythonAlias, "processEnsekApiMeterPointsDataHistory.py"])
@@ -23,7 +23,6 @@ def process_all_ensek_scripts():
                                                                       float(timeit.default_timer() - start)))
     except:
         raise
-
 
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:

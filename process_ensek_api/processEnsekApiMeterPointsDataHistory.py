@@ -247,7 +247,6 @@ class MeterPoints:
     def processAccounts(self, account_ids, S3, dir_s3):
         api_url_mp, head_mp = util.get_ensek_api_info1('meterpoints_history')
         api_url_mpr, head_mpr = util.get_ensek_api_info1('meterpoints_readings')
-        api_url_mprb, head_mprb = util.get_ensek_api_info1('meterpoints_readings_billeable')
 
         for account_id in account_ids:
             t = con.api_config['total_no_of_calls']
@@ -269,9 +268,7 @@ class MeterPoints:
                     api_url_mpr1 = api_url_mpr.format(account_id, each_meter_point)
                     meter_reading_response = self.get_api_response(api_url_mpr1, head_mpr)
 
-                    # api_url, head = get_meter_readings_billeable_api_info(account_id, each_meter_point)
-                    api_url_mprb1 = api_url_mprb.format(account_id, each_meter_point)
-                    meter_reading_billeable_response = self.get_api_response(api_url_mprb1, head_mprb)
+
 
                     # print(json.dumps(meter_reading_response, indent=4))
                     if meter_reading_response:
@@ -282,13 +279,22 @@ class MeterPoints:
                         msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
                         self.log_error(msg_mp, '')
 
-                    if meter_reading_billeable_response:
-                        formatted_meter_reading = self.format_json_response(meter_reading_billeable_response)
-                        self.extract_meter_readings_billeable_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
-                    else:
-                        print('mp:' + str(each_meter_point) + ' has no data')
-                        msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
-                        self.log_error(msg_mp, '')
+                    """ 
+                        Removed readings billeable for now as to reduce the NonPaScripts time.
+                        Can be switched ON whenever its needed!!!
+                    """
+                    # api_url_mprb, head_mprb = util.get_ensek_api_info1('meterpoints_readings_billeable')
+                    # api_url, head = get_meter_readings_billeable_api_info(account_id, each_meter_point)
+                    # api_url_mprb1 = api_url_mprb.format(account_id, each_meter_point)
+                    # meter_reading_billeable_response = self.get_api_response(api_url_mprb1, head_mprb)
+
+                    # if meter_reading_billeable_response:
+                    #     formatted_meter_reading = self.format_json_response(meter_reading_billeable_response)
+                    #     self.extract_meter_readings_billeable_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
+                    # else:
+                    #     print('mp:' + str(each_meter_point) + ' has no data')
+                    #     msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
+                    #     self.log_error(msg_mp, '')
             else:
                 print('ac:' + str(account_id) + ' has no data')
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
