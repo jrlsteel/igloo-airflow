@@ -88,6 +88,10 @@ uat = {
         },
         "igloo_zendesk_user_tickets": {
             "api_url": "https://iglooenergy.zendesk.com/api/v2/users/{0}/tickets/requested.json",
+        },
+        "igloo_eac_batch": {
+            "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
+            "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         }
     },
 
