@@ -6,11 +6,20 @@ from conf import config as con
 
 
 class CopyRedshiftdata:
+    """
+    This script transfers the data from one table to another which are in different databases
+        :param self._copy_from_env - copy from environment name
+        :param self._copy_to_env - copy to environment name
+        :param self.overwrite - True= truncates the copy_to table and then inserts the data
+        :param self._copy_tables - List of tables to be copied from and copied to in key_value pairs
+                {'copy_from': 'copy_from_table',
+                 'copy_to': 'copy_to_table'}
+    """
 
     def __init__(self):
+
         self._copy_from_env = 'dev'
         self._copy_to_env = 'prod'
-        self._no_of_tables_to_copy = 2
         self.overwrite = True
         self._copy_tables = [
                             # {'copy_from': 'ref_registrations_status_elec_audit',
@@ -51,29 +60,33 @@ class CopyRedshiftdata:
 
     def process_copy(self):
         try:
-            for table in self._copy_tables:
-                _env_from = self.get_env(self._copy_from_env)
-                self.get_connection(_env_from)
-                copy_from_sql = "select * from {0}".format(table['copy_from'])
-                print('Copying data from : ' + table['copy_from'])
-                df_copy_from = pr.redshift_to_pandas(copy_from_sql)
-                # print(df_copy_from.to_csv(None, index=False))
-                self.close_connection()
+            if len(self._copy_tables) == 0:
+                print("Copy tables data is empty")
 
-                if df_copy_from.empty:
-                    return "No data to copy"
-                else:
-                    _env_to = self.get_env(self._copy_to_env)
-                    self.get_connection(_env_to)
-                    if self.overwrite:
-                        print('Deleting existing data from : '+ table['copy_to'])
-                        delete_sql = "delete from {0}".format(table['copy_to'])
-                        pr.exec_commit(delete_sql)
-
-                    print('Inserting data into : ' + table['copy_to'])
-                    pr.pandas_to_redshift(df_copy_from, table['copy_to'], append=True, index=False)
+            else:
+                for table in self._copy_tables:
+                    _env_from = self.get_env(self._copy_from_env)
+                    self.get_connection(_env_from)
+                    copy_from_sql = "select * from {0}".format(table['copy_from'])
+                    print('Copying data from : ' + table['copy_from'])
+                    df_copy_from = pr.redshift_to_pandas(copy_from_sql)
+                    # print(df_copy_from.to_csv(None, index=False))
                     self.close_connection()
-                    print('Total records copied :' + str(df_copy_from['account_id'].count()))
+
+                    if df_copy_from.empty:
+                        return "No data to copy"
+                    else:
+                        _env_to = self.get_env(self._copy_to_env)
+                        self.get_connection(_env_to)
+                        if self.overwrite:
+                            print('Deleting existing data from : '+ table['copy_to'])
+                            delete_sql = "delete from {0}".format(table['copy_to'])
+                            pr.exec_commit(delete_sql)
+
+                        print('Inserting data into : ' + table['copy_to'])
+                        pr.pandas_to_redshift(df_copy_from, table['copy_to'], append=True, index=False)
+                        self.close_connection()
+                        print('Total records copied :' + str(df_copy_from['account_id'].count()))
 
         except Exception as e:
             print('Error:' + str(e))
