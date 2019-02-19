@@ -139,7 +139,8 @@ uat = {
         "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
-        "AnnualStatements": "stage1/AnnualStatements/"
+        "AnnualStatements": "stage1/AnnualStatements/",
+        "Statements": "stage1/Statements/"
     },
 
 
@@ -322,7 +323,8 @@ prod = {
         "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
-        "AnnualStatements": "stage1/AnnualStatements/"
+        "AnnualStatements": "stage1/AnnualStatements/",
+        "Statements": "stage1/Statements/"
 
     },
 
