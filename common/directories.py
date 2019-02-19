@@ -62,6 +62,13 @@ uat = {
         "account_transactions": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Transactions"
         },
+        "annual_statements": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/annualStatements"
+        },
+        "statements": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Statements"
+        },
+
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
         "igloo_epc_certificates": {
@@ -92,7 +99,8 @@ uat = {
         "igloo_eac_batch": {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
-        }
+        },
+
     },
 
     "s3_bucket": "igloo-data-warehouse-uat",
@@ -131,6 +139,7 @@ uat = {
         "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
+        "AnnualStatements": "stage1/AnnualStatements/"
     },
 
 
@@ -241,6 +250,12 @@ prod = {
         "account_transactions": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Transactions"
         },
+        "annual_statements": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/annualStatements"
+        },
+        "statements": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Statements"
+        },
 
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
@@ -307,6 +322,8 @@ prod = {
         "RegistersAttributesHistory": "stage1/RegistersAttributesHistory/",
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
+        "AnnualStatements": "stage1/AnnualStatements/"
+
     },
 
     "s3_d18_key": {
