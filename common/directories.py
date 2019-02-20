@@ -68,6 +68,9 @@ uat = {
         "statements": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Statements"
         },
+        "account_settings": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/AccountSettings"
+        },
 
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
@@ -140,7 +143,8 @@ uat = {
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
         "AnnualStatements": "stage1/AnnualStatements/",
-        "Statements": "stage1/Statements/"
+        "Statements": "stage1/Statements/",
+        "AccountSettings": "stage1/AccountSettings/"
     },
 
 
@@ -257,6 +261,9 @@ prod = {
         "statements": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Statements"
         },
+        "account_settings": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/AccountSettings"
+        },
 
         "token": "Wk01QnVWVU01aWlLTiVeUWtwMUIyRU5EbCN0VTJUek01KmJJVFcyVGFaeiNtJkFpYUJwRUNNM2MzKjVHcjVvIQ==",
 
@@ -324,7 +331,8 @@ prod = {
         "ReadingsHistory": "stage1/ReadingsHistory/",
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
         "AnnualStatements": "stage1/AnnualStatements/",
-        "Statements": "stage1/Statements/"
+        "Statements": "stage1/Statements/",
+        "AccountSettings": "stage1/AccountSettings/"
 
     },
 

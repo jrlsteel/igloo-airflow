@@ -86,7 +86,7 @@ class CopyRedshiftdata:
                         print('Inserting data into : ' + table['copy_to'])
                         pr.pandas_to_redshift(df_copy_from, table['copy_to'], append=True, index=False)
                         self.close_connection()
-                        print('Total records copied :' + str(df_copy_from['account_id'].count()))
+                        print('Total records copied :' + str(df_copy_from.count()))
 
         except Exception as e:
             print('Error:' + str(e))
