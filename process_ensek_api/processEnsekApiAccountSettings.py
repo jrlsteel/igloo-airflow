@@ -64,7 +64,7 @@ class AccountSettings:
     def extract_data(self, data, account_id, k, dir_s3_key):
         df__extract = json_normalize(data)
         df__extract['account_id'] = account_id
-        filename = 'account_settings' + str(account_id) + '.csv'
+        filename = 'account_settings_' + str(account_id) + '.csv'
         df_extract_string = df__extract.to_csv(None, index=False)
         print(df_extract_string)
         k.key = dir_s3_key['s3_key']['AccountSettings'] + filename
