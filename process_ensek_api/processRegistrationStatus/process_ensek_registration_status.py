@@ -105,7 +105,6 @@ class StatusRegistrations:
             employee_writer.writerow([error_msg, error_code])
 
     def processAccounts(self, _df, k, _dir_s3):
-        api_url_ac, head_ac = util.get_ensek_api_info1('account_status')
         api_url_elec, head_elec = util.get_ensek_api_info1('elec_mp_status')
         api_url_gas, head_gas = util.get_ensek_api_info1('gas_mp_status')
 
@@ -149,6 +148,7 @@ if __name__ == "__main__":
 
     # Enable to test without multiprocessing.
     p = StatusRegistrations()
+
     df = util.execute_query(p.sql)
     # p.processAccounts(df, s3, dir_s3)
 

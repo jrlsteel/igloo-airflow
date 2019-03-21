@@ -38,11 +38,20 @@ def get_Users_from_s3(k):
     return p
 
 
-def run_sql(config_sql):
+def execute_query(sql, return_as='d'):
+    '''
+    :param sql: The query to execute
+    :param return_as: User can mention the return type as list (l) or dataframe (d - default)
+    :return:
+    '''
     pr = db.get_redshift_connection()
-    df = pr.redshift_to_pandas(config_sql)
+    df = pr.redshift_to_pandas(sql)
     db.close_redshift_connection()
-    addresses_list = addresses_df.values.tolist()
+
+    df_list = []
+    if return_as == 'l':
+        df_list = df.values.tolist()
+        return df_list
 
     return df
 
