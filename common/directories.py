@@ -47,13 +47,15 @@ uat = {
         "gas_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
         },
+
         "elec_mp_status": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec"
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec?meterpointnumber={1}"
         },
 
-        "gas_pp_status": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
+        "gas_mp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas?meterpointnumber={1}"
         },
+
         "tariff_history": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory"
         },
@@ -242,11 +244,11 @@ prod = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus"
         },
         "elec_mp_status": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec"
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec?meterpointnumber={1}"
         },
 
-        "gas_pp_status": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
+        "gas_mp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas?meterpointnumber={1}"
         },
 
         "elec_status": {

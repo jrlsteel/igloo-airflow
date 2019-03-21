@@ -2,6 +2,7 @@ import timeit
 
 import requests
 import json
+import pandas as pd
 from pandas.io.json import json_normalize 
 from ratelimit import limits, sleep_and_retry
 import time
@@ -15,7 +16,7 @@ import sys
 import os
 
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from common import utils as util
 from conf import config as con
@@ -28,7 +29,7 @@ class StatusRegistrations:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.sql = "select account_id, meterpoint_id, meterpointnumber from ref_meterpoints"
+        self.sql = "select account_id, meter_point_id, meterpointnumber, meterpointtype from ref_meterpoints"
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -63,55 +64,37 @@ class StatusRegistrations:
                     time.sleep(retry_in_secs)
             i=i+retry_in_secs
 
+    def extract_reg_elec_json(self, data, _df, k, _dir_s3):
 
-
-
-    def extract_reg_elec_json(self, data,account_id,meterpointnumber,k, dir_s3):
-        # global k
-
-        elec_dict = dict(Account_id = account_id,  meterpointnumber=meterpointnumber,Status = data)
+        elec_dict = dict(account_id=str(_df['account_id']).strip(), meter_point_id=str(_df['meter_point_id']).strip(), meterpointnumber=str(_df['meterpointnumber']).strip(), status=data)
         elec_str = json.dumps(elec_dict)
         elec_json = json.loads(elec_str)
         df_elec = json_normalize(elec_json)
-        filename_elec = 'reg_elec_meterpointnumber_' + str(account_id) + '_'+ str(meterpointnumber) + '.csv'
+        filename_elec = 'reg_elec_mp_status_' + str(_df['account_id']) + '_' + str(_df['meterpointnumber']) + '.csv'
         df_elec_string = df_elec.to_csv(None, index=False)
+        print(df_elec_string)
 
-
-        k.key = dir_s3['s3_key']['RegistrationsElecMeterpoints'] + filename_elec
+        k.key = _dir_s3['s3_key']['RegistrationsElecMeterpoint'] + filename_elec
         k.set_contents_from_string(df_elec_string)
 
-    def extract_reg_gas_json(self, data,account_id,meterpointnumber,k, dir_s3):
-        # global k
+    def extract_reg_gas_json(self, data, _df, k, _dir_s3):
 
-        gas_dict = dict(Account_id = account_id, meterpointnumber=meterpointnumber, Status = data)
+        gas_dict = dict(account_id=str(_df['account_id']).strip(), meter_point_id=str(_df['meter_point_id']).strip(), meterpointnumber=str(_df['meterpointnumber']).strip(), status=data)
         gas_str = json.dumps(gas_dict)
         gas_json = json.loads(gas_str)
         df_gas = json_normalize(gas_json)
-        filename_gas = 'reg_gas_meterpointnumber_' + str(account_id) + '_' + str(meterpointnumber) + '.csv'
+        filename_gas = 'reg_gas_mp_status_' + str(_df['account_id']) + '_' + str(_df['meterpointnumber']) + '.csv'
         df_gas_string = df_gas.to_csv(None, index=False)
+        print(df_gas_string)
 
-        k.key = dir_s3['s3_key']['RegistrationsGasMeterpoints'] + filename_gas
+        k.key = _dir_s3['s3_key']['RegistrationsGasMeterpoint'] + filename_gas
         k.set_contents_from_string(df_gas_string)
-
-
-    '''Read Users from S3'''
-    def get_Users(k):
-        # global k
-        filename_Users = 'users.csv'
-        k.key = 'ensek-meterpoints/Users/' + filename_Users
-        k.open()
-        l = k.read()
-        s = l.decode('utf-8')
-        p = s.splitlines()
-        # print(len(p))
-        return p
 
     '''Format Json to handle null values'''
     def format_json_response(self, data):
-        data_str = json.dumps(data, indent=4).replace('null','""')
+        data_str = json.dumps(data, indent=4).replace('null', '""')
         data_json = json.loads(data_str)
         return data_json
-
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
@@ -121,42 +104,39 @@ class StatusRegistrations:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
-
-    def processAccounts(self, account_ids,k, dir_s3):
-
+    def processAccounts(self, _df, k, _dir_s3):
         api_url_ac, head_ac = util.get_ensek_api_info1('account_status')
-        api_url_elec, head_elec = util.get_ensek_api_info1('elec_status')
-        api_url_gas, head_gas = util.get_ensek_api_info1('gas_status')
+        api_url_elec, head_elec = util.get_ensek_api_info1('elec_mp_status')
+        api_url_gas, head_gas = util.get_ensek_api_info1('gas_mp_status')
 
-        for account_id in account_ids:
-            t = con.api_config['total_no_of_calls']
-
-
+        for index, df in _df.iterrows():
             # Get Elec details
-            api_url_elec1 = api_url_elec.format(account_id)
-            account_elec_response = self.get_api_response(api_url_elec1, head_elec)
-            # print(account_elec_response)
+            if df['meterpointtype'] == 'E':
+                formatted_url_elec = api_url_elec.format(df['account_id'], df['meterpointnumber'])
+                response_elec = self.get_api_response(formatted_url_elec, head_elec)
+                # print(account_elec_response)
 
-            if account_elec_response:
-                formated_elec = account_elec_response
-                self.extract_reg_elec_json(formated_elec,account_id, k, dir_s3)
-            else:
-                print('ac:' + str(account_id) + ' has no data for Elec status')
-                msg_ac = 'ac:' + str(account_id) + ' has no data for Elec status'
-                self.log_error(msg_ac, '')
+                if response_elec:
+                    formated_response_elec = self.format_json_response(response_elec)
+                    self.extract_reg_elec_json(formated_response_elec, df, k, _dir_s3)
+                else:
+                    print('ac:' + str(df['account_id']) + ' has no data for Elec status')
+                    msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Elec status'
+                    self.log_error(msg_ac, '')
 
             # Get Gas details
-            api_url_gas1 = api_url_gas.format(account_id)
-            account_gas_response = self.get_api_response(api_url_gas1, head_gas)
-            # print(account_gas_response)
-            if account_gas_response:
-                formated_gas = account_gas_response
-                self.extract_reg_gas_json(formated_gas,account_id,k, dir_s3)
-            else:
-                print('ac:' + str(account_id) + ' has no data Gas status')
-                msg_ac = 'ac:' + str(account_id) + ' has no data for Gas status'
-                self.log_error(msg_ac, '')
+            if df['meterpointtype'] == 'G':
+                api_url_gas1 = api_url_gas.format(df['account_id'], df['meterpointnumber'])
+                response_gas = self.get_api_response(api_url_gas1, head_gas)
+                # print(account_gas_response)
 
+                if response_gas:
+                    formated_response_gas = self.format_json_response(response_gas)
+                    self.extract_reg_gas_json(formated_response_gas, df, k, _dir_s3)
+                else:
+                    print('ac:' + str(df['account_id']) + ' has no data Gas status')
+                    msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Gas status'
+                    self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":
@@ -167,33 +147,21 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    account_ids = []
-    '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
-    
-    if con.test_config['enable_file'] == 'Y':
-        account_ids = util.get_Users_from_s3(s3)
-
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = util.get_accountID_fromDB(False)
-
-    if con.test_config['enable_db_max'] == 'Y':
-        account_ids = util.get_accountID_fromDB(True)
-
     # Enable to test without multiprocessing.
-    # p.processAccounts(account_ids, s3, dir_s3)
+    p = StatusRegistrations()
+    df = util.execute_query(p.sql)
+    # p.processAccounts(df, s3, dir_s3)
 
-    ####### Multiprocessing Starts #########
+    ##### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':
         n = 12  # number of process to run in parallel
     else:
         n = 24
 
-    k = int(len(account_ids) / n)  # get equal no of files for each process
+    k = int(len(df) / n)  # get equal no of files for each process
 
-    print(len(account_ids))
+    print(len(df))
     print(k)
 
     processes = []
@@ -206,10 +174,10 @@ if __name__ == "__main__":
         uv = i * k
         if i == n:
             # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:], s3, dir_s3))
         else:
             # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:uv], s3, dir_s3))
         lv = uv
 
         processes.append(t)
