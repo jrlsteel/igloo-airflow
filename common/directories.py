@@ -47,7 +47,13 @@ uat = {
         "gas_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
         },
+        "elec_mp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec"
+        },
 
+        "gas_pp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
+        },
         "tariff_history": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/TariffsWithHistory"
         },
@@ -121,6 +127,8 @@ uat = {
         "AccountStatus": "stage1/AccountStatus/",
         "RegistrationsElec": "stage1/RegistrationsElec/",
         "RegistrationsGas": "stage1/RegistrationsGas/",
+        "RegistrationsElecMeterpoint": "stage1/RegistrationsElecMeterpoint/",
+        "RegistrationsGasMeterpoint": "stage1/RegistrationsGasMeterpoint/",
         "EstimatesElecInternal": "stage1/EstimatesElecInternal/",
         "EstimatesGasInternal": "stage1/EstimatesGasInternal/",
         "TariffHistory": "stage1/TariffHistory/",
@@ -232,6 +240,13 @@ prod = {
 
         "account_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus"
+        },
+        "elec_mp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Elec"
+        },
+
+        "gas_pp_status": {
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/Processes/Registrations/Gas"
         },
 
         "elec_status": {

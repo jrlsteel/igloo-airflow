@@ -38,6 +38,14 @@ def get_Users_from_s3(k):
     return p
 
 
+def run_sql(config_sql):
+    pr = db.get_redshift_connection()
+    df = pr.redshift_to_pandas(config_sql)
+    db.close_redshift_connection()
+    addresses_list = addresses_df.values.tolist()
+
+    return df
+
 def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
