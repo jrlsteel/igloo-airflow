@@ -14,18 +14,20 @@ class StartRegistrationsMeterpointsStatusJobs:
         self.env = util.get_env()
         self.dir = util.get_dir()
 
-    def submit_registrations_meterpoints_status_scripts(self):
+    def submit_registrations_meterpoints_status_job(self):
+        """
+        Calls the Registration Status process_ensek_registration_status.py"script to which processes ensek registrations stus.
+        :return: None
+        """
+
+        print("{0}: >>>> Process Ensek Registrations by Meterpoint Status  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            process_ensek_registrations_status = ae.process_ensek_registrations_status()
-            if process_ensek_registrations_status:
-                print("{0}: Registration Meterpoint Status Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                # return process_ensek_registrations_status
-            else:
-                print("Error occurred in Registration Meterpoint Status Scripts job")
-                # return process_ensek_registrations_status
-                raise Exception
+            start = timeit.default_timer()
+            subprocess.run([self.pythonAlias, "process_ensek_registration_status.py"])
+            print("{0}: Process Ensek Registrations by Meterpoint Status completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               float(timeit.default_timer() - start)))
         except Exception as e:
-            print("Error in Registration Meterpoint Status Scripts :- " + str(e))
+            print("Error in Process Ensek Registrations by Meterpoint Status process :- " + str(e))
             sys.exit(1)
 
     def submit_registrations_meterpoints_status_staging_Gluejob(self):
@@ -35,7 +37,7 @@ class StartRegistrationsMeterpointsStatusJobs:
             environment = self.env
 
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='registrations_meterpoints_status')
+                                            processJob='reg-mp-status')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -75,15 +77,15 @@ if __name__ == '__main__':
 
     # run Registrations Meterpoints Status
     print("{0}:  Registrations Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_registrations_meterpoints_status_scripts()
+    s.submit_registrations_meterpoints_status_job()
 
     # run Registrations Meterpoints Status Staging Jobs
     print("{0}:  Registrations Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_registrations_meterpoints_status_staging_Gluejob()
 
-    # run staging glue job
-    print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_registrations_meterpoints_status_Gluejob()
+    # # run staging glue job
+    # print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_registrations_meterpoints_status_Gluejob()
 
 
 

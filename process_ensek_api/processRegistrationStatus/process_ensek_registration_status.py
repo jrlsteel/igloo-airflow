@@ -24,7 +24,7 @@ from connections import connect_db as db
 from connections.connect_db import get_boto_S3_Connections as s3_con
 
 
-class StatusRegistrations:
+class RegistrationsMeterpointsStatus:
     max_calls = con.api_config['max_api_calls']
     rate = con.api_config['allowed_period_in_secs']
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     s3 = s3_con(bucket_name)
 
     # Enable to test without multiprocessing.
-    p = StatusRegistrations()
+    p = RegistrationsMeterpointsStatus()
 
     df = util.execute_query(p.sql)
     # p.processAccounts(df, s3, dir_s3)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     start = timeit.default_timer()
 
     for i in range(n + 1):
-        p1 = StatusRegistrations()
+        p1 = RegistrationsMeterpointsStatus()
         print(i)
         uv = i * k
         if i == n:
