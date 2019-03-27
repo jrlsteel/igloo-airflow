@@ -20,14 +20,14 @@ class StartMeterpointsJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process Ensek Registrations by Meterpoint Status  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}: >>>> Process Ensek Meterpoints   <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_ensek_meterpoints.py"])
             print("{0}: Process Ensek Meterpoints completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
-            print("Error in Process Meterpoints Registrations by Meterpoint Status process :- " + str(e))
+            print("Error in Process Ensek Meterpoints  :- " + str(e))
             sys.exit(1)
 
     def submit_meterpoints_extract_staging_gluejob(self):
@@ -40,14 +40,14 @@ class StartMeterpointsJobs:
                                             processJob='reg-mp-status')
             job_response = obj_stage.run_glue_job()
             if job_response:
-                print("{0}: Staging Meterpoints Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: Staging Ensek Meterpoints Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
-                print("Error occurred in Staging Job")
+                print("Error occurred in Ensek Meterpoints Staging Job")
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            print("Error in Staging Job :- " + str(e))
+            print("Error in Ensek Meterpoints Staging Job :- " + str(e))
             sys.exit(1)
 
     # def submit_registrations_meterpoints_status_gluejob(self):
@@ -76,12 +76,12 @@ if __name__ == '__main__':
     s = StartMeterpointsJobs()
 
     #Ensek Meterpoints Extract
-    print("{0}:  Registrations Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_registrations_meterpoints_status_job()
+    print("{0}:  Ensek Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_meterpoints_extract_job()
 
     #Ensek Meterpoints Staging Jobs
-    print("{0}:  Registrations Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_registrations_meterpoints_status_staging_gluejob()
+    print("{0}:  Ensek  Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_meterpoints_extract_staging_gluejob()
 
     #Ensek Meterpoints ref Tables Jobs
     # print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
