@@ -76,12 +76,12 @@ if __name__ == '__main__':
     s = StartMeterpointsJobs()
 
     #Ensek Meterpoints Extract
-    # print("{0}:  Ensek Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_meterpoints_extract_job()
+    print("{0}:  Ensek Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_meterpoints_extract_job()
 
     # #Ensek Meterpoints Staging Jobs
-    # print("{0}:  Ensek  Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_meterpoints_extract_staging_gluejob()
+    print("{0}:  Ensek  Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_meterpoints_extract_staging_gluejob()
 
     #Ensek Meterpoints ref Tables Jobs
     print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
