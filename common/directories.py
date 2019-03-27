@@ -210,7 +210,7 @@ prod = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}"
         },
         "meterpoints": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints?includeHistory=true"
         },
 
         "meterpoints_history": {
@@ -389,7 +389,7 @@ prod = {
 
     "glue_ensek_job_name": "_process_ref_tables_prod",
     "glue_d18_job_name": "_process_ref_tables_prod",
-    "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_uat",
+    "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_prod",
     "glue_historicalweather_jobname": "_process_ref_tables_prod",
     "glue_eac_aq_job_name": "_process_ref_tables_prod",
     "glue_epc_job_name": "_process_ref_tables_prod",

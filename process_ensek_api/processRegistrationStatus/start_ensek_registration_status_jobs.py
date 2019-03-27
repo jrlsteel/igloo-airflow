@@ -75,15 +75,15 @@ if __name__ == '__main__':
 
     s = StartRegistrationsMeterpointsStatusJobs()
 
-    # run Registrations Meterpoints Status
+    #Registrations Meterpoints Status Ensek Extract
     print("{0}:  Registrations Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_registrations_meterpoints_status_job()
 
-    # run Registrations Meterpoints Status Staging Jobs
+    #Registrations Meterpoints Status Staging Jobs
     print("{0}:  Registrations Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_registrations_meterpoints_status_staging_gluejob()
 
-    # # run staging glue job
+    #Registrations Meterpoints Status ref Tables Jobs
     print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_registrations_meterpoints_status_gluejob()
 
