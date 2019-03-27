@@ -264,20 +264,22 @@ class MeterPoints:
                     msg_mp = 'mp:' + str(each_meter_point)
                     self.log_error(msg_mp, '')
 
+                    """ 
+                    Removed readings for now as to reduce the NonPaScripts time.
+                    Can be switched ON whenever its needed!!!
+                    """
+
                     # api_url, head = get_meter_readings_api_info(account_id, each_meter_point)
-                    api_url_mpr1 = api_url_mpr.format(account_id, each_meter_point)
-                    meter_reading_response = self.get_api_response(api_url_mpr1, head_mpr)
-
-
-
-                    # print(json.dumps(meter_reading_response, indent=4))
-                    if meter_reading_response:
-                        formatted_meter_reading = self.format_json_response(meter_reading_response)
-                        self.extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
-                    else:
-                        print('mp:' + str(each_meter_point) + ' has no data')
-                        msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
-                        self.log_error(msg_mp, '')
+                    # api_url_mpr1 = api_url_mpr.format(account_id, each_meter_point)
+                    # meter_reading_response = self.get_api_response(api_url_mpr1, head_mpr)
+                    # # print(json.dumps(meter_reading_response, indent=4))
+                    # if meter_reading_response:
+                    #     formatted_meter_reading = self.format_json_response(meter_reading_response)
+                    #     self.extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
+                    # else:
+                    #     print('mp:' + str(each_meter_point) + ' has no data')
+                    #     msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
+                    #     self.log_error(msg_mp, '')
 
                     """ 
                         Removed readings billeable for now as to reduce the NonPaScripts time.
@@ -330,7 +332,7 @@ if __name__ == "__main__":
     ####### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':
-        n = 12  # number of process to run in parallel
+        n = 24  # number of process to run in parallel
     else:
         n = 24
 
@@ -348,10 +350,8 @@ if __name__ == "__main__":
         print(i)
         uv = i * k
         if i == n:
-            # print(d18_keys_s3[l:])
             t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
         else:
-            # print(d18_keys_s3[l:u])
             t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
         lv = uv
 
