@@ -34,7 +34,7 @@ class HistoricalWeather:
         self.end_date = datetime.today().date() + timedelta(days=(7-self.day_of_week))
         # no_of_days = (5 * 7)  # 5 weeks
         # self.start_date = self.end_date - timedelta(days=(no_of_days-1))
-        self.start_date = datetime.strptime('2018-11-18', '%Y-%m-%d').date()
+        self.start_date = datetime.strptime('2018-11-11', '%Y-%m-%d').date()
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
 
@@ -80,13 +80,14 @@ class HistoricalWeather:
         weather_df['sources'] = " ".join(data['sources'])
         weather_df['postcode'] = postcode
 
-        if weather_df.empty:
+        weather_df1 = weather_df.drop(columns=['app_temp'])
+        if weather_df1.empty:
             print(" - has no Weather data")
         else:
             week_number_iso = start_date.strftime("%V")
             year = start_date.strftime("%Y")
 
-            weather_df_string = weather_df.to_csv(None, index=False)
+            weather_df_string = weather_df1.to_csv(None, index=False)
             file_name_weather = 'historical_weather' + '_' + postcode.strip() + '_' + year.strip() + '_' + week_number_iso.strip() + '.csv'
             k.key = dir_s3['s3_weather_key']['HistoricalWeather'] + file_name_weather
             # print(weather_df_string)
@@ -152,9 +153,8 @@ if __name__ == "__main__":
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
 
-
     s3 = s3_con(bucket_name)
-    # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('AB14') group by left(postcode, len(postcode) - 3)"
+    # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SL6') group by left(postcode, len(postcode) - 3)"
     # weather_postcode_sql = weather_sql
     weather_postcode_sql = con.test_config['weather_sql']
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
