@@ -158,44 +158,44 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
-    # p = DirectDebit()
-    # p.processAccounts(account_ids, s3, dir_s3)
+    p = DirectDebit()
+    p.processAccounts(account_ids, s3, dir_s3)
 
     ###### Multiprocessing Starts #########
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
-    else:
-        n = 24
-    k = int(len(account_ids) / n)  # get equal no of files for each process
-
-    print(len(account_ids))
-    print(k)
-
-    processes = []
-    lv = 0
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        p1 = DirectDebit()
-        print(i)
-        uv = i * k
-        if i == n:
-            # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
-        else:
-            # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
+    # env = util.get_env()
+    # if env == 'uat':
+    #     n = 12  # number of process to run in parallel
+    # else:
+    #     n = 24
+    # k = int(len(account_ids) / n)  # get equal no of files for each process
+    #
+    # print(len(account_ids))
+    # print(k)
+    #
+    # processes = []
+    # lv = 0
+    # start = timeit.default_timer()
+    #
+    # for i in range(n + 1):
+    #     p1 = DirectDebit()
+    #     print(i)
+    #     uv = i * k
+    #     if i == n:
+    #         # print(d18_keys_s3[l:])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+    #     else:
+    #         # print(d18_keys_s3[l:u])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+    #     lv = uv
+    #
+    #     processes.append(t)
+    #
+    # for p in processes:
+    #     p.start()
+    #     time.sleep(2)
+    #
+    # for process in processes:
+    #     process.join()
     ####### Multiprocessing Ends #########
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
