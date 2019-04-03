@@ -192,6 +192,7 @@ uat = {
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
+    "glue_direct_debits_job_name": "_process_ref_tables_uat",
     "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_uat",
     "glue_meterpoints_status_job_name": "_process_ref_tables_uat",
     "glue_zendesk_job_name": "_process_ref_tables_uat",
@@ -201,7 +202,8 @@ uat = {
     "glue_land_registry_job_name": "_process_ref_tables_uat",
     "glue_alp_job_name": "_process_ref_tables_uat",
     "glue_customerDB_job_name": "_process_ref_customerdb_uat",
-    "glue_staging_job_name": "process_staging_files_uat"
+    "glue_staging_job_name": "process_staging_files_uat",
+    "glue_tado_efficiency_job_name": "_process_ref_tables_uat"
 
 }
 
@@ -390,6 +392,7 @@ prod = {
 
     "glue_ensek_job_name": "_process_ref_tables_prod",
     "glue_d18_job_name": "_process_ref_tables_prod",
+    "glue_direct_debits_job_name": "_process_ref_tables_prod",
     "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_prod",
     "glue_meterpoints_status_job_name": "_process_ref_tables_prod",
     "glue_historicalweather_jobname": "_process_ref_tables_prod",
@@ -398,6 +401,7 @@ prod = {
     "glue_land_registry_job_name": "_process_ref_tables_prod",
     "glue_alp_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
-    "glue_staging_job_name": "process_staging_files_prod"
+    "glue_staging_job_name": "process_staging_files_prod",
+    "glue_tado_efficiency_job_name": "_process_ref_tables_prod"
 
 }

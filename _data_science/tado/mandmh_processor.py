@@ -152,7 +152,7 @@ def fun_sort_age_columns(df_in):
     return (df_out)
 
 
-def fun_create_family_categories(df_in):
+def fun_create_family_categories(df_.in):
     ''' categorise households in a useful? manner
     '''
 
