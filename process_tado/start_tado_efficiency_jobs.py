@@ -31,7 +31,7 @@ class TADOEfficiencyJobs:
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            print("Error in D18 Job :- " + str(e))
+            print("Error in TADO Efficiency Glue Job Job :- " + str(e))
             sys.exit(1)
 
 
@@ -39,9 +39,9 @@ if __name__ == '__main__':
 
     s = TADOEfficiencyJobs()
 
-    # run reference d18 glue job
-    print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_d18_gluejob()
+    # run reference TADO Efficiency glue job
+    print("{0}: TADO Efficiency Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_tado_efficiency_gluejob()
 
-    print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: TADO Efficiency Glue Job running completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
