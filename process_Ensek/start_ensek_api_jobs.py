@@ -3,22 +3,38 @@ from datetime import datetime
 
 sys.path.append('..')
 
-from process_ensek_api import processAllEnsekPAScripts as ae
+from process_Ensek.schema_validation import validateSchema as vs
+from process_Ensek import processAllEnsekScripts as ae
+# from process_Ensek import processEnsekApiCounts as ec
 from common import process_glue_job as glue
 
 from common import utils as util
 
 
-class StartEnsekPAJobs:
+class StartEnsekJobs:
 
     def __init__(self):
         self.env = util.get_env()
         self.dir = util.get_dir()
 
-    def submit_all_ensek_pa_scripts(self):
+    def submit_schema_validations(self):
         try:
-            all_ensek_pa_scripts_response = ae.process_all_ensek_pa_scripts()
-            if all_ensek_pa_scripts_response:
+            schema_validation_response = vs.processAccounts()
+            if schema_validation_response:
+                print("{0}: Schema Validation job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                # return schema_validation_response
+            else:
+                print("Error occurred in Schema Validation job")
+                # return schema_validation_response
+                raise Exception
+        except Exception as e:
+            print("Error in Schema Validation :- " + str(e))
+            sys.exit(1)
+
+    def submit_all_ensek_scripts(self):
+        try:
+            all_ensek_scripts_response = ae.process_all_ensek_scripts()
+            if all_ensek_scripts_response:
                 print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return all_ensek_scripts_response
             else:
@@ -28,7 +44,6 @@ class StartEnsekPAJobs:
         except Exception as e:
             print("Error in Ensek Scripts :- " + str(e))
             sys.exit(1)
-
 
     def submit_ensek_staging_Gluejob(self):
         try:
@@ -110,27 +125,34 @@ class StartEnsekPAJobs:
 
 
 
+
+# def submit_ensek_counts(self):
+#      try:
+#          ensek_counts_response = ec.process_count()
+#          if ensek_counts_response:
+#              print("{0}: Ensek Counts Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+#              # return ensek_counts_response
+#          else:
+#              print("Error occurred in Ensek Count Job")
+#              # return ensek_counts_response
+#              raise Exception
+#      except Exception as e:
+#          print("Error in Ensek Counts job :- " + str(e))
+#          sys.exit(1)
+
+
 if __name__ == '__main__':
-    s = StartEnsekPAJobs()
+    s = StartEnsekJobs()
 
-
-    # run Customer DB
-    print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_customerDB_Gluejob()
-
-    # run PA Ensek Jobs
-    print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_all_ensek_pa_scripts()
+    # run all ensek scripts
+    print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_all_ensek_scripts()
 
     # run staging glue job
-    print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Ensek Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
 
     print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
-
-    # # run eac and aq calculation job
-    # print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_eac_aq_gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))

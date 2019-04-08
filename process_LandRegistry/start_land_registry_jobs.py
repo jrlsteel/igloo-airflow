@@ -17,13 +17,13 @@ class LandRegistry:
 
     def submit_stage1_job(self):
         """
-        Calls the processLandRegistry.py.py script which processes the land registry data from http://landregistry.data.gov.uk
+        Calls the process_land_registry.py.py script which processes the land registry data from http://landregistry.data.gov.uk
         :return: None
         """
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processLandRegistry.py"])
+            subprocess.run([self.pythonAlias, "process_land_registry.py"])
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
