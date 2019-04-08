@@ -16,7 +16,7 @@ class StartMeterpointsJobs:
 
     def submit_meterpoints_extract_job(self):
         """
-        Calls the Registration Status process_ensek_registration_status.py"script to which processes ensek registrations stus.
+        Calls the Registration Status process_ensek_registration_meterpoint_status.py"script to which processes ensek registrations stus.
         :return: None
         """
 

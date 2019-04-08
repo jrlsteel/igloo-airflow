@@ -27,7 +27,7 @@ class StartEPCJobs:
         print("{0}: >>>> Process EPC Certificates Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processIglooEPCCertificates.py"])
+            subprocess.run([self.pythonAlias, "process_external_EPC_certificates.py"])
             print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
@@ -43,7 +43,7 @@ class StartEPCJobs:
         print("{0}: >>>> Process EPC Recommendations Data <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processIglooEPCRecommendations.py"])
+            subprocess.run([self.pythonAlias, "process_external_EPC_recommendations.py"])
             print("{0}: Process EPC Recommendations files completed in {1:.2f} seconds".format(
                 datetime.now().strftime('%H:%M:%S'),
                 float(timeit.default_timer() - start)))
@@ -132,13 +132,9 @@ if __name__ == '__main__':
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_epc_certificates_staging_gluejob()
 
-    # # run processing epc recommendations python script
-    # print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
-    # s.submit_process_epc_recommendations_job()
-    # #
     # # # run staging glue job recommendations
-    # print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
-    # s.submit_epc_recommendations_staging_gluejob()
+    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
+    s.submit_epc_recommendations_staging_gluejob()
 
     # run EPC Certificates glue job
     print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))

@@ -86,7 +86,7 @@ class CopyStage2Files:
         print('copying data')
         for key in stage2_keys:
             temp = key.split('_')[-1]
-            if key not in 'stage2/' and temp not in '$folder$':
+            if key not in 'stage2/':
                 print(key)
                 copy_source = {
                     'Bucket': self._copy_from_bucket,

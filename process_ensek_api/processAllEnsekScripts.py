@@ -27,7 +27,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiStatusRegistrationsData.py"])
+        subprocess.run([pythonAlias, "process_ensek_registrations_status.py"])
         print("{0}: Status Registrations completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
@@ -35,7 +35,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Internal Estimates <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiInternalEstimatesData.py"])
+        subprocess.run([pythonAlias, "process_ensek_internal_estimates.py"])
         print("{0}: Internal Estimates completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
@@ -43,7 +43,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Tariff History <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiTariffsWithHistory.py"])
+        subprocess.run([pythonAlias, "process_ensek_tariffs_history.py"])
         print("{0}: Tariff History completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
@@ -59,7 +59,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Live Balances <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiAccountsLiveBalances.py"])
+        subprocess.run([pythonAlias, "process_ensek_accounts_live_balances.py"])
         print("{0}: Live Balances completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                        float(timeit.default_timer() - start)))
     except:
@@ -68,7 +68,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Account Transactions <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekApiTransactions.py"])
+        subprocess.run([pythonAlias, "process_ensek_transactions.py"])
         print("{0}: Account Transactions completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                        float(timeit.default_timer() - start)))
     except:

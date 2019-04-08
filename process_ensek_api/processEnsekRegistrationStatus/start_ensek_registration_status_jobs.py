@@ -16,14 +16,14 @@ class StartRegistrationsMeterpointsStatusJobs:
 
     def submit_registrations_meterpoints_status_job(self):
         """
-        Calls the Registration Status process_ensek_registration_status.py"script to which processes ensek registrations stus.
+        Calls the Registration Status process_ensek_registration_meterpoint_status.py"script to which processes ensek registrations stus.
         :return: None
         """
 
         print("{0}: >>>> Process Ensek Registrations by Meterpoint Status  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_registration_status.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_registration_meterpoint_status.py"])
             print("{0}: Process Ensek Registrations by Meterpoint Status completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
