@@ -75,18 +75,18 @@ if __name__ == '__main__':
     s = StartMeterpointsJobs()
 
     #Ensek Direct Debits Extract
-    print("{0}:  Ensek Direct Debits Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Ensek Direct Debits Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_direct_debits_extract_job()
 
     # #Ensek Meterpoints Staging Jobs
-    print("{0}:  Ensek  Direct Debits Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Ensek  Direct Debits Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_direct_debits_extract_staging_gluejob()
 
     #Ensek Meterpoints ref Tables Jobs
-    print("{0}: Direct Debits Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Direct Debits Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_direct_debits_extract_reference_gluejob()
 
 
 
-    print("{0}: All Registrations Meterpoints Status completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: All Direct Debits Status completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
