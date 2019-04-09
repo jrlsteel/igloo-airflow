@@ -1,10 +1,10 @@
-import timeit
-
 import requests
 import json
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import time
+from time import sleep
+import timeit
 import datetime
 from requests import ConnectionError
 import csv
@@ -14,7 +14,7 @@ from multiprocessing import freeze_support
 import sys
 import os
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from conf import config as con
 from common import utils as util
@@ -50,7 +50,7 @@ class InternalEstimates:
                     return response_items_elec, response_items_gas
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    log_error('Response Error: Problem grabbing data', response.status_code)
+                    self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None, None
                     break
 
@@ -177,9 +177,10 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
+    # p = InternalEstimates()
     # p.processAccounts(account_ids, s3, dir_s3)
 
-        ####### Multiprocessing Starts #########
+    #     ####### Multiprocessing Starts #########
     env = util.get_env()
     if env == 'uat':
         n = 12  # number of process to run in parallel
@@ -210,7 +211,7 @@ if __name__ == "__main__":
 
     for p in processes:
         p.start()
-        time.sleep(2)
+        sleep(2)
 
     for process in processes:
         process.join()

@@ -25,6 +25,7 @@ class TADOEfficiencyJobs:
             tado_efficiency_job_response = obj_tado_efficiency.run_glue_job()
             if tado_efficiency_job_response:
                 print("{0}: TADO Efficiency Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                # write
                 # return staging_job_response
             else:
                 print("Error occurred in TADO Efficiency Job")
@@ -32,6 +33,7 @@ class TADOEfficiencyJobs:
                 raise Exception
         except Exception as e:
             print("Error in TADO Efficiency Glue Job Job :- " + str(e))
+            # write
             sys.exit(1)
 
 

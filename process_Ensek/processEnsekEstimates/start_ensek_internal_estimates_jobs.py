@@ -3,7 +3,7 @@ from datetime import datetime
 import timeit
 import subprocess
 
-sys.path.append('../..')
+sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
 
@@ -56,9 +56,9 @@ class StartInternalEstimatesJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_submit_registrations_meterpoints_status_Gluejob = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
+            obj_submit_internal_estimates_Gluejob = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
                                                  processJob='ensek_ref_estimates')
-            job_response = obj_submit_registrations_meterpoints_status_Gluejob.run_glue_job()
+            job_response = obj_submit_internal_estimates_Gluejob.run_glue_job()
             if job_response:
                 print("{0}: Ensek Internal Estimates Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
