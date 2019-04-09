@@ -1,6 +1,8 @@
 import requests
 import platform
 import sys
+import pandas as pd
+import datetime
 from connections import connect_db as db
 
 sys.path.append('..')
@@ -37,14 +39,72 @@ def get_Users_from_s3(k):
     # print(len(p))
     return p
 
-def redshift_insert_dataframe(df, table):
+
+def batch_logging_insert(id, job_id, job_name, job_script_name):
     '''
-    :param df: The dataframe to insert
-    :param table: Table to insert into
+    Batch Logging Function
     '''
-    pr = db.get_redshift_connection()
-    pr.pandas_to_redshift(data_frame=df, redshift_table_name=table)
-    db.close_redshift_connection()
+    job_start = datetime.datetime.now()
+    job_end = None
+    job_status = 'Running'
+    job_df = pd.DataFrame(data=[[id, job_id, job_name, job_script_name, job_start, job_end, job_status]], columns=['id', 'job_id', 'job_name', 'job_script_name', 'job_start', 'job_end', 'job_status'])
+    batch_logging = redshift_upsert(df=job_df, crud_type='i')
+    return batch_logging
+
+
+def batch_logging_update(id, update_type=None):
+    """
+    :param self:
+    :param update_type: 's' - Start time, 'e' - End time, 'f' - Job Failed
+    :return: None
+    """
+    time = datetime.datetime.now()
+    job_updates = {
+                    's': { 'time': time,
+                           'status': 'Running'
+                           },
+                    'e': {
+                            'time': time,
+                            'status': 'Done'
+                        },
+                    'f': {
+                        'time': time,
+                        'status': 'Failed'
+                    },
+                }
+
+    job_time = job_updates[update_type]['time']
+    job_status = job_updates[update_type]['status']
+
+    sql_update_f = ''
+    if update_type == 's':
+        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}' where id = {2}"""
+        sql_update_f = sql_update.format(job_time, job_status, id)
+        redshift_upsert(sql_update_f, crud_type='u')
+
+    if update_type in ('e', 'f'):
+        sql_update = """update ref_batch_audit set job_end = '{0}', job_status = '{1}' where id = {2}"""
+        sql_update_f = sql_update.format(job_time, job_status, id)
+        redshift_upsert(sql_update_f, crud_type='u')
+
+
+def redshift_upsert(sql=None, df=None, crud_type=None):
+    '''
+    :param sql: the sql to run
+    '''
+    try:
+        table_name = 'ref_batch_audit'
+        pr = db.get_redshift_connection()
+        if crud_type == 'i':
+            pr.pandas_to_redshift(df, table_name, index=None)
+
+        if crud_type in ('u', 'd'):
+            pr.exec_commit(sql)
+        pr.close_up_shop()
+
+    except Exception as e:
+        return e
+
 
 def execute_query(sql, return_as='d'):
     '''

@@ -89,5 +89,5 @@ if __name__ == '__main__':
 
 
 
-    print("{0}: All Registrations Meterpoints Status completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: All Internal Estimates completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 

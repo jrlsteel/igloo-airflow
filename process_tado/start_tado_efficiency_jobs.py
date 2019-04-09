@@ -1,4 +1,6 @@
 import sys
+import uuid
+
 from datetime import datetime
 import timeit
 import subprocess
@@ -13,6 +15,7 @@ class TADOEfficiencyJobs:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.jobid = uuid.uuid4()
 
 
     def submit_tado_efficiency_gluejob(self):
@@ -20,12 +23,12 @@ class TADOEfficiencyJobs:
             jobName = self.dir['glue_tado_efficiency_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
-
+            util.batch_logging_insert(self.jobid, 1, 'tado_efficiency_gluejob','start_ensek_internal_estimates_jobs.py')
             obj_tado_efficiency = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='tado_efficiency')
             tado_efficiency_job_response = obj_tado_efficiency.run_glue_job()
             if tado_efficiency_job_response:
                 print("{0}: TADO Efficiency Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                # write
+                util.batch_logging_update(self.jobid, 'e')
                 # return staging_job_response
             else:
                 print("Error occurred in TADO Efficiency Job")
@@ -33,8 +36,10 @@ class TADOEfficiencyJobs:
                 raise Exception
         except Exception as e:
             print("Error in TADO Efficiency Glue Job Job :- " + str(e))
+            util.batch_logging_update(self.jobid, 'f')
             # write
             sys.exit(1)
+
 
 
 if __name__ == '__main__':

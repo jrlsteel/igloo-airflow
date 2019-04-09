@@ -28,6 +28,11 @@ def get_redshift_connection():
                                user=con.redshift_config['user'], password=con.redshift_config['pwd'],
                                dbname=con.redshift_config['db'])
         print("Connected to Redshift")
+
+        pr.connect_to_s3(aws_access_key_id=con.s3_config['access_key'],
+                         aws_secret_access_key=con.s3_config['secret_key'],
+                         bucket=con.s3_config['bucket_name'],
+                         subdirectory='aws-glue-tempdir/')
         return pr
 
     except ConnectionError as e:
