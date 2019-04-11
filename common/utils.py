@@ -47,15 +47,16 @@ def batch_logging_insert(id, job_id, job_name, job_script_name):
     job_start = datetime.datetime.now()
     job_end = None
     job_status = 'Running'
-    job_df = pd.DataFrame(data=[[id, job_id, job_name, job_script_name, job_start, job_end, job_status]], columns=['id', 'job_id', 'job_name', 'job_script_name', 'job_start', 'job_end', 'job_status'])
+    job_df = pd.DataFrame(data=[[id, job_id, job_name, job_script_name, job_start, job_end, '', job_status]], columns=['id', 'job_id', 'job_name', 'job_script_name', 'job_start', 'job_end', 'job_error_message', 'job_status'])
     batch_logging = redshift_upsert(df=job_df, crud_type='i')
     return batch_logging
 
 
-def batch_logging_update(id, update_type=None):
+def batch_logging_update(id, update_type=None, error_message=None):
     """
-    :param self:
+    :param id:
     :param update_type: 's' - Start time, 'e' - End time, 'f' - Job Failed
+    :param error_message
     :return: None
     """
     time = datetime.datetime.now()
@@ -78,13 +79,13 @@ def batch_logging_update(id, update_type=None):
 
     sql_update_f = ''
     if update_type == 's':
-        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}' where id = {2}"""
-        sql_update_f = sql_update.format(job_time, job_status, id)
+        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
+        sql_update_f = sql_update.format(job_time, job_status, error_message, id)
         redshift_upsert(sql_update_f, crud_type='u')
 
     if update_type in ('e', 'f'):
-        sql_update = """update ref_batch_audit set job_end = '{0}', job_status = '{1}' where id = {2}"""
-        sql_update_f = sql_update.format(job_time, job_status, id)
+        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
+        sql_update_f = sql_update.format(job_time, job_status, error_message, id)
         redshift_upsert(sql_update_f, crud_type='u')
 
 
@@ -96,7 +97,7 @@ def redshift_upsert(sql=None, df=None, crud_type=None):
         table_name = 'ref_batch_audit'
         pr = db.get_redshift_connection()
         if crud_type == 'i':
-            pr.pandas_to_redshift(df, table_name, index=None)
+            pr.pandas_to_redshift(df, table_name, index=None, append=True)
 
         if crud_type in ('u', 'd'):
             pr.exec_commit(sql)
