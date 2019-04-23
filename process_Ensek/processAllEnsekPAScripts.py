@@ -16,7 +16,7 @@ def process_all_ensek_pa_scripts():
     print("{0}: >>>> Meter Points <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "process_ensek_meterpoints_no_history.py"])
+        subprocess.run([pythonAlias, "processEnsekMeterpoints/process_ensek_meterpoints_no_history.py"])
         print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
     except:
         raise
@@ -24,7 +24,7 @@ def process_all_ensek_pa_scripts():
     print("{0}: >>>> Internal Readings <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         start = timeit.default_timer()
-        subprocess.run([pythonAlias, "process_ensek_internal_readings.py"])
+        subprocess.run([pythonAlias, "processEnsekReadings/process_ensek_internal_readings.py"])
         print("{0}: Internal Readings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                            float(timeit.default_timer() - start)))
     except:
