@@ -148,10 +148,11 @@ if __name__ == '__main__':
     print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_all_ensek_scripts()
 
-    # run staging glue job
+    #run staging glue job
     print("{0}: Ensek Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
 
+    #run reference jobs
     print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
 
