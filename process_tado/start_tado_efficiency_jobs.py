@@ -38,6 +38,7 @@ class TADOEfficiencyJobs:
                 util.batch_logging_update(self.jobid, 'e')
 
             else:
+
                 print("Error occurred in TADO Efficiency Job")
                 # return staging_job_response
                 raise Exception
