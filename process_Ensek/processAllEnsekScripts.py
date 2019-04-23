@@ -14,15 +14,15 @@ def process_all_ensek_scripts():
     pythonAlias = util.get_pythonAlias()
 
 
-    not related to PA
-    print("{0}: >>>> Meter Points History<<<<".format(datetime.now().strftime('%H:%M:%S')))
-    try:
-        start = timeit.default_timer()
-        subprocess.run([pythonAlias, "process_ensek_meterpoints.py"])
-        print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-                                                                      float(timeit.default_timer() - start)))
-    except:
-        raise
+    # not related to PA
+    # print("{0}: >>>> Meter Points History<<<<".format(datetime.now().strftime('%H:%M:%S')))
+    # try:
+    #     start = timeit.default_timer()
+    #     subprocess.run([pythonAlias, "process_ensek_meterpoints.py"])
+    #     print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+    #                                                                   float(timeit.default_timer() - start)))
+    # except:
+    #     raise
 
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
