@@ -88,6 +88,5 @@ if __name__ == '__main__':
     s.submit_tariff_history_gluejob()
 
 
-
     print("{0}: All Tariff History completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
