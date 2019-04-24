@@ -1,5 +1,4 @@
 import sys
-import uuid
 
 from datetime import datetime
 import timeit
@@ -15,7 +14,7 @@ class TADOEfficiencyJobs:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.jobid = uuid.uuid4()
+        self.jobid = util.get_jobID()
 
 
     def submit_tado_efficiency_gluejob(self):

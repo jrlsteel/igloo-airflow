@@ -4,6 +4,7 @@ import sys
 import pandas as pd
 import datetime
 from connections import connect_db as db
+import uuid
 
 sys.path.append('..')
 
@@ -299,3 +300,7 @@ def get_pythonAlias():
         pythonAlias = 'python3'
 
     return pythonAlias
+
+def get_jobID():
+    jobid = uuid.uuid4()
+    return jobid
