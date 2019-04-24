@@ -24,6 +24,14 @@ def process_all_ensek_scripts():
     #                                                                   float(timeit.default_timer() - start)))
     # except:
     #     raise
+    print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekRegistrationStatus/process_ensek_registration_status.py"])
+        print("{0}: Status Registrations completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                              float(timeit.default_timer() - start)))
+    except:
+        raise
 
     print("{0}: >>>> Status Registrations Meterpoints <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
