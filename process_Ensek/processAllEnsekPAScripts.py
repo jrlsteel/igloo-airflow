@@ -17,7 +17,7 @@ def process_all_ensek_pa_scripts():
     try:
         # Batch Logging
         job_id = util.get_jobID()
-        util.batch_logging_insert(job_id, 1, 'ensek_meterpoints_pyscript', 'process_ensek_meterpoints_no_history.py')
+        util.batch_logging_insert(job_id, 7, 'ensek_meterpoints_pyscript', 'process_ensek_meterpoints_no_history.py')
         start = timeit.default_timer()
         subprocess.run([pythonAlias, "processEnsekMeterpoints/process_ensek_meterpoints_no_history.py"])
         print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
@@ -30,7 +30,7 @@ def process_all_ensek_pa_scripts():
     try:
         job_id = util.get_jobID()
         # Batch Logging
-        util.batch_logging_insert(job_id, 1, 'ensek_internal_readings_pyscript', 'process_ensek_internal_readings.py')
+        util.batch_logging_insert(job_id, 8, 'ensek_internal_readings_pyscript', 'process_ensek_internal_readings.py')
         start = timeit.default_timer()
         subprocess.run([pythonAlias, "processEnsekReadings/process_ensek_internal_readings.py"])
         print("{0}: Internal Readings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
