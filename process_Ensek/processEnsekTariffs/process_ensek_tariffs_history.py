@@ -45,7 +45,7 @@ class TariffHistory(object):
                     return json.loads(response.content.decode('utf-8'))
                 else:
                     print ('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    self.log_error('Response Error:  Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
