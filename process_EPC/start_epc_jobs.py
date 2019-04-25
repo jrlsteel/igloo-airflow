@@ -141,6 +141,10 @@ if __name__ == '__main__':
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_process_epc_certificates_job()
 
+    # run processing epc recommendations python script
+    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
+    s.submit_process_epc_recommendations_job()
+
     # run staging glue job epc  certificates
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_epc_certificates_staging_gluejob()
