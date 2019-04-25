@@ -14,6 +14,8 @@ class Weather:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+
+        self.all_jobid = util.get_jobID()
         self.weather_jobid = util.get_jobID()
         self.weather_staging_jobid = util.get_jobID()
         self.weather_ref_jobid = util.get_jobID()
@@ -34,6 +36,7 @@ class Weather:
                                                                                float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
             util.batch_logging_update(self.weather_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -55,6 +58,7 @@ class Weather:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.weather_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -76,6 +80,7 @@ class Weather:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.weather_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
@@ -83,6 +88,8 @@ class Weather:
 if __name__ == '__main__':
 
     s = Weather()
+
+    util.batch_logging_insert(s.all_jobid, 107, 'all_weather_jobs', 'start_weather_jobs.py')
 
     # run processing weather python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
@@ -98,3 +105,4 @@ if __name__ == '__main__':
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
+    util.batch_logging_update(s.all_jobid, 'e')
