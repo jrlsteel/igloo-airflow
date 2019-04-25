@@ -100,7 +100,6 @@ class StartD18Jobs:
             print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
-
 if __name__ == '__main__':
 
     s = StartD18Jobs()
