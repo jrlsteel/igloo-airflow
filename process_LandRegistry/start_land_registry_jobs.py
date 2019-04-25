@@ -28,7 +28,7 @@ class LandRegistry:
             util.batch_logging_insert(self.landregistry_jobid, 24, 'landregistry_extract_pyscript', 'start_land_registry_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_land_registry.py"])
-            util.batch_logging_update(self.landregistry_staging_jobid, 'e')
+            util.batch_logging_update(self.landregistry_jobid, 'e')
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
             util.batch_logging_update(self.landregistry_jobid, 'f', str(e))
@@ -66,6 +66,7 @@ class LandRegistry:
 
             obj_landregistry = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='land_registry')
             landregistry_job_response = obj_landregistry.run_glue_job()
+
             if landregistry_job_response:
                 util.batch_logging_update(self.landregistry_ref_jobid, 'e')
                 print("{0}: Ref Glue Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
