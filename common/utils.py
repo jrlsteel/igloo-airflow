@@ -85,7 +85,7 @@ def batch_logging_update(id, update_type=None, error_message=None):
         redshift_upsert(sql_update_f, crud_type='u')
 
     if update_type in ('e', 'f'):
-        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
+        sql_update = """update ref_batch_audit set job_end = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
         sql_update_f = sql_update.format(job_time, job_status, error_message, id)
         redshift_upsert(sql_update_f, crud_type='u')
 
