@@ -15,6 +15,7 @@ class ALP:
         self.env = util.get_env()
         self.dir = util.get_dir()
 
+        self.all_jobid = util.get_jobID()
         self.alp_wcf_jobid = util.get_jobID()
         self.alp_cv_jobid = util.get_jobID()
         self.alp_wcf_staging_jobid = util.get_jobID()
@@ -39,6 +40,7 @@ class ALP:
                                                                                float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
             util.batch_logging_update(self.alp_wcf_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -59,6 +61,7 @@ class ALP:
                                                                                float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
             util.batch_logging_update(self.alp_cv_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -82,6 +85,7 @@ class ALP:
 
         except Exception as e:
             util.batch_logging_update(self.alp_wcf_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -104,6 +108,7 @@ class ALP:
 
         except Exception as e:
             util.batch_logging_update(self.alp_cv_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -127,6 +132,7 @@ class ALP:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.alp_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
@@ -150,6 +156,7 @@ class ALP:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.eac_aq_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in EAC and AQ Job :- " + str(e))
             sys.exit(1)
 
@@ -157,6 +164,8 @@ class ALP:
 if __name__ == '__main__':
 
     s = ALP()
+
+    util.batch_logging_insert(s.all_jobid, 105, 'all_alp_jobs', 'start_alp_jobs.py')
 
     # run processing alp wcf script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
@@ -183,4 +192,6 @@ if __name__ == '__main__':
     s.submit_eac_aq_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+
+    util.batch_logging_update(s.all_jobid, 'e')
 

@@ -143,7 +143,7 @@ if __name__ == '__main__':
 
     s = StartEPCJobs()
 
-    util.batch_logging_insert(s.all_jobid, 104, 'all_d18_jobs', 'start_d18_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 104, 'all_epc_jobs', 'start_epc_jobs.py')
 
     # run processing epc certificates python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
