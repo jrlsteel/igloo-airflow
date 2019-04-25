@@ -13,6 +13,7 @@ class StartD18Jobs:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.all_jobid = util.get_jobID()
         self.d18_jobid = util.get_jobID()
         self.d18_download_jobid = util.get_jobID()
         self.d18_staging_jobid = util.get_jobID()
@@ -36,6 +37,7 @@ class StartD18Jobs:
                                                                           float(timeit.default_timer() - start)))
         except Exception as e:
             util.batch_logging_update(self.d18_download_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in download_d18 process :- " + str(e))
             sys.exit(1)
 
@@ -54,6 +56,7 @@ class StartD18Jobs:
             print("{0}: Process D18 files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
             util.batch_logging_update(self.d18_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in download_d18 process :- " + str(e))
             sys.exit(1)
 
@@ -75,6 +78,7 @@ class StartD18Jobs:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.d18_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -97,12 +101,15 @@ class StartD18Jobs:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.d18_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in D18 Job :- " + str(e))
             sys.exit(1)
 
 if __name__ == '__main__':
 
     s = StartD18Jobs()
+
+    util.batch_logging_insert(s.all_jobid, 102, 'all_d18_jobs', 'start_d18_jobs.py')
 
     # run download d18 python script
     print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
@@ -122,3 +129,4 @@ if __name__ == '__main__':
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
+    util.batch_logging_update(s.all_jobid, 'e')
