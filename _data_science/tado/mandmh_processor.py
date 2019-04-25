@@ -14,9 +14,9 @@ import pandas as pd
 import numpy as np
 from scipy.stats import halfnorm
 
-import sklearn.linear_model as lm
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
+# import sklearn.linear_model as lm
+# from sklearn.model_selection import train_test_split
+# from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import itertools
 
@@ -152,8 +152,9 @@ def fun_sort_age_columns(df_in):
     return (df_out)
 
 
-def fun_create_family_categories(df_.in):
-    ''' categorise households in a useful? manner
+def fun_create_family_categories(df_in):
+    '''
+    categorise households in a useful? manner
     '''
 
     # 1 occupant -> age ranges.... < 30, 30 - 65, 65+
@@ -250,7 +251,6 @@ def fun_create_family_categories(df_.in):
                 else:
                     ft = 'working_age_family_3'
                     hs = 'working_kids'
-
 
             elif no_oc == 4:
                 if all([a == 3 for a in ages]):

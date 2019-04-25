@@ -2,7 +2,7 @@ import sys
 import pandas_redshift as pr
 
 sys.path.append('..')
-from conf import config as con
+from utils.conf1 import config as con
 
 
 class CopyRedshiftdata:
