@@ -14,6 +14,8 @@ class LandRegistry:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+
+        self.all_jobid = util.get_jobID()
         self.landregistry_jobid = util.get_jobID()
         self.landregistry_staging_jobid = util.get_jobID()
         self.landregistry_ref_jobid = util.get_jobID()
@@ -32,6 +34,7 @@ class LandRegistry:
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
             util.batch_logging_update(self.landregistry_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -53,6 +56,7 @@ class LandRegistry:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.landregistry_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -77,6 +81,7 @@ class LandRegistry:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.landregistry_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
@@ -84,6 +89,8 @@ class LandRegistry:
 if __name__ == '__main__':
 
     s = LandRegistry()
+
+    util.batch_logging_insert(s.all_jobid, 106, 'all_land_registry_jobs', 'start_land_registry_jobs.py')
 
     # run processing land regsitry python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
@@ -98,4 +105,6 @@ if __name__ == '__main__':
     s.submit_landregistry_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+
+    util.batch_logging_update(s.all_jobid, 'e')
 
