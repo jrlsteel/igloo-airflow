@@ -144,8 +144,4 @@ if __name__ == '__main__':
     print("{0}: Ensek Reference Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_Ensek_Gluejob()
 
-    # # run eac and aq calculation job
-    # print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_eac_aq_gluejob()
-
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))

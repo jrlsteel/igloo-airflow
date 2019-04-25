@@ -14,6 +14,9 @@ class LandRegistry:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.landregistry_jobid = util.get_jobID()
+        self.landregistry_staging_jobid = util.get_jobID()
+        self.landregistry_ref_jobid = util.get_jobID()
 
     def submit_stage1_job(self):
         """
@@ -22,23 +25,26 @@ class LandRegistry:
         """
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
+            util.batch_logging_insert(self.landregistry_jobid, 24, 'landregistry_extract_pyscript', 'start_land_registry_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_land_registry.py"])
-            print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-                                                                               float(timeit.default_timer() - start), self.process_name))
+            util.batch_logging_update(self.landregistry_staging_jobid, 'e')
+            print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start), self.process_name))
         except Exception as e:
+            util.batch_logging_update(self.landregistry_jobid, 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
     def submit_stage2_job(self):
         try:
+            util.batch_logging_insert(self.landregistry_staging_jobid, 25, 'landregistry_staging_glue_job','start_land_registry_jobs.py')
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
-
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='land_registry')
             staging_job_response = obj_stage.run_glue_job()
             if staging_job_response:
+                util.batch_logging_update(self.landregistry_staging_jobid, 'e')
                 print("{0}: Staging Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
                 # return staging_job_response
             else:
@@ -46,6 +52,7 @@ class LandRegistry:
                 # return staging_job_response
                 raise Exception
         except Exception as e:
+            util.batch_logging_update(self.landregistry_staging_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -55,9 +62,9 @@ class LandRegistry:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_d18 = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='land_registry')
-            d18_job_response = obj_d18.run_glue_job()
-            if d18_job_response:
+            obj_landregistry = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='land_registry')
+            landregistry_job_response = obj_landregistry.run_glue_job()
+            if landregistry_job_response:
                 print("{0}: Ref Glue Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
                 # return staging_job_response
             else:
