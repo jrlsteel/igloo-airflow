@@ -14,6 +14,7 @@ class StartEnsekPAJobs:
     def __init__(self):
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.all_jobid = util.get_jobID()
         self.staging_jobid = util.get_jobID()
         self.customerdb_jobid = util.get_jobID()
         self.ref_jobid = util.get_jobID()
@@ -31,6 +32,7 @@ class StartEnsekPAJobs:
                 raise Exception
         except Exception as e:
             print("Error in Ensek Scripts :- " + str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
 
@@ -54,6 +56,7 @@ class StartEnsekPAJobs:
         except Exception as e:
             print("Error in Staging Job :- " + str(e))
             util.batch_logging_update(self.staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
     def submit_customerDB_Gluejob(self):
@@ -75,6 +78,7 @@ class StartEnsekPAJobs:
         except Exception as e:
             print("Error in Customer DB Job :- " + str(e))
             util.batch_logging_update(self.customerdb_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
     def submit_Ensek_Gluejob(self):
@@ -98,6 +102,7 @@ class StartEnsekPAJobs:
         except Exception as e:
             print("Error in Ensek Job :- " + str(e))
             util.batch_logging_update(self.ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
     def submit_eac_aq_gluejob(self):
@@ -121,6 +126,7 @@ class StartEnsekPAJobs:
         except Exception as e:
             print("Error in EAC and AQ Job :- " + str(e))
             util.batch_logging_update(self.ref_eac_aq_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
 
@@ -128,6 +134,7 @@ class StartEnsekPAJobs:
 if __name__ == '__main__':
     s = StartEnsekPAJobs()
 
+    util.batch_logging_insert(s.all_jobid, 103, 'all_pa_jobs', 'start_ensek_api_pa_jobs.py')
 
     # run Customer DB
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
@@ -145,3 +152,5 @@ if __name__ == '__main__':
     s.submit_Ensek_Gluejob()
 
     print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+
+    util.batch_logging_update(s.all_jobid, 'e')
