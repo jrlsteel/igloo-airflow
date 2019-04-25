@@ -3,9 +3,7 @@ from datetime import datetime
 
 sys.path.append('..')
 
-from process_Ensek.schema_validation import validateSchema as vs
 from process_Ensek import processAllEnsekScripts as ae
-# from process_Ensek import processEnsekApiCounts as ec
 from common import process_glue_job as glue
 
 from common import utils as util
