@@ -15,6 +15,7 @@ class StartEPCJobs:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.all_jobid = util.get_jobID()
         self.certificates_jobid = util.get_jobID()
         self.recommendations_jobid = util.get_jobID()
         self.certificates_staging_jobid = util.get_jobID()
@@ -36,6 +37,7 @@ class StartEPCJobs:
             print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
             util.batch_logging_update(self.certificates_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in EPC Certificates process :- " + str(e))
             sys.exit(1)
 
@@ -54,6 +56,7 @@ class StartEPCJobs:
             print("{0}: Process EPC Recommendations files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
             util.batch_logging_update(self.recommendations_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in EPC Recommendations process :- " + str(e))
             sys.exit(1)
 
@@ -80,6 +83,7 @@ class StartEPCJobs:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.certificates_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -107,6 +111,7 @@ class StartEPCJobs:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.recommendations_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -129,6 +134,7 @@ class StartEPCJobs:
                 raise Exception
         except Exception as e:
             util.batch_logging_update(self.certificates_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
@@ -136,6 +142,8 @@ class StartEPCJobs:
 if __name__ == '__main__':
 
     s = StartEPCJobs()
+
+    util.batch_logging_insert(s.all_jobid, 104, 'all_d18_jobs', 'start_d18_jobs.py')
 
     # run processing epc certificates python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
@@ -158,4 +166,6 @@ if __name__ == '__main__':
     s.submit_ref_epc_certificates_gluejob()
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+
+    util.batch_logging_update(s.all_jobid, 'e')
 
