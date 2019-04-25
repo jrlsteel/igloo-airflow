@@ -58,6 +58,8 @@ class LandRegistry:
 
     def submit_landregistry_gluejob(self):
         try:
+            util.batch_logging_insert(self.landregistry_ref_jobid, 26, 'landregistry_ref_glue_job', 'start_landregistry_jobs.py')
+
             jobName = self.dir['glue_land_registry_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
@@ -65,6 +67,7 @@ class LandRegistry:
             obj_landregistry = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='land_registry')
             landregistry_job_response = obj_landregistry.run_glue_job()
             if landregistry_job_response:
+                util.batch_logging_update(self.landregistry_ref_jobid, 'e')
                 print("{0}: Ref Glue Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
                 # return staging_job_response
             else:
@@ -72,6 +75,7 @@ class LandRegistry:
                 # return staging_job_response
                 raise Exception
         except Exception as e:
+            util.batch_logging_update(self.landregistry_ref_jobid, 'f', str(e))
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
