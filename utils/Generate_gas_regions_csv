@@ -1,0 +1,22 @@
+import json
+from pandas.io.json import json_normalize
+
+if __name__ == '__main__':
+
+    filename = 'gasregion_postcodesector.json'
+    p_list = []
+    with open(filename) as data_file:
+        json_data = data_file.read()
+        data = json.loads(json_data)
+    for d in data:
+        p = d['Postcode Sector'].split('-')
+        r = d['LDZ']
+        for e in p:
+            json_data = [{'LDZ': r, 'postcode_sector': e}]
+            p_list += json_data
+
+    print(p_list)
+    gasregion_df = json_normalize(p_list)
+    file_name_gasregion = '/Users/sakthimurugan/Igloo/projects/enzek-meterpoint-readings/utils/gas_region.csv'
+    weather_df_string = gasregion_df.to_csv(file_name_gasregion, index=False)
+

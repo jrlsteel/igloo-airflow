@@ -17,9 +17,10 @@ import pandas as pd
 import json
 import sys
 
-sys.path.append('..')
-import mandmh_processor as mp
+sys.path.append('../..')
 
+from _data_science.tado import mandmh_processor as mp
+from connections import connect_db as db
 from conf import config as con
 
 
@@ -143,14 +144,14 @@ def bottom_up_impact_model(row):
 
 def db_connection():
 
+    env = con.environment_config['environment']
 
-    env_config = con.env['environment']
-    env = None
-    if env_config == 'uat':
-        env = con.uat
-
-    if env_config == 'prod':
-        env = con.prod
+    # env = None
+    # if env_config == 'uat':
+    #     env = con.uat
+    #
+    # if env_config == 'prod':
+    #     env = con.prod
 
     pr.connect_to_redshift(host=env['redshift_config']['host'], port=env['redshift_config']['port'],
                            user=env['redshift_config']['user'], password=env['redshift_config']['pwd'],
@@ -163,14 +164,14 @@ def db_connection():
                      subdirectory='aws-glue-tempdir/')
 
 def get_data():
-    conn = db_connection()
+    pr = db.get_redshift_connection()
 
-    query = 'select * from temp_me_and_my_home_fixed'  # drop downs etc
+    query = 'select * from temp_me_and_my_home_fixed where account_id = 1831'  # drop downs etc
     mamh_raw_fixed = pr.redshift_to_pandas(query)
 
     # print len(mamh_raw_fixed)
 
-    query = 'select * from temp_me_and_my_home_non_fixed'  # appliance data
+    query = 'select * from temp_me_and_my_home_non_fixed where account_id = 1831'  # appliance data
     mamh_raw_non_fixed = pr.redshift_to_pandas(query)
 
     clean_df = mp.clean_mamh(mamh_raw_fixed, mamh_raw_non_fixed, uid=None)
@@ -180,6 +181,8 @@ def get_data():
     h_size, h_type, ht_summary = mp.fun_create_family_categories(clean_df)
     h_summ_df = pd.Series(ht_summary)
     clean_df['heating_type'] = h_summ_df
+    clean_df['heating_type'] = 'working_kids'
+    clean_df['heating_control'] = 'smartthermostat'
     return clean_df
 
 
@@ -191,6 +194,8 @@ if __name__ == '__main__':
     for uid in clean_df['user_id'].unique()[:]:
         impact, base_mit, est_mit = bottom_up_impact_model(clean_df.loc[clean_df['user_id'] == uid])
         impacts[uid] = impact
+
+        print(impact)
 
     clean_df['st_impact'] = pd.Series(impacts)
     clean_df['st_impact'].plot(kind='hist')
