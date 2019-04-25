@@ -14,6 +14,20 @@ def process_all_ensek_scripts():
     # Aliases are different on different OS
     pythonAlias = util.get_pythonAlias()
 
+    print("{0}: >>>> Meter Points With History<<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        # Batch Logging
+        job_id = util.get_jobID()
+        util.batch_logging_insert(job_id, 7, 'ensek_meterpoints_pyscript', 'process_ensek_meterpoints.py')
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekMeterpoints/process_ensek_meterpoints.py"])
+        print("{0}: Meter Points completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                      float(timeit.default_timer() - start)))
+        util.batch_logging_update(job_id, 'e')
+
+    except:
+        raise
+
     print("{0}: >>>> Status Registrations <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         job_id = util.get_jobID()
