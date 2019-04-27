@@ -14,7 +14,7 @@ from multiprocessing import freeze_support
 import sys
 import os
 
-sys.path.append('../..')
+sys.path.append('..')
 
 from conf import config as con
 from common import utils as util
