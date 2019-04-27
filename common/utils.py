@@ -80,12 +80,12 @@ def batch_logging_update(id, update_type=None, error_message=None):
 
     sql_update_f = ''
     if update_type == 's':
-        sql_update = """update ref_batch_audit set job_start = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
+        sql_update = """update dwh_job_logs set job_start = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
         sql_update_f = sql_update.format(job_time, job_status, error_message, id)
         redshift_upsert(sql_update_f, crud_type='u')
 
     if update_type in ('e', 'f'):
-        sql_update = """update ref_batch_audit set job_end = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
+        sql_update = """update dwh_job_logs set job_end = '{0}', job_status = '{1}', job_error_message = '{2}' where id = '{3}'"""
         sql_update_f = sql_update.format(job_time, job_status, error_message, id)
         redshift_upsert(sql_update_f, crud_type='u')
 
@@ -95,7 +95,7 @@ def redshift_upsert(sql=None, df=None, crud_type=None):
     :param sql: the sql to run
     '''
     try:
-        table_name = 'ref_batch_audit'
+        table_name = 'dwh_job_logs'
         pr = db.get_redshift_connection()
         if crud_type == 'i':
             pr.pandas_to_redshift(df, table_name, index=None, append=True)
