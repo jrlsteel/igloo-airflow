@@ -73,11 +73,11 @@ class StartReadingsJobs:
 
 if __name__ == '__main__':
 
-    s = StartInternalReadingsJobs()
+    s = StartReadingsJobs()
 
     #Ensek Internal Readings
     print("{0}:  Ensek Internal Readings Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_internal_readings_job()
+    s.submit_readings_internal_job()
 
 
 
