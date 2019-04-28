@@ -188,8 +188,8 @@ if __name__ == '__main__':
     s.submit_alp_gluejob()
 
     # run eac and aq calculation job
-    # print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_eac_aq_gluejob()
+    print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_eac_aq_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
