@@ -10,7 +10,7 @@ from common import utils as util
 
 class EacAqPa:
     def __init__(self):
-        self.process_name = "EAC AQ PA Process"
+        self.process_name = "EAC AQ V1 Process"
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     s = EacAqPa()
 
-    util.batch_logging_insert(s.all_jobid, 130, 'all_eac_aq_pa', 'start_eac_aq_pa_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 131, 'all_eac_aq_v1', 'start_eac_aq_v1_jobs.py')
 
     # run eac and aq calculation job
     print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
