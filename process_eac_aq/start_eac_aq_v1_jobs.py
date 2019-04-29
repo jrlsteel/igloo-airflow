@@ -8,7 +8,7 @@ from common import process_glue_job as glue
 from common import utils as util
 
 
-class EacAqPa:
+class EacAqV1:
     def __init__(self):
         self.process_name = "EAC AQ V1 Process"
         self.pythonAlias = util.get_pythonAlias()
@@ -47,7 +47,7 @@ class EacAqPa:
 
 if __name__ == '__main__':
 
-    s = EacAqPa()
+    s = EacAqV1()
 
     util.batch_logging_insert(s.all_jobid, 131, 'all_eac_aq_v1', 'start_eac_aq_v1_jobs.py')
 
