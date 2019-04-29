@@ -16,23 +16,23 @@ class EacAqPa:
         self.dir = util.get_dir()
 
         self.all_jobid = util.get_jobID()
-        self.eac_aq_ref_jobid = util.get_jobID()
+        self.eac_aq_v1_ref_jobid = util.get_jobID()
 
 
 
 
     def submit_eac_aq_gluejob(self):
         try:
-            util.batch_logging_insert(self.eac_aq_ref_jobid, 38, 'eac_aq_pa_calculated_glue_job', 'start_eac_aq_pa_jobs.py')
+            util.batch_logging_insert(self.eac_aq_v1_ref_jobid, 38, 'eac_aq_v1_calculated_glue_job', 'start_eac_aq_v1_jobs.py')
 
             jobName = self.dir['glue_eac_aq_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_eac_aq = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='eac_aq')
+            obj_eac_aq = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='eac_aq_v1')
             eac_aq_job_response = obj_eac_aq.run_glue_job()
             if eac_aq_job_response:
-                util.batch_logging_update(self.eac_aq_ref_jobid, 'e')
+                util.batch_logging_update(self.eac_aq_v1_ref_jobid, 'e')
                 print("{0}: EAC and AQ Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
                 # return staging_job_response
             else:
@@ -40,7 +40,7 @@ class EacAqPa:
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            util.batch_logging_update(self.eac_aq_ref_jobid, 'f', str(e))
+            util.batch_logging_update(self.eac_aq_v1_ref_jobid, 'f', str(e))
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in EAC and AQ Job :- " + str(e))
             sys.exit(1)
