@@ -17,7 +17,7 @@ def process_all_ensek_scripts():
     print("{0}: >>>> Account Status <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         job_id = util.get_jobID()
-        util.batch_logging_insert(job_id, 2, 'ensek_account_status_pyscript', 'process_ensek_account_status.py')
+        util.batch_logging_insert(job_id, 41, 'ensek_account_status_pyscript', 'process_ensek_account_status.py')
 
         start = timeit.default_timer()
         subprocess.run([pythonAlias, "processEnsekStatus/process_ensek_account_status.py"])
