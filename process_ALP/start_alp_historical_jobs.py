@@ -143,38 +143,6 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
-    # def submit_eac_aq_pa_gluejob(self):
-    #     try:
-    #         util.batch_logging_insert(self.eac_aq_pa_ref_jobid, 38, 'eac_aq_pa_glue_job', 'start_alp_historical_jobs.py')
-    #         all_start_eac_aq_pa_jobs = eacaqpa.EacAqPa()
-    #         if all_start_eac_aq_pa_jobs:
-    #             util.batch_logging_update(self.eac_aq_pa_ref_jobid, 'e')
-    #             print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-    #             # return all_ensek_scripts_response
-    #         else:
-    #             print("Error occurred in All Ensek Scripts job")
-    #             # return all_ensek_scripts_response
-    #             raise Exception
-    #     except Exception as e:
-    #         util.batch_logging_update(self.eac_aq_pa_ref_jobid, 'f', str(e))
-    #         print("Error in Ensek Scripts :- " + str(e))
-    #         sys.exit(1)
-    #
-    # def submit_eac_aq_v1_gluejob(self):
-    #     try:
-    #         all_start_eac_aq_v1_jobs = eacaqv1.EacAqV1()
-    #         if all_start_eac_aq_v1_jobs:
-    #             print("{0}: All EAC AQ V1 Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-    #             # return all_ensek_scripts_response
-    #         else:
-    #             print("Error occurred in All All EAC AQ V1 Scripts job")
-    #             # return all_ensek_scripts_response
-    #             raise Exception
-    #     except Exception as e:
-    #         util.batch_logging_update(self.eac_aq_v1_ref_jobid, 'f', str(e))
-    #         print("Error in All EAC AQ V1 Scripts :- " + str(e))
-    #         sys.exit(1)
-
 if __name__ == '__main__':
 
     s = ALP()
