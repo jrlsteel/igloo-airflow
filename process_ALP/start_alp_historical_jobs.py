@@ -4,6 +4,10 @@ import timeit
 import subprocess
 
 sys.path.append('..')
+
+from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
+from process_eac_aq import start_eac_aq_v1_jobs as eacaqv1
+
 from common import process_glue_job as glue
 from common import utils as util
 
@@ -16,12 +20,15 @@ class ALP:
         self.dir = util.get_dir()
 
         self.all_jobid = util.get_jobID()
+
         self.alp_wcf_jobid = util.get_jobID()
         self.alp_cv_jobid = util.get_jobID()
         self.alp_wcf_staging_jobid = util.get_jobID()
         self.alp_cv_staging_jobid = util.get_jobID()
         self.alp_ref_jobid = util.get_jobID()
-        self.eac_aq_ref_jobid = util.get_jobID()
+
+        self.eac_aq_pa_ref_jobid = util.get_jobID()
+        self.eac_aq_v1_ref_jobid = util.get_jobID()
 
     def submit_process_alp_wcf_job(self):
         """
@@ -136,30 +143,37 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
-    def submit_eac_aq_gluejob(self):
-        try:
-            util.batch_logging_insert(self.eac_aq_ref_jobid, 38, 'eac_aq_calculated_glue_job', 'start_alp_historical_jobs.py')
-
-            jobName = self.dir['glue_eac_aq_job_name']
-            s3_bucket = self.dir['s3_bucket']
-            environment = self.env
-
-            obj_eac_aq = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='eac_aq')
-            eac_aq_job_response = obj_eac_aq.run_glue_job()
-            if eac_aq_job_response:
-                util.batch_logging_update(self.eac_aq_ref_jobid, 'e')
-                print("{0}: EAC and AQ Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                # return staging_job_response
-            else:
-                print("Error occurred in EAC and AQ Job")
-                # return staging_job_response
-                raise Exception
-        except Exception as e:
-            util.batch_logging_update(self.eac_aq_ref_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
-            print("Error in EAC and AQ Job :- " + str(e))
-            sys.exit(1)
-
+    # def submit_eac_aq_pa_gluejob(self):
+    #     try:
+    #         util.batch_logging_insert(self.eac_aq_pa_ref_jobid, 38, 'eac_aq_pa_glue_job', 'start_alp_historical_jobs.py')
+    #         all_start_eac_aq_pa_jobs = eacaqpa.EacAqPa()
+    #         if all_start_eac_aq_pa_jobs:
+    #             util.batch_logging_update(self.eac_aq_pa_ref_jobid, 'e')
+    #             print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    #             # return all_ensek_scripts_response
+    #         else:
+    #             print("Error occurred in All Ensek Scripts job")
+    #             # return all_ensek_scripts_response
+    #             raise Exception
+    #     except Exception as e:
+    #         util.batch_logging_update(self.eac_aq_pa_ref_jobid, 'f', str(e))
+    #         print("Error in Ensek Scripts :- " + str(e))
+    #         sys.exit(1)
+    #
+    # def submit_eac_aq_v1_gluejob(self):
+    #     try:
+    #         all_start_eac_aq_v1_jobs = eacaqv1.EacAqV1()
+    #         if all_start_eac_aq_v1_jobs:
+    #             print("{0}: All EAC AQ V1 Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    #             # return all_ensek_scripts_response
+    #         else:
+    #             print("Error occurred in All All EAC AQ V1 Scripts job")
+    #             # return all_ensek_scripts_response
+    #             raise Exception
+    #     except Exception as e:
+    #         util.batch_logging_update(self.eac_aq_v1_ref_jobid, 'f', str(e))
+    #         print("Error in All EAC AQ V1 Scripts :- " + str(e))
+    #         sys.exit(1)
 
 if __name__ == '__main__':
 
@@ -187,9 +201,16 @@ if __name__ == '__main__':
     print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_alp_gluejob()
 
-    # run eac and aq calculation job
+    # run eac and aq pa calculation job
     print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s = eacaqpa.EacAqPa()
     s.submit_eac_aq_gluejob()
+
+    # run eac and aq v1 calculation job
+    print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s = eacaqv1.EacAqV1()
+    s.submit_eac_aq_gluejob()
+
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
