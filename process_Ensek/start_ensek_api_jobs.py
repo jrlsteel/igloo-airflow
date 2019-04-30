@@ -58,7 +58,6 @@ class StartEnsekJobs:
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
-
     def submit_Ensek_Gluejob(self):
         try:
             jobname = self.dir['glue_ensek_job_name']
