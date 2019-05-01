@@ -171,13 +171,13 @@ if __name__ == '__main__':
 
     # run eac and aq pa calculation job
     print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s = eacaqpa.EacAqPa()
-    s.submit_eac_aq_gluejob()
+    eacaqpa_obj = eacaqpa.EacAqPa()
+    eacaqpa_obj.submit_eac_aq_gluejob()
 
     # run eac and aq v1 calculation job
     print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s = eacaqv1.EacAqV1()
-    s.submit_eac_aq_gluejob()
+    eacaqv1_obj = eacaqv1.EacAqV1()
+    eacaqv1_obj.submit_eac_aq_gluejob()
 
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
