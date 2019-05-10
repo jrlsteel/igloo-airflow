@@ -66,7 +66,7 @@ class AccountSettings:
         df__extract['account_id'] = account_id
         filename = 'account_settings_' + str(account_id) + '.csv'
         df_extract_string = df__extract.to_csv(None, index=False)
-        print(df_extract_string)
+        # print(df_extract_string)
         k.key = dir_s3_key['s3_key']['AccountSettings'] + filename
         k.set_contents_from_string(df_extract_string)
 
