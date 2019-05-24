@@ -167,6 +167,11 @@ uat = {
         "D18Suffix": ".flw"
     },
 
+    "s3_nosi_key": {
+        "NOSIRaw": "stage1/NOSI/NOSIRaw/",
+        "NOSI_SFTP": "fileExports"
+    },
+
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
@@ -207,7 +212,8 @@ uat = {
     "glue_tado_efficiency_job_name": "_process_ref_tables_uat",
     "glue_internal_estimates_job_name":"_process_ref_tables_uat",
     "glue_annual_statements_job_name": "_process_ref_tables_uat",
-    "glue_tariff_history_job_name": "_process_ref_tables_uat"
+    "glue_tariff_history_job_name": "_process_ref_tables_uat",
+    "glue_cons_accu_job_name": "_process_ref_tables_uat"
 
 }
 
@@ -411,6 +417,7 @@ prod = {
     "glue_tado_efficiency_job_name": "_process_ref_tables_uat",
     "glue_internal_estimates_job_name":"_process_ref_tables_uat",
     "glue_annual_statements_job_name": "_process_ref_tables_uat",
-    "glue_tariff_history_job_name": "_process_ref_tables_uat"
+    "glue_tariff_history_job_name": "_process_ref_tables_uat",
+    "glue_cons_accu_job_name": "_process_ref_tables_uat"
 
 }
