@@ -134,13 +134,13 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 103, 'all_pa_jobs', 'start_ensek_api_pa_jobs.py')
 
-    # # run Customer DB
-    # print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_customerDB_Gluejob()
-    #
-    # # run PA Ensek Jobs
-    # print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    # s.submit_all_ensek_pa_scripts()
+    # run Customer DB
+    print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_customerDB_Gluejob()
+
+    # run PA Ensek Jobs
+    print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_all_ensek_pa_scripts()
 
     # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
