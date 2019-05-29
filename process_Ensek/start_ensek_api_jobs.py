@@ -18,8 +18,6 @@ class StartEnsekJobs:
         self.staging_jobid = util.get_jobID()
         self.ref_jobid = util.get_jobID()
 
-
-
     def submit_all_ensek_scripts(self):
         try:
             all_ensek_scripts_response = ae.process_all_ensek_scripts()

@@ -12,7 +12,6 @@ def process_all_ensek_pa_scripts():
     # Aliases are different on different OS
     pythonAlias = util.get_pythonAlias()
 
-
     print("{0}: >>>> Meter Points <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
         # Batch Logging
