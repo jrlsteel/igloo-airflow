@@ -208,6 +208,7 @@ uat = {
     "glue_internal_estimates_job_name":"_process_ref_tables_uat",
     "glue_annual_statements_job_name": "_process_ref_tables_uat",
     "glue_tariff_history_job_name": "_process_ref_tables_uat",
+    "glue_cons_accu_job_name": "_process_ref_tables_uat",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat"
 
 }
@@ -413,6 +414,7 @@ prod = {
     "glue_internal_estimates_job_name":"_process_ref_tables_prod",
     "glue_annual_statements_job_name": "_process_ref_tables_prod",
     "glue_tariff_history_job_name": "_process_ref_tables_prod",
+    "glue_cons_accu_job_name": "_process_ref_tables_prod",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod"
 
 }
