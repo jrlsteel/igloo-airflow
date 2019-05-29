@@ -42,7 +42,7 @@ class StartEnsekJobs:
             environment = self.env
 
             util.batch_logging_insert(self.staging_jobid, 13, 'ensek_non_pa_staging_gluejob', 'start_ensek_api_jobs.py')
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='ensek')
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='ensek-non-pa')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 util.batch_logging_update(self.staging_jobid, 'e')

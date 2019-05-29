@@ -207,7 +207,8 @@ uat = {
     "glue_tado_efficiency_job_name": "_process_ref_tables_uat",
     "glue_internal_estimates_job_name":"_process_ref_tables_uat",
     "glue_annual_statements_job_name": "_process_ref_tables_uat",
-    "glue_tariff_history_job_name": "_process_ref_tables_uat"
+    "glue_tariff_history_job_name": "_process_ref_tables_uat",
+    "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat"
 
 }
 
@@ -408,9 +409,10 @@ prod = {
     "glue_alp_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod",
-    "glue_tado_efficiency_job_name": "_process_ref_tables_uat",
-    "glue_internal_estimates_job_name":"_process_ref_tables_uat",
-    "glue_annual_statements_job_name": "_process_ref_tables_uat",
-    "glue_tariff_history_job_name": "_process_ref_tables_uat"
+    "glue_tado_efficiency_job_name": "_process_ref_tables_prod",
+    "glue_internal_estimates_job_name":"_process_ref_tables_prod",
+    "glue_annual_statements_job_name": "_process_ref_tables_prod",
+    "glue_tariff_history_job_name": "_process_ref_tables_prod",
+    "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod"
 
 }
