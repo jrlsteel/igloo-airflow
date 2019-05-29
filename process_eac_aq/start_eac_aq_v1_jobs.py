@@ -18,9 +18,6 @@ class EacAqV1:
         self.all_jobid = util.get_jobID()
         self.eac_aq_v1_ref_jobid = util.get_jobID()
 
-
-
-
     def submit_eac_aq_gluejob(self):
         try:
             util.batch_logging_insert(self.eac_aq_v1_ref_jobid, 38, 'eac_aq_v1_calculated_glue_job', 'start_eac_aq_v1_jobs.py')
@@ -44,6 +41,7 @@ class EacAqV1:
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in EAC and AQ Job :- " + str(e))
             sys.exit(1)
+
 
 if __name__ == '__main__':
 

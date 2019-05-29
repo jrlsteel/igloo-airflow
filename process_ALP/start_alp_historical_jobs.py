@@ -7,6 +7,7 @@ sys.path.append('..')
 
 from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
 from process_eac_aq import start_eac_aq_v1_jobs as eacaqv1
+from process_eac_aq import start_consumption_accuracy_jobs as ca
 
 from common import process_glue_job as glue
 from common import utils as util
@@ -14,7 +15,7 @@ from common import utils as util
 
 class ALP:
     def __init__(self):
-        self.process_name = "ALP WCF CV Historical"
+        self.process_name = "ALP WCF CV Historical EAC_AQ CONS_ACCU "
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
@@ -29,6 +30,7 @@ class ALP:
 
         self.eac_aq_pa_ref_jobid = util.get_jobID()
         self.eac_aq_v1_ref_jobid = util.get_jobID()
+        self.eac_aq_cons_accu_ref_jobid = util.get_jobID()
 
     def submit_process_alp_wcf_job(self):
         """
@@ -143,6 +145,7 @@ class ALP:
             print("Error in ALP Job :- " + str(e))
             sys.exit(1)
 
+
 if __name__ == '__main__':
 
     s = ALP()
@@ -179,6 +182,10 @@ if __name__ == '__main__':
     eacaqv1_obj = eacaqv1.EacAqV1()
     eacaqv1_obj.submit_eac_aq_gluejob()
 
+    # run eac and aq v1 calculation job
+    print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    ca_obj = ca.ConsumptionAccuracy()
+    ca_obj.submit_consumption_accuracy_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

@@ -35,7 +35,6 @@ class StartEnsekPAJobs:
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
-
     def submit_ensek_staging_Gluejob(self):
         try:
             jobName = self.dir['glue_staging_job_name']
@@ -128,7 +127,6 @@ class StartEnsekPAJobs:
             util.batch_logging_update(self.ref_eac_aq_jobid, 'f', str(e))
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
-
 
 
 if __name__ == '__main__':
