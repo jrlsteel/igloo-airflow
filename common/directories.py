@@ -189,6 +189,11 @@ uat = {
     "s3_land_reg_key": {
         "LandRegistry": "stage1/LandRegistry/"
     },
+    "s3_nrl_key": {
+        "Raw": "stage1/NRL/NRLRaw/",
+        "NRL": "stage1/NRL/NRL/",
+        "SFTP": "CNGexport/NRL"
+    },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
@@ -395,6 +400,16 @@ prod = {
     },
     "s3_alp_cv": {
         "AlpCV": "stage1/ALP/AlpCV/"
+    },
+    "s3_nrl_key": {
+        "Raw": "stage1/ReadingsNRL/NRLRaw/",
+        "NRL": "stage1/ReadingsNRL/NRL/",
+        "SFTP": "CNGexport/NRL"
+    },
+    "s3_nosi_key": {
+        "Raw": "stage1/ReadingsNOSIGAS/NOSIRaw/",
+        "NRL": "stage1/ReadingsNOSIGAS/NOSI/",
+        "SFTP": "CNGexport/NRL"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_prod",

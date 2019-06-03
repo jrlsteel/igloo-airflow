@@ -13,7 +13,7 @@ from multiprocessing import freeze_support
 import sys
 import os
 
-sys.path.append('..')
+sys.path.append('../..')
 
 from common import utils as util
 from conf import config as con
@@ -115,6 +115,8 @@ class MeterPoints:
 
         else:
             df_attributes['account_id'] = account_id
+            df_attributes['attributes_attributeValue'] = df_attributes[
+                'attributes_attributeValue'].str.replace(",", " ")
             # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
             df_attributes_string = df_attributes.to_csv(None, index=False)
             filename_attributes = 'mp_attributes_' + str(account_id) + '.csv'

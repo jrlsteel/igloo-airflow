@@ -288,6 +288,22 @@ def get_pythonAlias():
 
     return pythonAlias
 
+
 def get_jobID():
     jobid = uuid.uuid4()
     return jobid
+
+
+def get_files_from_sftp(sftp_path):
+    """
+    :return: files from sftp for the specified directory
+    """
+    sftp_conn = db.get_ensek_sftp_connection()  # get sftp connection
+    sftp_files = []
+
+    if sftp_conn.exists(sftp_path):
+
+        sftp_files = sftp_conn.listdir(sftp_path)
+
+    return sftp_conn, sftp_files
+
