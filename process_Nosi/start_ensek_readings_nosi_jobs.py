@@ -19,7 +19,7 @@ class StartReadingsNOSIJobs:
         self.nosi_staging_jobid = util.get_jobID()
         self.nosi_ref_jobid = util.get_jobID()
 
-    # def submit_readings_internal_job(self):
+    # def submit_readings_internal_nosi_download_job(self):
     #     """
     #     Calls the Registration Status process_ensek_registration_meterpoint_status.py"script to which processes ensek registrations stus.
     #     :return: None
