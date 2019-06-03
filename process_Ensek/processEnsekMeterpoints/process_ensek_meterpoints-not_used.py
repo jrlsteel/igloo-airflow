@@ -108,7 +108,7 @@ class MeterPoints:
 
         ''' Processing meterpoints attributes data'''
         df_attributes = json_normalize(data, record_path=['attributes'], record_prefix='attributes_', meta=['id'],
-                                       meta_prefix='meter_point_')
+                                       meta_prefix='meter_point_', )
         if df_attributes.empty:
             print(" - has no attributes data")
             self.log_error(" - has no attributes data")
@@ -116,6 +116,8 @@ class MeterPoints:
         else:
             df_attributes['account_id'] = account_id
             # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
+            df_attributes['attributes_attributeValue'] = df_attributes[
+                'attributes_attributeValue'].str.replace(",", " ")
             df_attributes_string = df_attributes.to_csv(None, index=False)
             filename_attributes = 'mp_attributes_history_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/Attributes/' + filename_attributes
@@ -311,58 +313,58 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    account_ids = []
+    account_ids = [3367]
     '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
-
-    if con.test_config['enable_file'] == 'Y':
-        account_ids = util.get_Users_from_s3(s3)
-
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = util.get_accountID_fromDB(False)
-
-    if con.test_config['enable_db_max'] == 'Y':
-        account_ids = util.get_accountID_fromDB(True)
+    # if con.test_config['enable_manual'] == 'Y':
+    #     account_ids = con.test_config['account_ids']
+    #
+    # if con.test_config['enable_file'] == 'Y':
+    #     account_ids = util.get_Users_from_s3(s3)
+    #
+    # if con.test_config['enable_db'] == 'Y':
+    #     account_ids = util.get_accountID_fromDB(False)
+    #
+    # if con.test_config['enable_db_max'] == 'Y':
+    #     account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
-    # p = MeterPoints()
-    # p.processAccounts(account_ids, s3, dir_s3)
+    p = MeterPoints()
+    p.processAccounts(account_ids, s3, dir_s3)
 
-    ####### Multiprocessing Starts #########
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
-    else:
-        n = 24
-
-    k = int(len(account_ids) / n)  # get equal no of files for each process
-
-    print(len(account_ids))
-    print(k)
-    processes = []
-    lv = 0
-
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        p1 = MeterPoints()
-        print(i)
-        uv = i * k
-        if i == n:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
-        else:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        sleep(2)
-
-    for process in processes:
-        process.join()
-    ####### Multiprocessing Ends #########
-
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    # ####### Multiprocessing Starts #########
+    # env = util.get_env()
+    # if env == 'uat':
+    #     n = 12  # number of process to run in parallel
+    # else:
+    #     n = 24
+    #
+    # k = int(len(account_ids) / n)  # get equal no of files for each process
+    #
+    # print(len(account_ids))
+    # print(k)
+    # processes = []
+    # lv = 0
+    #
+    # start = timeit.default_timer()
+    #
+    # for i in range(n + 1):
+    #     p1 = MeterPoints()
+    #     print(i)
+    #     uv = i * k
+    #     if i == n:
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+    #     else:
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+    #     lv = uv
+    #
+    #     processes.append(t)
+    #
+    # for p in processes:
+    #     p.start()
+    #     sleep(2)
+    #
+    # for process in processes:
+    #     process.join()
+    # ####### Multiprocessing Ends #########
+    #
+    # print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
