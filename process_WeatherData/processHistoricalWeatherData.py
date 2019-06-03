@@ -162,43 +162,43 @@ if __name__ == "__main__":
 
     # print(weather_postcodes)
     # if False:
-    p.processData(weather_postcodes, s3, dir_s3)
+    # p.processData(weather_postcodes, s3, dir_s3)
 
     ##### Multiprocessing Starts #########
-    # env = util.get_env()
-    #
-    # if env == 'uat':
-    #     n = 12  # number of process to run in parallel
-    # else:
-    #     n = 24
-    #
-    # k = int(len(weather_postcodes) / n)  # get equal no of files for each process
-    #
-    # print(len(weather_postcodes))
-    # print(k)
-    #
-    # processes = []
-    # lv = 0
-    # start = timeit.default_timer()
-    #
-    # for i in range(n + 1):
-    #     p1 = HistoricalWeather()
-    #     print(i)
-    #     uv = i * k
-    #     if i == n:
-    #         t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
-    #     else:
-    #         t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
-    #     lv = uv
-    #
-    #     processes.append(t)
-    #
-    # for p in processes:
-    #     p.start()
-    #     time.sleep(2)
-    #
-    # for process in processes:
-    #     process.join()
-    #
-    # print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
-    # ####### Multiprocessing Ends #########
+    env = util.get_env()
+
+    if env == 'uat':
+        n = 12  # number of process to run in parallel
+    else:
+        n = 24
+
+    k = int(len(weather_postcodes) / n)  # get equal no of files for each process
+
+    print(len(weather_postcodes))
+    print(k)
+
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
+
+    for i in range(n + 1):
+        p1 = HistoricalWeather()
+        print(i)
+        uv = i * k
+        if i == n:
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
+        else:
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
+        lv = uv
+
+        processes.append(t)
+
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    ####### Multiprocessing Ends #########
