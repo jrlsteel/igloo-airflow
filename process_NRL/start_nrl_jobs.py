@@ -44,7 +44,7 @@ class StartReadingsNOSIJobs:
         try:
             util.batch_logging_insert(self.nrl_jobid, 46, 'nrl_extract_pyscript','start_nrl_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_NRL.py"])
+            subprocess.run([self.pythonAlias, "process_nrl.py"])
             util.batch_logging_update(self.nrl_jobid, 'e')
             print("{0}: Process NRL files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
 
