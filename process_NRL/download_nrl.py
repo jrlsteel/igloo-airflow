@@ -18,45 +18,16 @@ class DownloadNRLFiles:
 
 if __name__ == '__main__':
 
+    # Donwload NRL files from SFTP
     s = DownloadNRLFiles()
+    nrl = sf.ProcessSFTPFiles(s.key)
+    files = util.get_files_from_sftp(nrl.sftp_path, search_string='')
+    files.remove('Archive')
+    if files:
+        nrl.upload_to_s3(files)
 
-    start = timeit.default_timer()
-
-    nrl = sf.ProcessSFTPFiles(s.key)   # Enable this to test without multiprocessing
-    files = nrl.files
-
-    ######## multiprocessing starts  ##########
-
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
+        # Archive NRL files in SFTP
+        archive_path = nrl.sftp_path + '/archive'
+        util.archive_files_on_sftp(files, nrl.sftp_path, archive_path)
     else:
-        n = 24
-    print(len(files))
-    k = int(len(files) / n)  # get equal no of files for each process
-    print(k)
-    processes = []
-    lv = 0
-
-    for i in range(n+1):
-        s = DownloadNRLFiles()
-        print(i)
-        uv = i * k
-        if i == n:
-            # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=nrl.upload_to_s3(), args=(files[lv:]))
-        else:
-            # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=nrl.upload_to_s3(), args=(files[lv:uv]))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-
-    for process in processes:
-        process.join()
-    ###### multiprocessing Ends #########
-
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+        print('No new NRL files available')

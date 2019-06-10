@@ -5,6 +5,7 @@ import pandas as pd
 import datetime
 from connections import connect_db as db
 import uuid
+import os
 
 sys.path.append('..')
 
@@ -294,16 +295,66 @@ def get_jobID():
     return jobid
 
 
-def get_files_from_sftp(sftp_path):
+def get_files_from_sftp(sftp_path, search_string=''):
     """
     :return: files from sftp for the specified directory
     """
-    sftp_conn = db.get_ensek_sftp_connection()  # get sftp connection
+    sftp_conn = None
     sftp_files = []
+    try:
+        sftp_conn = db.get_ensek_sftp_connection()  # get sftp connection
 
-    if sftp_conn.exists(sftp_path):
+        if sftp_conn.exists(sftp_path):
 
-        sftp_files = sftp_conn.listdir(sftp_path)
+            sftp_files = sftp_conn.listdir(sftp_path)
+            if search_string:
+                print(type(sftp_files))
+                sftp_files = [x for x in sftp_files if search_string in x]
+        else:
+            print('Error : SFTP path does not exists')
 
-    return sftp_conn, sftp_files
+    except Exception as e:
+        print('Error :' + str(e))
+        sys.exit(1)
 
+    finally:
+        sftp_conn.close()
+
+    return sftp_files
+
+
+def archive_files_on_sftp(files, sftp_path, archive_path):
+
+    sftp_conn = None
+    try:
+        sftp_conn = db.get_ensek_sftp_connection()  # get sftp connection
+
+        if sftp_conn.exists(sftp_path):
+            for file in files:
+                if file != 'Archive':
+                    src_file = sftp_path + '/' + file
+                    tgt_file = archive_path + '/' + file
+                    sftp_conn.rename(src_file, tgt_file)
+
+    except Exception as e:
+        print('Error : ' + str(e))
+
+    finally:
+        sftp_conn.close()
+
+
+def get_keys_from_s3(s3, bucket_name, prefix, suffix):
+    """
+    This function gets all the nrl_keys that needs to be processed.
+    :param s3: holds the s3 connection
+    :param bucket_name: s3 bucket name
+    :param suffix: suffix of file ex: .csv, .flw
+    :param prefix: directory path of the file exists ex: bucket/stage1/nrl/
+    :return: list of filenames under the s3 path
+    """
+
+    s3_keys = []
+    for obj in s3.list_objects(Bucket=bucket_name, Prefix=prefix)['Contents']:
+        if obj['Key'].endswith(suffix):
+            s3_keys.append(obj['Key'])
+    return s3_keys

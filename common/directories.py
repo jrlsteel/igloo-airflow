@@ -190,9 +190,14 @@ uat = {
         "LandRegistry": "stage1/LandRegistry/"
     },
     "s3_nrl_key": {
-        "Raw": "stage1/NRL/NRLRaw/",
-        "NRL": "stage1/NRL/NRL/",
-        "SFTP": "CNGexport/NRL"
+        "Raw": "stage1/ReadingsNRL/NRLRaw/",
+        "NRL": "stage1/ReadingsNRL/NRL/",
+        "SFTP": "CNGexport/NRL",
+        "Suffix": ".flw"
+    },
+    "s3_nosi_key": {
+        "Raw": "stage1/ReadingsNOSIGas/",
+        "SFTP": "NOSI"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
@@ -214,7 +219,8 @@ uat = {
     "glue_annual_statements_job_name": "_process_ref_tables_uat",
     "glue_tariff_history_job_name": "_process_ref_tables_uat",
     "glue_cons_accu_job_name": "_process_ref_tables_uat",
-    "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat"
+    "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat",
+    "glue_nrl_job_name": "_process_ref_tables_uat"
 
 }
 
@@ -404,12 +410,12 @@ prod = {
     "s3_nrl_key": {
         "Raw": "stage1/ReadingsNRL/NRLRaw/",
         "NRL": "stage1/ReadingsNRL/NRL/",
-        "SFTP": "CNGexport/NRL"
+        "SFTP": "CNGexport/NRL",
+        "Suffix": ".flw"
     },
     "s3_nosi_key": {
-        "Raw": "stage1/ReadingsNOSIGAS/NOSIRaw/",
-        "NRL": "stage1/ReadingsNOSIGAS/NOSI/",
-        "SFTP": "CNGexport/NRL"
+        "Raw": "stage1/ReadingsNOSIGas/",
+        "SFTP": "NOSI"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_prod",
@@ -430,6 +436,7 @@ prod = {
     "glue_annual_statements_job_name": "_process_ref_tables_prod",
     "glue_tariff_history_job_name": "_process_ref_tables_prod",
     "glue_cons_accu_job_name": "_process_ref_tables_prod",
-    "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod"
+    "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod",
+    "glue_nrl_job_name": "_process_ref_tables_prod"
 
 }
