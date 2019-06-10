@@ -19,21 +19,24 @@ class StartReadingsNOSIJobs:
         self.nosi_staging_jobid = util.get_jobID()
         self.nosi_ref_jobid = util.get_jobID()
 
-    # def submit_readings_internal_nosi_download_job(self):
-    #     """
-    #     Calls the Registration Status process_ensek_registration_meterpoint_status.py"script to which processes ensek registrations stus.
-    #     :return: None
-    #     """
-    #
-    #     print("{0}: >>>> Process Ensek Internal Readings  <<<<".format(datetime.now().strftime('%H:%M:%S')))
-    #     try:
-    #         start = timeit.default_timer()
-    #         subprocess.run([self.pythonAlias, "process_ensek_internal_readings.py"])
-    #         print("{0}: Process Ensek Internal Readings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-    #                                                                            float(timeit.default_timer() - start)))
-    #     except Exception as e:
-    #         print("Error in Process Ensek Internal Readings process :- " + str(e))
-    #         sys.exit(1)
+    def submit_download_nosi_job(self):
+
+        pythonAlias = util.get_pythonAlias()
+
+        print("{0}: >>>> Downloading NOSI files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        try:
+            util.batch_logging_insert(self.nosi_download_jobid, 45, 'nosi_download_pyscript', 'start_ensek_readings_nosi_jobs.py')
+            start = timeit.default_timer()
+            subprocess.run([pythonAlias, "download_nosi.py"])
+            util.batch_logging_update(self.nosi_download_jobid, 'e')
+            print("{0}: download_NOSI completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                          float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.nosi_download_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in download_NOSI process :- " + str(e))
+            sys.exit(1)
+
 
     def submit_internal_readings_nosi_staging_gluejob(self):
         try:
@@ -90,7 +93,11 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 132, 'all_readings_internal_nosi_jobs', 'start_ensek_readings_nosi_jobs.py')
 
-   # # Ensek Internal Readings NOSI Staging
+    # # Ensek Internal Readings NOSI Downloading
+    print("{0}: download_NOSI job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_download_nosi_job()
+
+    # # Ensek Internal Readings NOSI Staging
     print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_staging_gluejob()
 
@@ -98,8 +105,7 @@ if __name__ == '__main__':
     print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_gluejob()
 
-
-    print("{0}: All Ensek Internal Readings Nosi completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: All Ensek Internal Readings NOSI completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
     util.batch_logging_update(s.all_jobid, 'e')
 
