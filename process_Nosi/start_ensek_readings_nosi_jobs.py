@@ -90,11 +90,11 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 132, 'all_readings_internal_nosi_jobs', 'start_ensek_readings_nosi_jobs.py')
 
-    #Ensek Internal Readings NOSI Staging
+   # # Ensek Internal Readings NOSI Staging
     print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_staging_gluejob()
 
-    # Ensek Internal Readings NOSI Glue Job
+    # # Ensek Internal Readings NOSI Glue Job
     print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_gluejob()
 

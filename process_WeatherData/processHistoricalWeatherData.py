@@ -26,16 +26,10 @@ class HistoricalWeather:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        # self.start_date = datetime.datetime.strptime('2018-07-01', '%Y-%m-%d').date().isoweekday()
-        # self.day_of_week = datetime.strptime('2018-12-17', '%Y-%m-%d').date().isoweekday()
-        # self.end_date = datetime.strptime('2018-12-17', '%Y-%m-%d').date() + timedelta(days=(7-self.day_of_week))
 
         self.day_of_week = datetime.today().isoweekday()
         self.end_date = datetime.today().date() + timedelta(days=(7-self.day_of_week))
-        # no_of_days = (5 * 7)  # 5 weeks
-        # self.start_date = self.end_date - timedelta(days=(no_of_days-1))
         self.start_date = (datetime.today().date() + timedelta(days=(7-self.day_of_week))) - timedelta(days=35)
-        # self.start_date = datetime.strptime('2018-11-11', '%Y-%m-%d').date()
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
 
