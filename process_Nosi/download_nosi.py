@@ -32,4 +32,4 @@ if __name__ == '__main__':
         archive_path = nosi.sftp_path + '/archive'
         util.archive_files_on_sftp(files, nosi.sftp_path, archive_path)
     else:
-        print('No new NRL files available')
+        print('No new NOSI files available')
