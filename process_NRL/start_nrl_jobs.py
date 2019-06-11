@@ -8,7 +8,7 @@ from common import process_glue_job as glue
 from common import utils as util
 
 
-class StartReadingsNOSIJobs:
+class StartReadingsNRLJobs:
     def __init__(self):
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
@@ -26,7 +26,7 @@ class StartReadingsNOSIJobs:
 
         print("{0}: >>>> Downloading NRL files <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            util.batch_logging_insert(self.nrl_download_jobid, 45, 'nrl_download_pyscript', 'start_nrl_jobs.py')
+            util.batch_logging_insert(self.nrl_download_jobid, 46, 'nrl_download_pyscript', 'start_nrl_jobs.py')
             start = timeit.default_timer()
             subprocess.run([pythonAlias, "download_nrl.py"])
             util.batch_logging_update(self.nrl_download_jobid, 'e')
@@ -42,7 +42,7 @@ class StartReadingsNOSIJobs:
 
         print("{0}: >>>> Process NRL files <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            util.batch_logging_insert(self.nrl_jobid, 46, 'nrl_extract_pyscript','start_nrl_jobs.py')
+            util.batch_logging_insert(self.nrl_jobid, 47, 'nrl_extract_pyscript','start_nrl_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_nrl.py"])
             util.batch_logging_update(self.nrl_jobid, 'e')
@@ -57,7 +57,7 @@ class StartReadingsNOSIJobs:
     def submit_nrl_staging_gluejob(self):
         try:
             jobName = self.dir['glue_staging_job_name']
-            util.batch_logging_insert(self.nrl_staging_jobid, 43, 'nrl_staging_glue_job', 'start_nrl_jobs.py')
+            util.batch_logging_insert(self.nrl_staging_jobid, 48, 'nrl_staging_glue_job', 'start_nrl_jobs.py')
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
@@ -80,7 +80,7 @@ class StartReadingsNOSIJobs:
     def submit_nrl_ref_gluejob(self):
         try:
             jobname = self.dir['glue_nrl_job_name']
-            util.batch_logging_insert(self.nrl_ref_jobid, 44, 'nrl_ref_glue_job', 'start_nrl_jobs.py')
+            util.batch_logging_insert(self.nrl_ref_jobid, 49, 'nrl_ref_glue_job', 'start_nrl_jobs.py')
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
@@ -102,7 +102,7 @@ class StartReadingsNOSIJobs:
 
 if __name__ == '__main__':
 
-    s = StartReadingsNOSIJobs()
+    s = StartReadingsNRLJobs()
 
     util.batch_logging_insert(s.all_jobid, 133, 'all_nrl_jobs', 'start_nrl_jobs.py')
 
