@@ -98,11 +98,11 @@ if __name__ == '__main__':
     s.submit_download_nosi_job()
 
     # # Ensek Internal Readings NOSI Staging
-    print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Ensek Internal Readings Staging NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_staging_gluejob()
 
     # # Ensek Internal Readings NOSI Glue Job
-    print("{0}:  Ensek Internal Readings NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Ensek Internal Readings Ref NOSI Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_internal_readings_nosi_gluejob()
 
     print("{0}: All Ensek Internal Readings NOSI completed successfully".format(datetime.now().strftime('%H:%M:%S')))
