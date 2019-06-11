@@ -25,7 +25,7 @@ class StartReadingsNOSIJobs:
 
         print("{0}: >>>> Downloading NOSI files <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            util.batch_logging_insert(self.nosi_download_jobid, 45, 'nosi_download_pyscript', 'start_ensek_readings_nosi_jobs.py')
+            util.batch_logging_insert(self.nosi_download_jobid, 43, 'nosi_download_pyscript', 'start_ensek_readings_nosi_jobs.py')
             start = timeit.default_timer()
             subprocess.run([pythonAlias, "download_nosi.py"])
             util.batch_logging_update(self.nosi_download_jobid, 'e')
@@ -41,7 +41,7 @@ class StartReadingsNOSIJobs:
     def submit_internal_readings_nosi_staging_gluejob(self):
         try:
             jobName = self.dir['glue_staging_job_name']
-            util.batch_logging_insert(self.nosi_staging_jobid, 43, 'nosi_staging_glue_job', 'start_ensek_readings_nosi_jobs.py')
+            util.batch_logging_insert(self.nosi_staging_jobid, 44, 'nosi_staging_glue_job', 'start_ensek_readings_nosi_jobs.py')
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
@@ -65,7 +65,7 @@ class StartReadingsNOSIJobs:
     def submit_internal_readings_nosi_gluejob(self):
         try:
             jobname = self.dir['glue_internal_readings_nosi_job_name']
-            util.batch_logging_insert(self.nosi_ref_jobid, 44, 'nosi_ref_glue_job', 'start_ensek_readings_nosi_jobs.py')
+            util.batch_logging_insert(self.nosi_ref_jobid, 45, 'nosi_ref_glue_job', 'start_ensek_readings_nosi_jobs.py')
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
