@@ -46,7 +46,7 @@ class StartReadingsNOSIJobs:
             environment = self.env
 
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='ensek-readings-nosi')
+                                            processJob='nosi')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 util.batch_logging_update(self.nosi_staging_jobid, 'e')
