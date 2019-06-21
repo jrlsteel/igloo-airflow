@@ -26,7 +26,7 @@ class ALPHistoricalCV:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.start_date = datetime.datetime.strptime('2014-01-01', '%Y-%m-%d').date()
+        self.start_date = datetime.datetime.strptime('2017-01-01', '%Y-%m-%d').date()
         #self.end_date = datetime.datetime.strptime('2018-07-01', '%Y-%m-%d').date()
         self.end_date = datetime.datetime.today().date()
         self.api_url, self.key = util.get_gas_historical_cv_api_info('gas_historical')
