@@ -8,6 +8,7 @@ sys.path.append('..')
 from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
 from process_eac_aq import start_eac_aq_v1_jobs as eacaqv1
 from process_eac_aq import start_consumption_accuracy_jobs as ca
+from process_tado import start_tado_efficiency_jobs as ta
 
 from common import process_glue_job as glue
 from common import utils as util
@@ -182,10 +183,15 @@ if __name__ == '__main__':
     eacaqv1_obj = eacaqv1.EacAqV1()
     eacaqv1_obj.submit_eac_aq_gluejob()
 
-    # run eac and aq v1 calculation job
+    # run consumption accuracy job
     print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
     ca_obj = ca.ConsumptionAccuracy()
     ca_obj.submit_consumption_accuracy_gluejob()
+
+    # run TADO efficiency job
+    print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    ta_obj = ta.TADOEfficiencyJobs()
+    ta_obj.submit_tado_efficiency_batch_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
