@@ -182,13 +182,13 @@ if __name__ == '__main__':
     print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
     iglindeacaq_obj = iglindeacaq.IglIndEacAq()
     iglindeacaq_obj.submit_eac_aq_gluejob()
-
-    # run consumption accuracy job
+    #
+    # # run consumption accuracy job
     print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
     ca_obj = ca.ConsumptionAccuracy()
     ca_obj.submit_consumption_accuracy_gluejob()
-
-    # run TADO efficiency job
+    #
+    # # run TADO efficiency job
     print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
     ta_obj = ta.TADOEfficiencyJobs()
     ta_obj.submit_tado_efficiency_batch_gluejob()
