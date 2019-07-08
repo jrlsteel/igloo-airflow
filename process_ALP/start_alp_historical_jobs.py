@@ -189,9 +189,9 @@ if __name__ == '__main__':
     ca_obj.submit_consumption_accuracy_gluejob()
     #
     # # run TADO efficiency job
-    print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    ta_obj = ta.TADOEfficiencyJobs()
-    ta_obj.submit_tado_efficiency_batch_gluejob()
+    # print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    # ta_obj = ta.TADOEfficiencyJobs()
+    # ta_obj.submit_tado_efficiency_batch_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
