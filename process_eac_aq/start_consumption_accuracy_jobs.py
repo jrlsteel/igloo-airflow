@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     s = ConsumptionAccuracy()
 
-    util.batch_logging_insert(s.all_jobid, 105, 'consumption_accuracy', 'start_eac_aq_v1_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 105, 'consumption_accuracy', 'start_igloo_ind_eac_aq_jobs.py')
 
     # run consumption accuracy job
     print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))

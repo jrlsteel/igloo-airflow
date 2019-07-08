@@ -106,14 +106,14 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 133, 'all_nrl_jobs', 'start_nrl_jobs.py')
 
-    print("{0}: download_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_download_nrl_job()
-
-    print("{0}: process_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_process_nrl_job()
-
-    print("{0}:  Ensek NRL Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_nrl_staging_gluejob()
+    # print("{0}: download_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_download_nrl_job()
+    #
+    # print("{0}: process_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_process_nrl_job()
+    #
+    # print("{0}:  Ensek NRL Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    # s.submit_nrl_staging_gluejob()
 
     print("{0}:  Ensek NRL Ref Glue Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_nrl_ref_gluejob()

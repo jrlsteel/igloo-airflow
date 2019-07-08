@@ -6,7 +6,7 @@ import subprocess
 sys.path.append('..')
 
 from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
-from process_eac_aq import start_eac_aq_v1_jobs as eacaqv1
+from process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
 from process_eac_aq import start_consumption_accuracy_jobs as ca
 from process_tado import start_tado_efficiency_jobs as ta
 
@@ -180,8 +180,8 @@ if __name__ == '__main__':
 
     # run eac and aq v1 calculation job
     print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    eacaqv1_obj = eacaqv1.EacAqV1()
-    eacaqv1_obj.submit_eac_aq_gluejob()
+    iglindeacaq_obj = iglindeacaq.IglIndEacAq()
+    iglindeacaq_obj.submit_eac_aq_gluejob()
 
     # run consumption accuracy job
     print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
