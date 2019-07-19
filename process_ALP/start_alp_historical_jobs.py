@@ -153,23 +153,23 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 105, 'all_alp_jobs', 'start_alp_jobs.py')
 
-    # run processing alp wcf script
+    # # run processing alp wcf script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_process_alp_wcf_job()
-
-    # run alp cv python script
+    #
+    # # run alp cv python script
     print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_process_alp_cv_job()
-
-    # run alp wcf staging glue job
+    #
+    # # run alp wcf staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_wcf_staging_gluejob()
-
-    # run alp cv staging glue job
+    #
+    # # run alp cv staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_cv_staging_gluejob()
-
-    # run reference alp glue job
+    #
+    # # run reference alp glue job
     print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_alp_gluejob()
 
@@ -190,8 +190,8 @@ if __name__ == '__main__':
     #
     # # run TADO efficiency job
     # print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # ta_obj = ta.TADOEfficiencyJobs()
-    # ta_obj.submit_tado_efficiency_batch_gluejob()
+    ta_obj = ta.TADOEfficiencyJobs()
+    ta_obj.submit_tado_efficiency_batch_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
