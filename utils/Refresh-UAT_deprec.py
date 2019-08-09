@@ -8,6 +8,7 @@ sys.path.append('..')
 from connections import connect_db as db
 from utils.conf import config as con
 
+
 class CopyStage2Files:
     """
     This script transfers the data from one table to another which are in different databases
