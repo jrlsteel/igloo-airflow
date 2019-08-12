@@ -220,7 +220,9 @@ uat = {
     "glue_tariff_history_job_name": "_process_ref_tables_uat",
     "glue_cons_accu_job_name": "_process_ref_tables_uat",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat",
-    "glue_nrl_job_name": "_process_ref_tables_uat"
+    "glue_nrl_job_name": "_process_ref_tables_uat",
+    "glue_estimated_advance_job_name": "_process_ref_tables_uat"
+
 
 }
 
