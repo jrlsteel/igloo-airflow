@@ -15,12 +15,11 @@ import datetime
 import sys
 import os
 from pathlib import Path
-
 #sys.path.append('..')
 
 from process_Ensek.processEnsekPriorityServiceRegister.conf import config as con
 from process_Ensek.processEnsekPriorityServiceRegister.connections import connect_db as db
-
+from common.utils import get_ensek_api_info1
 
 class TstApi:
 
@@ -92,7 +91,7 @@ class TstApi:
             else:
                 df_string = df.to_csv(csv_filename, mode='w', index=False)
 
-            # print(df_string)
+            print(df_string)
 
     def format_json_response(self, data):
         data_str = json.dumps(data, indent=4).replace('null', '""')
@@ -109,6 +108,7 @@ class TstApi:
             employee_writer.writerow([error_msg, error_code])
 
     def test_tado(self, account_ids, k, env, compare_demand_batch):
+
         api_url = "https://6rsh2pqob0.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/tado"
 
         # last_updated = "2019-04-20 14:10:10"
@@ -188,21 +188,11 @@ class TstApi:
                     print(api_response)
 
     def test_psr(self, account_ids_local, k, env, compare_demand_batch):
-        api_url = "https://igloo.ignition.ensek.co.uk/api/GetPSRByAccount/{0}"
-
-        # last_updated = "2019-04-20 14:10:10"
-
-        headers = {
-            'Accept': "application/json",
-            'Authorization': "Bearer SfmnUF7k2HVSbFdbExYEgzmVcurepYsrQ4oV766GJVGQiB_fXstV8kbt2-smH3xuqWpTvvMPYnHDNjNb_Rfk88xL9V2ujLACQwsPZfaVaBw5vaVAZGNFja53zw4jnfqAaZchvFKk0iqNn_ph3hOKSzCCQFUwOsPqOBlEoebI3xmXNTTUgCM43pR20fotgkqUFBC_wwntW7G-X8PWcp2KZGGRrN-yx0in5xJx213CBApb2BqFh6rCqfhLwfFJi0Fk_JJ033nlHPRXX7DAidpUfpb_scao_l-4rkInBPW6xfqNuUT1phExJhlnJXMRNc8x1XKyOD_ge0V_xwG-YEYUWOp000P0T08o4b_5A7ME_YrU2g72ROmGAOoPHKT1XhniB6NQmLXYKS6wBd1pkp48uHhkRRYVI3MV-lOS_LKNzORFrh7jzSa3CfNBorEbaSeSRVq8TaNQR9NCFed-_pY8uzhnvSaLz6klERhiwrZ2aORhvvWEX-o-ZJ11E39Cs6hgLwvVZmQkatib0nvzgPNagWtQizwaHs0qfS3P6ZHsBCC-90P-JeF-mCNT3lpOxiURGjcMLfCu7-Navm--u9DvhXYDpgJJT6nAZuEX5XJhKZ66qGZBSnybZzzTOFeM4joLv5spdu0FkbY6HwmFYFzKgMpMZHoA0AaiXm4DhJq3TPDiaNVMYiPYiDGayK8FaL0uxC88bA",
-            'Content-Type': "application/json"
-        }
-
-        # res = pd.DataFrame(columns=['account_id', 'psr_api_response'])
+        api_url, headers = get_ensek_api_info1('internal_psr')
 
         for account_id in account_ids_local:
             if account_id > 43053:
-                # logging
+                # loggingqqqqqqqqqqqq
                 print('ac:' + str(account_id))
                 # perform api call
                 api_url_full = api_url.format(account_id)
@@ -231,7 +221,7 @@ class TstApi:
 if __name__ == "__main__":
     freeze_support()
 
-    # env = con.prod
+    env = con.prod
 
     # get redshift and rds connection
     # bucket_name = env['s3_config']['bucket_name']
@@ -239,12 +229,11 @@ if __name__ == "__main__":
 
     p1 = TstApi()
 
-    # p1.get_connection_pr(env)
+    p1.get_connection_pr(env)
+    account_ids = p1.get_account_ids()
 
-    # account_ids = p1.get_account_ids()
-
-    acc_id_df = pd.read_csv('live_ids_190718.csv')
-    account_ids = acc_id_df['account_id']
+    # acc_id_df = pd.read_csv('live_ids_190718.csv')
+    # account_ids = acc_id_df['account_id']
 
     # account_ids = range(8334, 52361)
 

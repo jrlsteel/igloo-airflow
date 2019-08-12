@@ -262,6 +262,9 @@ prod = {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
         },
 
+        "internal_psr": {
+            "api_url": "https://igloo.ignition.ensek.co.uk/api/GetPSRByAccount/{0}"
+        },
         "account_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus"
         },

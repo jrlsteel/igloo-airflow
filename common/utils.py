@@ -167,7 +167,7 @@ def get_ensek_api_info(api, account_id):
     env_api = env['apis'][api]
     api_url = env_api['api_url'].format(account_id)
 
-    if api in ['internal_estimates', 'internal_readings']:
+    if api in ['internal_estimates', 'internal_readings','internal_psr']:
         token = get_auth_code()
     else:
         token = env['apis']['token']
