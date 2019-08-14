@@ -58,13 +58,13 @@ class ALP:
 
     def submit_process_s3_mirror_job(self, source_input, destination_input):
         """
-        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination folder
         :return: None
         """
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.alp_wcf_jobid, 31, 'alp_wcf_extract_mirror',
+            util.batch_logging_insert(self.alp_wcf_jobid, 31, 'alp_wcf_extract_mirror' + source_input + '-' + self.env,
                                       'start_alp_historical_jobs.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)

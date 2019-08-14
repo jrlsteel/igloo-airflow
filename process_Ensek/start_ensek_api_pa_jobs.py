@@ -31,7 +31,7 @@ class StartEnsekPAJobs:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.mirror_jobid, 8, + source_input + '-' + self.env,
+            util.batch_logging_insert(self.mirror_jobid, 8, 'ensek_extract_mirror-' + source_input + '-' + self.env,
                                       'start_ensek_api_pa_jobs.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)

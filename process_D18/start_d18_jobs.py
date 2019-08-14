@@ -70,7 +70,8 @@ class StartD18Jobs:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.d18_jobid, 28, 'd18_extract_mirror',
+
+            util.batch_logging_insert(self.d18_jobid, 28, 'd18_extract_mirror' + source_input + '-' + self.env,
                                       'start_d18_jobs.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
