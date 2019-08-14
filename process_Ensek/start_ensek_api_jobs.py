@@ -38,7 +38,7 @@ class StartEnsekJobs:
             r.process_sync()
 
             util.batch_logging_update(self.mirror_jobid, 'e')
-            print("ensek_extract_mirror-" + source_input + " files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
+            print("ensek_extract_mirror-" + source_input + "-" + self.env +" files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
             util.batch_logging_update(self.mirror_jobid, 'f', str(e))
             util.batch_logging_update(self.all_jobid, 'f', str(e))
