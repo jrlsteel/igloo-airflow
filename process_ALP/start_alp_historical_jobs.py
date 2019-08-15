@@ -188,8 +188,8 @@ if __name__ == '__main__':
        # # run processing alp wcf script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpWCF/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/ALP/AlpWCF/"
-        s.submit_process_s3_mirror_job(source_input,destination_input)
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpWCF/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
     #
     # # run alp cv python script
     if s.env == 'prod':
@@ -200,7 +200,7 @@ if __name__ == '__main__':
         # # run processing alp wcf script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpCV/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/ALP/AlpCV/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpCV/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
     #
     # # run alp wcf staging glue job

@@ -122,57 +122,57 @@ if __name__ == '__main__':
     else:
         print("Ensek Account Status  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/AccountStatus/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/AccountStatus/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/AccountStatus/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Registration Meterpoint Status Elec mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/RegistrationsElecMeterpoint/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/RegistrationsElecMeterpoint/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/RegistrationsElecMeterpoint/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Registration Status  Gas Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/RegistrationsGasMeterpoint/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/RegistrationsGasMeterpoint/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/RegistrationsGasMeterpoint/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Internal Estimates Elec  mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/EstimatesElecInternal/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/EstimatesElecInternal/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EstimatesElecInternal/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Internal Estimates Gas  mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/EstimatesGasInternal/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/EstimatesGasInternal/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EstimatesGasInternal/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/TariffHistory/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/TariffHistory/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/TariffHistory/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Elec Stand Charge Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/TariffHistoryElecStandCharge/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/TariffHistoryElecStandCharge/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/TariffHistoryElecStandCharge/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Gas Stand Charge Mirror  job is running...".format( datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/TariffHistoryGasStandCharge/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/TariffHistoryGasStandCharge/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/TariffHistoryGasStandCharge/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Elec Unit Rates Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/TariffHistoryElecUnitRates/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/TariffHistoryElecUnitRates/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/TariffHistoryElecUnitRates/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Gas Unit Rates Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/TariffHistoryGasUnitRates/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/TariffHistoryGasUnitRates/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/TariffHistoryGasUnitRates/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Account Transactions mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/AccountTransactions/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/AccountTransactions/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/AccountTransactions/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     #run staging glue job

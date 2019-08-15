@@ -150,12 +150,12 @@ if __name__ == '__main__':
         # # run processing alp wcf script
         print("D18 BPP Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/D18/D18BPP/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/D18/D18BPP/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/D18/D18BPP/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("D18 PPC Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/D18/D18PPC/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/D18/D18PPC/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/D18/D18PPC/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     # run staging glue job

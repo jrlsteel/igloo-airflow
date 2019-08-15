@@ -125,7 +125,7 @@ if __name__ == '__main__':
         # # run processing mirror job
         print("Weather Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/HistoricalWeather/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/HistoricalWeather/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/HistoricalWeather/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     # run processing weather python script

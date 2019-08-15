@@ -128,7 +128,7 @@ if __name__ == '__main__':
         # # run processing mirror job
         print("Nosi Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ReadingsNOSIGas/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/ReadingsNOSIGas/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ReadingsNOSIGas/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     # # Ensek Internal Readings NOSI Staging

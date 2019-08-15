@@ -171,40 +171,40 @@ if __name__ == '__main__':
     else:
         print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/MeterPoints/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/MeterPoints/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MeterPoints/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Meterpoints Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/MeterPointsAttributes/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/MeterPointsAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MeterPointsAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Meters Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/Meters/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/Meters/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/Meters/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Meters Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                               s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/MetersAttributes/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/MetersAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MetersAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Registers Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/Registers/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/Registers/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/Registers/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Registers Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                          s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/RegistersAttributes/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/RegistersAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/RegistersAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Readings Internal mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                             s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ReadingsInternal/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/ReadingsInternal/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ReadingsInternal/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     # run staging glue job

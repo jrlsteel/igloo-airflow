@@ -142,7 +142,7 @@ if __name__ == '__main__':
         # # run processing mirror job
         print("NRL  Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ReadingsNRL/"
-        destination_input = "s3://igloo-data-warehouse-uat/stage1/ReadingsNRL/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ReadingsNRL/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     print("{0}:  Ensek NRL Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
