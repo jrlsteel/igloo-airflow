@@ -17,7 +17,7 @@ class StartMirrorJobs:
         self.dir = util.get_dir()
         self.all_jobid = util.get_jobID()
         self.mirror_jobid = util.get_jobID()
-       self.process_name = "Mirror S3 Folder "
+        self.process_name = "Mirror S3 Folder"
 
 
     def submit_process_s3_mirror_job(self, source_input, destination_input):
