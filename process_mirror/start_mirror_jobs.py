@@ -46,9 +46,9 @@ class StartMirrorJobs:
 
 if __name__ == '__main__':
 
-    s = StartEnsekJobs()
+    s = StartMirrorJobs()
 
-    util.batch_logging_insert(s.all_jobid, 101, 'all_non_pa_jobs', 'start_ensek_api_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 60, 'all_mirror_jobs', 'start_mirror_api_jobs.py')
 
     if s.env == 'prod':
         # run all ensek scripts
@@ -190,13 +190,13 @@ if __name__ == '__main__':
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         # # run processing alp wcf script
-        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("ALp CV job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpCV/"
         destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpCV/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         # # run processing alp wcf script
-        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("ALP WCF job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpWCF/"
         destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpWCF/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
