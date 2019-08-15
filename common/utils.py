@@ -26,6 +26,8 @@ def get_dir():
         dir = dirs3.uat
     if env_conf == 'prod':
         dir = dirs3.prod
+    if env_conf == 'preprod':
+        dir = dirs3.preprod
 
     return dir
 
