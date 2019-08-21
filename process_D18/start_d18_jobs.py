@@ -158,14 +158,13 @@ if __name__ == '__main__':
         destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/D18/D18PPC/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-    # run staging glue job
+    # # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_staging_gluejob()
 
-    # run reference d18 glue job
+    # # run reference d18 glue job
     print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_gluejob()
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-
     util.batch_logging_update(s.all_jobid, 'e')

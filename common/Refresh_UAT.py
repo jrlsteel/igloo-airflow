@@ -31,6 +31,7 @@ class SyncS3:
             print("completed")
 
         if 'preprod' in self._destination_path:
+            print("Warning you are overwriting input data in Pre-Production ")
             if 'stage2' in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
                 command = "aws s3 rm {0} --recursive".format(self._destination_path)
