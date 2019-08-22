@@ -128,9 +128,6 @@ if __name__ == '__main__':
         destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/HistoricalWeather/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-    # run processing weather python script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_process_weather_job()
 
     # run staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
