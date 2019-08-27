@@ -200,8 +200,8 @@ if __name__ == '__main__':
     s.submit_epc_certificates_staging_gluejob()
 
     # # # run staging glue job recommendations
-    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
-    s.submit_epc_recommendations_staging_gluejob()
+    # print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
+    # s.submit_epc_recommendations_staging_gluejob()
 
     # run EPC Certificates glue job
     print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
