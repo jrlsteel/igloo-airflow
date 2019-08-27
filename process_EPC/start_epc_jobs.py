@@ -13,6 +13,7 @@ class StartEPCJobs:
     def __init__(self):
         self.process_epc_cert_name = "EPC Certificates"
         self.process_epc_reco_name = "EPC Recommendations"
+        self.process_epc_mirror_name = 'EPC Recomends Certs Mirror'
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
@@ -30,7 +31,7 @@ class StartEPCJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_epc_mirror_name))
         try:
 
             util.batch_logging_insert(self.mirror_jobid, 28, 'epc_extract_mirror' + source_input + '-' + self.env,
