@@ -24,7 +24,7 @@ class TADOEfficiencyJobs:
             environment = self.env
 
             #Batch Logging
-            util.batch_logging_insert(self.tado_efficiency_batch_jobid, 1, 'tado_efficiency_gluejob', 'start_daily_sales_jobs.py')
+            util.batch_logging_insert(self.tado_efficiency_batch_jobid, 1, 'tado_efficiency_gluejob', 'start_tado_efficiency_jobs.py')
 
             obj_tado_efficiency = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='tado_efficiency')
             tado_efficiency_job_response = obj_tado_efficiency.run_glue_job()
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     s = TADOEfficiencyJobs()
 
-    util.batch_logging_insert(s.all_jobid, 1, 'all_tado_jobs', 'start_daily_sales_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 1, 'all_tado_jobs', 'start_tado_efficiency_jobs.py')
 
     # run reference TADO Efficiency glue job
     print("{0}: TADO Efficiency Batch Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
