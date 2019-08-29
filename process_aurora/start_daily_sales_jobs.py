@@ -54,13 +54,12 @@ class DailySalesJobs:
 
 if __name__ == '__main__':
 
-    s = TADOEfficiencyJobs()
+    s = DailySalesJobs()
 
-    util.batch_logging_insert(s.all_jobid, 1, 'all_tado_jobs', 'start_tado_efficiency_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 1, 'all_daily_sales_jobs', 'start_daily_sales_jobs.py')
 
     # run reference TADO Efficiency glue job
-    print("{0}: TADO Efficiency Batch Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_tado_efficiency_batch_gluejob()
-
+    print("{0}: Dail Sales Batch Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_daily_sales_batch_gluejob()
 
     util.batch_logging_update(s.all_jobid, 'e')

@@ -235,6 +235,11 @@ if __name__ == '__main__':
     ta_obj = ta.TADOEfficiencyJobs()
     ta_obj.submit_tado_efficiency_batch_gluejob()
 
+    # run TADO efficiency job
+    print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    ds_obj = ds.DailySalesJobs()
+    ds_obj.submit_daily_sales_batch_gluejob()
+
     # run Estimated Advance Job
     print("{0}: Estiamted Advance Job running...".format(datetime.now().strftime('%H:%M:%S')))
     est_adv_obj = est_adv.EstimatedAdvance()
