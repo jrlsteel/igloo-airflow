@@ -10,6 +10,7 @@ from process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
 from process_eac_aq import start_consumption_accuracy_jobs as ca
 from process_tado import start_tado_efficiency_jobs as ta
 from process_EstimatedAdvance import start_est_advance_job as est_adv
+from process_aurora import start_daily_sales_jobs as ds
 
 from common import process_glue_job as glue
 from common import utils as util
@@ -235,13 +236,13 @@ if __name__ == '__main__':
     ta_obj = ta.TADOEfficiencyJobs()
     ta_obj.submit_tado_efficiency_batch_gluejob()
 
-    # run TADO efficiency job
-    print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    # run daily sales job
+    print("{0}: Daily Sales Job running...".format(datetime.now().strftime('%H:%M:%S')))
     ds_obj = ds.DailySalesJobs()
     ds_obj.submit_daily_sales_batch_gluejob()
 
     # run Estimated Advance Job
-    print("{0}: Estiamted Advance Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: Estimated Advance Job running...".format(datetime.now().strftime('%H:%M:%S')))
     est_adv_obj = est_adv.EstimatedAdvance()
     est_adv_obj.submit_estimated_advance_gluejob()
 
