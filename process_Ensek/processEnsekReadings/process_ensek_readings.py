@@ -328,7 +328,7 @@ if __name__ == "__main__":
     if env == 'uat':
         n = 12  # number of process to run in parallel
     else:
-        n = 24
+        n = 12
 
     k = int(len(account_ids) / n)  # get equal no of files for each process
 
