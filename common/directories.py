@@ -672,6 +672,7 @@ prod = {
     "glue_cons_accu_job_name": "_process_ref_tables_prod",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod",
     "glue_nrl_job_name": "_process_ref_tables_prod",
-    "glue_daily_sales_job_name": "_process_ref_tables_prod"
+    "glue_daily_sales_job_name": "_process_ref_tables_prod",
+    "glue_estimated_advance_job_name": "_process_ref_tables_prod"
 
 }
