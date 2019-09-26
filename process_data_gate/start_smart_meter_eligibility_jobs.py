@@ -9,43 +9,43 @@ from common import process_glue_job as glue
 from common import utils as util
 
 
-class TADOEfficiencyJobs:
+class SmartMeterEligibilityJobs:
     def __init__(self):
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
         self.all_jobid = util.get_jobID()
-        self.tado_efficiency_batch_jobid = util.get_jobID()
+        self.smart_meter_eligibility_jobid = util.get_jobID()
 
-    def submit_tado_efficiency_batch_gluejob(self):
+    def submit_smart_meter_eligibility_gluejob(self):
         try:
-            jobName = self.dir['glue_tado_efficiency_job_name']
+            jobName = self.dir['glue_smart_meter_eligibility_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
             #Batch Logging
-            util.batch_logging_insert(self.tado_efficiency_batch_jobid, 1, 'tado_efficiency_gluejob', 'start_tado_efficiency_jobs.py')
+            util.batch_logging_insert(self.smart_meter_eligibility_jobid, 1, 'smart_meter_eligibility_gluejob', 'start_smart_meter_eligibility_jobs.py')
 
-            obj_tado_efficiency = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='tado_efficiency')
-            tado_efficiency_job_response = obj_tado_efficiency.run_glue_job()
+            obj_smart_meter_eligibility = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='smart_eli')
+            smart_meter_eligibility_job_response = obj_smart_meter_eligibility.run_glue_job()
 
-            if tado_efficiency_job_response:
+            if smart_meter_eligibility_job_response:
 
-                print("{0}: TADO Efficiency Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: Smart Meter Eligibility job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
                 # Batch Logging
-                util.batch_logging_update(self.tado_efficiency_batch_jobid, 'e')
+                util.batch_logging_update(self.smart_meter_eligibility_jobid, 'e')
 
             else:
 
-                print("Error occurred in TADO Efficiency Job")
+                print("Error occurred in Smart Meter Eligibility job")
                 # return staging_job_response
                 raise Exception
         except Exception as e:
-            print("Error in TADO Efficiency Glue Job Job :- " + str(e))
+            print("Error in Smart Meter Eligibility glue job Job :- " + str(e))
 
             # Batch Logging
-            util.batch_logging_update(self.tado_efficiency_batch_jobid, 'f',  str(e))
+            util.batch_logging_update(self.smart_meter_eligibility_jobid, 'f',  str(e))
 
             # write
             sys.exit(1)
@@ -53,12 +53,12 @@ class TADOEfficiencyJobs:
 
 if __name__ == '__main__':
 
-    s = TADOEfficiencyJobs()
+    s = SmartMeterEligibilityJobs()
 
-    util.batch_logging_insert(s.all_jobid, 1, 'all_tado_jobs', 'start_tado_efficiency_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 1, 'all_smart_meter_eligibility_jobs', 'start_smart_meter_eligibility_jobs.py')
 
-    # run reference TADO Efficiency glue job
-    print("{0}: TADO Efficiency Batch Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_tado_efficiency_batch_gluejob()
+    # run reference smart meter eligibility glue job
+    print("{0}: Smart Meter Eligibility glue job running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_smart_meter_eligibility_gluejob()
 
     util.batch_logging_update(s.all_jobid, 'e')
