@@ -24,7 +24,7 @@ class SmartMeterEligibilityJobs:
             environment = self.env
 
             #Batch Logging
-            util.batch_logging_insert(self.smart_meter_eligibility_jobid, 1, 'smart_meter_eligibility_gluejob', 'start_smart_meter_eligibility_jobs.py')
+            util.batch_logging_insert(self.smart_meter_eligibility_jobid, 50, 'smart_meter_eligibility_gluejob', 'start_smart_meter_eligibility_jobs.py')
 
             obj_smart_meter_eligibility = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='smart_eli')
             smart_meter_eligibility_job_response = obj_smart_meter_eligibility.run_glue_job()
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     s = SmartMeterEligibilityJobs()
 
-    util.batch_logging_insert(s.all_jobid, 1, 'all_smart_meter_eligibility_jobs', 'start_smart_meter_eligibility_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 50, 'all_smart_meter_eligibility_jobs', 'start_smart_meter_eligibility_jobs.py')
 
     # run reference smart meter eligibility glue job
     print("{0}: Smart Meter Eligibility glue job running...".format(datetime.now().strftime('%H:%M:%S')))
