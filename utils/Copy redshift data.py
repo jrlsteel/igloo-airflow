@@ -18,18 +18,17 @@ class CopyRedshiftdata:
 
     def __init__(self):
 
-        self._copy_from_env = 'dev'
-        self._copy_to_env = 'prod'
+        self._copy_from_env = 'uat'
+        self._copy_to_env = 'preprod'
         self.overwrite = True
         self._copy_tables = [
-                            # {'copy_from': 'ref_registrations_status_elec_audit',
-                            #  'copy_to': 'temp_ref_registrations_status_elec_audit_dev'},
-                            #  {'copy_from': 'ref_registrations_status_gas_audit',
-                            #   'copy_to': 'temp_ref_registrations_status_gas_audit_dev'}
+                             {'copy_from': 'temp_test',
+                              'copy_to': 'temp_test'}
                              ]
 
     def get_connection(self, env):
         try:
+            print('Connecting')
             pr.connect_to_redshift(host=env['redshift_config']['host'], port=env['redshift_config']['port'],
                                    user=env['redshift_config']['user'], password=env['redshift_config']['pwd'],
                                    dbname=env['redshift_config']['db'])
@@ -50,6 +49,9 @@ class CopyRedshiftdata:
         if env == 'prod':
             env = con.prod
 
+        if env == 'preprod':
+            env = con.preprod
+
         if env == 'uat':
             env = con.uat
 
@@ -65,11 +67,13 @@ class CopyRedshiftdata:
 
             else:
                 for table in self._copy_tables:
+
                     _env_from = self.get_env(self._copy_from_env)
                     self.get_connection(_env_from)
                     copy_from_sql = "select * from {0}".format(table['copy_from'])
                     print('Copying data from : ' + table['copy_from'])
                     df_copy_from = pr.redshift_to_pandas(copy_from_sql)
+                    print('Data loaded')
                     # print(df_copy_from.to_csv(None, index=False))
                     self.close_connection()
 
