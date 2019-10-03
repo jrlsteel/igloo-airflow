@@ -1,12 +1,13 @@
 import sys
 from datetime import datetime
-
+import timeit
 sys.path.append('..')
 
 from process_Ensek import processAllEnsekPAScripts as ae
 from common import process_glue_job as glue
 
 from common import utils as util
+from common import Refresh_UAT as refresh
 
 
 class StartEnsekPAJobs:
@@ -16,9 +17,33 @@ class StartEnsekPAJobs:
         self.dir = util.get_dir()
         self.all_jobid = util.get_jobID()
         self.staging_jobid = util.get_jobID()
+        self.mirror_jobid = util.get_jobID()
         self.customerdb_jobid = util.get_jobID()
         self.ref_jobid = util.get_jobID()
         self.ref_eac_aq_jobid = util.get_jobID()
+        self.process_name = "Ensek PA Extract and Process "
+
+    def submit_process_s3_mirror_job(self, source_input, destination_input):
+        """
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+        :return: None
+        """
+
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        try:
+            util.batch_logging_insert(self.mirror_jobid, 8, 'ensek_extract_mirror-' + source_input + '-' + self.env,
+                                      'start_ensek_api_pa_jobs.py')
+            start = timeit.default_timer()
+            r = refresh.SyncS3(source_input, destination_input)
+            r.process_sync()
+
+            util.batch_logging_update(self.mirror_jobid, 'e')
+            print( "ensek_extract_mirror-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in process :- " + str(e))
+            sys.exit(1)
 
     def submit_all_ensek_pa_scripts(self):
         try:
@@ -138,11 +163,51 @@ if __name__ == '__main__':
     print("{0}:  CustomerDB Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_customerDB_Gluejob()
 
-   # run PA Ensek Jobs
-    print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_all_ensek_pa_scripts()
+    if s.env == 'prod':
+        # run PA Ensek Jobs
+        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_all_ensek_pa_scripts()
 
-   # run staging glue job
+    else:
+        print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/MeterPoints/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MeterPoints/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Meterpoints Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/MeterPointsAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MeterPointsAttributes/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Meters Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/Meters/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/Meters/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Meters Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                              s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/MetersAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/MetersAttributes/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Registers Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/Registers/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/Registers/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Registers Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                         s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/RegistersAttributes/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/RegistersAttributes/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek Readings Internal mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                            s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/ReadingsInternal/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ReadingsInternal/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+    # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()
 

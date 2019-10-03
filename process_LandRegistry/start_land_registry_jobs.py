@@ -2,10 +2,14 @@ import sys
 from datetime import datetime
 import timeit
 import subprocess
+import timeit
+from datetime import datetime
+
 
 sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
+from common import Refresh_UAT as refresh
 
 
 class LandRegistry:
@@ -19,6 +23,31 @@ class LandRegistry:
         self.landregistry_jobid = util.get_jobID()
         self.landregistry_staging_jobid = util.get_jobID()
         self.landregistry_ref_jobid = util.get_jobID()
+        self.mirror_jobid = util.get_jobID()
+
+    def submit_process_s3_mirror_job(self, source_input, destination_input):
+        """
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+        :return: None
+        """
+
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        try:
+            util.batch_logging_insert(self.mirror_jobid, 24, 'land_registry_extract_mirror-' + source_input + '-' + self.env,
+                                      'start_land_registry_jobs.py')
+            start = timeit.default_timer()
+            r = refresh.SyncS3(source_input, destination_input)
+            r.process_sync()
+
+            util.batch_logging_update(self.mirror_jobid, 'e')
+            print(
+                "land_registry_extract_mirror--" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(
+                    datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in process :- " + str(e))
+            sys.exit(1)
 
     def submit_stage1_job(self):
         """
@@ -91,10 +120,19 @@ if __name__ == '__main__':
     s = LandRegistry()
 
     util.batch_logging_insert(s.all_jobid, 106, 'all_land_registry_jobs', 'start_land_registry_jobs.py')
+    if s.env == 'prod':
+        # run processing land regsitry python script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_stage1_job()
 
-    # run processing land regsitry python script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_stage1_job()
+    else:
+        # # run processing mirror job
+        print("Land Registry  Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/LandRegistry/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/LandRegistry/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+
 
     # run staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))

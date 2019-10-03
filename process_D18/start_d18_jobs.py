@@ -6,6 +6,7 @@ import subprocess
 sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
+from common import Refresh_UAT as refresh
 
 
 class StartD18Jobs:
@@ -18,6 +19,7 @@ class StartD18Jobs:
         self.d18_download_jobid = util.get_jobID()
         self.d18_staging_jobid = util.get_jobID()
         self.d18_ref_jobid = util.get_jobID()
+        self.process_name = "D18 Download Extract and Process "
 
     def submit_download_d18_job(self):
         """
@@ -58,6 +60,30 @@ class StartD18Jobs:
             util.batch_logging_update(self.d18_jobid, 'f', str(e))
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             print("Error in download_d18 process :- " + str(e))
+            sys.exit(1)
+
+    def submit_process_s3_mirror_job(self, source_input, destination_input):
+        """
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+        :return: None
+        """
+
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        try:
+
+            util.batch_logging_insert(self.d18_jobid, 28, 'd18_extract_mirror' + source_input + '-' + self.env,
+                                      'start_d18_jobs.py')
+            start = timeit.default_timer()
+            r = refresh.SyncS3(source_input, destination_input)
+            r.process_sync()
+
+            util.batch_logging_update(self.d18_jobid, 'e')
+            print("{0}: Process D18 files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.d18_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in process :- " + str(e))
             sys.exit(1)
 
     def submit_d18_staging_gluejob(self):
@@ -111,22 +137,34 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 102, 'all_d18_jobs', 'start_d18_jobs.py')
 
-    # run download d18 python script
-    print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_download_d18_job()
+    if s.env == 'prod':
+        # run download d18 python script
+        print("{0}: download_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_download_d18_job()
 
-    # run processing d18 python script
-    print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_process_d18_job()
+        # run processing d18 python script
+        print("{0}: process_d18 job is running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_process_d18_job()
 
-    # run staging glue job
+    else:
+        # # run processing alp wcf script
+        print("D18 BPP Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/D18/D18BPP/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/D18/D18BPP/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("D18 PPC Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/D18/D18PPC/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/D18/D18PPC/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+    # # run staging glue job
     print("{0}: Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_staging_gluejob()
 
-    # run reference d18 glue job
+    # # run reference d18 glue job
     print("{0}: D18 Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_d18_gluejob()
 
     print("{0}: All D18 completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-
     util.batch_logging_update(s.all_jobid, 'e')

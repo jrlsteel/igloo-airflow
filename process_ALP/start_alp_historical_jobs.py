@@ -9,9 +9,12 @@ from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
 from process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
 from process_eac_aq import start_consumption_accuracy_jobs as ca
 from process_tado import start_tado_efficiency_jobs as ta
+from process_EstimatedAdvance import start_est_advance_job as est_adv
+from process_aurora import start_daily_sales_jobs as ds
 
 from common import process_glue_job as glue
 from common import utils as util
+from common import Refresh_UAT as refresh
 
 
 class ALP:
@@ -48,6 +51,32 @@ class ALP:
 
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start), self.process_name))
+        except Exception as e:
+            util.batch_logging_update(self.alp_wcf_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in process :- " + str(e))
+            sys.exit(1)
+
+    def submit_process_s3_mirror_job(self, source_input, destination_input):
+        """
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination folder
+        :return: None
+        """
+
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        try:
+            util.batch_logging_insert(self.alp_wcf_jobid, 31, 'alp_wcf_extract_mirror' + source_input + '-' + self.env,
+                                      'start_alp_historical_jobs.py')
+            start = timeit.default_timer()
+            r = refresh.SyncS3(source_input, destination_input)
+            r.process_sync()
+
+            util.batch_logging_update(self.alp_wcf_jobid, 'e')
+
+            print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                                    float(
+                                                                                        timeit.default_timer() - start),
+                                                                                    self.process_name))
         except Exception as e:
             util.batch_logging_update(self.alp_wcf_jobid, 'f', str(e))
             util.batch_logging_update(self.all_jobid, 'f', str(e))
@@ -152,24 +181,38 @@ if __name__ == '__main__':
     s = ALP()
 
     util.batch_logging_insert(s.all_jobid, 105, 'all_alp_jobs', 'start_alp_jobs.py')
-
-    # run processing alp wcf script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_process_alp_wcf_job()
-
-    # run alp cv python script
-    print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    s.submit_process_alp_cv_job()
-
-    # run alp wcf staging glue job
+    if s.env == 'prod':
+        # # run processing alp wcf script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_process_alp_wcf_job()
+    else:
+       # # run processing alp wcf script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpWCF/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpWCF/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+    #
+    # # run alp cv python script
+    if s.env == 'prod':
+        # # run processing alp wcf script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        s.submit_process_alp_cv_job()
+    else:
+        # # run processing alp wcf script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/ALP/AlpCV/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ALP/AlpCV/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+    #
+    # # run alp wcf staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_wcf_staging_gluejob()
-
-    # run alp cv staging glue job
+    #
+    # # run alp cv staging glue job
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     s.submit_alp_cv_staging_gluejob()
-
-    # run reference alp glue job
+    #
+    # # run reference alp glue job
     print("{0}: ALP Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_alp_gluejob()
 
@@ -187,11 +230,21 @@ if __name__ == '__main__':
     print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
     ca_obj = ca.ConsumptionAccuracy()
     ca_obj.submit_consumption_accuracy_gluejob()
-    #
-    # # run TADO efficiency job
-    # print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
-    # ta_obj = ta.TADOEfficiencyJobs()
-    # ta_obj.submit_tado_efficiency_batch_gluejob()
+
+    # run TADO efficiency job
+    print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    ta_obj = ta.TADOEfficiencyJobs()
+    ta_obj.submit_tado_efficiency_batch_gluejob()
+
+    # run daily sales job
+    print("{0}: Daily Sales Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    ds_obj = ds.DailySalesJobs()
+    ds_obj.submit_daily_sales_batch_gluejob()
+
+    # run Estimated Advance Job
+    print("{0}: Estimated Advance Job running...".format(datetime.now().strftime('%H:%M:%S')))
+    est_adv_obj = est_adv.EstimatedAdvance()
+    est_adv_obj.submit_estimated_advance_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

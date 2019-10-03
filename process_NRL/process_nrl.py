@@ -90,7 +90,7 @@ if __name__ == "__main__":
     if env == 'uat':
         n = 12  # number of process to run in parallel
     else:
-        n = 24
+        n = 12
     print(len(nrl_keys_s3))
     k = int(len(nrl_keys_s3) / n)  # get equal no of files for each process
     print(k)

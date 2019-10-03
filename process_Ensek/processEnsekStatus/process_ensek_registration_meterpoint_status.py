@@ -29,7 +29,7 @@ class RegistrationsMeterpointsStatus:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.sql = "select account_id, meter_point_id, meterpointnumber, meterpointtype from ref_meterpoints"
+        self.sql = "select account_id, meter_point_id, meterpointnumber, meterpointtype from ref_meterpoints where greatest(supplystartdate, associationstartdate) >= getdate() group by account_id, meter_point_id, meterpointnumber, meterpointtype order by account_id"
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     if env == 'uat':
         n = 12  # number of process to run in parallel
     else:
-        n = 24
+        n = 12
 
     k = int(len(df) / n)  # get equal no of files for each process
 
