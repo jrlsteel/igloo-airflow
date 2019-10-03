@@ -8,6 +8,7 @@ sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
 from common import Refresh_UAT as refresh
+from process_calculated_steps import start_calculated_steps_jobs as sj
 
 
 class ALP:
@@ -206,6 +207,11 @@ if __name__ == '__main__':
     s.submit_alp_gluejob()
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+
+    # run consumption accuracy job
+    print("{0}: All Calcs..".format(datetime.now().strftime('%H:%M:%S')))
+    sj_obj = sj.CalcSteps()
+    sj_obj.startCalcJobs()
 
     util.batch_logging_update(s.all_jobid, 'e')
 
