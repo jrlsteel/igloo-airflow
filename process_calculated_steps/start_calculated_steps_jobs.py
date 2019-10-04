@@ -25,8 +25,9 @@ class CalcSteps:
 
     def startCalcJobs(self):
 
+
         util.batch_logging_insert(self.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
-        print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
 
         print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
         eacaqpa_obj = eacaqpa.EacAqPa()
@@ -62,7 +63,7 @@ class CalcSteps:
         sme_obj = sme.SmartMeterEligibilityJobs()
         sme_obj.submit_smart_meter_eligibility_gluejob()
 
-        print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
 
         util.batch_logging_update(self.all_jobid, 'e')
 
@@ -70,10 +71,10 @@ class CalcSteps:
 
 if __name__ == '__main__':
 
-    s = CalcSteps()
+    sm = CalcSteps()
 
-    util.batch_logging_insert(s.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
-    print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+    util.batch_logging_insert(sm.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
+    print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), sm.process_name))
 
     print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
     eacaqpa_obj = eacaqpa.EacAqPa()
@@ -111,5 +112,5 @@ if __name__ == '__main__':
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
-    util.batch_logging_update(s.all_jobid, 'e')
+    util.batch_logging_update(sm.all_jobid, 'e')
 
