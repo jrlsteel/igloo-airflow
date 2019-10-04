@@ -110,7 +110,7 @@ if __name__ == '__main__':
     sme_obj = sme.SmartMeterEligibilityJobs()
     sme_obj.submit_smart_meter_eligibility_gluejob()
 
-    print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+    print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), sm.process_name))
 
     util.batch_logging_update(sm.all_jobid, 'e')
 
