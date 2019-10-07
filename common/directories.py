@@ -222,9 +222,8 @@ uat = {
     "glue_cons_accu_job_name": "_process_ref_tables_uat",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat",
     "glue_nrl_job_name": "_process_ref_tables_uat",
-    "glue_estimated_advance_job_name": "_process_ref_tables_uat"
-
-
+    "glue_estimated_advance_job_name": "_process_ref_tables_uat",
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_uat"
 }
 
 preprod = {
@@ -450,7 +449,8 @@ preprod = {
     "glue_cons_accu_job_name": "_process_ref_tables_preprod",
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_preprod",
     "glue_nrl_job_name": "_process_ref_tables_preprod",
-    "glue_estimated_advance_job_name": "_process_ref_tables_preprod"
+    "glue_estimated_advance_job_name": "_process_ref_tables_preprod",
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_preprod"
 
 
 }
@@ -673,6 +673,7 @@ prod = {
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_prod",
     "glue_nrl_job_name": "_process_ref_tables_prod",
     "glue_daily_sales_job_name": "_process_ref_tables_prod",
-    "glue_estimated_advance_job_name": "_process_ref_tables_prod"
+    "glue_estimated_advance_job_name": "_process_ref_tables_prod",
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_prod"
 
 }
