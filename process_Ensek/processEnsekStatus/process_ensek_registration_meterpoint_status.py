@@ -19,6 +19,7 @@ import os
 sys.path.append('..')
 
 from common import utils as util
+from common import api_filters as apif
 from conf import config as con
 from connections import connect_db as db
 from connections.connect_db import get_boto_S3_Connections as s3_con
@@ -29,7 +30,7 @@ class RegistrationsMeterpointsStatus:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        self.sql = "select account_id, meter_point_id, meterpointnumber, meterpointtype from ref_meterpoints where greatest(supplystartdate, associationstartdate) >= getdate() group by account_id, meter_point_id, meterpointnumber, meterpointtype order by account_id"
+        self.sql = apif.acc_mp_ids['daily']  # there is no need for a weekly run here
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)

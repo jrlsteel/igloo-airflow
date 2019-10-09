@@ -135,9 +135,9 @@ def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
     if datetime.date.weekday() == 6:  # 6 == Sunday
-        config_sql = apif.account_ids['within_sed_plus_1_year']
+        config_sql = apif.account_ids['weekly']
     else:
-        config_sql = apif.account_ids['within_sed_plus_8_weeks']
+        config_sql = apif.account_ids['daily']
 
     account_ids = []
     if env_conf == 'prod':
