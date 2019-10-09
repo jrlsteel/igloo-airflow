@@ -11,6 +11,7 @@ sys.path.append('..')
 
 from conf import config as con
 from common import directories as dirs3
+from common import api_filters as apif
 
 
 def get_env():
@@ -134,23 +135,14 @@ def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
     if datetime.date.weekday() == 6:  # 6 == Sunday
-        datepart = 'years'
-        quantity = 1
+        config_sql = apif.account_ids['within_sed_plus_1_year']
     else:
-        datepart = 'weeks'
-        quantity = 8
-    sql = '''select account_id, case when count(mp_sed) < count(*) then null else max(mp_sed) end as sed
-             from (select account_id, least(supplyenddate, associationenddate) as mp_sed
-                   from ref_meterpoints_raw mpr) mps
-             group by account_id
-             having sed is null or datediff({0}, sed, getdate()) < {1}
-             order by account_id'''.format(datepart, quantity)
+        config_sql = apif.account_ids['within_sed_plus_8_weeks']
 
     account_ids = []
     if env_conf == 'prod':
         rd_conn = db.get_redshift_connection_prod()
         # config_sql = con.test_config['account_ids_sql_prod']
-        config_sql = sql
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
@@ -163,7 +155,7 @@ def get_accountID_fromDB(get_max):
             account_ids = account_id_list1
     else:
         rd_conn = db.get_redshift_connection_prod()
-        config_sql = con.test_config['account_ids_sql_prod']
+        # config_sql = con.test_config['account_ids_sql_prod']
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
