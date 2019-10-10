@@ -36,6 +36,10 @@ uat = {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
         },
 
+        "occupier_accounts": {
+            "api_url": "https://igloo.ignition.ensek.co.uk/api/DataSources/GetData?name=OccupierAccounts"
+        },
+
         "account_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus"
         },
@@ -154,7 +158,8 @@ uat = {
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
         "AnnualStatements": "stage1/AnnualStatements/",
         "Statements": "stage1/Statements/",
-        "AccountSettings": "stage1/AccountSettings/"
+        "AccountSettings": "stage1/AccountSettings/",
+        "OccupierAccounts": "stage1/OccupierAccounts/"
     },
 
 
