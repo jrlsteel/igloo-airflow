@@ -8,6 +8,8 @@ from requests import ConnectionError
 import csv
 import sys
 import os
+import datetime
+
 
 sys.path.append('..')
 
@@ -21,7 +23,7 @@ class OccupierAccounts:
     rate = con.api_config['allowed_period_in_secs']
 
     def __init__(self):
-        pass
+        self.now = datetime.datetime.now()
 
 
     @sleep_and_retry
@@ -68,7 +70,9 @@ class OccupierAccounts:
     def extract_internal_data_response(self, data, k, dir_s3):
         ''' Processing meter points data'''
         df_occupier_accounts = json_normalize(data, '$values')
-        df_occupier_accounts.drop(['$type'], axis=1)
+        df_occupier_accounts = df_occupier_accounts[['AccountID', 'COT Date', 'Current Balance', 'Days Since COT Date']]
+        df_occupier_accounts.rename(columns={"AccountID": "account_id", "COT Date": "co     t_date", "Current Balance": "current_balance", "Days Since COT Date": "days_since_cot"})
+        df_occupier_accounts['etl_change'] = self.now
 
         print(df_occupier_accounts)
         # print(df_internal_readings)
