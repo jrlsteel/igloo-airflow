@@ -159,7 +159,7 @@ uat = {
         "AnnualStatements": "stage1/AnnualStatements/",
         "Statements": "stage1/Statements/",
         "AccountSettings": "stage1/AccountSettings/",
-        "OccupierAccounts": "stage1/OccupierAccounts/"
+        "OccupierAccounts": "stage2/stage2_OccupierAccounts/"
     },
 
 
@@ -228,7 +228,8 @@ uat = {
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_uat",
     "glue_nrl_job_name": "_process_ref_tables_uat",
     "glue_estimated_advance_job_name": "_process_ref_tables_uat",
-    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_uat"
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_uat",
+    "glue_occupier_accounts_job_name": "_process_ref_tables_uat"
 }
 
 preprod = {
@@ -386,7 +387,8 @@ preprod = {
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
         "AnnualStatements": "stage1/AnnualStatements/",
         "Statements": "stage1/Statements/",
-        "AccountSettings": "stage1/AccountSettings/"
+        "AccountSettings": "stage1/AccountSettings/",
+        "OccupierAccounts": "stage2/stage2_OccupierAccounts/"
     },
 
 
@@ -455,7 +457,8 @@ preprod = {
     "glue_internal_readings_nosi_job_name": "_process_ref_tables_preprod",
     "glue_nrl_job_name": "_process_ref_tables_preprod",
     "glue_estimated_advance_job_name": "_process_ref_tables_preprod",
-    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_preprod"
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_preprod",
+    "glue_occupier_accounts_job_name": "_process_ref_tables_preprod"
 
 
 }
@@ -612,7 +615,8 @@ prod = {
         "ReadingsBilleableHistory": "stage1/ReadingsBilleableHistory/",
         "AnnualStatements": "stage1/AnnualStatements/",
         "Statements": "stage1/Statements/",
-        "AccountSettings": "stage1/AccountSettings/"
+        "AccountSettings": "stage1/AccountSettings/",
+        "OccupierAccounts": "stage2/stage2_OccupierAccounts/"
 
     },
 
@@ -679,6 +683,7 @@ prod = {
     "glue_nrl_job_name": "_process_ref_tables_prod",
     "glue_daily_sales_job_name": "_process_ref_tables_prod",
     "glue_estimated_advance_job_name": "_process_ref_tables_prod",
-    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_prod"
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_prod",
+    "glue_occupier_accounts_job_name": "_process_ref_tables_prod"
 
 }

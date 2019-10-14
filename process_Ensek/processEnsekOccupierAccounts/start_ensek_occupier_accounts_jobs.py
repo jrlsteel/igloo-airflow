@@ -13,6 +13,9 @@ class StartOccupierAccountsJobs:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.occupier_accounts_extract_jobid = util.get_jobID()
+        self.occupier_accounts_staging_jobid = util.get_jobID()
+        self.occupier_accounts_reference_jobid = util.get_jobID()
         self.occupier_accounts_job_id = util.get_jobID()
         self.jobName = self.dir['glue_estimated_advance_job_name']
 
@@ -25,16 +28,22 @@ class StartOccupierAccountsJobs:
 
         print("{0}: >>>> Process Ensek Occupier Accounts   <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
+            util.batch_logging_insert(self.occupier_accounts_extract_jobid , 51, 'Occupier Accounts pyscript', 'start_ensek_occupier_accounts_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_ensek_occupier_accounts.py"])
             print("{0}: Process Ensek Occupier  completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
+            util.batch_logging_update(self.occupier_accounts_extract_jobid, 'e')
         except Exception as e:
+            util.batch_logging_update(self.occupier_accounts_extract_jobid, 'f', str(e))
+            util.batch_logging_update(self.occupier_accounts_job_id, 'f', str(e))
             print("Error in Process Occupier Accounts  :- " + str(e))
             sys.exit(1)
 
     def submit_occupier_accounts_extract_staging_gluejob(self):
         try:
+            util.batch_logging_insert(self.occupier_accounts_staging_jobid, 51, 'Occupier Accounts Staging',
+                                      'start_ensek_occupier_accounts_jobs.py')
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
@@ -44,6 +53,7 @@ class StartOccupierAccountsJobs:
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Staging Occupier Accounts Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                util.batch_logging_update(self.occupier_accounts_staging_jobid, 'e')
                 # return staging_job_response
             else:
                 print("Error occurred in Ensek Occupier Accounts Staging Job")
@@ -51,16 +61,18 @@ class StartOccupierAccountsJobs:
                 raise Exception
         except Exception as e:
             print("Error in Ensek Occupier Accounts Staging Job :- " + str(e))
+            util.batch_logging_update(self.occupier_accounts_extract_jobid,'f', str(e))
+            util.batch_logging_update(self.occupier_accounts_job_id, 'f', str(e))
             sys.exit(1)
 
     def submit_occupier_accounts_extract_reference_gluejob(self):
         try:
-            jobname = self.dir['glue_occupier_accounts_status_job_name']
+            jobname = self.dir['glue_occupier_accounts_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
             obj_submit_occupier_accounts_status_Gluejob = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
-                                                 processJob='ref_occupier_accounts')
+                                                 processJob='occu_acc')
             job_response = obj_submit_occupier_accounts_status_Gluejob.run_glue_job()
             if job_response:
                 print("{0}: Ensek Occupier Accounts Reference Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
@@ -83,17 +95,14 @@ if __name__ == '__main__':
                               'start_ensek_occupier_accounts_jobs.py')
 
 
-    #Ensek Meterpoints Extract
-    print("{0}:  Ensek Meterpoints Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    # #Ensek Occupier Accounts Extract
+    print("{0}:  Ensek Occupier Accounts Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_occupier_accounts_extract_job()
 
-    #Ensek Meterpoints Staging Jobs
-    print("{0}:  Ensek  Meterpoints Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_meterpoints_extract_staging_gluejob()
 
-    #Ensek Meterpoints ref Tables Jobs
-    print("{0}: Registrations Meterpoints Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_meterpoints_extract_reference_gluejob()
+    # #Ensek Occupier Accounts  Ref Tables Jobs
+    print("{0}: Occupier Accounts Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_occupier_accounts_extract_reference_gluejob()
 
     print("{0}: AllEnsek Occupier Accounts completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
