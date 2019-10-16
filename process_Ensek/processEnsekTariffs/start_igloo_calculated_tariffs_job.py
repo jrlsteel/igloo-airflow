@@ -31,7 +31,7 @@ class IglooCalculatedTariffsJobs:
 
             if igloo_calculated_tariffs_job_response:
 
-                print("{0}: Smart Igloo Calculated Tariffs job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: Igloo Calculated Tariffs job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
                 # Batch Logging
                 util.batch_logging_update(self.igloo_calculated_tariffs_jobid, 'e')
@@ -62,3 +62,5 @@ if __name__ == '__main__':
     s.submit_igloo_calculated_tariffs_gluejob()
 
     util.batch_logging_update(s.all_jobid, 'e')
+
+    print("{0}: Igloo Calculated Tariffs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
