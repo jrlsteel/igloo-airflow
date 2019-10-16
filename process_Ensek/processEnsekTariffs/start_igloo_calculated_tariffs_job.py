@@ -4,7 +4,7 @@ from datetime import datetime
 import timeit
 import subprocess
 
-sys.path.append('..')
+sys.path.append('../..')
 from common import process_glue_job as glue
 from common import utils as util
 
