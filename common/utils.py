@@ -19,6 +19,10 @@ def get_env():
     return env_conf
 
 
+def get_multiprocess(source):
+    env_total_processes = con.multi_process[source]
+    return env_total_processes
+
 def get_dir():
     dir = ''
     env_conf = get_env()
