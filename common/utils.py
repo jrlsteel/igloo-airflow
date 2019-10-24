@@ -123,6 +123,14 @@ def execute_query(sql, return_as='d'):
     :param return_as: User can mention the return type as list (l) or dataframe (d - default)
     :return:
     '''
+    env_conf = get_env()
+
+    # Limit for UAT environments
+    if env_conf == 'prod':
+        sql = sql
+    else:
+        sql = sql + ' limit 100'
+
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
     db.close_redshift_connection()
