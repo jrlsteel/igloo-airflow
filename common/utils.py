@@ -147,7 +147,7 @@ def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
     # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
-    if datetime.date.weekday() == 6:  # 6 == Sunday
+    if datetime.date.today().weekday() == 6:  # 6 == Sunday
         if env_conf == 'prod':
             config_sql = apif.account_ids['weekly']
         else:
