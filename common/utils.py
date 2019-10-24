@@ -129,7 +129,7 @@ def execute_query(sql, return_as='d'):
     if env_conf == 'prod':
         sql = sql
     else:
-        sql = sql + ' limit 1000'
+        sql = sql + ' limit 200'
 
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
@@ -151,12 +151,12 @@ def get_accountID_fromDB(get_max):
         if env_conf == 'prod':
             config_sql = apif.account_ids['weekly']
         else:
-            config_sql = apif.account_ids['weekly'] + ' limit 1000'
+            config_sql = apif.account_ids['weekly'] + ' limit 200'
     else:
         if env_conf == 'prod':
             config_sql = apif.account_ids['daily']
         else:
-            config_sql = apif.account_ids['daily'] + ' limit 1000'
+            config_sql = apif.account_ids['daily'] + ' limit 200'
 
     account_ids = []
     if env_conf == 'prod':
