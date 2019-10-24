@@ -138,10 +138,17 @@ def execute_query(sql, return_as='d'):
 def get_accountID_fromDB(get_max):
     env_conf = get_env()
 
+    # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
     if datetime.date.weekday() == 6:  # 6 == Sunday
-        config_sql = apif.account_ids['weekly']
+        if env_conf == 'prod':
+            config_sql = apif.account_ids['weekly']
+        else:
+            config_sql = apif.account_ids['weekly'] + ' limit 100'
     else:
-        config_sql = apif.account_ids['daily']
+        if env_conf == 'prod':
+            config_sql = apif.account_ids['daily']
+        else:
+            config_sql = apif.account_ids['daily'] + ' limit 100'
 
     account_ids = []
     if env_conf == 'prod':
