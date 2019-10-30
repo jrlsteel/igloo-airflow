@@ -48,7 +48,7 @@ class TADOEfficiencyJobs:
             util.batch_logging_update(self.tado_efficiency_batch_jobid, 'f',  str(e))
 
             # write
-            sys.exit(1)
+            # sys.exit(1)
 
 
 
