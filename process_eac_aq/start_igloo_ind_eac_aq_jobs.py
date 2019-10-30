@@ -20,7 +20,7 @@ class IglIndEacAq:
 
     def submit_eac_aq_gluejob(self):
         try:
-            util.batch_logging_insert(self.igl_ind_eac_aq_ref_jobid, 38, 'igl_ind_eac_aq_calculated_glue_job', 'start_igl_ind_eac_aq_jobs.py')
+            util.batch_logging_insert(self.igl_ind_eac_aq_ref_jobid, 40, 'igl_ind_eac_aq_calculated_glue_job', 'start_igl_ind_eac_aq_jobs.py')
 
             jobName = self.dir['glue_igl_ind_eac_aq_job_name']
             s3_bucket = self.dir['s3_bucket']

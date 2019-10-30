@@ -11,6 +11,7 @@ sys.path.append('..')
 
 from conf import config as con
 from common import directories as dirs3
+from common import api_filters as apif
 
 
 def get_env():
@@ -18,8 +19,11 @@ def get_env():
     return env_conf
 
 
-def get_dir():
+def get_multiprocess(source):
+    env_total_processes = con.multi_process[source]
+    return env_total_processes
 
+def get_dir():
     dir = ''
     env_conf = get_env()
     if env_conf == 'uat':
@@ -51,7 +55,9 @@ def batch_logging_insert(id, job_id, job_name, job_script_name):
     job_start = datetime.datetime.now()
     job_end = None
     job_status = 'Running'
-    job_df = pd.DataFrame(data=[[id, job_id, job_name, job_script_name, job_start, job_end, '', job_status]], columns=['id', 'job_id', 'job_name', 'job_script_name', 'job_start', 'job_end', 'job_error_message', 'job_status'])
+    job_df = pd.DataFrame(data=[[id, job_id, job_name, job_script_name, job_start, job_end, '', job_status]],
+                          columns=['id', 'job_id', 'job_name', 'job_script_name', 'job_start', 'job_end',
+                                   'job_error_message', 'job_status'])
     batch_logging = redshift_upsert(df=job_df, crud_type='i')
     return batch_logging
 
@@ -65,18 +71,18 @@ def batch_logging_update(id, update_type=None, error_message=None):
     """
     time = datetime.datetime.now()
     job_updates = {
-                    's': { 'time': time,
-                           'status': 'Running'
-                           },
-                    'e': {
-                            'time': time,
-                            'status': 'Done'
-                        },
-                    'f': {
-                        'time': time,
-                        'status': 'Failed'
-                    },
-                }
+        's': {'time': time,
+              'status': 'Running'
+              },
+        'e': {
+            'time': time,
+            'status': 'Done'
+        },
+        'f': {
+            'time': time,
+            'status': 'Failed'
+        },
+    }
 
     job_time = job_updates[update_type]['time']
     job_status = job_updates[update_type]['status']
@@ -117,6 +123,14 @@ def execute_query(sql, return_as='d'):
     :param return_as: User can mention the return type as list (l) or dataframe (d - default)
     :return:
     '''
+    env_conf = get_env()
+
+    # Limit for UAT environments
+    if env_conf == 'prod':
+        sql = sql
+    else:
+        sql = sql + ' limit 200'
+
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
     db.close_redshift_connection()
@@ -128,13 +142,26 @@ def execute_query(sql, return_as='d'):
 
     return df
 
+
 def get_accountID_fromDB(get_max):
     env_conf = get_env()
+
+    # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
+    if datetime.date.today().weekday() == 6:  # 6 == Sunday
+        if env_conf == 'prod':
+            config_sql = apif.account_ids['weekly']
+        else:
+            config_sql = apif.account_ids['weekly'] + ' limit 200'
+    else:
+        if env_conf == 'prod':
+            config_sql = apif.account_ids['daily']
+        else:
+            config_sql = apif.account_ids['daily'] + ' limit 200'
 
     account_ids = []
     if env_conf == 'prod':
         rd_conn = db.get_redshift_connection_prod()
-        config_sql = con.test_config['account_ids_sql_prod']
+        # config_sql = con.test_config['account_ids_sql_prod']
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
@@ -147,7 +174,7 @@ def get_accountID_fromDB(get_max):
             account_ids = account_id_list1
     else:
         rd_conn = db.get_redshift_connection_prod()
-        config_sql = con.test_config['account_ids_sql_prod']
+        # config_sql = con.test_config['account_ids_sql_prod']
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
@@ -164,12 +191,11 @@ def get_accountID_fromDB(get_max):
 
 
 def get_ensek_api_info(api, account_id):
-
     env = get_dir()
     env_api = env['apis'][api]
     api_url = env_api['api_url'].format(account_id)
 
-    if api in ['internal_estimates', 'internal_readings','internal_psr']:
+    if api in ['internal_estimates', 'internal_readings', 'internal_psr']:
         token = get_auth_code()
     else:
         token = env['apis']['token']
@@ -180,13 +206,12 @@ def get_ensek_api_info(api, account_id):
 
 
 def get_ensek_api_info1(api):
-
     dir = get_dir()
 
     env_api = dir['apis'][api]
     api_url = env_api['api_url']
 
-    if api in ['internal_estimates', 'internal_readings']:
+    if api in ['internal_estimates', 'internal_readings', 'occupier_accounts']:
         token = get_auth_code()
     else:
         token = dir['apis']['token']
@@ -197,7 +222,6 @@ def get_ensek_api_info1(api):
 
 
 def get_epc_api_info(api):
-
     dir = get_dir()
 
     env_api = dir['apis'][api]
@@ -210,8 +234,8 @@ def get_epc_api_info(api):
             'accept': 'application/json'}
     return api_url, head
 
-def get_gas_historical_wcf_api_info(api):
 
+def get_gas_historical_wcf_api_info(api):
     dir = get_dir()
 
     env_api = dir['apis'][api]
@@ -220,9 +244,9 @@ def get_gas_historical_wcf_api_info(api):
             'charset': 'utf-8'}
 
     return api_url, head
+
 
 def get_gas_historical_cv_api_info(api):
-
     dir = get_dir()
 
     env_api = dir['apis'][api]
@@ -231,6 +255,7 @@ def get_gas_historical_cv_api_info(api):
             'charset': 'utf-8'}
 
     return api_url, head
+
 
 def get_weather_url_token(api):
     dir = get_dir()
@@ -268,9 +293,9 @@ def get_api_info(api=None, auth_type=None, token_required=False, header_type=Non
 def get_auth_code():
     oauth_url = 'https://igloo.ignition.ensek.co.uk/api/Token'
     data = {
-            'username': con.internalapi_config['username'],
-            'password': con.internalapi_config['password'],
-            'grant_type': con.internalapi_config['grant_type']
+        'username': con.internalapi_config['username'],
+        'password': con.internalapi_config['password'],
+        'grant_type': con.internalapi_config['grant_type']
     }
 
     headers = {
@@ -326,7 +351,6 @@ def get_files_from_sftp(sftp_path, search_string=''):
 
 
 def archive_files_on_sftp(files, sftp_path, archive_path):
-
     sftp_conn = None
     try:
         sftp_conn = db.get_ensek_sftp_connection()  # get sftp connection

@@ -131,10 +131,13 @@ if __name__ == "__main__":
 
     ##### Multiprocessing Starts #########
     env = util.get_env()
+    total_processes = util.get_multiprocess('total_ensek_processes')
+
     if env == 'uat':
-        n = 12  # number of process to run in parallel
+        n = total_processes  # number of process to run in parallel
     else:
-        n = 12
+        n = total_processes
+
     k = int(len(account_ids) / n)  # get equal no of files for each process
 
     print(len(account_ids))
