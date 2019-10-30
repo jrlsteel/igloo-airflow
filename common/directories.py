@@ -270,6 +270,10 @@ preprod = {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
         },
 
+        "occupier_accounts": {
+            "api_url": "https://igloo.ignition.ensek.co.uk/api/DataSources/GetData?name=OccupierAccounts"
+        },
+
         "account_status": {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/SupplyStatus"
         },
@@ -501,6 +505,10 @@ prod = {
 
         "internal_readings": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
+        },
+        
+        "occupier_accounts": {
+            "api_url": "https://igloo.ignition.ensek.co.uk/api/DataSources/GetData?name=OccupierAccounts"
         },
 
         "internal_psr": {
