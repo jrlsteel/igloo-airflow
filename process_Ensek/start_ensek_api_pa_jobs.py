@@ -113,7 +113,7 @@ class StartEnsekPAJobs:
             util.batch_logging_insert(self.ref_jobid, 11, 'ensek_pa_ref_gluejob',
                                       'start_ensek_api_pa_jobs.py')
             obj_ensek = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='ensek')
+                                            processJob='ensek_pa')
             job_response = obj_ensek.run_glue_job()
             if job_response:
                 print("{0}: Ensek Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
