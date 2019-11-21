@@ -594,6 +594,20 @@ prod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+
+        "igloo_epc_certificates_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
+            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
+            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
+        },
+        "igloo_epc_recommendations_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
+            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
+            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
+        },
+
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"

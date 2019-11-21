@@ -7,15 +7,13 @@ import fnmatch
 
 sys.path.append('..')
 
-from connections import connect_db as db
+from conf import config as con
 from common import utils as util
 
 class GetEPCFullFiles:
 
     def __init__(self):
-        self.process_name = "Download EPC Full"
-        self.env = util.get_env()
-        self.dir = util.get_dir()
+        pass
 
     # UNZIP DOWNLOAD FILE
     def unzip_epc_zip(self, path_to_zip_file, extract_path):
@@ -59,7 +57,7 @@ class GetEPCFullFiles:
 
     # DOWNLOAD FILE
     def download_epc_zip(self):
-        site_url, file_url = util.get_epc_api_info_full('igloo_epc_recommendations_full')
+        site_url, file_url = util.get_epc_api_info_full('igloo_epc_certificates_full')
         download_path = "~/Downloads/test/all-domestic-certificates.zip"
         extract_path = "~/Downloads/test/EPC"
 
