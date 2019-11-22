@@ -95,17 +95,9 @@ uat = {
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
 
-        "igloo_epc_certificates_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
-        },
-        "igloo_epc_recommendations_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
 
         "historical_weather": {
@@ -190,6 +182,14 @@ uat = {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
     },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
+    },
+
 
     "s3_zendesk_igloo_key": {
         "ZendeskUserTickets": "stage1/Zendesk/UserTickets/"
@@ -343,17 +343,9 @@ preprod = {
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
 
-        "igloo_epc_certificates_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
-        },
-        "igloo_epc_recommendations_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
 
         "historical_weather": {
@@ -437,6 +429,13 @@ preprod = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
     },
 
     "s3_zendesk_igloo_key": {
@@ -595,17 +594,9 @@ prod = {
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
 
-        "igloo_epc_certificates_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
-        },
-        "igloo_epc_recommendations_full": {
-            "api_url": "https://epc.opendatacommunities.org/login-with-token?"
-            "token=262b855e8fb47003e8e34e036fcd800b7c767180&email=tolulope.adegunle@igloo.energy",
-            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip",
-            "token": "262b855e8fb47003e8e34e036fcd800b7c767180"
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
 
         "historical_weather": {
@@ -684,6 +675,13 @@ prod = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
     },
 
     "s3_zendesk_igloo_key": {

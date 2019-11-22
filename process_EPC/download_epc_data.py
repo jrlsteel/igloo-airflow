@@ -13,7 +13,12 @@ from common import utils as util
 class GetEPCFullFiles:
 
     def __init__(self):
-        pass
+        self.dir = util.get_dir()
+        self.bucket_name = self.dir['s3_bucket']
+        self.EPCFullDownload_path = self.dir['s3_epc_full_key']['EPCFullDownload_path']
+        self.EPCFullExtract_path = self.dir['s3_epc_full_key']['EPCFullExtract_path']
+        self.EPCFullCertificates = self.dir['s3_epc_full_key']['EPCFullCertificates']
+        self.EPCFullRecommendations = self.dir['s3_epc_full_key']['EPCFullRecommendations']
 
     # UNZIP DOWNLOAD FILE
     def unzip_epc_zip(self, path_to_zip_file, extract_path):
@@ -22,52 +27,43 @@ class GetEPCFullFiles:
 
     # PREPARE FILES FOR S3 BUCKET
     def epc_pre_S3(self, extract_path):
-        # download_path = "~/Downloads/test/all-domestic-certificates.zip"
-        # extract_path = "~/Downloads/test/EPC"
+        certificates_path = self.EPCFullCertificates
+        recommendation_path = self.EPCFullRecommendations
 
-        certificates_path = "~/Downloads/test/s3_Dir/CERT/"
-        recommendation_path = "~/Downloads/test/s3_Dir/REC/"
+        full_extract_path = os.path.basename(extract_path) + os.sep
 
-        # CHECK IF DIRECTORY EXISTS
-        if not os.path.exists(os.path.expanduser(certificates_path)):
-            os.makedirs(os.path.expanduser(certificates_path))
+        for subdir, dirs, files in os.walk(os.path.basename(extract_path)):
+            for file in files:
+                # print os.path.join(subdir, file)
+                fspath = subdir + os.sep + file
+                fullpath = subdir + "_" + file
+                newFileName = fullpath.replace(full_extract_path, '')
 
-        # CHECK IF DIRECTORY EXISTS
-        if not os.path.exists(os.path.expanduser(recommendation_path)):
-            os.makedirs(os.path.expanduser(recommendation_path))
+                if fnmatch.fnmatch(newFileName, '*certificates.csv'):
+                    # MOVE TO CERTIFICATES DIRECTORY
+                    shutil.copyfile(fspath, os.path.basename(certificates_path) + newFileName)
+                    print(newFileName)
 
-            full_extract_path = os.path.expanduser(extract_path) + os.sep
-
-            for subdir, dirs, files in os.walk(os.path.expanduser(extract_path)):
-                for file in files:
-                    # print os.path.join(subdir, file)
-                    fspath = subdir + os.sep + file
-                    fullpath = subdir + "_" + file
-                    newFileName = fullpath.replace(full_extract_path, '')
-
-                    if fnmatch.fnmatch(newFileName, '*certificates.csv'):
-                        # MOVE TO CERTIFICATES DIRECTORY
-                        shutil.copyfile(fspath, os.path.expanduser(certificates_path) + newFileName)
-                        print(newFileName)
-
-                    elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
-                        # MOVE TO recommendations DIRECTORY
-                        shutil.copyfile(fspath, os.path.expanduser(recommendation_path) + newFileName)
-                        print(newFileName)
+                elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
+                    # MOVE TO recommendations DIRECTORY
+                    shutil.copyfile(fspath, os.path.basename(recommendation_path) + newFileName)
+                    print(newFileName)
 
     # DOWNLOAD FILE
     def download_epc_zip(self):
-        site_url, file_url = util.get_epc_api_info_full('igloo_epc_certificates_full')
-        download_path = "~/Downloads/test/all-domestic-certificates.zip"
-        extract_path = "~/Downloads/test/EPC"
+        site_url, file_url = util.get_epc_api_info_full('igloo_epc_full')
+        token = con.igloo_epc_full["token"]
+        fullsite_url = site_url + token
+        download_path = self.EPCFullDownload_path
+        extract_path =  self.EPCFullExtract_path
 
         # OPEN SESSION
         s = requests.Session()
-        s.get(site_url)
-        s.post(site_url)
+        s.get(fullsite_url)
+        s.post(fullsite_url) 
 
         # DOWNLOAD ZIP FILE
-        with open(os.path.expanduser(download_path), 'wb') as file:
+        with open(os.path.basename(download_path), 'wb') as file:
             r = s.get(file_url, stream=True, timeout=3600)
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk:
@@ -75,13 +71,16 @@ class GetEPCFullFiles:
                     file.flush()
 
         # UNZIP ZIP FILE
-        unzip_epc_zip(os.path.expanduser(download_path), os.path.expanduser(extract_path))
+        self.unzip_epc_zip(os.path.basename(download_path), os.path.basename(extract_path))
 
         # ETRACT FILES FOR S3
-        epc_pre_S3(extract_path)
+        self.epc_pre_S3(extract_path)
 
 
 if __name__ == '__main__':
 
     p = GetEPCFullFiles()
     p.download_epc_zip()
+
+
+
