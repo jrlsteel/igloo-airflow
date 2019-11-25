@@ -1,20 +1,26 @@
+import timeit
+
 import sys
 import requests
 import os
 import shutil
 import zipfile
 import fnmatch
+import multiprocessing
+from multiprocessing import freeze_support
 
 sys.path.append('..')
 
 from conf import config as con
 from common import utils as util
+from connections.connect_db import get_boto_S3_Connections as s3_con
 
 class GetEPCFullFiles:
 
     def __init__(self):
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_bucket']
+        self.s3 = s3_con(self.bucket_name)
         self.EPCFullDownload_path = self.dir['s3_epc_full_key']['EPCFullDownload_path']
         self.EPCFullExtract_path = self.dir['s3_epc_full_key']['EPCFullExtract_path']
         self.EPCFullCertificates = self.dir['s3_epc_full_key']['EPCFullCertificates']
@@ -77,10 +83,22 @@ class GetEPCFullFiles:
         self.epc_pre_S3(extract_path)
 
 
+    def extract_epc_full_data(self,k,dir_s3):
+        dir_s3 = self.dir
+        k = self.s3
+        k.key = dir_s3['s3_epc_full_key']['EPCFullDownload_path']
+
+
+
+
+
 if __name__ == '__main__':
+
+    #freeze_support()
 
     p = GetEPCFullFiles()
     p.download_epc_zip()
+
 
 
 
