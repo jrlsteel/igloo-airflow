@@ -1,5 +1,3 @@
-import timeit
-
 import sys
 import requests
 import os
@@ -14,6 +12,7 @@ sys.path.append('..')
 from conf import config as con
 from common import utils as util
 from connections.connect_db import get_boto_S3_Connections as s3_con
+from connections import connect_db as db
 
 class GetEPCFullFiles:
 
@@ -66,7 +65,7 @@ class GetEPCFullFiles:
         # OPEN SESSION
         s = requests.Session()
         s.get(fullsite_url)
-        s.post(fullsite_url) 
+        s.post(fullsite_url)
 
         # DOWNLOAD ZIP FILE
         with open(os.path.basename(download_path), 'wb') as file:
@@ -83,22 +82,7 @@ class GetEPCFullFiles:
         self.epc_pre_S3(extract_path)
 
 
-    def extract_epc_full_data(self,k,dir_s3):
-        dir_s3 = self.dir
-        k = self.s3
-        k.key = dir_s3['s3_epc_full_key']['EPCFullDownload_path']
-
-
-
-
-
 if __name__ == '__main__':
-
-    #freeze_support()
 
     p = GetEPCFullFiles()
     p.download_epc_zip()
-
-
-
-
