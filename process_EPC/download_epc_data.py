@@ -6,6 +6,8 @@ import zipfile
 import fnmatch
 import multiprocessing
 from multiprocessing import freeze_support
+import pandas as pd
+import numpy as np
 
 sys.path.append('..')
 
@@ -31,9 +33,15 @@ class GetEPCFullFiles:
             zip_ref.extractall(extract_path)
 
     # PREPARE FILES FOR S3 BUCKET
-    def epc_pre_S3(self, extract_path):
-        certificates_path = self.EPCFullCertificates
-        recommendation_path = self.EPCFullRecommendations
+    def epc_pre_S3(self, extract_path, certificates_path, recommendation_path):
+        # CHECK IF DIRECTORY EXISTS
+        if not os.path.exists(os.path.expanduser(certificates_path)):
+          os.makedirs(os.path.expanduser(certificates_path))
+
+        # CHECK IF DIRECTORY EXISTS
+        if not os.path.exists(os.path.expanduser(recommendation_path)):
+          os.makedirs(os.path.expanduser(recommendation_path))
+
 
         full_extract_path = os.path.basename(extract_path) + os.sep
 
@@ -46,21 +54,67 @@ class GetEPCFullFiles:
 
                 if fnmatch.fnmatch(newFileName, '*certificates.csv'):
                     # MOVE TO CERTIFICATES DIRECTORY
-                    shutil.copyfile(fspath, os.path.basename(certificates_path) + newFileName)
+                    shutil.copyfile(fspath, os.path.expanduser(certificates_path) + newFileName)
+                    #WRITE TO S3 LAKE
+                    Cert_directory = "~/enzek-meterpoint-readings/process_EPC/EPCCertificates/"
+                    FileName = Cert_directory + newFileName
+                    self.extract_epc_full_data(Cert_directory, newFileName)
                     print(newFileName)
 
                 elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
                     # MOVE TO recommendations DIRECTORY
-                    shutil.copyfile(fspath, os.path.basename(recommendation_path) + newFileName)
+                    shutil.copyfile(fspath, os.path.expanduser(recommendation_path) + newFileName)
+                    #WRITE TO S3 LAKE
+                    Recc_directory = "~/enzek-meterpoint-readings/process_EPC/EPCRecommendations/"
+                    FileName = Recc_directory + newFileName
+                    self.extract_epc_full_data(Recc_directory, newFileName)
                     print(newFileName)
+
+
+
+    def extract_epc_full_data(self, directory, newFileName):
+        k = self.s3
+        dir_s3 = self.dir
+        epc_rows_df = pd.read_csv(directory + newFileName)
+        if epc_rows_df.empty:
+            print(" - has no EPC data")
+        else:
+            epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
+            epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
+            epc_rows_df = epc_rows_df.replace('"', '', regex=True)
+            epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
+            file_name_full_epc = newFileName
+            if fnmatch.fnmatch(newFileName, '*certificates.csv'):
+                # MOVE TO CERTIFICATES DIRECTORY
+                k.key = dir_s3['s3_epc_full_key']['EPCFullCertificates'] + file_name_full_epc
+                # print(epc_rows_df_string)
+                k.set_contents_from_string(epc_rows_df_string)
+
+            elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
+                # MOVE TO recommendations DIRECTORY
+                k.key = dir_s3['s3_epc_full_key']['EPCFullRecommendations'] + file_name_full_epc
+                # print(epc_rows_df_string)
+                k.set_contents_from_string(epc_rows_df_string)
+
+
+
 
     # DOWNLOAD FILE
     def download_epc_zip(self):
+        dir_s3 = self.dir
+        bucket_name = self.bucket_name
+        k= self.s3
         site_url, file_url = util.get_epc_api_info_full('igloo_epc_full')
         token = con.igloo_epc_full["token"]
         fullsite_url = site_url + token
-        download_path = self.EPCFullDownload_path
-        extract_path =  self.EPCFullExtract_path
+
+        #download_path = self.EPCFullDownload_path
+        #extract_path =  self.EPCFullExtract_path
+
+        download_path = "~/enzek-meterpoint-readings/process_EPC/all-domestic-certificates.zip"
+        extract_path = "./EPC_full"
+        certificates_path = "./EPCCertificates/"
+        recommendation_path = "./EPCRecommendations/"
 
         # OPEN SESSION
         s = requests.Session()
@@ -79,7 +133,8 @@ class GetEPCFullFiles:
         self.unzip_epc_zip(os.path.basename(download_path), os.path.basename(extract_path))
 
         # ETRACT FILES FOR S3
-        self.epc_pre_S3(extract_path)
+        self.epc_pre_S3(os.path.basename(extract_path), certificates_path, recommendation_path)
+
 
 
 if __name__ == '__main__':
