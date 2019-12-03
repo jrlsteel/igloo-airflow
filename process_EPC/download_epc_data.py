@@ -148,13 +148,6 @@ class GetEPCFullFiles:
 if __name__ == '__main__':
 
     p = GetEPCFullFiles()
-    #p.download_epc_zip()
+    p.download_epc_zip()
 
-
-    download_path = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC" + os.sep + "all-domestic-certificates.zip"
-    extract_path = "." + os.sep + "EPC_full"
-    certificates_path = "." + os.sep + "EPCCertificates" + os.sep
-    recommendation_path = "." + os.sep + "EPCRecommendations" + os.sep
-
-    p.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
 
