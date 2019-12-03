@@ -9,6 +9,7 @@ import multiprocessing
 from multiprocessing import freeze_support
 import pandas as pd
 import numpy as np
+import codecs
 
 sys.path.append('..')
 
@@ -60,6 +61,7 @@ class GetEPCFullFiles:
                     #WRITE TO S3 LAKE
                     #Cert_directory = "~/enzek-meterpoint-readings/process_EPC/EPCCertificates/"
                     Cert_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCCertificates" + os.sep
+                    Cert_directory = codecs.decode(Cert_directory, 'unicode_escape')
                     FileName = Cert_directory + newFileName
                     self.extract_epc_full_data(Cert_directory, newFileName)
                     print(newFileName)
@@ -70,6 +72,7 @@ class GetEPCFullFiles:
                     #WRITE TO S3 LAKE
                     #Recc_directory = "~/enzek-meterpoint-readings/process_EPC/EPCRecommendations/"
                     Recc_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCRecommendations" + os.sep
+                    Recc_directory = codecs.decode(Recc_directory, 'unicode_escape')
                     FileName = Recc_directory + newFileName
                     self.extract_epc_full_data(Recc_directory, newFileName)
                     print(newFileName)
@@ -119,9 +122,16 @@ class GetEPCFullFiles:
         #recommendation_path = "./EPCRecommendations/"
 
         download_path = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC" + os.sep + "all-domestic-certificates.zip"
+        download_path = codecs.decode(download_path, 'unicode_escape')
+
         extract_path = "." + os.sep + "EPC_full"
+        extract_path =  codecs.decode(extract_path, 'unicode_escape')
+
         certificates_path = "." + os.sep + "EPCCertificates" + os.sep
+        certificates_path =  codecs.decode(certificates_path, 'unicode_escape')
+
         recommendation_path = "." + os.sep + "EPCRecommendations" + os.sep
+        recommendation_path =  codecs.decode(recommendation_path, 'unicode_escape')
 
         # OPEN SESSION
         s = requests.Session()
@@ -148,3 +158,4 @@ if __name__ == '__main__':
 
     p = GetEPCFullFiles()
     p.download_epc_zip()
+
