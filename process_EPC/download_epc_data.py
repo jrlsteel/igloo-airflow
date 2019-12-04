@@ -9,7 +9,8 @@ import multiprocessing
 from multiprocessing import freeze_support
 import pandas as pd
 import numpy as np
-import codecs
+import warnings
+warnings.filterwarnings("ignore")
 
 sys.path.append('..')
 
@@ -61,6 +62,7 @@ class GetEPCFullFiles:
                     #WRITE TO S3 LAKE
                     #Cert_directory = "~/enzek-meterpoint-readings/process_EPC/EPCCertificates/"
                     Cert_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCCertificates" + os.sep
+                    Cert_directory = os.path.expanduser(Cert_directory)
                     FileName = Cert_directory + newFileName
                     self.extract_epc_full_data(Cert_directory, newFileName)
                     print(newFileName)
@@ -71,6 +73,7 @@ class GetEPCFullFiles:
                     #WRITE TO S3 LAKE
                     #Recc_directory = "~/enzek-meterpoint-readings/process_EPC/EPCRecommendations/"
                     Recc_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCRecommendations" + os.sep
+                    Recc_directory = os.path.expanduser(Recc_directory)
                     FileName = Recc_directory + newFileName
                     self.extract_epc_full_data(Recc_directory, newFileName)
                     print(newFileName)
@@ -149,5 +152,12 @@ if __name__ == '__main__':
 
     p = GetEPCFullFiles()
     p.download_epc_zip()
+
+
+
+
+
+
+
 
 
