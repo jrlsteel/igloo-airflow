@@ -4,9 +4,7 @@ import os
 import shutil
 import zipfile
 import fnmatch
-import time
-import multiprocessing
-from multiprocessing import freeze_support
+import platform
 import pandas as pd
 import numpy as np
 import warnings
@@ -58,7 +56,7 @@ class GetEPCFullFiles:
 
                 if fnmatch.fnmatch(newFileName, '*certificates.csv'):
                     # MOVE TO CERTIFICATES DIRECTORY
-                    s3_directory_name = subdir.replace('EPC_full\\', '')
+                    s3_directory_name = subdir.replace('EPC_full' + os.sep, '')
                     filename_path = os.path.expanduser(certificates_path) + newFileName
                     shutil.copyfile(fspath, os.path.expanduser(certificates_path) + newFileName)
                     p.push_to_s3(filename_path, newFileName, s3_directory_name)
@@ -66,7 +64,7 @@ class GetEPCFullFiles:
 
                 elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
                     # MOVE TO recommendations DIRECTORY
-                    s3_directory_name = fullpath.replace(subdir, '')
+                    s3_directory_name = subdir.replace('EPC_full' + os.sep, '')
                     filename_path = os.path.expanduser(recommendation_path) + newFileName
                     shutil.copyfile(fspath, os.path.expanduser(recommendation_path) + newFileName)
                     p.push_to_s3(filename_path, newFileName, s3_directory_name)
@@ -129,15 +127,15 @@ class GetEPCFullFiles:
         s.post(fullsite_url)
 
         # DOWNLOAD ZIP FILE
-        with open(os.path.basename(download_path), 'wb') as file:
-            r = s.get(file_url, stream=True, timeout=3600)
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    file.write(chunk)
-                    file.flush()
+        # with open(os.path.basename(download_path), 'wb') as file:
+        #     r = s.get(file_url, stream=True, timeout=3600)
+        #     for chunk in r.iter_content(chunk_size=1024):
+        #         if chunk:
+        #             file.write(chunk)
+        #             file.flush()
 
         # UNZIP ZIP FILE
-        self.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
+        # p.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
 
         # ETRACT FILES FOR S3
         p.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
