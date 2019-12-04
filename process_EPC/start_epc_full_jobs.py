@@ -60,7 +60,7 @@ class StartEPCJobs:
         try:
             util.batch_logging_insert(self.certificates_jobid, 56, 'epc_full_extract_pyscript', 'start_epc_full_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "download_epc_data.py"])
+            subprocess.run([self.pythonAlias, "process_download_epc_data.py"])
             util.batch_logging_update(self.certificates_jobid, 'e')
             print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
 
 
-    if s.env == 'prod':
+    if s.env in ('prod', 'uat'):
         # run processing download epc data script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_full_name))
         s.submit_process_epc_full_job()
@@ -185,9 +185,9 @@ if __name__ == '__main__':
     print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
     s.submit_epc_certificates_staging_gluejob()
 
-    # # # run staging glue job recommendations
-    # print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
-    # s.submit_epc_recommendations_staging_gluejob()
+    # # run staging glue job recommendations
+    print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_reco_name))
+    s.submit_epc_recommendations_staging_gluejob()
 
     # run EPC Certificates glue job
     print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_cert_name))
