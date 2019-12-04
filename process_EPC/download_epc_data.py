@@ -53,37 +53,32 @@ class GetEPCFullFiles:
             for file in files:
                 # print os.path.join(subdir, file)
                 fspath = subdir + os.sep + file
-                fullpath = subdir + "_" + file
+                fullpath = subdir + "-" + file
                 newFileName = fullpath.replace(full_extract_path, '')
 
                 if fnmatch.fnmatch(newFileName, '*certificates.csv'):
                     # MOVE TO CERTIFICATES DIRECTORY
+                    s3_directory_name = subdir.replace('EPC_full\\', '')
+                    filename_path = os.path.expanduser(certificates_path) + newFileName
                     shutil.copyfile(fspath, os.path.expanduser(certificates_path) + newFileName)
-                    #WRITE TO S3 LAKE
-                    #Cert_directory = "~/enzek-meterpoint-readings/process_EPC/EPCCertificates/"
-                    Cert_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCCertificates" + os.sep
-                    Cert_directory = os.path.expanduser(Cert_directory)
-                    FileName = Cert_directory + newFileName
-                    self.extract_epc_full_data(Cert_directory, newFileName)
+                    p.push_to_s3(filename_path, newFileName, s3_directory_name)
                     print(newFileName)
 
                 elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
                     # MOVE TO recommendations DIRECTORY
+                    s3_directory_name = fullpath.replace(subdir, '')
+                    filename_path = os.path.expanduser(recommendation_path) + newFileName
                     shutil.copyfile(fspath, os.path.expanduser(recommendation_path) + newFileName)
-                    #WRITE TO S3 LAKE
-                    #Recc_directory = "~/enzek-meterpoint-readings/process_EPC/EPCRecommendations/"
-                    Recc_directory = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC"  + os.sep + "EPCRecommendations" + os.sep
-                    Recc_directory = os.path.expanduser(Recc_directory)
-                    FileName = Recc_directory + newFileName
-                    self.extract_epc_full_data(Recc_directory, newFileName)
+                    p.push_to_s3(filename_path, newFileName, s3_directory_name)
                     print(newFileName)
 
 
 
-    def extract_epc_full_data(self, directory, newFileName):
+    def push_to_s3(self, filename_path, newFileName,subdir):
         k = self.s3
         dir_s3 = self.dir
-        epc_rows_df = pd.read_csv(directory + newFileName)
+        file_location = filename_path
+        epc_rows_df = pd.read_csv(file_location)
         if epc_rows_df.empty:
             print(" - has no EPC data")
         else:
@@ -94,13 +89,13 @@ class GetEPCFullFiles:
             file_name_full_epc = newFileName
             if fnmatch.fnmatch(newFileName, '*certificates.csv'):
                 # MOVE TO CERTIFICATES DIRECTORY
-                k.key = dir_s3['s3_epc_full_key']['EPCFullCertificates'] + file_name_full_epc
+                k.key = dir_s3['s3_epc_full_key']['EPCFullCertificates'] + '/' + subdir + '/' + file_name_full_epc
                 # print(epc_rows_df_string)
                 k.set_contents_from_string(epc_rows_df_string)
 
             elif fnmatch.fnmatch(newFileName, '*recommendations.csv'):
                 # MOVE TO recommendations DIRECTORY
-                k.key = dir_s3['s3_epc_full_key']['EPCFullRecommendations'] + file_name_full_epc
+                k.key = dir_s3['s3_epc_full_key']['EPCFullRecommendations'] + '/' + subdir + '/' + file_name_full_epc
                 # print(epc_rows_df_string)
                 k.set_contents_from_string(epc_rows_df_string)
 
@@ -133,18 +128,18 @@ class GetEPCFullFiles:
         s.post(fullsite_url)
 
         # DOWNLOAD ZIP FILE
-        with open(os.path.basename(download_path), 'wb') as file:
-            r = s.get(file_url, stream=True, timeout=3600)
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    file.write(chunk)
-                    file.flush()
+        # with open(os.path.basename(download_path), 'wb') as file:
+        #     r = s.get(file_url, stream=True, timeout=3600)
+        #     for chunk in r.iter_content(chunk_size=1024):
+        #         if chunk:
+        #             file.write(chunk)
+        #             file.flush()
 
         # UNZIP ZIP FILE
-        self.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
+        # self.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
 
         # ETRACT FILES FOR S3
-        self.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
+        p.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
 
 
 
