@@ -82,9 +82,10 @@ class GetEPCFullFiles:
         if epc_rows_df.empty:
             print(" - has no EPC data")
         else:
-            epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
-            epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
-            epc_rows_df = epc_rows_df.replace('"', '', regex=True)
+            #May have to add this lines in later if glue cat does not work.
+            # epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
+            # epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
+            # epc_rows_df = epc_rows_df.replace('"', '', regex=True)
             epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
             file_name_full_epc = newFileName
             if fnmatch.fnmatch(newFileName, '*certificates.csv'):
