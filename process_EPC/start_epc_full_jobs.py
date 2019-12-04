@@ -171,13 +171,13 @@ if __name__ == '__main__':
         ## run EPC Certificates Mirror Job
         print("EPC Certificates  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_mirror_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/EPC_Full/EPCCertificates/"
-        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EPC/EPCCertificates/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EPC_Full/EPCCertificates/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         # # run EPC Recommendations Mirror Job
         print("EPC Certificates  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_mirror_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/EPC_Full/EPCRecommendations/"
-        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EPC/EPCRecommendations/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/EPC_Full/EPCRecommendations/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
 
