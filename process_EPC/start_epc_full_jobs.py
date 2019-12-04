@@ -82,7 +82,7 @@ class StartEPCJobs:
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc-certificates')
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc-certificates-all')
             staging_job_response = obj_stage.run_glue_job()
             if staging_job_response:
                 util.batch_logging_update(self.certificates_staging_jobid, 'e')
@@ -112,7 +112,7 @@ class StartEPCJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc-recommendations')
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc-recommendations-all')
             staging_job_response = obj_stage.run_glue_job()
             if staging_job_response:
                 util.batch_logging_update(self.recommendations_staging_jobid, 'e')
@@ -136,7 +136,7 @@ class StartEPCJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
             util.batch_logging_insert(self.certificates_ref_jobid, 59, 'epc_certificates_ref_glue_job','start_epc_full_jobs.py')
-            obj = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc_certificates')
+            obj = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob='epc_cert_all')
             job_response = obj.run_glue_job()
             if job_response:
                 util.batch_logging_update(self.certificates_ref_jobid, 'e')
