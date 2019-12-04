@@ -94,6 +94,12 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
+        },
+
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -176,6 +182,14 @@ uat = {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
     },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
+    },
+
 
     "s3_zendesk_igloo_key": {
         "ZendeskUserTickets": "stage1/Zendesk/UserTickets/"
@@ -328,6 +342,12 @@ preprod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
+        },
+
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -409,6 +429,13 @@ preprod = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
     },
 
     "s3_zendesk_igloo_key": {
@@ -566,6 +593,12 @@ prod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
+
+        "igloo_epc_full": {
+            "api_url": "https://epc.opendatacommunities.org/login-with-token?",
+            "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
+        },
+
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -642,6 +675,13 @@ prod = {
     "s3_epc_key": {
         "EPCCertificates": "stage1/EPC/EPCCertificates/",
         "EPCRecommendations": "stage1/EPC/EPCRecommendations/"
+    },
+
+    "s3_epc_full_key": {
+        "EPCFullDownload_path": "stage1/EPC_Full/all-domestic-certificates.zip",
+        "EPCFullExtract_path": "stage1/EPC_Full/EPC_Full_Extract",
+        "EPCFullCertificates": "stage1/EPC_Full/EPCCertificates/",
+        "EPCFullRecommendations": "stage1/EPC_Full/EPCRecommendations/"
     },
 
     "s3_zendesk_igloo_key": {

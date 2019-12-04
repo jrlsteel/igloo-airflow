@@ -235,6 +235,17 @@ def get_epc_api_info(api):
     return api_url, head
 
 
+def get_epc_api_info_full(api):
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+
+    file_url = env_api['file_url']
+
+    return api_url, file_url
+
+
 def get_gas_historical_wcf_api_info(api):
     dir = get_dir()
 
