@@ -76,15 +76,19 @@ class GetEPCFullFiles:
         k = self.s3
         dir_s3 = self.dir
         file_location = filename_path
-        epc_rows_df = pd.read_csv(file_location)
-        if epc_rows_df.empty:
+        with open(file_location) as f:
+            epc_string = f.read() + '\n'  # add trailing new line character
+        #epc_rows_df = pd.read_csv(file_location)
+        #if epc_rows_df.empty:
+        if len(epc_string) == 0:
             print(" - has no EPC data")
         else:
             #May have to add this lines in later if glue cat does not work.
             # epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
             # epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
             # epc_rows_df = epc_rows_df.replace('"', '', regex=True)
-            epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
+            #epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
+            epc_rows_df_string = epc_string
             file_name_full_epc = newFileName
             if fnmatch.fnmatch(newFileName, '*certificates.csv'):
                 # MOVE TO CERTIFICATES DIRECTORY
