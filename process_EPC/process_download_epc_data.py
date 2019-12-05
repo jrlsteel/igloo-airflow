@@ -78,6 +78,8 @@ class GetEPCFullFiles:
         file_location = filename_path
         with open(file_location) as f:
             epc_string = f.read() + '\n'  # add trailing new line character
+        #More effeicient to read file into string directly and add line throws than read into a dataframe.
+        #Left code in if we need to act on teh dataframe at a later date
         #epc_rows_df = pd.read_csv(file_location)
         #if epc_rows_df.empty:
         if len(epc_string) == 0:
@@ -115,11 +117,6 @@ class GetEPCFullFiles:
         token = con.igloo_epc_full["token"]
         fullsite_url = site_url + token
 
-        #download_path = "~/enzek-meterpoint-readings/process_EPC/all-domestic-certificates.zip"
-        #extract_path = "./EPC_full"
-        #certificates_path = "./EPCCertificates/"
-        #recommendation_path = "./EPCRecommendations/"
-
         download_path = "~" + os.sep + "enzek-meterpoint-readings" + os.sep + "process_EPC" + os.sep + "all-domestic-certificates.zip"
         extract_path = "." + os.sep + "EPC_full"
         certificates_path = "." + os.sep + "EPCCertificates" + os.sep
@@ -131,15 +128,15 @@ class GetEPCFullFiles:
         s.post(fullsite_url)
 
         # DOWNLOAD ZIP FILE
-        # with open(os.path.basename(download_path), 'wb') as file:
-        #     r = s.get(file_url, stream=True, timeout=3600)
-        #     for chunk in r.iter_content(chunk_size=1024):
-        #         if chunk:
-        #             file.write(chunk)
-        #             file.flush()
+        with open(os.path.basename(download_path), 'wb') as file:
+            r = s.get(file_url, stream=True, timeout=3600)
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    file.write(chunk)
+                    file.flush()
 
         # UNZIP ZIP FILE
-        # p.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
+        p.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
 
         # ETRACT FILES FOR S3
         p.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
