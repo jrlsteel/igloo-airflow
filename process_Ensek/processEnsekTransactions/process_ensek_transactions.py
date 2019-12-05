@@ -157,15 +157,13 @@ if __name__ == "__main__":
     if con.test_config['enable_db_max'] == 'Y':
         account_ids = util.get_accountID_fromDB(True)
 
-    account_ids = account_ids[:10]
-
     # Enable to test without multiprocessing.
     # p = AccountTransactions()
     # p.processAccounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
     env = util.get_env()
-    total_processes = 2  # util.get_multiprocess('total_ensek_processes')
+    total_processes = util.get_multiprocess('total_ensek_processes')
 
     if env == 'uat':
         n = total_processes  # number of process to run in parallel
