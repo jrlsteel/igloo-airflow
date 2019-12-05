@@ -143,20 +143,27 @@ def execute_query(sql, return_as='d'):
     return df
 
 
-def get_accountID_fromDB(get_max):
+def get_accountID_fromDB(get_max, filter='live'):
     env_conf = get_env()
+
+    if filter == 'live':
+        sql_group = apif.account_ids
+    elif filter == 'pre-live':
+        sql_group = apif.pending_acc_ids
+    else:
+        sql_group = {}
 
     # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
     if datetime.date.today().weekday() == 6:  # 6 == Sunday
         if env_conf == 'prod':
-            config_sql = apif.account_ids['weekly']
+            config_sql = sql_group['weekly']
         else:
-            config_sql = apif.account_ids['weekly'] + ' limit 200'
+            config_sql = sql_group['weekly'] + ' limit 200'
     else:
         if env_conf == 'prod':
-            config_sql = apif.account_ids['daily']
+            config_sql = sql_group['daily']
         else:
-            config_sql = apif.account_ids['daily'] + ' limit 200'
+            config_sql = sql_group['daily'] + ' limit 200'
 
     account_ids = []
     if env_conf == 'prod':
@@ -233,6 +240,17 @@ def get_epc_api_info(api):
             'authorization': 'Basic {0}'.format(token),
             'accept': 'application/json'}
     return api_url, head
+
+
+def get_epc_api_info_full(api):
+    dir = get_dir()
+
+    env_api = dir['apis'][api]
+    api_url = env_api['api_url']
+
+    file_url = env_api['file_url']
+
+    return api_url, file_url
 
 
 def get_gas_historical_wcf_api_info(api):
