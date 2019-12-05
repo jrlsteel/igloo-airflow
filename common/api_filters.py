@@ -28,3 +28,14 @@ acc_mp_ids = {
                 where datediff(weeks, greatest(supplystartdate, associationstartdate), getdate()) < 1
                 order by account_id""",
 }
+
+pending_acc_ids = {
+    "daily": """select account_id, min(greatest(associationstartdate, supplystartdate)) as ssd
+from ref_meterpoints
+group by account_id
+having datediff(days, ssd, getdate()) <= 7""",
+    "weekly": """select account_id, min(greatest(associationstartdate, supplystartdate)) as ssd
+from ref_meterpoints
+group by account_id
+having datediff(days, ssd, getdate()) <= 7"""
+}
