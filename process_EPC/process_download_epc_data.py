@@ -127,15 +127,15 @@ class GetEPCFullFiles:
         s.post(fullsite_url)
 
         # DOWNLOAD ZIP FILE
-        with open(os.path.basename(download_path), 'wb') as file:
-            r = s.get(file_url, stream=True, timeout=3600)
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk:
-                    file.write(chunk)
-                    file.flush()
+        # with open(os.path.basename(download_path), 'wb') as file:
+        #     r = s.get(file_url, stream=True, timeout=3600)
+        #     for chunk in r.iter_content(chunk_size=1024):
+        #         if chunk:
+        #             file.write(chunk)
+        #             file.flush()
 
         # UNZIP ZIP FILE
-        p.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
+        # p.unzip_epc_zip(os.path.basename(download_path), os.path.abspath(extract_path))
 
         # ETRACT FILES FOR S3
         p.epc_pre_S3(os.path.abspath(extract_path), certificates_path, recommendation_path)
