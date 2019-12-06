@@ -226,7 +226,7 @@ class MeterPoints:
     def log_msg(self, msg, msg_type='diagnostic'):
         with open(self.generic_log_file, mode='a+') as log_msg_file:
             log_msg_file.write(
-                '{0}, {1}, {2}, {3}\n'.format(self.pnum, datetime.datetime.now().strftime('%H:%M:%S.%f'), msg, msg_type))
+                '{0}, {1}, {2}, {3}\n'.format(self.pnum, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), msg, msg_type))
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
