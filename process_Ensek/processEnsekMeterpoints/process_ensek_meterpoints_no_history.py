@@ -226,7 +226,7 @@ class MeterPoints:
     def log_msg(self, msg, msg_type='diagnostic'):
         with open(self.generic_log_file, mode='a+') as log_msg_file:
             log_msg_file.write(
-                '{0}, {1}, {2}, {3}\n'.format(self.pnum, datetime.datetime.now().strftime('%H:%M:%S.%f'), msg, msg_type))
+                '{0}, {1}, {2}, {3}\n'.format(self.pnum, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'), msg, msg_type))
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
@@ -262,6 +262,17 @@ class MeterPoints:
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
                 self.log_error(msg_ac, '')
 
+    def callApisNoProcessing(self, account_ids):
+        api_url_mp, head_mp = util.get_ensek_api_info1('meterpoints')
+
+        for account_id in account_ids:
+            t = con.api_config['total_no_of_calls']
+            print('ac:' + str(account_id))
+            msg_ac = 'ac:' + str(account_id) + ' no processing'
+            self.log_error(msg_ac, '')
+            api_url_mp1 = api_url_mp.format(account_id)
+            self.get_api_response(api_url_mp1, head_mp, account_id)
+
 
 if __name__ == "__main__":
     freeze_support()
@@ -288,6 +299,41 @@ if __name__ == "__main__":
     # Enable to test without multiprocessing.
     # p = MeterPoints()
     # p.processAccounts(account_ids, s3, dir_s3)
+
+    #Test for batch problems...
+    weekday = datetime.date.today().weekday()
+    if weekday == 5 or weekday == 6:  # Saturday or Sunday
+        print("Starting no-processing api call run-through")
+        n_processes = 12
+        k = int(len(account_ids) / n_processes)
+
+        print(len(account_ids))
+        print(k)
+        processes = []
+        lv = 0
+
+        start = timeit.default_timer()
+
+        for i in range(n_processes + 1):
+            p1 = MeterPoints(i)
+            print(i)
+            uv = i * k
+            if i == n_processes:
+                # print(d18_keys_s3[l:])
+                t = multiprocessing.Process(target=p1.callApisNoProcessing, args=([account_ids[lv:]]))
+            else:
+                # print(d18_keys_s3[l:u])
+                t = multiprocessing.Process(target=p1.callApisNoProcessing, args=([account_ids[lv:uv]]))
+            lv = uv
+
+            processes.append(t)
+
+        for p in processes:
+            p.start()
+            sleep(2)
+
+        for process in processes:
+            process.join()
 
     ####### Multiprocessing Starts #########
     env = util.get_env()
