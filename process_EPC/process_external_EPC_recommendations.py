@@ -162,9 +162,9 @@ if __name__ == "__main__":
         print(i)
         uv = i * k
         if i == n:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:], s3_con(bucket_name), dir_s3))
         else:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)
