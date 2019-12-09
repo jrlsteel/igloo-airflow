@@ -177,10 +177,10 @@ if __name__ == "__main__":
         uv = i * k
         if i == n:
             # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:], s3_con(bucket_name), dir_s3))
         else:
             # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(df[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)
