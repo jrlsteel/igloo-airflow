@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
 
 
-    if s.env in ('prod', 'uat'):
+    if s.env in ('prod', 'uat','preprod'):
         # run processing download epc data script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_full_name))
         s.submit_process_epc_full_job()
