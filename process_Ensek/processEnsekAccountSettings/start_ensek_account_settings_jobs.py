@@ -8,13 +8,13 @@ from common import process_glue_job as glue
 from common import utils as util
 
 
-class StartMeterpointsJobs:
+class AccountSettingsJobs:
     def __init__(self):
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
 
-    def submit_meterpoints_extract_job(self):
+    def submit_account_settings_extract_job(self):
         """
         Calls the Registration Status process_ensek_registration_meterpoint_status.py"script to which processes ensek registrations stus.
         :return: None
@@ -30,7 +30,7 @@ class StartMeterpointsJobs:
             print("Error in Process Ensek Account  :- " + str(e))
             sys.exit(1)
 
-    def submit_meterpoints_extract_staging_gluejob(self):
+    def submit_account_settings_extract_staging_gluejob(self):
         try:
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
@@ -50,21 +50,21 @@ class StartMeterpointsJobs:
             print("Error in Ensek Account Staging Job :- " + str(e))
             sys.exit(1)
     """"
-    def submit_meterpoints_extract_reference_gluejob(self):
+    def submit_account_settings_extract_reference_gluejob(self):
         try:
             jobname = self.dir['glue_registrations_meterpoints_status_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_submit_registrations_meterpoints_status_Gluejob = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
+            obj_submit_registrations_account_settings_status_Gluejob = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment,
                                                  processJob='ref_meterpoints')
-            job_response = obj_submit_registrations_meterpoints_status_Gluejob.run_glue_job()
+            job_response = obj_submit_registrations_account_settings_status_Gluejob.run_glue_job()
             if job_response:
                 print("{0}: Ensek Account Reference Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                # returnsubmit_registrations_meterpoints_status_Gluejob
+                # returnsubmit_registrations_account_settings_status_Gluejob
             else:
                 print("Error occurred in Ensek Account Reference Glue Job")
-                # return submit_registrations_meterpoints_status_Gluejob
+                # return submit_registrations_account_settings_status_Gluejob
                 raise Exception
         except Exception as e:
             print("Error in Ensek Account Reference DB Job :- " + str(e))
@@ -74,23 +74,24 @@ class StartMeterpointsJobs:
 
 if __name__ == '__main__':
 
-    s = StartMeterpointsJobs()
+    s = AccountSettingsJobs()
 
     #Ensek Meterpoints Extract
     print("{0}:  Ensek Account Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_meterpoints_extract_job()
+    s.submit_account_settings_extract_job()
 
     # #Ensek Meterpoints Staging Jobs
     print("{0}:  Ensek Account Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_meterpoints_extract_staging_gluejob()
+    s.submit_account_settings_extract_staging_gluejob()
 
     """
-    #Ensek Meterpoints ref Tables Jobs
+    #Ensek Account Settings ref Tables Jobs
     print("{0}: Registrations Account Status Ref Jobs Running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.submit_meterpoints_extract_reference_gluejob()
+    s.submit_account_settings_extract_reference_gluejob()
     """
 
 
 
     print("{0}: All Registrations Account Status completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+
 
