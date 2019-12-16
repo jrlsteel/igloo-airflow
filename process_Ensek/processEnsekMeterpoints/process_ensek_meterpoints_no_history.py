@@ -300,6 +300,7 @@ if __name__ == "__main__":
     # p = MeterPoints()
     # p.processAccounts(account_ids, s3, dir_s3)
 
+    #Test for batch problems...
     weekday = datetime.date.today().weekday()
     if weekday == 4 or weekday == 5:  # Friday or Saturday - this runs in the evening so these are the weekend runs
         print("Starting no-processing api call run-through")
