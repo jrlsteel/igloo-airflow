@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     if con.test_config['enable_db'] == 'Y':
         account_ids = util.get_accountID_fromDB(False)
-    #
+
     if con.test_config['enable_db_max'] == 'Y':
         account_ids = util.get_accountID_fromDB(True)
 
