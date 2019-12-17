@@ -73,6 +73,17 @@ def process_all_ensek_scripts():
     except:
         raise
 
+    print("{0}: >>>> Account Settings <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        job_id = util.get_jobID()
+        util.batch_logging_insert(job_id, 12, 'ensek_account_settings_pyscript', 'process_ensek_account_settings.py')
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekAccountSettings/process_ensek_account_settings.py"])
+        print("{0}: Account Settings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        util.batch_logging_update(job_id, 'e')
+    except:
+        raise
+
     return True
 
 
