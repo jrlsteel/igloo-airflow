@@ -94,7 +94,10 @@ class AccountSettings:
             api_url1 = api_url.format(account_id)
             dd_response = self.get_api_response(api_url1, head)
             if dd_response:
-                formatted_dd = self.format_json_response(dd_response)
+                formatted_dd_old = self.format_json_response(dd_response)
+                keys = ['AccountID', 'BillDayOfMonth', 'BillFrequencyMonths', 'NextBillDate', 'NextBillDay',
+                        'NextBillMonth', 'NextBillYear', 'SendEmail', 'SendPost', 'TopupWithEstimates']
+                formatted_dd = {x: formatted_dd_old[x] for x in keys}
                 # print(json.dumps(formatted_dd))
                 self.extract_data(formatted_dd, account_id, k, dir_s3)
             else:
