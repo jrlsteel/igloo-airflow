@@ -245,6 +245,7 @@ uat = {
     "glue_smart_meter_eligibility_job_name": "_process_ref_tables_uat",
     "glue_occupier_accounts_job_name": "_process_ref_tables_uat",
     "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_uat",
+    "glue_meets_eligibility_job_name": "_process_ref_tables_uat",
 }
 
 preprod = {
@@ -492,6 +493,7 @@ preprod = {
     "glue_smart_meter_eligibility_job_name": "_process_ref_tables_preprod",
     "glue_occupier_accounts_job_name": "_process_ref_tables_preprod",
     "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_preprod",
+    "glue_meets_eligibility_job_name": "_process_ref_tables_preprod",
 
 
 }
@@ -736,5 +738,6 @@ prod = {
     "glue_smart_meter_eligibility_job_name": "_process_ref_tables_prod",
     "glue_occupier_accounts_job_name": "_process_ref_tables_prod",
     "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_prod",
+    "glue_meets_eligibility_job_name": "_process_ref_tables_prod",
 
 }

@@ -181,6 +181,12 @@ if __name__ == '__main__':
         destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/AccountTransactions/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
+        print("Ensek Account Settings mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
+        source_input = "s3://igloo-data-warehouse-prod/stage1/AccountSettings/"
+        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/AccountSettings/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+
     #run staging glue job
     print("{0}: Ensek Staging Job running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_ensek_staging_Gluejob()

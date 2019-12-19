@@ -9,7 +9,7 @@ from process_eac_aq import start_consumption_accuracy_jobs as ca
 from process_tado import start_tado_efficiency_jobs as ta
 from process_EstimatedAdvance import start_est_advance_job as est_adv
 from process_aurora import start_daily_sales_jobs as ds
-from process_data_gate import start_smart_meter_eligibility_jobs as sme
+from process_data_gate import start_smart_meter_eligibility_jobs as sme, start_meets_eligibility_jobs as me
 from process_Ensek.processEnsekTariffs import start_igloo_calculated_tariffs_job as calc_tariffs
 
 from common import utils as util
@@ -64,10 +64,15 @@ class CalcSteps:
         sme_obj = sme.SmartMeterEligibilityJobs()
         sme_obj.submit_smart_meter_eligibility_gluejob()
 
-        # run Smart Meter Eligibility Job
+        # run Calculated Tariffs Job
         print("{0}: Calculated Tariffs Job running...".format(datetime.now().strftime('%H:%M:%S')))
         ct_obj = calc_tariffs.IglooCalculatedTariffsJobs()
         ct_obj.submit_igloo_calculated_tariffs_gluejob()
+
+        # run Meets Eligibility Job
+        print("{0}: Meets Eligibility Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        me_obj = me.MeetsEligibilityJobs()
+        me_obj.submit_meets_eligibility_gluejob()
 
         print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         util.batch_logging_update(self.all_jobid, 'e')
