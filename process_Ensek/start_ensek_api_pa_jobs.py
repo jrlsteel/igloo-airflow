@@ -169,9 +169,9 @@ if __name__ == '__main__':
         s.submit_all_ensek_pa_scripts()
 
     elif s.env in ['preprod', 'uat']:
-        # run PA Ensek Jobs in UAT PreProd Limit of 100 accounts
-        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_all_ensek_pa_scripts()
+        # # run PA Ensek Jobs in UAT PreProd Limit of 100 accounts
+        # print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        # s.submit_all_ensek_pa_scripts()
 
         print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://igloo-data-warehouse-prod/stage1/MeterPoints/"
