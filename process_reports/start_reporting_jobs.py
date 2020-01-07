@@ -43,6 +43,38 @@ class ReportingJobs:
             # write
             sys.exit(1)
 
+    def submit_eligibility_reporting_batch_gluejob(self):
+        try:
+            job_name = self.dir['glue_reporting_job_name']
+            s3_bucket = self.dir['s3_bucket']
+            environment = self.env
+
+            # Batch Logging
+            util.batch_logging_insert(self.reporting_jobid, 200, 'eligibility_reporting_gluejob',
+                                      'start_reporting_jobs.py')
+
+            eli_reporting_job_response = glue.ProcessGlueJob(job_name=job_name,
+                                                             s3_bucket=s3_bucket,
+                                                             environment=environment,
+                                                             processJob='eligibility_reporting').run_glue_job()
+
+            if eli_reporting_job_response:
+                print("{0}: Eligibility Reporting Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                # Batch Logging
+                util.batch_logging_update(self.reporting_jobid, 'e')
+            else:
+                print("Error occurred in Eligibility Reporting Job")
+                # return staging_job_response
+                raise Exception
+        except Exception as e:
+            print("Error in Eligibility Reporting Glue Job: " + str(e))
+
+            # Batch Logging
+            util.batch_logging_update(self.reporting_jobid, 'f', str(e))
+
+            # write
+            sys.exit(1)
+
 
 if __name__ == '__main__':
     rj = ReportingJobs()

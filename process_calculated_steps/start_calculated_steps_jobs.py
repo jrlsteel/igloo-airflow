@@ -26,7 +26,6 @@ class CalcSteps:
 
     def startCalcJobs(self):
 
-
         util.batch_logging_insert(self.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
         print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
 
@@ -59,20 +58,15 @@ class CalcSteps:
         est_adv_obj = est_adv.EstimatedAdvance()
         est_adv_obj.submit_estimated_advance_gluejob()
 
-        # run Smart Meter Eligibility Job
-        print("{0}: Smart Meter Eligibility Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        sme_obj = sme.SmartMeterEligibilityJobs()
-        sme_obj.submit_smart_meter_eligibility_gluejob()
-
         # run Calculated Tariffs Job
         print("{0}: Calculated Tariffs Job running...".format(datetime.now().strftime('%H:%M:%S')))
         ct_obj = calc_tariffs.IglooCalculatedTariffsJobs()
         ct_obj.submit_igloo_calculated_tariffs_gluejob()
 
-        # run Meets Eligibility Job
-        print("{0}: Meets Eligibility Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        me_obj = me.MeetsEligibilityJobs()
-        me_obj.submit_meets_eligibility_gluejob()
+        # run eligibility jobs
+        print("{0}: Eligibility Reporting Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        rj_obj = srj.ReportingJobs()
+        rj_obj.submit_eligibility_reporting_batch_gluejob()
 
         print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         util.batch_logging_update(self.all_jobid, 'e')
