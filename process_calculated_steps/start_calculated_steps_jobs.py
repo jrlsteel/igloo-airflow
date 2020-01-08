@@ -8,8 +8,8 @@ from process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
 from process_eac_aq import start_consumption_accuracy_jobs as ca
 from process_tado import start_tado_efficiency_jobs as ta
 from process_EstimatedAdvance import start_est_advance_job as est_adv
-from process_aurora import start_daily_sales_jobs as ds
-from process_data_gate import start_smart_meter_eligibility_jobs as sme
+from process_reports import start_reporting_jobs as srj
+from process_data_gate import start_smart_meter_eligibility_jobs as sme, start_meets_eligibility_jobs as me
 from process_Ensek.processEnsekTariffs import start_igloo_calculated_tariffs_job as calc_tariffs
 
 from common import utils as util
@@ -25,7 +25,6 @@ class CalcSteps:
         self.all_jobid = util.get_jobID()
 
     def startCalcJobs(self):
-
 
         util.batch_logging_insert(self.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
         print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
@@ -50,24 +49,24 @@ class CalcSteps:
         ta_obj.submit_tado_efficiency_batch_gluejob()
 
         # run daily sales job
-        print("{0}: Daily Sales Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        ds_obj = ds.DailySalesJobs()
-        ds_obj.submit_daily_sales_batch_gluejob()
+        print("{0}: Daily Reporting Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        rj_obj = srj.ReportingJobs()
+        rj_obj.submit_daily_reporting_batch_gluejob()
 
         # run Estimated Advance Job
         print("{0}: Estimated Advance Job running...".format(datetime.now().strftime('%H:%M:%S')))
         est_adv_obj = est_adv.EstimatedAdvance()
         est_adv_obj.submit_estimated_advance_gluejob()
 
-        # run Smart Meter Eligibility Job
-        print("{0}: Smart Meter Eligibility Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        sme_obj = sme.SmartMeterEligibilityJobs()
-        sme_obj.submit_smart_meter_eligibility_gluejob()
-
-        # run Smart Meter Eligibility Job
+        # run Calculated Tariffs Job
         print("{0}: Calculated Tariffs Job running...".format(datetime.now().strftime('%H:%M:%S')))
         ct_obj = calc_tariffs.IglooCalculatedTariffsJobs()
         ct_obj.submit_igloo_calculated_tariffs_gluejob()
+
+        # run eligibility jobs
+        print("{0}: Eligibility Reporting Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        rj_obj = srj.ReportingJobs()
+        rj_obj.submit_eligibility_reporting_batch_gluejob()
 
         print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         util.batch_logging_update(self.all_jobid, 'e')

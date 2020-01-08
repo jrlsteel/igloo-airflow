@@ -27,18 +27,6 @@ def process_all_ensek_scripts():
     # except:
     #     raise
 
-    print("{0}: >>>> Account Transactions <<<<".format(datetime.now().strftime('%H:%M:%S')))
-    try:
-        job_id = util.get_jobID()
-        util.batch_logging_insert(job_id, 6, 'ensek_transactions_pyscript', 'process_ensek_transactions.py')
-        start = timeit.default_timer()
-        subprocess.run([pythonAlias, "processEnsekTransactions/process_ensek_transactions.py"])
-        print("{0}: Account Transactions completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-                                                                              float(timeit.default_timer() - start)))
-        util.batch_logging_update(job_id, 'e')
-
-    except:
-        raise
 
     print("{0}: >>>> Status Registrations Meterpoints <<<<".format(datetime.now().strftime('%H:%M:%S')))
     try:
@@ -70,6 +58,30 @@ def process_all_ensek_scripts():
         subprocess.run([pythonAlias, "processEnsekTariffs/process_ensek_tariffs_history.py"])
         print("{0}: Tariff History completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
         util.batch_logging_update(job_id, 'e')
+    except:
+        raise
+
+    print("{0}: >>>> Account Settings <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        job_id = util.get_jobID()
+        util.batch_logging_insert(job_id, 12, 'ensek_account_settings_pyscript', 'process_ensek_account_settings.py')
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekAccountSettings/process_ensek_account_settings.py"])
+        print("{0}: Account Settings completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        util.batch_logging_update(job_id, 'e')
+    except:
+        raise
+
+    print("{0}: >>>> Account Transactions <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    try:
+        job_id = util.get_jobID()
+        util.batch_logging_insert(job_id, 6, 'ensek_transactions_pyscript', 'process_ensek_transactions.py')
+        start = timeit.default_timer()
+        subprocess.run([pythonAlias, "processEnsekTransactions/process_ensek_transactions.py"])
+        print("{0}: Account Transactions completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                              float(timeit.default_timer() - start)))
+        util.batch_logging_update(job_id, 'e')
+
     except:
         raise
 
