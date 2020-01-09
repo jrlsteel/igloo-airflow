@@ -29,24 +29,24 @@ class CalcSteps:
         util.batch_logging_insert(self.all_jobid, 100, 'all_calc_steps', 'start_calculated_steps_jobs.py')
         print("{0}: Starting {1}".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
 
-        # print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        # eacaqpa_obj = eacaqpa.EacAqPa()
-        # eacaqpa_obj.submit_eac_aq_gluejob()
-        #
-        # # run eac and aq v1 calculation job
-        # print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        # iglindeacaq_obj = iglindeacaq.IglIndEacAq()
-        # iglindeacaq_obj.submit_eac_aq_gluejob()
-        #
-        # # run consumption accuracy job
-        # print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        # ca_obj = ca.ConsumptionAccuracy()
-        # ca_obj.submit_consumption_accuracy_gluejob()
-        #
-        # # run TADO efficiency job
-        # print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        # ta_obj = ta.TADOEfficiencyJobs()
-        # ta_obj.submit_tado_efficiency_batch_gluejob()
+        print("{0}: EAC and AQ Glue Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        eacaqpa_obj = eacaqpa.EacAqPa()
+        eacaqpa_obj.submit_eac_aq_gluejob()
+
+        # run eac and aq v1 calculation job
+        print("{0}: EAC and AQ Glue V1 Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        iglindeacaq_obj = iglindeacaq.IglIndEacAq()
+        iglindeacaq_obj.submit_eac_aq_gluejob()
+
+        # run consumption accuracy job
+        print("{0}: Consumption Accuracy Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        ca_obj = ca.ConsumptionAccuracy()
+        ca_obj.submit_consumption_accuracy_gluejob()
+
+        # run TADO efficiency job
+        print("{0}: TADO Efficiency Job running...".format(datetime.now().strftime('%H:%M:%S')))
+        ta_obj = ta.TADOEfficiencyJobs()
+        ta_obj.submit_tado_efficiency_batch_gluejob()
 
         # run daily sales job
         print("{0}: Daily Reporting Job running...".format(datetime.now().strftime('%H:%M:%S')))
