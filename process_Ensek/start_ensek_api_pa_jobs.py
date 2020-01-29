@@ -154,28 +154,6 @@ class StartEnsekPAJobs:
             util.batch_logging_update(self.all_jobid, 'f', str(e))
             sys.exit(1)
 
-    def submit_process_ensek_flows(self, source_input, destination_input, _IAM):
-        """
-        Calls the utils/Sync_files.py script which mirrors ensek data
-        :return: None
-        """
-
-        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
-        try:
-            util.batch_logging_insert(self.mirror_jobid, 9999, 'process_ensek_flows-' + source_input + '-' + self.env,
-                                      'start_ensek_api_pa_jobs.py')
-            start = timeit.default_timer()
-            r = ensek_sync.SyncS3(source_input, destination_input, _IAM)
-            r.process_sync()
-
-            util.batch_logging_update(self.mirror_jobid, 'e')
-            print( "process_ensek_flows-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
-        except Exception as e:
-            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
-            print("Error in process :- " + str(e))
-            sys.exit(1)
-
 
 if __name__ == '__main__':
     s = StartEnsekPAJobs()
