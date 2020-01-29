@@ -402,3 +402,14 @@ def get_keys_from_s3(s3, bucket_name, prefix, suffix):
         if obj['Key'].endswith(suffix):
             s3_keys.append(obj['Key'])
     return s3_keys
+
+
+def get_credentials(_IAM):
+    IAM = ''
+    enzek_credentials = _IAM
+    if enzek_credentials == 'inbound':
+        IAM = con.Enseks3_ensek_inbound
+    if enzek_credentials == 'outbound':
+        IAM = con.Enseks3_ensek_outbound
+
+    return IAM
