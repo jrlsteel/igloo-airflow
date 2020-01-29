@@ -21,7 +21,7 @@ class StartEnsekFlowJobs:
         self.customerdb_jobid = util.get_jobID()
         self.ref_jobid = util.get_jobID()
         self.ref_eac_aq_jobid = util.get_jobID()
-        self.process_name = "Ensek PA Extract and Process "
+        self.process_name = "Ensek Flows Extract and Process "
 
 
     def submit_process_ensek_flows(self, source_input, destination_input, _IAM):
