@@ -67,6 +67,7 @@ if __name__ == '__main__':
     s.submit_process_ensek_flows(source_input, destination_input, IAM)
 
 
+
     # #Sync inbound flows locally
     print("Ensek Flows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     source_input = "s3://igloo-flows-dtc-inbound/"
