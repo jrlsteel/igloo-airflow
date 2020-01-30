@@ -26,11 +26,11 @@ class SyncS3:
         else:
             if 'stage2' in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
-                command = "aws s3 rm {0} --recursive".format(self._destination_path, self._IAM)
+                command = "aws s3 rm {0} --recursive".format(self._destination_path)
                 subprocess.run(command, shell=True)
 
             print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
-            command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path, self._IAM)
+            command = "aws s3 sync {0} {1} {2}".format(self._source_path, self._destination_path, self._IAM)
             subprocess.run(command, shell=True)
             print("completed")
 
@@ -38,11 +38,11 @@ class SyncS3:
             print("Warning you are overwriting input data in Pre-Production ")
             if 'stage2' in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
-                command = "aws s3 rm {0} --recursive".format(self._destination_path, self._IAM)
+                command = "aws s3 rm {0} --recursive".format(self._destination_path)
                 subprocess.run(command, shell=True)
 
             print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
-            command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path, self._IAM)
+            command = "aws s3 sync {0} {1} {2}".format(self._source_path, self._destination_path, self._IAM)
             subprocess.run(command, shell=True)
             print("completed")
 
