@@ -60,7 +60,7 @@ if __name__ == '__main__':
     s.submit_process_ensek_flows(source_input, destination_input, IAM)
 
     #Sync outbound flows
-    print("Ensek Fows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+    print("Ensek Flows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
     source_input = "s3://igloo-flows-dtc-inbound/"
     destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1Flows/"
     IAM = 'inbound'
