@@ -218,6 +218,12 @@ uat = {
         "Raw": "stage1/ReadingsNOSIGas/",
         "SFTP": "NOSI"
     },
+    "s3_ensekflow_key": {
+        "EFfileStore": "/stage1Flows/outbound/",
+        "EFprefix": "/stage1Flows/outbound/master/",
+        "EFStartAfter": "stage1Flows/outbound/master",
+        "EFSuffix": ".uff"
+    },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
