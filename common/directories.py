@@ -219,7 +219,7 @@ uat = {
         "SFTP": "NOSI"
     },
     "s3_ensekflow_key": {
-        "EFfileStore": "stage1Flows/outbound/",
+        "EFfileStore": "stage1Flows/outbound/subfiles/",
         "EFprefix": "/stage1Flows/outbound/master/",
         "EFStartAfter": "stage1Flows/outbound/master",
         "EFSuffix": ".uff"
