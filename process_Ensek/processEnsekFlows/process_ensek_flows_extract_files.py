@@ -71,19 +71,20 @@ class ExtractEnsekFiles(object):
                 filekey = file_content[0][2]
                 worddoc =''
                 for wd in file_content:
-                    worddoc += ''.join(wd) + '\n'
+                    worddoc += ','.join(wd) + '\n'
                 # upload to s3
                 keypath = self.EFfileStore + filekey  + filename
                 print(keypath)
-
                 copy_source = {
                                 'Bucket': self.bucket_name,
                                 'Key': fkey
                               }
 
                 # archive File
-                s31.copy(copy_source, self.bucket_name, keypath)
+                #s31.copy(copy_source, self.bucket_name, keypath)
                 # break
+                # upload to s3
+                s31.put_object(Bucket=self.bucket_name, Key=keypath, Body=worddoc)
 
         except Exception as e:
             print(" Error :" + str(e))
