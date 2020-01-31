@@ -36,8 +36,7 @@ class ExtractEnsekFiles(object):
         self.prefix = self.dir['s3_ensekflow_key']['EFprefix']
         self.suffix = self.dir['s3_ensekflow_key']['EFSuffix']
         self.EFStartAfter = self.dir['s3_ensekflow_key']['EFStartAfter']
-        self.fileSource = "s3://igloo-data-warehouse-" + self.env + "/stage1Flows/outbound/master/"
-        self.fileStore = "s3://igloo-data-warehouse-" + self.env + "/stage1Flows/outbound/"
+        self.EFfileStore = self.dir['s3_ensekflow_key']['EFfileStore']
         self.s3 = boto3.client("s3")
         self.all_objects = s3.list_objects(Bucket='igloo-data-warehouse-uat')
 
@@ -59,33 +58,32 @@ class ExtractEnsekFiles(object):
             # loop each file
             for fkey in flow_keys:
                 print(fkey)
-                print(bucket_name)
                 obj = s31.get_object(Bucket=bucket_name, Key=fkey)
-
                 obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
-                # get the filename from the key
-                filename = fkey.replace(self.prefix, '')
-                with open(filename) as fp:
-                    row = fp.readline()
-                    filekey = row[2]
-                    # print(df_string)
-                    file_name_readings = filename + '_' + str(filekey)
-                    # Copy from master directory to subdirectory
-                    #s3_resource.Object(self.bucket_name, self.fileSource+filekey+"/"+filename).copy_from(CopySource=self.fileStore+filename)
-                    # upload to s3
-                    keypath = self.prefix + "/" + filekey + filename
-                    print(keypath)
+                filename = fkey.replace(self.EFStartAfter, '')
 
-                    copy_source = {
-                                    'Bucket': self.bucket_name,
-                                    'Key': fkey
-                                  }
+                fileUFF_csv = filename.replace(self.suffix, '_UFF.csv')
+                file_content = []
+                for lines in obj_str:
+                    line_rep = lines.replace('\n', '').replace('|', ',')
+                    line_sp = line_rep.split(',')
+                    file_content.append(line_sp)
+                filekey = file_content[0][2]
+                worddoc =''
+                for wd in file_content:
+                    worddoc += ''.join(wd) + '\n'
+                # upload to s3
+                keypath = self.EFfileStore + filekey  + filename
+                print(keypath)
 
-                    # archive d18
-                    s31.copy(copy_source, self.bucket_name, keypath)
-                    fp.close()
+                copy_source = {
+                                'Bucket': self.bucket_name,
+                                'Key': fkey
+                              }
 
-
+                # archive File
+                s31.copy(copy_source, self.bucket_name, keypath)
+                # break
 
         except Exception as e:
             print(" Error :" + str(e))
