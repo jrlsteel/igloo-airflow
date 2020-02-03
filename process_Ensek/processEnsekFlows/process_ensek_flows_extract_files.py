@@ -13,6 +13,7 @@ import csv
 import multiprocessing
 from multiprocessing import freeze_support
 from datetime import datetime
+import pandas_redshift as pr
 
 import sys
 import os
@@ -28,17 +29,17 @@ from connections import connect_db as db
 
 class ExtractEnsekFiles(object):
 
-    def __init__(self):
+    def __init__(self, _type):
         self.env = util.get_env()
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_bucket']
         self.now = datetime.now()
-        self.prefix = self.dir['s3_ensekflow_key']['EFprefix']
-        self.suffix = self.dir['s3_ensekflow_key']['EFSuffix']
-        self.EFStartAfter = self.dir['s3_ensekflow_key']['EFStartAfter']
-        self.EFfileStore = self.dir['s3_ensekflow_key']['EFfileStore']
-        self.s3 = boto3.client("s3")
-        self.all_objects = s3.list_objects(Bucket='igloo-data-warehouse-uat')
+        self.type = _type
+        self.prefix = self.dir['s3_ensekflow_key'][self.type]['EFprefix']
+        self.suffix = self.dir['s3_ensekflow_key'][self.type]['EFSuffix']
+        self.EFStartAfter = self.dir['s3_ensekflow_key'][self.type]['EFStartAfter']
+        self.EFfileStore = self.dir['s3_ensekflow_key'][self.type]['EFfileStore']
+        self.connect = db.get_redshift_connection()
 
     def process_flow_data(self, flow_keys):
         bucket_name = self.bucket_name
@@ -56,6 +57,7 @@ class ExtractEnsekFiles(object):
             s31 = db.get_S3_Connections_client()
 
             # loop each file
+            df_flowid = pd.DataFrame()
             for fkey in flow_keys:
                 print(fkey)
                 obj = s31.get_object(Bucket=bucket_name, Key=fkey)
@@ -68,12 +70,18 @@ class ExtractEnsekFiles(object):
                     line_rep = lines.replace('\n', '').replace('|', ',')
                     line_sp = line_rep.split(',')
                     file_content.append(line_sp)
-                filekey = file_content[0][2]
+                flow_id = file_content[0][2]
+                row_1 = file_content[0]
+                row_2 = file_content[1]
+                etlchange = self.now
                 worddoc =''
                 for wd in file_content:
                     worddoc += ','.join(wd) + '\n'
+                filecontents = worddoc
                 # upload to s3
-                keypath = self.EFfileStore + filekey  + filename
+                keypath = self.EFfileStore + flow_id  + filename
+                # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
+                df_flowid = df_flowid.append({'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
                 print(keypath)
                 copy_source = {
                                 'Bucket': self.bucket_name,
@@ -85,6 +93,11 @@ class ExtractEnsekFiles(object):
                 # break
                 # upload to s3
                 s31.put_object(Bucket=self.bucket_name, Key=keypath, Body=worddoc)
+                #der = df_flowid.head(10)
+
+            # Write the DataFrame to redshift
+            pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
+            pr.close_up_shop()
 
         except Exception as e:
             print(" Error :" + str(e))
@@ -116,12 +129,12 @@ if __name__ == '__main__':
 
     freeze_support()
     s3 = db.get_S3_Connections_client()
-    p = ExtractEnsekFiles()
+    p = ExtractEnsekFiles("outbound")
     ef_keys_s3 = p.get_keys_from_s3(s3)
 
     #Ensek Internal Estimates Ensek Extract
     print("{0}: Ensek flows extract Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    print(ef_keys_s3)
+    #print(ef_keys_s3)
     p.process_flow_data(ef_keys_s3)
 
 

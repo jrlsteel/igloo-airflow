@@ -219,10 +219,18 @@ uat = {
         "SFTP": "NOSI"
     },
     "s3_ensekflow_key": {
+        "outbound":{
         "EFfileStore": "stage1Flows/outbound/subfiles/",
         "EFprefix": "/stage1Flows/outbound/master/",
         "EFStartAfter": "stage1Flows/outbound/master",
         "EFSuffix": ".uff"
+        },
+        "inbound":{
+        "EFfileStore": "stage1Flows/inbound/subfiles/",
+        "EFprefix": "/stage1Flows/inbound/master/",
+        "EFStartAfter": "stage1Flows/inbound/master",
+        "EFSuffix": ".EDS"
+        }
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
