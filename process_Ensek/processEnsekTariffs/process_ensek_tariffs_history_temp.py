@@ -193,7 +193,7 @@ if __name__ == "__main__":
     if con.test_config['enable_db_max'] == 'Y':
         account_ids = util.get_accountID_fromDB(True, filter='pre-live')
 
-    with open("acc_ids_to_fetch.csv") as f:
+    with open("processEnsekTariffs/acc_ids_to_fetch.csv") as f:
         account_ids = []
         for line in f.readlines()[1:]:
             account_ids.append(int(line))
