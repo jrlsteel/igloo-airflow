@@ -45,5 +45,13 @@ class SyncS3:
 
 if __name__ == "__main__":
 
-    p = SyncS3("s3://igloo-data-warehouse-prod/stage2/stage2_DirectDebit/", "s3://igloo-data-warehouse-uat/stage2/stage2_DirectDebit1/")
-    p.process_sync()
+    folders = ['TariffHistory', 'TariffHistoryElecStandCharge', 'TariffHistoryElecUnitRates',
+               'TariffHistoryGasStandCharge', 'TariffHistoryGasUnitRates']
+    for folder in folders:
+        src = "s3://igloo-data-warehouse-uat/stage1/{0}/TempNew/".format(folder)
+        dest = "s3://igloo-data-warehouse-uat/stage1/{0}/".format(folder)
+        p = SyncS3(src, dest)
+        p.process_sync()
+
+    # p = SyncS3("s3://igloo-data-warehouse-prod/stage2/stage2_DirectDebit/", "s3://igloo-data-warehouse-uat/stage2/stage2_DirectDebit1/")
+    # p.process_sync()
