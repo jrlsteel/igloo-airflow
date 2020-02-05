@@ -11,9 +11,12 @@ import time
 from requests import ConnectionError
 import csv
 import multiprocessing
+from time import sleep
 from multiprocessing import freeze_support
 from datetime import datetime
 import pandas_redshift as pr
+from concurrent.futures import ProcessPoolExecutor
+from queue import Queue
 
 import sys
 import os
@@ -73,6 +76,7 @@ class ExtractEnsekFiles(object):
                 flow_id = file_content[0][2]
                 row_1 = file_content[0]
                 row_2 = file_content[1]
+                file_n = filename.replace('/', '')
                 etlchange = self.now
                 worddoc =''
                 for wd in file_content:
@@ -81,7 +85,7 @@ class ExtractEnsekFiles(object):
                 # upload to s3
                 keypath = self.EFfileStore + flow_id  + filename
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
-                df_flowid = df_flowid.append({'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
+                df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
                 print(keypath)
                 copy_source = {
                                 'Bucket': self.bucket_name,
@@ -97,7 +101,7 @@ class ExtractEnsekFiles(object):
 
             # Write the DataFrame to redshift
             pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
-            pr.close_up_shop()
+            #pr.close_up_shop()
 
         except Exception as e:
             print(" Error :" + str(e))
@@ -105,10 +109,9 @@ class ExtractEnsekFiles(object):
 
 
 
-
     def get_keys_from_s3(self, s3):
         """
-        This function gets all the d18_keys that needs to be processed.
+        This function gets all the dkeys that needs to be processed.
         :param s3: holds the s3 connection
         :return: list of d18 filenames
         """
@@ -123,6 +126,54 @@ class ExtractEnsekFiles(object):
         return flow_keys
 
 
+    def get_keys_from_s3_v2(self, s3):
+        """
+        This function gets all the keys that needs to be processed.
+        :param s3: holds the s3 connection
+        :return: list of filenames
+        """
+        s3client = s3
+        bucket = self.bucket_name
+        flow_keys = []
+        EFprefix= self.EFStartAfter
+        paginator = s3client.get_paginator("list_objects")
+        page_iterator = paginator.paginate(Bucket=bucket, Prefix=EFprefix)
+        for page in page_iterator:
+            if "Contents" in page:
+                for key in page[ "Contents" ]:
+                    if key[ "Key" ].endswith(self.suffix): # and key[ "Key" ].startswith(EFprefix):
+                        keyString = key[ "Key" ]
+                        flow_keys.append(keyString)
+        return flow_keys
+
+
+    def get_keys_from_s3_v3(self):
+        """
+        This function gets all the keys that needs to be processed.
+        :param s3: holds the s3 connection
+        :return: list of filenames
+        """
+        s3client = s3
+        bucket = self.bucket_name
+        q = Queue()
+        #flow_keys = []
+        EFprefix= self.EFStartAfter
+        paginator = s3client.get_paginator("list_objects")
+        page_iterator = paginator.paginate(Bucket=bucket, Prefix=EFprefix)
+        for page in page_iterator:
+            if "Contents" in page:
+                for key in page[ "Contents" ]:
+                    if key[ "Key" ].endswith(self.suffix): # and key[ "Key" ].startswith(EFprefix):
+                        keyString = key[ "Key" ]
+                        q.put(keyString)
+        flow_keys = list(q.queue)
+        # Empty queue
+        with q.mutex:
+            q.queue.clear()
+        return flow_keys
+
+
+
 
 
 if __name__ == '__main__':
@@ -130,12 +181,51 @@ if __name__ == '__main__':
     freeze_support()
     s3 = db.get_S3_Connections_client()
     p = ExtractEnsekFiles("outbound")
-    ef_keys_s3 = p.get_keys_from_s3(s3)
+    ef_keys_s3 = p.get_keys_from_s3_v3()
 
+    print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
     print("{0}: Ensek flows extract Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-    #print(ef_keys_s3)
-    p.process_flow_data(ef_keys_s3)
+
+    #p.process_flow_data(ef_keys_s3) ##### Enable this to test without multiprocessing
+    ######### multiprocessing starts  ##########
+    env = util.get_env()
+    if env == 'uat':
+        n = 12  # number of process to run in parallel
+    else:
+        n = 12
+    print(len(ef_keys_s3))
+    k = int(len(ef_keys_s3) / n)  # get equal no of files for each process
+    print(k)
+    processes = []
+    lv = 0
+
+    start = timeit.default_timer()
+
+    for i in range(n+1):
+        p1 = ExtractEnsekFiles("outbound")
+        print(i)
+        uv = i * k
+        if i == n:
+            # print(ef_keys_s3[l:])
+            t = multiprocessing.Process(target=p1.process_flow_data, args=(ef_keys_s3[lv:],))
+        else:
+            # print(ef_keys_s3[l:u])
+            t = multiprocessing.Process(target=p1.process_flow_data, args=(ef_keys_s3[lv:uv],))
+        lv = uv
+
+        processes.append(t)
+
+    for p in processes:
+        p.start()
+        sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### multiprocessing Ends #########
+
+    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+
 
 
 
