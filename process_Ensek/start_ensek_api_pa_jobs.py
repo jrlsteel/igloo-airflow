@@ -8,6 +8,7 @@ from common import process_glue_job as glue
 
 from common import utils as util
 from common import Refresh_UAT as refresh
+from common import Sync_files as ensek_sync
 
 
 class StartEnsekPAJobs:
