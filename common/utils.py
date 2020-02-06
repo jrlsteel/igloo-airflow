@@ -150,6 +150,8 @@ def get_accountID_fromDB(get_max, filter='live'):
         sql_group = apif.account_ids
     elif filter == 'pre-live':
         sql_group = apif.pending_acc_ids
+    elif filter == 'tariff-diffs':
+        sql_group = apif.tariff_diff_acc_ids
     else:
         sql_group = {}
 
