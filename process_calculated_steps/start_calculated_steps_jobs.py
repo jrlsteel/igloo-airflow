@@ -58,11 +58,6 @@ class CalcSteps:
         est_adv_obj = est_adv.EstimatedAdvance()
         est_adv_obj.submit_estimated_advance_gluejob()
 
-        # run Calculated Tariffs Job
-        print("{0}: Calculated Tariffs Job running...".format(datetime.now().strftime('%H:%M:%S')))
-        ct_obj = calc_tariffs.IglooCalculatedTariffsJobs()
-        ct_obj.submit_igloo_calculated_tariffs_gluejob()
-
         # run eligibility jobs
         print("{0}: Eligibility Reporting Job running...".format(datetime.now().strftime('%H:%M:%S')))
         rj_obj = srj.ReportingJobs()
