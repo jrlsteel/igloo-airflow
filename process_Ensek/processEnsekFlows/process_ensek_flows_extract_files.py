@@ -86,6 +86,7 @@ class ExtractEnsekFiles(object):
                 keypath = self.EFfileStore + flow_id  + filename
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
                 df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
+
                 print(keypath)
                 copy_source = {
                                 'Bucket': self.bucket_name,
@@ -100,8 +101,8 @@ class ExtractEnsekFiles(object):
                 #der = df_flowid.head(10)
 
             # Write the DataFrame to redshift
-            pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
-            #pr.close_up_shop()
+            #pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
+            self.redshift_upsert(df=df_flowid, crud_type='i')
 
         except Exception as e:
             print(" Error :" + str(e))
@@ -147,7 +148,7 @@ class ExtractEnsekFiles(object):
         return flow_keys
 
 
-    def get_keys_from_s3_v3(self):
+    def get_keys_from_s3_page(self):
         """
         This function gets all the keys that needs to be processed.
         :param s3: holds the s3 connection
@@ -174,6 +175,21 @@ class ExtractEnsekFiles(object):
 
 
 
+    def redshift_upsert(sql=None, df=None, crud_type=None):
+        '''
+        :param sql: the sql to run
+        '''
+        try:
+            table_name = 'public.testtable'
+            pr = db.get_redshift_connection()
+            if crud_type == 'i':
+                pr.pandas_to_redshift(df, table_name, index=None, append=True)
+            if crud_type in ('u', 'd'):
+                pr.exec_commit(sql)
+            pr.close_up_shop()
+        except Exception as e:
+            return e
+
 
 
 if __name__ == '__main__':
@@ -181,7 +197,9 @@ if __name__ == '__main__':
     freeze_support()
     s3 = db.get_S3_Connections_client()
     p = ExtractEnsekFiles("outbound")
-    ef_keys_s3 = p.get_keys_from_s3_v3()
+    ef_keys_s3 = p.get_keys_from_s3_page()
+    # Test with 1000 records
+    #ef_keys_s3 = p.get_keys_from_s3(s3)
 
     print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
