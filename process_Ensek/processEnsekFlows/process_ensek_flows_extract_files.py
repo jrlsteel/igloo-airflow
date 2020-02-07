@@ -112,9 +112,9 @@ class ExtractEnsekFiles(object):
 
     def get_keys_from_s3(self, s3):
         """
-        This function gets all the dkeys that needs to be processed.
+        This function gets only maximum of 1000 keys per request.
         :param s3: holds the s3 connection
-        :return: list of d18 filenames
+        :return: list of Ensek Flow filenames
         """
         s3client = s3
         bucket = self.bucket_name
@@ -126,26 +126,6 @@ class ExtractEnsekFiles(object):
                 flow_keys.append(object['Key'])
         return flow_keys
 
-
-    def get_keys_from_s3_v2(self, s3):
-        """
-        This function gets all the keys that needs to be processed.
-        :param s3: holds the s3 connection
-        :return: list of filenames
-        """
-        s3client = s3
-        bucket = self.bucket_name
-        flow_keys = []
-        EFprefix= self.EFStartAfter
-        paginator = s3client.get_paginator("list_objects")
-        page_iterator = paginator.paginate(Bucket=bucket, Prefix=EFprefix)
-        for page in page_iterator:
-            if "Contents" in page:
-                for key in page[ "Contents" ]:
-                    if key[ "Key" ].endswith(self.suffix): # and key[ "Key" ].startswith(EFprefix):
-                        keyString = key[ "Key" ]
-                        flow_keys.append(keyString)
-        return flow_keys
 
 
     def get_keys_from_s3_page(self):
@@ -177,6 +157,7 @@ class ExtractEnsekFiles(object):
 
     def redshift_upsert(sql=None, df=None, crud_type=None):
         '''
+        This function gets connection to RedShift Database.
         :param sql: the sql to run
         '''
         try:
@@ -197,6 +178,7 @@ if __name__ == '__main__':
     freeze_support()
     s3 = db.get_S3_Connections_client()
     p = ExtractEnsekFiles("outbound")
+    # Extract all keys required
     ef_keys_s3 = p.get_keys_from_s3_page()
     # Test with 1000 records
     #ef_keys_s3 = p.get_keys_from_s3(s3)
