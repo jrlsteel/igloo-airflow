@@ -100,15 +100,8 @@ class ExtractEnsekFiles(object):
                 #der = df_flowid.head(10)
 
             # Write the DataFrame to redshift
-            # pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
-            # pr.close_up_shop()
-            """
-            file_name_df = 'ensekFlows_outbound_df' + '.csv'
-            # k.key = 'ensek-meterpoints/ReadingsInternal/' + file_name_internal_readings
-            k.key = dir_s3['s3_key']['s3_ensekflow_key']['outbound'] + file_name_internal_readings
-            k.set_contents_from_string(df_internal_readings_string)
-            """
-            exit (df_flowid)
+            pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
+            #pr.close_up_shop()
 
         except Exception as e:
             print(" Error :" + str(e))
@@ -188,7 +181,7 @@ if __name__ == '__main__':
     freeze_support()
     s3 = db.get_S3_Connections_client()
     p = ExtractEnsekFiles("outbound")
-    ef_keys_s3 = p.get_keys_from_s3(s3)
+    ef_keys_s3 = p.get_keys_from_s3_v3()
 
     print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
@@ -196,7 +189,6 @@ if __name__ == '__main__':
 
     #p.process_flow_data(ef_keys_s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
-    Q = Queue()
     env = util.get_env()
     if env == 'uat':
         n = 12  # number of process to run in parallel
@@ -230,12 +222,6 @@ if __name__ == '__main__':
 
     for process in processes:
         process.join()
-
     ####### multiprocessing Ends #########
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
-
-
-
-
-
