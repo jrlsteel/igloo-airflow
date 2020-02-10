@@ -48,7 +48,7 @@ class ExtractEnsekFiles(object):
         bucket_name = self.bucket_name
 
         """
-        :param d18_keys: list of D18 files stored in s3
+        :param ensekFlows_keys: list of D18 files stored in s3
         :return: None
 
         This function copies the D18 data that is being loaded into D18Raw folder and
@@ -69,23 +69,28 @@ class ExtractEnsekFiles(object):
 
                 fileUFF_csv = filename.replace(self.suffix, '_UFF.csv')
                 file_content = []
+                row_counter = 0
                 for lines in obj_str:
                     line_rep = lines.replace('\n', '').replace('|', ',')
                     line_sp = line_rep.split(',')
-                    file_content.append(line_sp)
-                flow_id = file_content[0][2]
+                    #file_content2.append(line_sp)
+                    file_content.append(lines)
+                    row_counter += 1
+                #flow_id = file_content2[0][2]
+                flow_id = file_content[0].replace('\n', '').replace('|', ',').split(',')[2]
                 row_1 = file_content[0]
                 row_2 = file_content[1]
+                row_footer = file_content[(row_counter - 1)]
                 file_n = filename.replace('/', '')
                 etlchange = self.now
                 worddoc =''
                 for wd in file_content:
-                    worddoc += ','.join(wd) + '\n'
+                    worddoc += ''.join(wd) #+ '\n'
                 filecontents = worddoc
                 # upload to s3
                 keypath = self.EFfileStore + flow_id  + filename
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
-                df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
+                df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'row_footer': row_footer, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
 
                 print(keypath)
                 copy_source = {
@@ -101,7 +106,7 @@ class ExtractEnsekFiles(object):
                 #der = df_flowid.head(10)
 
             # Write the DataFrame to redshift
-            #pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable', append = True )
+            #pr.pandas_to_redshift(data_frame = df_flowid, redshift_table_name = 'public.testtable2')
             self.redshift_upsert(df=df_flowid, crud_type='i')
 
         except Exception as e:
@@ -181,7 +186,7 @@ if __name__ == '__main__':
     # Extract all keys required
     ef_keys_s3 = p.get_keys_from_s3_page()
     # Test with 1000 records
-    #ef_keys_s3 = p.get_keys_from_s3(s3)
+    # ef_keys_s3 = p.get_keys_from_s3(s3)
 
     print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
