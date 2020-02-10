@@ -184,6 +184,7 @@ if __name__ == '__main__':
     s3 = db.get_S3_Connections_client()
     p = ExtractEnsekFiles("outbound")
     # Extract all keys required
+    print("Extracting Keys.....")
     ef_keys_s3 = p.get_keys_from_s3_page()
     # Test with 1000 records
     # ef_keys_s3 = p.get_keys_from_s3(s3)
