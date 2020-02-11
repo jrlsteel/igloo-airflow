@@ -111,7 +111,8 @@ class ExtractEnsekFiles(object):
 
         except Exception as e:
             print(" Error :" + str(e))
-            sys.exit(1)
+            print(file_n)
+            #sys.exit(1)
 
 
 
@@ -166,7 +167,7 @@ class ExtractEnsekFiles(object):
         :param sql: the sql to run
         '''
         try:
-            table_name = 'public.testtable'
+            table_name = 'public.ref_dataflows_inbound'
             pr = db.get_redshift_connection()
             if crud_type == 'i':
                 pr.pandas_to_redshift(df, table_name, index=None, append=True)
@@ -182,12 +183,14 @@ if __name__ == '__main__':
 
     freeze_support()
     s3 = db.get_S3_Connections_client()
-    p = ExtractEnsekFiles("outbound")
+    p = ExtractEnsekFiles("inbound")
     # Extract all keys required
+
+    start = timeit.default_timer()
     print("Extracting Keys.....")
-    ef_keys_s3 = p.get_keys_from_s3_page()
+    #ef_keys_s3 = p.get_keys_from_s3_page()
     # Test with 1000 records
-    # ef_keys_s3 = p.get_keys_from_s3(s3)
+    ef_keys_s3 = p.get_keys_from_s3(s3)
 
     print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
@@ -206,10 +209,10 @@ if __name__ == '__main__':
     processes = []
     lv = 0
 
-    start = timeit.default_timer()
+    #start = timeit.default_timer()
 
     for i in range(n+1):
-        p1 = ExtractEnsekFiles("outbound")
+        p1 = ExtractEnsekFiles("inbound")
         print(i)
         uv = i * k
         if i == n:
