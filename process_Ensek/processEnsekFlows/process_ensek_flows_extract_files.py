@@ -43,6 +43,7 @@ class ExtractEnsekFiles(object):
         self.EFStartAfter = self.dir['s3_ensekflow_key'][self.type]['EFStartAfter']
         self.EFfileStore = self.dir['s3_ensekflow_key'][self.type]['EFfileStore']
         self.connect = db.get_redshift_connection()
+        self.outputTable = self.dir['s3_ensekflow_key'][self.type]['outputTable']
 
     def process_flow_data(self, flow_keys):
         bucket_name = self.bucket_name
@@ -65,32 +66,43 @@ class ExtractEnsekFiles(object):
                 print(fkey)
                 obj = s31.get_object(Bucket=bucket_name, Key=fkey)
                 obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
+                obj_str2 = obj_str[0].replace("\n", "--")
+
                 filename = fkey.replace(self.EFStartAfter, '')
 
                 fileUFF_csv = filename.replace(self.suffix, '_UFF.csv')
                 file_content = []
                 row_counter = 0
                 for lines in obj_str:
-                    line_rep = lines.replace('\n', '').replace('|', ',')
-                    line_sp = line_rep.split(',')
-                    #file_content2.append(line_sp)
                     file_content.append(lines)
                     row_counter += 1
-                #flow_id = file_content2[0][2]
                 flow_id = file_content[0].replace('\n', '').replace('|', ',').split(',')[2]
                 row_1 = file_content[0]
                 row_2 = file_content[1]
                 row_footer = file_content[(row_counter - 1)]
                 file_n = filename.replace('/', '')
                 etlchange = self.now
+                """
                 worddoc =''
                 for wd in file_content:
-                    worddoc += ''.join(wd) #+ '\n'
+                    worddoc += ''.join(wd) 
+                """
+                objlen = len(obj_str)
+                i=0
+                worddoc = ''
+                while i < objlen:
+                    worddoc += obj_str[i].replace("\n", "--")
+                    i += 1
+
                 filecontents = worddoc
+                content_cnt = int(round(len(filecontents)))
                 # upload to s3
                 keypath = self.EFfileStore + flow_id  + filename
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
-                df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'row_footer': row_footer, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
+                # df_flowid = pd.DataFrame()
+                if content_cnt <= 65535.0:
+                    df_flowid = df_flowid.append({'filename': file_n,'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'row_footer': row_footer, 'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
+                # self.redshift_upsert(df=df_flowid, crud_type='i')
 
                 print(keypath)
                 copy_source = {
@@ -111,8 +123,7 @@ class ExtractEnsekFiles(object):
 
         except Exception as e:
             print(" Error :" + str(e))
-            print(file_n)
-            #sys.exit(1)
+            sys.exit(1)
 
 
 
@@ -161,13 +172,13 @@ class ExtractEnsekFiles(object):
 
 
 
-    def redshift_upsert(sql=None, df=None, crud_type=None):
+    def redshift_upsert(self, sql=None, df=None, crud_type=None):
         '''
         This function gets connection to RedShift Database.
         :param sql: the sql to run
         '''
         try:
-            table_name = 'public.ref_dataflows_inbound'
+            table_name = 'public.' + self.outputTable
             pr = db.get_redshift_connection()
             if crud_type == 'i':
                 pr.pandas_to_redshift(df, table_name, index=None, append=True)

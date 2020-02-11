@@ -223,13 +223,15 @@ uat = {
         "EFfileStore": "stage1Flows/outbound/subfiles/",
         "EFprefix": "/stage1Flows/outbound/master/",
         "EFStartAfter": "stage1Flows/outbound/master",
+        "outputTable": "ref_dataflows_outbound",
         "EFSuffix": ".uff"
         },
         "inbound":{
         "EFfileStore": "stage1Flows/inbound/subfiles/",
         "EFprefix": "/stage1Flows/inbound/master/",
         "EFStartAfter": "stage1Flows/inbound/master",
-        "EFSuffix": ".EDS"
+        "outputTable": "ref_dataflows_inbound",
+        "EFSuffix": ".usr"
         }
     },
 
