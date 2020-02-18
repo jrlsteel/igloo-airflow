@@ -223,14 +223,14 @@ uat = {
         "EFfileStore": "stage1Flows/outbound/subfiles/",
         "EFprefix": "/stage1Flows/outbound/master/",
         "EFStartAfter": "stage1Flows/outbound/master",
-        "outputTable": "ref_dataflows_outbound_phony",
+        "outputTable": "ref_dataflows_outbound",
         "EFSuffix": ".uff"
         },
         "inbound":{
         "EFfileStore": "stage1Flows/inbound/subfiles/",
         "EFprefix": "/stage1Flows/inbound/master/",
         "EFStartAfter": "stage1Flows/inbound/master",
-        "outputTable": "ref_dataflows_inbound_ph",
+        "outputTable": "ref_dataflows_inbound",
         "EFSuffix": ".usr"
         }
     },

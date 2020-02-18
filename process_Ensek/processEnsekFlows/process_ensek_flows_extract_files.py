@@ -294,7 +294,7 @@ if __name__ == '__main__':
         der = q2.qsize()
         print(der)
 
-        # pkf.redshift_upsert(df=data_df ,crud_type='i')
+
         ####### multiprocessing Ends #########
 
         print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
