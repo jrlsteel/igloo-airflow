@@ -199,9 +199,9 @@ if __name__ == '__main__':
 
     start = timeit.default_timer()
     print("Extracting Keys.....")
-    ef_keys_s3 = p.get_keys_from_s3_page()
+    # ef_keys_s3 = p.get_keys_from_s3_page()
     # Test with 1000 records
-    # ef_keys_s3 = p.get_keys_from_s3(s3)
+    ef_keys_s3 = p.get_keys_from_s3(s3)
 
     print(len(ef_keys_s3))
     #Ensek Internal Estimates Ensek Extract
