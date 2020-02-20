@@ -70,10 +70,10 @@ class ExtractEnsekFiles(object):
             # loop each file
             df_flowid = pd.DataFrame()
             for fkey in flow_keys:
-                print(fkey)
+                #print(fkey)
                 obj = s31.get_object(Bucket=bucket_name, Key=fkey)
-                obj_str = obj['Body'].read().decode('utf-8').splitlines(True)
-                obj_str2 = obj_str[0]
+                obj_str = obj['Body'].read().decode('ISO-8859-1').splitlines(True)
+
 
                 filename = fkey.replace(self.EFStartAfter, '')
 
@@ -83,10 +83,10 @@ class ExtractEnsekFiles(object):
                 for lines in obj_str:
                     file_content.append(lines)
                     row_counter += 1
-                flow_id = file_content[0].replace('\n', '').replace('|', ',').split(',')[2]
-                row_1 = file_content[0]
-                row_2 = file_content[1]
-                row_footer = file_content[(row_counter - 1)]
+                flow_id = file_content[0].replace('\n', '').replace('|', ',').split(',')[2].replace('"', '')
+                row_1 = file_content[0].replace('"', '')
+                row_2 = file_content[1].replace('"', '')
+                row_footer = file_content[(row_counter - 1)].replace('"', '')
                 file_n = filename.replace('/', '')
                 etlchange = self.now
                 """
@@ -105,20 +105,21 @@ class ExtractEnsekFiles(object):
                 content_cnt = int(round(len(filecontents)))
                 # upload to s3
                 keypath = self.EFfileStore + flow_id + filename
-                filecontents_url = "s3://igloo-data-warehouse-uat/stage1Flows/inbound/master" + filename
+                filecontents_url = "https://igloo-data-warehouse-uat.s3-eu-west-1.amazonaws.com/stage1Flows/inbound/master" + filename
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
                 # df_flowid = pd.DataFrame()
                 # if file_n[:4] != 'D019':
-                if self.type == 'inbound':
+                if content_cnt > 40000.0:
                     filecontents = filecontents_url
                 else:
                     filecontents = filecontents
+                #if flow_id == 'D0058001':
                 df_flowid = df_flowid.append(
                     {'filename': file_n, 'flow_id': flow_id, 'row_1': row_1, 'row_2': row_2, 'row_footer': row_footer,
                      'filecontents': filecontents, 'etlchange': etlchange}, ignore_index=True)
                 # self.redshift_upsert(df=df_flowid, crud_type='i')
 
-                print(keypath)
+                #print(keypath)
                 copy_source = {
                     'Bucket': self.bucket_name,
                     'Key': fkey
@@ -146,7 +147,7 @@ class ExtractEnsekFiles(object):
         q.put(data)
 
     def f_get(self, q):
-        print("f_get start")
+        #print("f_get start")
         while (1):
             data = pd.DataFrame()
             loop = 0
@@ -221,7 +222,7 @@ if __name__ == '__main__':
     freeze_support()
     s3 = db.get_S3_Connections_client()
     flowtype = ""
-    prc = 2
+    prc = 1
     while prc <= 2:
         if prc == 1:
             flowtype = "outbound"
@@ -235,7 +236,7 @@ if __name__ == '__main__':
         print("Extracting Keys.....")
         ef_keys_s3 = pkf.get_keys_from_s3_page()
         # Test with 1000 records
-        # ef_keys_s3 = pkf.get_keys_from_s3(s3)
+        #ef_keys_s3 = pkf.get_keys_from_s3(s3)
         print(len(ef_keys_s3))
 
         # Ensek Internal Estimates Ensek Extract
@@ -283,7 +284,7 @@ if __name__ == '__main__':
             while not q.empty():
                 data = q.get()
                 pkf.redshift_upsert(df=data, crud_type='i')
-                sleep(20)
+                sleep(40)
                 q2.put(data)
             process.join()
 
