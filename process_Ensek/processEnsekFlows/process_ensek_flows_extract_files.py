@@ -17,6 +17,8 @@ from datetime import datetime
 import pandas_redshift as pr
 from concurrent.futures import ProcessPoolExecutor
 from queue import Queue
+import queue
+
 
 import sys
 import os
@@ -109,7 +111,7 @@ class ExtractEnsekFiles(object):
                 # establish the flow id and place the header records in a data frame + file contents + etlchange timestamp as additional columns into {dataFlow flowId)
                 # df_flowid = pd.DataFrame()
                 # if file_n[:4] != 'D019':
-                if content_cnt > 40000.0:
+                if content_cnt > 4000.0:
                     filecontents = filecontents_url
                 else:
                     filecontents = filecontents
@@ -217,6 +219,19 @@ class ExtractEnsekFiles(object):
             return e
 
 
+
+class IterableQueue():
+    def __init__(self,source_queue):
+            self.source_queue = source_queue
+    def __iter__(self):
+        while True:
+            try:
+               yield self.source_queue.get_nowait()
+            except queue.Empty:
+               return
+
+
+
 if __name__ == '__main__':
 
     freeze_support()
@@ -230,13 +245,14 @@ if __name__ == '__main__':
             flowtype = "inbound"
 
         pkf = ExtractEnsekFiles(flowtype)
+        itr = IterableQueue
         # Extract all keys required
 
         start = timeit.default_timer()
         print("Extracting Keys.....")
         ef_keys_s3 = pkf.get_keys_from_s3_page()
         # Test with 1000 records
-        #ef_keys_s3 = pkf.get_keys_from_s3(s3)
+        # ef_keys_s3 = pkf.get_keys_from_s3(s3)
         print(len(ef_keys_s3))
 
         # Ensek Internal Estimates Ensek Extract
@@ -283,15 +299,16 @@ if __name__ == '__main__':
         for process in processes:
             while not q.empty():
                 data = q.get()
-                pkf.redshift_upsert(df=data, crud_type='i')
-                sleep(40)
+                sleep(5)
                 q2.put(data)
             process.join()
 
-        der = q2.qsize()
-        print(der)
+        # Completed Parallel Processes
+        print(q2.qsize())
 
-        # pkf.redshift_upsert(df=data_df ,crud_type='i')
+        # Write the DataFrame to redshift
+        for n in IterableQueue(q2):
+            pkf.redshift_upsert(df=n ,crud_type='i')
         ####### multiprocessing Ends #########
 
         print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
