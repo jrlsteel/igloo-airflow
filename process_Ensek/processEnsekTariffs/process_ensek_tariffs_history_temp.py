@@ -188,53 +188,61 @@ if __name__ == "__main__":
         account_ids = util.get_Users_from_s3(s3)
 
     if con.test_config['enable_db'] == 'Y':
-        account_ids = util.get_accountID_fromDB(False, filter='tariff-diffs')
+        account_ids = util.get_accountID_fromDB(False, filter='pre-live')
 
     if con.test_config['enable_db_max'] == 'Y':
-        account_ids = util.get_accountID_fromDB(True, filter='tariff-diffs')
+        account_ids = util.get_accountID_fromDB(True, filter='pre-live')
+
+    with open("processEnsekTariffs/acc_ids_to_fetch.csv") as f:
+        account_ids = []
+        for line in f.readlines()[1:]:
+            account_ids.append(int(line))
 
     # Enable to test without multiprocessing.
-    # p.processAccounts(account_ids, s3, dir_s3)
+    p = TariffHistory()
+    p.processAccounts(account_ids, s3, dir_s3)
 
-    ####### Multiprocessing Starts #########
-    env = util.get_env()
-    total_processes = util.get_multiprocess('total_ensek_processes')
 
-    if env == 'uat':
-        n = total_processes  # number of process to run in parallel
-    else:
-        n = total_processes
 
-    k = int(len(account_ids) / n)  # get equal no of files for each process
-
-    print(len(account_ids))
-    print(k)
-
-    processes = []
-    lv = 0
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        p1 = TariffHistory()
-        print(i)
-        uv = i * k
-        if i == n:
-            # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
-        else:
-            # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
-    ####### Multiprocessing Ends #########
-
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    # ####### Multiprocessing Starts #########
+    # env = util.get_env()
+    # total_processes = util.get_multiprocess('total_ensek_processes')
+    #
+    # if env == 'uat':
+    #     n = total_processes  # number of process to run in parallel
+    # else:
+    #     n = total_processes
+    #
+    # k = int(len(account_ids) / n)  # get equal no of files for each process
+    #
+    # print(len(account_ids))
+    # print(k)
+    #
+    # processes = []
+    # lv = 0
+    # start = timeit.default_timer()
+    #
+    # for i in range(n + 1):
+    #     p1 = TariffHistory()
+    #     print(i)
+    #     uv = i * k
+    #     if i == n:
+    #         # print(d18_keys_s3[l:])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
+    #     else:
+    #         # print(d18_keys_s3[l:u])
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
+    #     lv = uv
+    #
+    #     processes.append(t)
+    #
+    # for p in processes:
+    #     p.start()
+    #     time.sleep(2)
+    #
+    # for process in processes:
+    #     process.join()
+    # ####### Multiprocessing Ends #########
+    #
+    # print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
 
