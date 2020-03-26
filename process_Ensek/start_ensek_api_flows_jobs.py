@@ -32,7 +32,7 @@ class StartEnsekFlowJobs:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.mirror_jobid, 210, 'process_ensek_flows-' + source_input + '-' + self.env,
+            util.batch_logging_insert(self.mirror_jobid, 130, 'process_ensek_flows-' + source_input + '-' + self.env,
                                       'start_ensek_api_flows_jobs.py')
             start = timeit.default_timer()
             r = ensek_sync.SyncS3(source_input, destination_input, _IAM)
@@ -50,7 +50,7 @@ class StartEnsekFlowJobs:
 if __name__ == '__main__':
     s = StartEnsekFlowJobs()
 
-    util.batch_logging_insert(s.all_jobid, 210, 'process_ensek_flows', 'start_ensek_api_flows_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 130, 'all_pa_jobs', 'start_ensek_api_flows_jobs.py')
 
     #Sync inbound flows
     print("Ensek Flows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
