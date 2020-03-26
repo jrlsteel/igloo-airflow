@@ -52,16 +52,8 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 130, 'all_pa_jobs', 'start_ensek_api_flows_jobs.py')
 
-    #Sync inbound flows
-    print("Ensek Flows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    source_input = "s3://igloo-elec-imiflows-outbound/"
-    destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1Flows/"
-    IAM = 'outbound'
-    s.submit_process_ensek_flows(source_input, destination_input, IAM)
-
-    #Sync outbound flows
-    print("Ensek Fows Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-    source_input = "s3://igloo-flows-dtc-inbound/"
+    print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+    source_input = "s3://igloo-data-warehouse-uat/process_ensek_flows/"
     destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1Flows/"
     IAM = 'inbound'
     s.submit_process_ensek_flows(source_input, destination_input, IAM)
