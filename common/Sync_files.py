@@ -41,8 +41,8 @@ class SyncS3:
                 command = "aws s3 rm {0} --recursive".format(self._destination_path, self._IAM)
                 subprocess.run(command, shell=True)
 
-            print("Sync files in s3 from {0} to {1} profile {2}".format(self._source_path, self._destination_path, self._IAM))
-            command = "aws s3 sync {0} {1} --profile {2} ".format(self._source_path, self._destination_path, self._IAM)
+            print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
+            command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path, self._IAM)
             subprocess.run(command, shell=True)
             print("completed")
 
