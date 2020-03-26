@@ -33,7 +33,7 @@ class StartEnsekFlowJobs:
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
             util.batch_logging_insert(self.mirror_jobid, 130, 'process_ensek_flows-' + source_input + '-' + self.env,
-                                      'start_ensek_api_flows_jobs.py')
+                                      'start_ensek_api_pa_jobs.py')
             start = timeit.default_timer()
             r = ensek_sync.SyncS3(source_input, destination_input, _IAM)
             r.process_sync()
