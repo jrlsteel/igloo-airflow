@@ -50,71 +50,81 @@ for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "
     reason_code = ''
     scheme = ''
     will_attempt_retry = ''
-    ## print(event.id)
-    if event.metadata:
-        if 'AccountId' in event.metadata:
-            EnsekAccountId = event.metadata['AccountId']
-        if 'StatementId' in event.metadata:
-            StatementId = event.metadata['StatementId']
+    if is_json(event.id):
+        '''
+        if payment.metadata:
+            if 'AccountId' in payment.metadata:
+                EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
+            if 'StatementId' in payment.metadata:
+                StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
+        '''
+        id_js = json.loads(event.id.decode("utf-8"))
+    else:
+        ## print(event.id)
+        if event.metadata:
+            if 'AccountId' in event.metadata:
+                EnsekAccountId = event.metadata['AccountId']
+            if 'StatementId' in event.metadata:
+                StatementId = event.metadata['StatementId']
 
-    if event.links.mandate:
-        mandate = event.links.mandate
-    if event.links.new_customer_bank_account:
-        new_customer_bank_account = event.links.new_customer_bank_account
-    if event.links.new_mandate:
-        new_mandate = event.links.new_mandate
-    if event.links.organisation:
-        organisation = event.links.organisation
-    if event.links.parent_event:
-        parent_event = event.links.parent_event
-    if event.links.payment:
-        payment = event.links.payment
-    if event.links.payout:
-        payout = event.links.payout
-    if event.links.previous_customer_bank_account:
-        previous_customer_bank_account = event.links.previous_customer_bank_account
-    if event.links.refund:
-        refund = event.links.refund
-    if event.links.subscription:
-        subscription = event.links.subscription
+        if event.links.mandate:
+            mandate = event.links.mandate
+        if event.links.new_customer_bank_account:
+            new_customer_bank_account = event.links.new_customer_bank_account
+        if event.links.new_mandate:
+            new_mandate = event.links.new_mandate
+        if event.links.organisation:
+            organisation = event.links.organisation
+        if event.links.parent_event:
+            parent_event = event.links.parent_event
+        if event.links.payment:
+            payment = event.links.payment
+        if event.links.payout:
+            payout = event.links.payout
+        if event.links.previous_customer_bank_account:
+            previous_customer_bank_account = event.links.previous_customer_bank_account
+        if event.links.refund:
+            refund = event.links.refund
+        if event.links.subscription:
+            subscription = event.links.subscription
 
-    if event.id:
-        id = event.id
-    if event.created_at:
-        created_at = event.created_at
-    if event.resource_type:
-        resource_type = event.resource_type
-    if event.action:
-        action = event.action
-    if event.customer_notifications:
-        customer_notifications = event.customer_notifications
-    if event.details.cause:
-        cause = event.details.cause
-    if event.details.description:
-        description = event.details.description
-    if event.details.origin:
-        origin = event.details.origin
-    if event.details.reason_code:
-        reason_code = event.details.reason_code
-    if event.details.scheme:
-        scheme = event.details.scheme
-    if event.details.will_attempt_retry:
-        will_attempt_retry = event.details.will_attempt_retry
+        if event.id:
+            id = event.id
+        if event.created_at:
+            created_at = event.created_at
+        if event.resource_type:
+            resource_type = event.resource_type
+        if event.action:
+            action = event.action
+        if event.customer_notifications:
+            customer_notifications = event.customer_notifications
+        if event.details.cause:
+            cause = event.details.cause
+        if event.details.description:
+            description = event.details.description
+        if event.details.origin:
+            origin = event.details.origin
+        if event.details.reason_code:
+            reason_code = event.details.reason_code
+        if event.details.scheme:
+            scheme = event.details.scheme
+        if event.details.will_attempt_retry:
+            will_attempt_retry = event.details.will_attempt_retry
 
-    EnsekID = EnsekAccountId
-    EnsekStatementId = StatementId
-    listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
-               reason_code, scheme, will_attempt_retry,
-               mandate , new_customer_bank_account , new_mandate ,organisation , parent_event , payment ,
-               payout, previous_customer_bank_account ,refund ,subscription ,
-               EnsekID, EnsekStatementId]
-    q.put(listRow)
-data = q.queue
-for d in data:
-    datalist.append(d)
-# Empty queue
-with q.mutex:
-    q.queue.clear()
+        EnsekID = EnsekAccountId
+        EnsekStatementId = StatementId
+        listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
+                   reason_code, scheme, will_attempt_retry,
+                   mandate , new_customer_bank_account , new_mandate ,organisation , parent_event , payment ,
+                   payout, previous_customer_bank_account ,refund ,subscription ,
+                   EnsekID, EnsekStatementId]
+        q.put(listRow)
+    data = q.queue
+    for d in data:
+        datalist.append(d)
+    # Empty queue
+    with q.mutex:
+        q.queue.clear()
 
 
 df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
