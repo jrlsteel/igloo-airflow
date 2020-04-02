@@ -25,19 +25,19 @@ events = client.events
 # Loop through a page of payments, printing each payment's amount
 df = pd.DataFrame()
 print('.....listing events')
-EnsekAccountId = ''
-StatementId = ''
-mandate = ''
-new_customer_bank_account = ''
-new_mandate = ''
-organisation = ''
-parent_event = ''
-payment = ''
-payout = ''
-previous_customer_bank_account = ''
-refund  = ''
-subscription = ''
-for event in events.all(params={"created_at[gte]": "2017-04-01T00:00:00.000Z", "created_at[lte]": "2017-07-01T00:00:00.000Z"}):
+for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-03-01T00:00:00.000Z"}):
+    EnsekAccountId = ''
+    StatementId = ''
+    mandate = ''
+    new_customer_bank_account = ''
+    new_mandate = ''
+    organisation = ''
+    parent_event = ''
+    payment = ''
+    payout = ''
+    previous_customer_bank_account = ''
+    refund  = ''
+    subscription = ''
     ## print(event.id)
     if event.metadata:
         if 'AccountId' in event.metadata:
@@ -102,7 +102,7 @@ df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'acti
 print(df.head(5))
 
 
-df.to_csv('go_cardless_events_201704_201706.csv', encoding='utf-8', index=False)
+df.to_csv('go_cardless_events_202001_202003.csv', encoding='utf-8', index=False)
 
 
 
