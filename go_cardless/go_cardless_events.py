@@ -37,7 +37,7 @@ payout = ''
 previous_customer_bank_account = ''
 refund  = ''
 subscription = ''
-for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-01-03T00:00:00.000Z"}):
+for event in events.all(params={"created_at[gte]": "2017-04-01T00:00:00.000Z", "created_at[lte]": "2017-07-01T00:00:00.000Z"}):
     ## print(event.id)
     if event.metadata:
         if 'AccountId' in event.metadata:
@@ -100,6 +100,9 @@ df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'acti
                                      'subscription' , 'EnsekID', 'StatementId'])
 
 print(df.head(5))
+
+
+df.to_csv('go_cardless_events_201704_201706.csv', encoding='utf-8', index=False)
 
 
 
