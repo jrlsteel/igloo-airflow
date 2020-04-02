@@ -25,7 +25,7 @@ events = client.events
 # Loop through a page of payments, printing each payment's amount
 df = pd.DataFrame()
 print('.....listing events')
-for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-03-01T00:00:00.000Z"}):
+for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-02-01T00:00:00.000Z"}):
     EnsekAccountId = ''
     StatementId = ''
     mandate = ''
@@ -38,6 +38,18 @@ for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "
     previous_customer_bank_account = ''
     refund  = ''
     subscription = ''
+
+    id = ''
+    created_at = ''
+    resource_type = ''
+    action = ''
+    customer_notifications = ''
+    cause = ''
+    description = ''
+    origin = ''
+    reason_code = ''
+    scheme = ''
+    will_attempt_retry = ''
     ## print(event.id)
     if event.metadata:
         if 'AccountId' in event.metadata:
@@ -66,17 +78,29 @@ for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "
     if event.links.subscription:
         subscription = event.links.subscription
 
-    id = event.id
-    created_at = event.created_at
-    resource_type = event.resource_type
-    action = event.action
-    customer_notifications = event.customer_notifications
-    cause = event.details.cause
-    description = event.details.description
-    origin = event.details.origin
-    reason_code = event.details.reason_code
-    scheme = event.details.scheme
-    will_attempt_retry = event.details.will_attempt_retry
+    if event.id:
+        id = event.id
+    if event.created_at:
+        created_at = event.created_at
+    if event.resource_type:
+        resource_type = event.resource_type
+    if event.action:
+        action = event.action
+    if event.customer_notifications:
+        customer_notifications = event.customer_notifications
+    if event.details.cause:
+        cause = event.details.cause
+    if event.details.description:
+        description = event.details.description
+    if event.details.origin:
+        origin = event.details.origin
+    if event.details.reason_code:
+        reason_code = event.details.reason_code
+    if event.details.scheme:
+        scheme = event.details.scheme
+    if event.details.will_attempt_retry:
+        will_attempt_retry = event.details.will_attempt_retry
+
     EnsekID = EnsekAccountId
     EnsekStatementId = StatementId
     listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
@@ -102,7 +126,7 @@ df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'acti
 print(df.head(5))
 
 
-df.to_csv('go_cardless_events_202001_202003.csv', encoding='utf-8', index=False)
+df.to_csv('go_cardless_events_202001.csv', encoding='utf-8', index=False)
 
 
 
