@@ -37,7 +37,7 @@ payout = ''
 previous_customer_bank_account = ''
 refund  = ''
 subscription = ''
-for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-02-29T00:00:00.000Z"}):
+for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "created_at[lte]": "2020-01-03T00:00:00.000Z"}):
     ## print(event.id)
     if event.metadata:
         if 'AccountId' in event.metadata:
@@ -70,7 +70,6 @@ for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "
     created_at = event.created_at
     resource_type = event.resource_type
     action = event.action
-    details = event.links.details
     customer_notifications = event.customer_notifications
     cause = event.details.cause
     description = event.details.description
@@ -80,7 +79,7 @@ for event in events.all(params={"created_at[gte]": "2020-01-01T00:00:00.000Z", "
     will_attempt_retry = event.details.will_attempt_retry
     EnsekID = EnsekAccountId
     EnsekStatementId = StatementId
-    listRow = [id, created_at, resource_type, action, details, customer_notifications, cause, description, origin,
+    listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
                reason_code, scheme, will_attempt_retry,
                mandate , new_customer_bank_account , new_mandate ,organisation , parent_event , payment ,
                payout, previous_customer_bank_account ,refund ,subscription ,
@@ -94,7 +93,7 @@ with q.mutex:
     q.queue.clear()
 
 
-df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'action', 'details', 'customer_notifications',
+df = pd.DataFrame(datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
                                      'cause', 'description', 'origin', 'reason_code', 'scheme', 'will_attempt_retry',
                                      'mandate' , 'new_customer_bank_account' , 'new_mandate' , 'organisation' ,
                                      'parent_event' , 'payment' , 'payout', 'previous_customer_bank_account' , 'refund' ,
