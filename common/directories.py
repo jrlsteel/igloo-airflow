@@ -234,6 +234,13 @@ uat = {
         "EFSuffix": ".usr"
         }
     },
+    "s3_finance_goCardless_key": {
+        "Refunds": "igloo-data-warehouse-uat-finance/go-cardless-api-refunds",
+        "Payments": "igloo-data-warehouse-uat-finance/go-cardless-api-payments",
+        "Mandates": "igloo-data-warehouse-uat-finance/go-cardless-api-mandates",
+        "Payouts": "igloo-data-warehouse-uat-finance/go-cardless-api-payouts",
+        "Clients": "igloo-data-warehouse-uat-finance/go-cardless-api-clients"
+    },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
