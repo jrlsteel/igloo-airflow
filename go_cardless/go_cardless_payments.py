@@ -29,7 +29,6 @@ for payment in client.payments.all(params={"charge_date[gte]": "2020-03-01", "ch
     EnsekAccountId = ''
     StatementId = ''
     try:
-
         if payment.metadata:
             if 'AccountId' in payment.metadata:
                 EnsekAccountId = payment.metadata['AccountId']
@@ -56,12 +55,12 @@ for payment in client.payments.all(params={"charge_date[gte]": "2020-03-01", "ch
     except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
             gocardless_pro.errors.MalformedResponseError) as e:
         pass
-data = q.queue
-for d in data:
-    datalist.append(d)
-# Empty queue
-with q.mutex:
-    q.queue.clear()
+    data = q.queue
+    for d in data:
+        datalist.append(d)
+    # Empty queue
+    with q.mutex:
+        q.queue.clear()
 
 
 df = pd.DataFrame(datalist, columns=['id','amount', 'amount_refunded', 'charge_date','created_at',
