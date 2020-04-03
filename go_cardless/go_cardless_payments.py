@@ -28,7 +28,32 @@ print('.....listing payments')
 for payment in client.payments.all(params={"charge_date[gte]": "2020-03-01", "charge_date[lte]": "2020-03-31"}):
     EnsekAccountId = ''
     StatementId = ''
-    try:
+    if is_json(payment.id):
+        '''
+        if payment.metadata:
+            if 'AccountId' in payment.metadata:
+                EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
+            if 'StatementId' in payment.metadata:
+                StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
+        '''
+        id_js = json.loads(payment.id.decode("utf-8"))
+        amount_js = json.loads(payment.amount.decode("utf-8"))
+        amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
+        charge_date_js = json.loads(payment.charge_date.decode("utf-8"))
+        created_at_js = json.loads(payment.created_at.decode("utf-8"))
+        currency_js = json.loads(payment.currency.decode("utf-8"))
+        description_js = json.loads(payment.description.decode("utf-8"))
+        reference_js = json.loads(payment.reference.decode("utf-8"))
+        status_js = json.loads(payment.status.decode("utf-8"))
+        payout_js = json.loads(payment.links.payout.decode("utf-8"))
+        mandate_js = json.loads(payment.links.mandate.decode("utf-8"))
+        subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
+        EnsekID_js = EnsekAccountId
+        EnsekStatementId_js = StatementId
+        listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js, description_js,
+                   reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js, EnsekStatementId_js ]
+        q.put(listRow)
+    else:
         if payment.metadata:
             if 'AccountId' in payment.metadata:
                 EnsekAccountId = payment.metadata['AccountId']
@@ -52,9 +77,6 @@ for payment in client.payments.all(params={"charge_date[gte]": "2020-03-01", "ch
         listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
                    reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
         q.put(listRow)
-    except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-            gocardless_pro.errors.MalformedResponseError) as e:
-        pass
     data = q.queue
     for d in data:
         datalist.append(d)
