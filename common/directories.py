@@ -239,7 +239,8 @@ uat = {
         "Payments": "igloo-data-warehouse-uat-finance/go-cardless-api-payments",
         "Mandates": "igloo-data-warehouse-uat-finance/go-cardless-api-mandates",
         "Payouts": "igloo-data-warehouse-uat-finance/go-cardless-api-payouts",
-        "Clients": "igloo-data-warehouse-uat-finance/go-cardless-api-clients"
+        "Clients": "igloo-data-warehouse-uat-finance/go-cardless-api-clients",
+        "Events": "igloo-data-warehouse-uat-finance/go-cardless-api-events"
     },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
