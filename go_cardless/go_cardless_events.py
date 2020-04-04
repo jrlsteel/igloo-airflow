@@ -15,6 +15,7 @@ import multiprocessing
 from time import sleep
 from multiprocessing import freeze_support
 from datetime import datetime, date, time, timedelta
+import math
 
 import os
 import gocardless_pro
@@ -41,8 +42,13 @@ class GoCardlessEvents(object):
         self.bucket_name = self.dir['s3_bucket']
         self.now = datetime.now()
         self.execDate = datetime.strptime(execDate, '%Y-%m-%d')
+        self.qtr = math.ceil(self.execDate.month/3.)
+        self.yr = math.ceil(self.execDate.year)
+        self.s3key = 'timestamp=' + str(self.yr) + '-Q'+ str(self.qtr)
+        self.filename = 'go_cardless_events_' + '{:%Y-%m-%d}'.format(self.execDate) + '.csv'
         self.noDays = noDays
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Events']
+        self.s3 = db.get_S3_Connections_client()
 
 
     def is_json(myjson):
@@ -54,7 +60,6 @@ class GoCardlessEvents(object):
 
 
     def get_date(self, dateFormat="%Y-%m-%d"):
-
         dateStart = self.execDate
         addDays = self.noDays
         if (addDays != 0):
@@ -69,8 +74,9 @@ class GoCardlessEvents(object):
         bucket_name = self.bucket_name
         execStartDate = '{:%Y-%m-%d}'.format(self.execDate) + "T00:00:00.000Z"
         execEndDate = self.get_date() + "T00:00:00.000Z"
+        s3 = self.s3
 
-        client = gocardless_pro.Client(access_token='live_yk11i3mKMHN454DYUjIR0Mw6y34ePfW1GJoEXHaS', environment='live')
+        client = gocardless_pro.Client(access_token= con.go_cardless['access_token'], environment= con.go_cardless['environment'])
         # Loop through a page of payments, printing each payment's amount
         q = Queue()
         datalist = []
@@ -187,7 +193,12 @@ class GoCardlessEvents(object):
         print(df.head(5))
 
 
-        df.to_csv('go_cardless_events_202001.csv', encoding='utf-8', index=False)
+        #df.to_csv('go_cardless_events_202001.csv', encoding='utf-8', index=False)
+        df_string = df.to_csv(None, index=False)
+        # print(df_account_transactions_string)
+
+        s3.key = self.fileDirectory + self.filename
+        s3.set_contents_from_string(df_string)
 
 
 if __name__ == "__main__":
