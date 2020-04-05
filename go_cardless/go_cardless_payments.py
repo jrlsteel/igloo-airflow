@@ -69,8 +69,8 @@ class GoCardlessPayments(object):
 
     def process_Payments(self):
         bucket_name = self.bucket_name
-        execStartDate = '{:%Y-%m-%d}'.format(self.execDate) + "T00:00:00.000Z"
-        execEndDate = self.get_date() + "T00:00:00.000Z"
+        execStartDate = '{:%Y-%m-%d}'.format(self.execDate)
+        execEndDate = self.get_date()
         s3 = self.s3
         dir_s3 = self.dir
         fileDirectory = self.fileDirectory
@@ -86,7 +86,7 @@ class GoCardlessPayments(object):
         # Loop through a page of payments, printing each payment's amount
         df = pd.DataFrame()
         print('.....listing payments')
-        for payment in client.payments.all(params={"charge_date[gte]": "2020-03-01", "charge_date[lte]": "2020-03-31"}):
+        for payment in client.payments.all(params={"charge_date[gte]": execStartDate , "charge_date[lte]": execEndDate }):
             EnsekAccountId = ''
             StatementId = ''
             if self.is_json(payment.id):
