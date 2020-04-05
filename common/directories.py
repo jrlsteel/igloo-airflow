@@ -234,14 +234,6 @@ uat = {
         "EFSuffix": ".usr"
         }
     },
-    "s3_finance_goCardless_key": {
-        "Refunds": "igloo-data-warehouse-uat-finance/go-cardless-api-refunds",
-        "Payments": "igloo-data-warehouse-uat-finance/go-cardless-api-payments",
-        "Mandates": "igloo-data-warehouse-uat-finance/go-cardless-api-mandates",
-        "Payouts": "igloo-data-warehouse-uat-finance/go-cardless-api-payouts",
-        "Clients": "igloo-data-warehouse-uat-finance/go-cardless-api-clients",
-        "Events": "igloo-data-warehouse-uat-finance/go-cardless-api-events"
-    },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
@@ -271,6 +263,17 @@ uat = {
     "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_uat",
     "glue_meets_eligibility_job_name": "_process_ref_tables_uat",
     "glue_reporting_job_name": "_process_ref_tables_uat",
+
+    "s3_finance_bucket": "gloo-data-warehouse-uat-finance",
+
+    "s3_finance_goCardless_key": {
+        "Refunds": "igloo-data-warehouse-uat-finance/go-cardless-api-refunds",
+        "Payments": "igloo-data-warehouse-uat-finance/go-cardless-api-payments",
+        "Mandates": "igloo-data-warehouse-uat-finance/go-cardless-api-mandates",
+        "Payouts": "igloo-data-warehouse-uat-finance/go-cardless-api-payouts",
+        "Clients": "igloo-data-warehouse-uat-finance/go-cardless-api-clients",
+        "Events": "igloo-data-warehouse-uat-finance/go-cardless-api-events"
+    },
 }
 
 preprod = {
