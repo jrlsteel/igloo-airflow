@@ -39,7 +39,8 @@ class GoCardlessEvents(object):
     def __init__(self, execDate = datetime.now(), noDays=1 ):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_bucket']
+        self.bucket_name = self.dir['s3_finance_bucket']
+        self.s3 = s3_con(self.bucket_name)
         self.now = datetime.now()
         self.execDate = datetime.strptime(execDate, '%Y-%m-%d')
         self.qtr = math.ceil(self.execDate.month/3.)
@@ -48,7 +49,6 @@ class GoCardlessEvents(object):
         self.filename = 'go_cardless_events_' + '{:%Y-%m-%d}'.format(self.execDate) + '.csv'
         self.noDays = noDays
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Events']
-        self.s3 = db.get_S3_Connections_client()
 
 
     def is_json(myjson):
@@ -75,6 +75,8 @@ class GoCardlessEvents(object):
         execStartDate = '{:%Y-%m-%d}'.format(self.execDate) + "T00:00:00.000Z"
         execEndDate = self.get_date() + "T00:00:00.000Z"
         s3 = self.s3
+        dir_s3 = self.dir
+        fileDirectory = self.fileDirectory
 
         client = gocardless_pro.Client(access_token= con.go_cardless['access_token'], environment= con.go_cardless['environment'])
         # Loop through a page of payments, printing each payment's amount
@@ -197,13 +199,15 @@ class GoCardlessEvents(object):
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
-        s3.key = self.fileDirectory + self.filename
+        s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
+        print(s3.key)
         s3.set_contents_from_string(df_string)
 
 
 if __name__ == "__main__":
 
     freeze_support()
+    s3 = db.get_S3_Connections_client()
 
     p = GoCardlessEvents('2020-01-01', 1)
 
