@@ -124,7 +124,6 @@ class GoCardlessMandates(object):
                                              'customer_bank_account',
                                              'EnsekID', 'EnsekStatementId'])
 
-        df.to_csv('go_cardless_mandates_202001_202002.csv', encoding='utf-8', index=False)
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
