@@ -264,7 +264,7 @@ uat = {
     "glue_meets_eligibility_job_name": "_process_ref_tables_uat",
     "glue_reporting_job_name": "_process_ref_tables_uat",
 
-    "s3_finance_bucket": "gloo-data-warehouse-uat-finance",
+    "s3_finance_bucket": "igloo-data-warehouse-uat-finance",
 
     "s3_finance_goCardless_key": {
         "Refunds": "igloo-data-warehouse-uat-finance/go-cardless-api-refunds",
