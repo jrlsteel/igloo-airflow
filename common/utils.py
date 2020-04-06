@@ -156,7 +156,7 @@ def get_accountID_fromDB(get_max, filter='live'):
         sql_group = {}
 
     # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
-    if datetime.date.today().weekday() == 6:  # 6 == Sunday
+    if datetime.date.today().weekday() == 1:  # 6 == Sunday
         if env_conf == 'prod':
             config_sql = sql_group['weekly']
         else:
