@@ -60,7 +60,7 @@ class StartEPCJobs:
         try:
             util.batch_logging_insert(self.certificates_jobid, 56, 'epc_full_extract_pyscript', 'start_epc_full_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_download_epc_data.py"])
+            subprocess.run([self.pythonAlias, "process_download_epc_data.py"], check=True)
             util.batch_logging_update(self.certificates_jobid, 'e')
             print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:

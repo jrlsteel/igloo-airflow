@@ -53,7 +53,7 @@ class StartReadingsNRLJobs:
         try:
             util.batch_logging_insert(self.nrl_download_jobid, 46, 'nrl_download_pyscript', 'start_nrl_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([pythonAlias, "download_nrl.py"])
+            subprocess.run([pythonAlias, "download_nrl.py"] , check=True)
             util.batch_logging_update(self.nrl_download_jobid, 'e')
             print("{0}: download_NRL completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                           float(timeit.default_timer() - start)))
@@ -69,7 +69,7 @@ class StartReadingsNRLJobs:
         try:
             util.batch_logging_insert(self.nrl_jobid, 47, 'nrl_extract_pyscript','start_nrl_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_nrl.py"])
+            subprocess.run([self.pythonAlias, "process_nrl.py"] , check=True)
             util.batch_logging_update(self.nrl_jobid, 'e')
             print("{0}: Process NRL files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
 

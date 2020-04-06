@@ -23,7 +23,7 @@ class AccountSettingsJobs:
         print("{0}: >>>> Process Ensek Account   <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_account_settings.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_account_settings.py"], check=True)
             print("{0}: Process Ensek Account completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:

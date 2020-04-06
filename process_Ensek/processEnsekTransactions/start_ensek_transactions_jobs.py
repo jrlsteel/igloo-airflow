@@ -23,7 +23,7 @@ class StartTransactionsJobs:
         print("{0}: >>>> Process Ensek Transactions <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_transactions.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_transactions.py"] , check=True)
             print("{0}: Process Ensek Transactions completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:

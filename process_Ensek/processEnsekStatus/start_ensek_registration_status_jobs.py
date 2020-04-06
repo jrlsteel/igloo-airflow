@@ -23,7 +23,7 @@ class StartRegistrationsMeterpointsStatusJobs:
         print("{0}: >>>> Process Ensek Registrations by Meterpoint Status  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_registration_meterpoint_status.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_registration_meterpoint_status.py"] , check=True)
             print("{0}: Process Ensek Registrations by Meterpoint Status completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
