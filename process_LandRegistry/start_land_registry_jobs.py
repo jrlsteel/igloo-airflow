@@ -58,7 +58,7 @@ class LandRegistry:
         try:
             util.batch_logging_insert(self.landregistry_jobid, 24, 'landregistry_extract_pyscript', 'start_land_registry_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_land_registry.py"])
+            subprocess.run([self.pythonAlias, "process_land_registry.py"], check=True)
             util.batch_logging_update(self.landregistry_jobid, 'e')
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start), self.process_name))
         except Exception as e:

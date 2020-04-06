@@ -23,7 +23,7 @@ class StartTariffHistoryJobs:
         print("{0}: >>>> Process Ensek Tariff History <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_tariff_history.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_tariff_history.py"] , check=True)
             print("{0}: Process Ensek Tariff History completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:

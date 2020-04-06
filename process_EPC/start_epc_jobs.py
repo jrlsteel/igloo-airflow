@@ -59,7 +59,7 @@ class StartEPCJobs:
         try:
             util.batch_logging_insert(self.certificates_jobid, 16, 'epc_certificates_extract_pyscript', 'start_epc_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_external_EPC_certificates.py"])
+            subprocess.run([self.pythonAlias, "process_external_EPC_certificates.py"], check=True)
             util.batch_logging_update(self.certificates_jobid, 'e')
             print("{0}: Process EPC Certificates files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
@@ -78,7 +78,7 @@ class StartEPCJobs:
         try:
             util.batch_logging_insert(self.recommendations_jobid, 17, 'epc_recommendations_extract_pyscript','start_epc_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_external_EPC_recommendations.py"])
+            subprocess.run([self.pythonAlias, "process_external_EPC_recommendations.py"], check=True)
             util.batch_logging_update(self.recommendations_jobid, 'e')
             print("{0}: Process EPC Recommendations files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:
