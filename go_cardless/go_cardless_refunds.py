@@ -78,8 +78,9 @@ class GoCardlessRefunds(object):
         client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
                                        environment=con.go_cardless['environment'])
 
-        # Loop through a page of refunds, printing each payment's amount
-        # Fetch a refund by its ID
+        # Loop through a page of payments, printing each payment's amount
+        q = Queue()
+        datalist = []
         refund = client.refunds
 
         # Loop through a page of payments, printing each payment's amount
@@ -90,19 +91,36 @@ class GoCardlessRefunds(object):
             EnsekAccountId = ''
             if 'AccountId' in refund.metadata:
                 EnsekAccountId = refund.metadata['AccountId']
+
             print(refund.id)
-            df = df.append(
-                {'id': refund.id, 'amount': refund.amount, 'created_at': refund.created_at, 'currency': refund.currency,
-                 'reference': refund.reference, 'status': refund.status, 'metadata': refund.metadata,
-                 'payment': refund.links.payment, 'mandate': refund.links.mandate, 'EnsekID': EnsekAccountId
-                 }, ignore_index=True)
+            id = refund.id
+            amount = refund.amount
+            created_at = refund.created_at
+            currency = refund.currency
+            reference = refund.reference
+            status = refund.status
+            metadata = refund.metadata
+            payment = refund.links.payment
+            mandate = refund.links.mandate
+            EnsekID = EnsekAccountId
 
-        df_string = df.to_csv(None, index=False)
-        # print(df_account_transactions_string)
+            listRow = [id, amount, created_at, currency, reference, status, metadata,
+                       payment, mandate, EnsekID]
+            q.put(listRow)
 
-        s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
-        print(s3.key)
-        s3.set_contents_from_string(df_string)
+            while not q.empty():
+                datalist.append(q.get())
+
+            df = pd.DataFrame(datalist, columns=['id', 'amount', 'created_at', 'currency',
+                                                 'reference', 'status', 'metadata',
+                                                 'payment', 'mandate', 'EnsekID'])
+
+            df_string = df.to_csv(None, index=False)
+            # print(df_account_transactions_string)
+
+            s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
+            print(s3.key)
+            s3.set_contents_from_string(df_string)
 
 
 if __name__ == "__main__":
