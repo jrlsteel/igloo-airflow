@@ -33,6 +33,10 @@ class PaymentsApi(object):
     def __init__(self, execStartDate, execEndDate):
         self.env = util.get_env()
         self.dir = util.get_dir()
+        self.bucket_name = self.dir['s3_finance_bucket']
+        self.s3 = s3_con(self.bucket_name)
+        self.filename = 'square_payments_' + '201701_201703' + '.csv'
+        self.fileDirectory = self.dir['s3_finance_square_key']['Payments']
         self.payments_api = client.payments
         self.execStartDate = datetime.strptime(execStartDate, '%Y-%m-%d')
         self.execEndDate = datetime.strptime(execEndDate, '%Y-%m-%d')
@@ -77,6 +81,7 @@ class PaymentsApi(object):
         return pay
 
     def Normalise_payments(self):
+        fileDirectory = self.fileDirectory
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -109,7 +114,14 @@ class PaymentsApi(object):
         df_out = pd.DataFrame(datalist, columns=['status', 'currency', 'amount', 'EnsekID', 'created_at'])
 
         ### WRITE TO CSV
-        df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
+        #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
+
+        df_string = df_out.to_csv(None, index=False)
+        # print(df_account_transactions_string)
+
+        s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
+        print(s3.key)
+        s3.set_contents_from_string(df_string)
 
         return df_out
 
