@@ -1,4 +1,5 @@
 import os
+import boto3
 from square.client import Client
 from square.configuration import Configuration
 import timeit
@@ -20,7 +21,7 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_boto_S3_Connections as s3_con
+from connections.connect_db import get_finance_S3_Connections as s3_con
 from connections import connect_db as db
 
 client = Client(access_token=con.square['access_token'],
@@ -35,11 +36,14 @@ class PaymentsApi(object):
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
-        self.filename = 'square_payments_' + '201701_201703' + '.csv'
         self.fileDirectory = self.dir['s3_finance_square_key']['Payments']
         self.payments_api = client.payments
         self.execStartDate = datetime.strptime(execStartDate, '%Y-%m-%d')
         self.execEndDate = datetime.strptime(execEndDate, '%Y-%m-%d')
+        self.qtr = math.ceil(self.execStartDate.month / 3.)
+        self.yr = math.ceil(self.execStartDate.year)
+        self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
+        self.filename = 'square_payments_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(self.execEndDate) + '.csv'
 
     def get_date(self, _date, dateFormat="%Y-%m-%d"):
         dateStart = _date
@@ -82,6 +86,7 @@ class PaymentsApi(object):
 
     def Normalise_payments(self):
         fileDirectory = self.fileDirectory
+        s3 = self.s3
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -93,18 +98,25 @@ class PaymentsApi(object):
             end = self.get_date(start)
             print(start, end)
             k1 = self.transactions(start, end)
+            ## print JSON
+            ## print(k1)
             if k1.get("payments"):
                 df = pd.DataFrame.from_dict(json_normalize(k1, record_path=['payments']))
-                k2 = df[['status', 'amount_money', 'note', 'created_at']]
+                if 'note' in df.columns:
+                    k2 = df[['status', 'amount_money', 'note', 'created_at']]
+                else:
+                    k2 = df[['status', 'amount_money', 'created_at']]
                 # print(k2.head(5))
                 for row in k2.itertuples(index=True, name='Pandas'):
+                    EnsekID = ''
                     status = getattr(row, "status")
                     amount_money = getattr(row, "amount_money")
                     if amount_money['amount']:
                         amount = amount_money['amount']
                     if amount_money['currency']:
                         currency = amount_money['currency']
-                    EnsekID = getattr(row, "note")
+                    if 'note' in k2.columns:
+                        EnsekID = getattr(row, "note")
                     created_at = getattr(row, "created_at")
                     listRow = [status, currency, amount, EnsekID, created_at]
                     q.put(listRow)
@@ -132,9 +144,9 @@ class PaymentsApi(object):
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_S3_Connections_client()
+    s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = PaymentsApi('2020-01-01', '2020-06-05')
+    p = PaymentsApi('2019-10-01', '2020-01-01')
 
     p1 = p.Normalise_payments()
     print(p1[['EnsekID', 'status', 'amount', 'created_at']])
