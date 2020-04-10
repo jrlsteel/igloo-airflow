@@ -108,7 +108,7 @@ class PaymentsApi(object):
                     k2 = df[['status', 'amount_money', 'created_at']]
                 # print(k2.head(5))
                 for row in k2.itertuples(index=True, name='Pandas'):
-                    EnsekID = ''
+                    EnsekID = None
                     status = getattr(row, "status")
                     amount_money = getattr(row, "amount_money")
                     if amount_money['amount']:
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = PaymentsApi('2019-10-01', '2020-01-01')
+    p = PaymentsApi('2020-04-01', '2020-07-01')
 
     p1 = p.Normalise_payments()
     print(p1[['EnsekID', 'status', 'amount', 'created_at']])
