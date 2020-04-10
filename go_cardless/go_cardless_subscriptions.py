@@ -40,7 +40,7 @@ class GoCardlessSubscriptions(object):
         self.qtr = math.ceil(self.execStartDate.month / 3.)
         self.yr = math.ceil(self.execStartDate.year)
         self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
-        self.filename = 'goCardless_Subscriptions_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(
+        self.filename = 'goCardless_subscriptions_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(
             self.execEndDate) + '.csv'
 
     def get_date(self, _date, dateFormat="%Y-%m-%d"):
