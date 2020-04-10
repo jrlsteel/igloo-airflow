@@ -40,7 +40,7 @@ class GoCardlessSubscriptions(object):
         self.qtr = math.ceil(self.execStartDate.month / 3.)
         self.yr = math.ceil(self.execStartDate.year)
         self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
-        self.filename = 'goCardless_subscriptions_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(
+        self.filename = 'go_cardless_subscriptions_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(
             self.execEndDate) + '.csv'
 
     def get_date(self, _date, dateFormat="%Y-%m-%d"):
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessSubscriptions('2017-04-01', '2017-07-01')
+    p = GoCardlessSubscriptions('2017-07-01', '2017-10-01')
 
     p1 = p.process_Subscriptions()
 
