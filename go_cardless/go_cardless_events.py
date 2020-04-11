@@ -41,8 +41,7 @@ class GoCardlessEvents(object):
         self.qtr = math.ceil(self.execStartDate.month / 3.)
         self.yr = math.ceil(self.execStartDate.year)
         self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
-        self.filename = 'go_cardless_events_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(
-            self.execEndDate) + '.csv'
+        self.filename = 'go_cardless_events_' + '{:%Y%m%d}'.format(self.execStartDate) + '_' + '{:%Y%m%d}'.format(self.execEndDate) + '.csv'
 
     def is_json(self, myjson):
         try:
@@ -71,17 +70,21 @@ class GoCardlessEvents(object):
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    def process_Events(self):
+    def process_Events(self, _StartDate = None, _EndDate = None):
         fileDirectory = self.fileDirectory
         s3 = self.s3
+        if _StartDate is None:
+            _StartDate = self.execStartDate
+        if _EndDate is None:
+            _EndDate = self.execEndDate
         Events = self.Events
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
         datalist = []
         ls = []
-        StartDate = '{:%Y-%m-%d}'.format(self.execStartDate) + "T00:00:00.000Z"
-        EndDate = '{:%Y-%m-%d}'.format(self.execEndDate) + "T00:00:00.000Z"
+        StartDate = '{:%Y-%m-%d}'.format(_StartDate) + "T00:00:00.000Z"
+        EndDate = '{:%Y-%m-%d}'.format(_EndDate) + "T00:00:00.000Z"
         try:
             for event in Events.all(
                     params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
@@ -190,18 +193,23 @@ class GoCardlessEvents(object):
 
         return df
 
-    def sampletest(self):
+    def runDailyFiles(self):
         for single_date in self.daterange():
-            print(single_date)
+            start = single_date
+            end = self.get_date(start)
+            print(start, end)
+            ### Execute Job ###
+            self.process_Events(start, end)
 
 
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessEvents('2017-01-01', '2017-04-01')
+    p = GoCardlessEvents('2020-01-01', '2020-04-01')
 
-    p1 = p.process_Events()
+    ## p1 = p.process_Events()
+    p2 = p.runDailyFiles()
 
 
 
