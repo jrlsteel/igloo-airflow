@@ -77,7 +77,7 @@ class GoCardlessEvents(object):
         if _EndDate is None:
             _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
         Events = self.Events
-        filename = 'go_cardless_events_' + '{:%Y%m%d}'.format(_StartDate) + '_' + '{:%Y%m%d}'.format(_EndDate) + '.csv'
+        filename = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
