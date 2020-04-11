@@ -22,7 +22,8 @@ from conf import config as con
 from connections.connect_db import get_finance_S3_Connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token='live_yk11i3mKMHN454DYUjIR0Mw6y34ePfW1GJoEXHaS', environment='live')
+client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
+                                       environment=con.go_cardless['environment'])
 Events = client.events
 
 
@@ -198,7 +199,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessEvents('2020-02-04', '2020-02-05')
+    p = GoCardlessEvents('2017-01-01', '2017-04-01')
 
     p1 = p.process_Events()
 
