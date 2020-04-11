@@ -38,9 +38,6 @@ class GoCardlessEvents(object):
         self.Events = Events
         self.execStartDate = datetime.strptime(execStartDate, '%Y-%m-%d')
         self.execEndDate = datetime.strptime(execEndDate, '%Y-%m-%d')
-        self.qtr = math.ceil(self.execStartDate.month / 3.)
-        self.yr = math.ceil(self.execStartDate.year)
-        self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
 
     def is_json(self, myjson):
         try:
@@ -76,8 +73,12 @@ class GoCardlessEvents(object):
             _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
         if _EndDate is None:
             _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
         Events = self.Events
         filename = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
+        qtr = math.ceil(startdatetime.month / 3.)
+        yr = math.ceil(startdatetime.year)
+        s3key = 'timestamp=' + str(yr) + '-Q' + str(qtr)
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -185,7 +186,7 @@ class GoCardlessEvents(object):
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
-        s3.key = fileDirectory + os.sep + self.s3key + os.sep + filename
+        s3.key = fileDirectory + os.sep + s3key + os.sep + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
@@ -206,7 +207,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessEvents('2017-03-01', '2017-04-01')
+    p = GoCardlessEvents('2017-03-01', '2019-04-01')
 
     ## p1 = p.process_Events()
     p2 = p.runDailyFiles()
