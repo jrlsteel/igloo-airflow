@@ -167,12 +167,12 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    p = GoCardlessSubscriptions('2020-04-01', '2020-04-14')
-    ## p = GoCardlessSubscriptions()
+    ## p = GoCardlessSubscriptions('2020-04-01', '2020-04-14')
+    p = GoCardlessSubscriptions()
 
-    ## p1 = p.process_Subscriptions()
+    p1 = p.process_Subscriptions()
     ### Extract return single Daily Files from Date Range Provided ###
-    p2 = p.runDailyFiles()
+    ## p2 = p.runDailyFiles()
 
 
 
