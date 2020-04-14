@@ -12,6 +12,7 @@ import math
 
 from queue import Queue
 from pandas.io.json import json_normalize
+from pathlib import Path
 
 import sys
 
@@ -143,7 +144,8 @@ class GoCardlessSubscriptions(object):
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
-        s3.key = fileDirectory + os.sep + s3key + os.sep + filename
+        ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
+        s3.key = Path(fileDirectory , s3key, filename)
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
@@ -164,8 +166,8 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ##p = GoCardlessSubscriptions('2017-01-01', '2017-04-13')
-    p = GoCardlessSubscriptions()
+    p = GoCardlessSubscriptions('2020-04-01', '2020-07-01')
+    ##p = GoCardlessSubscriptions()
 
     p1 = p.process_Subscriptions()
     ### Extract return single Daily Files from Date Range Provided ###
