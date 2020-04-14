@@ -138,7 +138,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessSubscriptions('2017-07-01', '2017-10-01')
+    p = GoCardlessSubscriptions('2020-04-01', '2020-07-01')
 
     p1 = p.process_Subscriptions()
 
