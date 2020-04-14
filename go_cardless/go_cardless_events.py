@@ -29,15 +29,19 @@ Events = client.events
 
 class GoCardlessEvents(object):
 
-    def __init__(self, execStartDate, execEndDate):
+    def __init__(self, _execStartDate = None, _execEndDate = None):
         self.env = util.get_env()
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Events']
         self.Events = Events
-        self.execStartDate = datetime.strptime(execStartDate, '%Y-%m-%d')
-        self.execEndDate = datetime.strptime(execEndDate, '%Y-%m-%d')
+        if _execStartDate is None:
+            _execStartDate = datetime.today().strftime('%Y-%m-%d')
+        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+        if _execEndDate is None:
+            _execEndDate = self.get_date(_execStartDate)
+        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
 
     def is_json(self, myjson):
         try:
@@ -79,6 +83,7 @@ class GoCardlessEvents(object):
         qtr = math.ceil(startdatetime.month / 3.)
         yr = math.ceil(startdatetime.year)
         s3key = 'timestamp=' + str(yr) + '-Q' + str(qtr)
+        print('Listing Events.......')
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -90,6 +95,7 @@ class GoCardlessEvents(object):
             for event in Events.all(
                     params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
                 test = []
+
                 id = None
 
                 mandate = None
@@ -207,10 +213,13 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = GoCardlessEvents('2017-03-01', '2019-04-01')
+    ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
+    ### 2019-05-29 2019-05-30 ###
+    ##p = GoCardlessEvents('2020-04-01', '2020-04-13')
+    p = GoCardlessEvents()
 
-    ## p1 = p.process_Events()
-    p2 = p.runDailyFiles()
+    p1 = p.process_Events()
+    ## p2 = p.runDailyFiles()
 
 
 
