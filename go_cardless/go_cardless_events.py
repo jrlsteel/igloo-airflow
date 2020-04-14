@@ -36,11 +36,12 @@ class GoCardlessEvents(object):
         self.s3 = s3_con(self.bucket_name)
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Events']
         self.Events = Events
+        self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
-            _execStartDate = datetime.today().strftime('%Y-%m-%d')
+            _execStartDate = self.get_date(self.toDay, _addDays = -1)
         self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
         if _execEndDate is None:
-            _execEndDate = self.get_date(_execStartDate)
+            _execEndDate = self.toDay
         self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
 
     def is_json(self, myjson):
@@ -51,10 +52,12 @@ class GoCardlessEvents(object):
         return True
 
 
-    def get_date(self, _date, dateFormat="%Y-%m-%d"):
+    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
         dateStart = _date
         dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
-        addDays = 1  ###self.noDays
+        if _addDays is None:
+            _addDays = 1  ###self.noDays
+        addDays = _addDays
         if (addDays != 0):
             dateEnd = dateStart + timedelta(days=addDays)
         else:
@@ -91,6 +94,7 @@ class GoCardlessEvents(object):
         ls = []
         StartDate = _StartDate + "T00:00:00.000Z"
         EndDate = _EndDate + "T00:00:00.000Z"
+        print(_StartDate, _EndDate)
         try:
             for event in Events.all(
                     params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
@@ -204,7 +208,7 @@ class GoCardlessEvents(object):
         for single_date in self.daterange():
             start = single_date
             end = self.get_date(start)
-            print(start, end)
+            ## print(start, end)
             ### Execute Job ###
             self.process_Events(start, end)
 
@@ -215,11 +219,12 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ##p = GoCardlessEvents('2020-04-01', '2020-04-13')
+    ##p = GoCardlessEvents('2017-01-01', '2017-04-13')
     p = GoCardlessEvents()
 
     p1 = p.process_Events()
-    ## p2 = p.runDailyFiles()
+    ### Extract return single Daily Files from Date Range Provided ###
+    ##p2 = p.runDailyFiles()
 
 
 
