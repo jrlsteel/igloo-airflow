@@ -12,6 +12,7 @@ import math
 
 from queue import Queue
 from pandas.io.json import json_normalize
+from pathlib import Path
 
 import sys
 
