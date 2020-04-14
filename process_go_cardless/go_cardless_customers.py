@@ -97,7 +97,7 @@ class GoCardlessClients(object):
 
         for client in clients.all(
                 params={"created_at[gte]": StartDate , "created_at[lte]": EndDate }):
-            EnsekAccountId = ''
+            EnsekAccountId = None
             if client.metadata:
                 if 'ensekAccountId' in client.metadata:
                     EnsekAccountId = client.metadata['ensekAccountId']
