@@ -14,6 +14,7 @@ import math
 
 from queue import Queue
 from pandas.io.json import json_normalize
+from pathlib import Path
 
 import sys
 
@@ -131,7 +132,8 @@ class PaymentsApi(object):
         df_string = df_out.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
-        s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
+        ## s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
+        s3.key = Path(fileDirectory, self.s3key, self.filename)
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
