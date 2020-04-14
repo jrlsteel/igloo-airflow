@@ -132,6 +132,8 @@ class GoCardlessMandates(object):
                                              'customer_bank_account',
                                              'EnsekID', 'EnsekStatementId'])
 
+        print(df.head(5))
+
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
