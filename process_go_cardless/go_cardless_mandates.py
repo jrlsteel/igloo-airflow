@@ -85,7 +85,7 @@ class GoCardlessMandates(object):
         filename = 'go_cardless_mandates_' + _StartDate + '_' + _EndDate + '.csv'
         qtr = math.ceil(startdatetime.month / 3.)
         yr = math.ceil(startdatetime.year)
-        s3key = 'timestamp=' + str(yr) + '-Q' + str(qtr)
+        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -139,7 +139,8 @@ class GoCardlessMandates(object):
         # print(df_account_transactions_string)
 
         ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-        s3.key = Path(fileDirectory, s3key, filename)
+        ## s3.key = Path(fileDirectory, s3key, filename)
+        s3.key = fileDirectory + fkey + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
@@ -160,12 +161,12 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessMandates('2020-04-01', '2020-07-01')
-    p = GoCardlessMandates()
+    p = GoCardlessMandates('2020-04-01', '2020-04-14')
+    ## p = GoCardlessMandates()
 
-    p1 = p.process_Mandates()
+    ## p1 = p.process_Mandates()
     ### Extract return single Daily Files from Date Range Provided ###
-    ##p2 = p.runDailyFiles()
+    p2 = p.runDailyFiles()
 
 
 

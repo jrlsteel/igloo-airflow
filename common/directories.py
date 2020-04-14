@@ -267,17 +267,17 @@ uat = {
     "s3_finance_bucket": "igloo-data-warehouse-uat-finance",
 
     "s3_finance_goCardless_key": {
-        "Refunds": "go-cardless-api-refunds",
-        "Payments": "go-cardless-api-payments",
-        "Mandates": "go-cardless-api-mandates",
-        "Payouts": "go-cardless-api-payouts",
-        "Clients": "go-cardless-api-clients",
-        "Events": "go-cardless-api-events",
-        "Subscriptions": "go-cardless-api-subscriptions"
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/"
     },
 
     "s3_finance_square_key": {
-        "Payments": "square-api-payments"
+        "Payments": "/square-api-payments/"
     },
 }
 

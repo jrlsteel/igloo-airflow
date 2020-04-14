@@ -43,7 +43,7 @@ class PaymentsApi(object):
         self.execEndDate = datetime.strptime(execEndDate, '%Y-%m-%d')
         self.qtr = math.ceil(self.execStartDate.month / 3.)
         self.yr = math.ceil(self.execStartDate.year)
-        self.s3key = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr)
+        self.fkey = 'timestamp=' + str(self.yr) + '-Q' + str(self.qtr) + '/'
         self.filename = 'square_payments_' + '{:%Y%m}'.format(self.execStartDate) + '_' + '{:%Y%m}'.format(self.execEndDate) + '.csv'
 
     def get_date(self, _date, dateFormat="%Y-%m-%d"):
@@ -133,7 +133,8 @@ class PaymentsApi(object):
         # print(df_account_transactions_string)
 
         ## s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
-        s3.key = Path(fileDirectory, self.s3key, self.filename)
+        ## s3.key = Path(fileDirectory, self.s3key, self.filename)
+        s3.key = fileDirectory + self.fkey + self.filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
 

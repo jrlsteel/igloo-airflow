@@ -86,7 +86,7 @@ class GoCardlessEvents(object):
         filename = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
         qtr = math.ceil(startdatetime.month / 3.)
         yr = math.ceil(startdatetime.year)
-        s3key = 'timestamp=' + str(yr) + '-Q' + str(qtr)
+        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         print('Listing Events.......')
         # Loop through a page
         q = Queue()
@@ -198,7 +198,8 @@ class GoCardlessEvents(object):
         # print(df_account_transactions_string)
 
         ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-        s3.key = Path(fileDirectory, s3key, filename)
+        ## s3.key = Path(fileDirectory, s3key, filename)
+        s3.key = fileDirectory + fkey + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
@@ -221,12 +222,12 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessEvents('2017-01-01', '2017-04-13')
-    p = GoCardlessEvents()
+    p = GoCardlessEvents('2020-04-01', '2020-04-14')
+    ## p = GoCardlessEvents()
 
-    p1 = p.process_Events()
+    ## p1 = p.process_Events()
     ### Extract return single Daily Files from Date Range Provided ###
-    ##p2 = p.runDailyFiles()
+    p2 = p.runDailyFiles()
 
 
 
