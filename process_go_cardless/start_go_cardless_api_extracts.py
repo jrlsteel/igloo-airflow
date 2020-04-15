@@ -8,6 +8,7 @@ import gocardless_pro
 sys.path.append('../..')
 from common import process_glue_job as glue
 from common import utils as util
+import process_square
 from process_square import process_square_payments
 
 
@@ -19,19 +20,6 @@ class StartGoCardlessAPIExtracts:
         self.all_jobid = util.get_jobID()
         self.goCardless_jobid = util.get_jobID()
         self.square_jobid = util.get_jobID()
-
-
-    def retry_function2(self, process):
-        tries = 3
-        for i in range(tries):
-            try:
-                process
-            except subprocess.CalledProcessError as e:
-                if i < tries - 1:  # i is zero indexed
-                    continue
-                else:
-                    raise
-            break
 
 
     def retry_function(self, process):
@@ -202,7 +190,7 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.square_jobid, 401, 'process_square_payments.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_square_payments.py"], check=True)
+            subprocess.run([self.pythonAlias, "../process_square/process_square_payments.py"], check=True)
             util.batch_logging_update(self.square_jobid, 'e')
             print("{0}: Process Square Payments API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -220,6 +208,7 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
 
+    '''
     ## Payments API Endpoint
     print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.retry_function(process = s.extract_go_cardless_payments_job())
@@ -253,6 +242,7 @@ if __name__ == '__main__':
     ## Subscriptions API Endpoint
     print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.retry_function(process= s.extract_go_cardless_subscriptions_job())
+    '''
 
 
     ## Square Payments API Endpoint
