@@ -31,9 +31,10 @@ class StartGoCardlessAPIExtracts:
                 try:
                     process
                 except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+                gocardless_pro.errors.MalformedResponseError, subprocess.CalledProcessError) as e:
                     continue
                 break
+
 
 
     def extract_go_cardless_payments_job(self):
