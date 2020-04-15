@@ -4,6 +4,9 @@ import timeit
 import subprocess
 import json
 import gocardless_pro
+from square.client import Client
+from queue import Queue
+from pandas.io.json import json_normalize
 
 sys.path.append('../..')
 from common import process_glue_job as glue
@@ -208,7 +211,6 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
 
-    '''
     ## Payments API Endpoint
     print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.retry_function(process = s.extract_go_cardless_payments_job())
@@ -242,12 +244,7 @@ if __name__ == '__main__':
     ## Subscriptions API Endpoint
     print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.retry_function(process= s.extract_go_cardless_subscriptions_job())
-    '''
 
-
-    ## Square Payments API Endpoint
-    print("{0}:  Square Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process = s.extract_square_payments_job())
 
 
 
