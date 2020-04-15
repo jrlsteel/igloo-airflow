@@ -24,7 +24,7 @@ class StartDirectDebitJobs:
         print("{0}: >>>> Process Ensek Direct Debits   <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_direct_debits.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_direct_debits.py"], check=True)
             print("{0}: Process Ensek Direct Debits completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:

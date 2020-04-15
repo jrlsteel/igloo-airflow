@@ -54,7 +54,7 @@ class StartReadingsNOSIJobs:
         try:
             util.batch_logging_insert(self.nosi_download_jobid, 43, 'nosi_download_pyscript', 'start_ensek_readings_nosi_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([pythonAlias, "download_nosi.py"])
+            subprocess.run([pythonAlias, "download_nosi.py"], check=True)
             util.batch_logging_update(self.nosi_download_jobid, 'e')
             print("{0}: download_NOSI completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                           float(timeit.default_timer() - start)))

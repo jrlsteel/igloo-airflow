@@ -36,7 +36,7 @@ class ALP:
         try:
             util.batch_logging_insert(self.alp_wcf_jobid, 31, 'alp_wcf_extract_pyscript','start_alp_historical_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processALP_WCF.py"])
+            subprocess.run([self.pythonAlias, "processALP_WCF.py"], check=True)
             util.batch_logging_update(self.alp_wcf_jobid, 'e')
 
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
@@ -83,7 +83,7 @@ class ALP:
         try:
             util.batch_logging_insert(self.alp_cv_jobid, 32, 'alp_cv_extract_pyscript','start_alp_historical_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processALP_CV.py"])
+            subprocess.run([self.pythonAlias, "processALP_CV.py"], check=True)
             util.batch_logging_update(self.alp_cv_jobid, 'e')
 
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
