@@ -23,7 +23,7 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Payments API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_payments.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_payments.py"], check=True)
             print("{0}: Process Go-Cardless Payments API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
@@ -39,7 +39,7 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Refunds API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_refunds.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_refunds.py"], check=True)
             print("{0}: Process Go-Cardless Refunds API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
@@ -55,14 +55,14 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Mandates API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_mandates.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_mandates.py"], check=True)
             print("{0}: Process Go-Cardless Mandates API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
             print("Error in Process Go-Cardless Mandates API extract :- " + str(e))
             sys.exit(1)
 
-    def extract_go_cardless_payouts_job(self):
+    def extract_go_cardless_payout_job(self):
         """
         Calls the GoCardless Payouts API extract: go_cardless_payouts.py.
         :return: None
@@ -71,11 +71,11 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Payouts API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_payouts.py"])
-            print("{0}: Process Go-Cardless Payouts API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+            subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
+            print("{0}: Process Go-Cardless Payout API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
-            print("Error in Process Go-Cardless Payouts API extract :- " + str(e))
+            print("Error in Process Go-Cardless Payout API extract :- " + str(e))
             sys.exit(1)
 
     def extract_go_cardless_events_job(self):
@@ -87,7 +87,7 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Events API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_events.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True)
             print("{0}: Process Go-Cardless Events API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
@@ -103,7 +103,7 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Clients API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_customers.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True)
             print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
@@ -119,7 +119,7 @@ class StartGoCardlessAPIExtracts:
         print("{0}: >>>> Process Go-Cardless Subscriptions API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_subscriptions.py"])
+            subprocess.run([self.pythonAlias, "go_cardless_subscriptions.py"], check=True)
             print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:
