@@ -6,6 +6,7 @@ import subprocess
 sys.path.append('../..')
 from common import process_glue_job as glue
 from common import utils as util
+from process_square import process_square_payments
 
 
 class StartGoCardlessAPIExtracts:
@@ -126,6 +127,22 @@ class StartGoCardlessAPIExtracts:
             print("Error in Process Go-Cardless Subscriptions API extract :- " + str(e))
             sys.exit(1)
 
+    def extract_square_payments_job(self):
+        """
+        Calls the GoCardless Subscriptions API extract: go_cardless_customers.py.
+        :return: None
+        """
+
+        print("{0}: >>>> Process Square Payments API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        try:
+            start = timeit.default_timer()
+            subprocess.run([self.pythonAlias, "process_square_payments.py"])
+            print("{0}: Process Square Payments API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               float(timeit.default_timer() - start)))
+        except Exception as e:
+            print("Error in Process Square Payments API extract :- " + str(e))
+            sys.exit(1)
+
 
 
 if __name__ == '__main__':
@@ -157,8 +174,12 @@ if __name__ == '__main__':
     s.extract_go_cardless_customers_job()
 
     ## Subscriptions API Endpoint
-    print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.extract_go_cardless_subscriptions_job()
+
+    ## Square Payments API Endpoint
+    print("{0}:  Square Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.extract_square_payments_job()
 
 
 
