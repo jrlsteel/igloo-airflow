@@ -21,18 +21,28 @@ class StartGoCardlessAPIExtracts:
         self.square_jobid = util.get_jobID()
 
 
-    def retry_function(self, process):
+    def retry_function2(self, process):
         tries = 3
         for i in range(tries):
             try:
                 process
-            except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                    gocardless_pro.errors.MalformedResponseError) as e:
+            except subprocess.CalledProcessError as e:
                 if i < tries - 1:  # i is zero indexed
                     continue
                 else:
                     raise
             break
+
+
+    def retry_function(self, process):
+        for i in range(0, 3):
+            while True:
+                try:
+                    process
+                except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError) as e:
+                    continue
+                break
 
 
     def extract_go_cardless_payments_job(self):
@@ -105,10 +115,10 @@ class StartGoCardlessAPIExtracts:
 
         print("{0}: >>>> Process Go-Cardless Payouts API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payouts.py',
+            util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payout.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_payouts.py"], check=True)
+            subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Payouts API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -212,17 +222,8 @@ if __name__ == '__main__':
 
     ## Payments API Endpoint
     print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    tries = 3
-    for i in range(tries):
-        try:
-            s.extract_go_cardless_payments_job()
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
-            if i < tries - 1:  # i is zero indexed
-                continue
-            else:
-                raise
-        break
+    s.retry_function(process = s.extract_go_cardless_payments_job())
+
 
     ## Refunds API Endpoint
     print("{0}:  Go-Cardless Refunds API extract running...".format(datetime.now().strftime('%H:%M:%S')))
