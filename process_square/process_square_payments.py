@@ -103,19 +103,25 @@ class PaymentsApi(object):
             ## print(k1)
             if k1.get("payments"):
                 df = pd.DataFrame.from_dict(json_normalize(k1, record_path=['payments']))
+                k2 = df.loc[:, df.columns.isin(['status', 'amount_money', 'note', 'created_at', ])]
+                '''
                 if 'note' in df.columns:
                     k2 = df[['status', 'amount_money', 'note', 'created_at']]
                 else:
                     k2 = df[['status', 'amount_money', 'created_at']]
+                '''
                 # print(k2.head(5))
                 for row in k2.itertuples(index=True, name='Pandas'):
                     EnsekID = None
+                    currency = None
+                    amount = None
                     status = getattr(row, "status")
-                    amount_money = getattr(row, "amount_money")
-                    if amount_money['amount']:
-                        amount = amount_money['amount']
-                    if amount_money['currency']:
-                        currency = amount_money['currency']
+                    if 'amount_money' in k2.columns:
+                        amount_money = getattr(row, "amount_money")
+                        if amount_money['amount']:
+                            amount = amount_money['amount']
+                        if amount_money['currency']:
+                            currency = amount_money['currency']
                     if 'note' in k2.columns:
                         EnsekID = getattr(row, "note")
                     created_at = getattr(row, "created_at")
@@ -125,6 +131,8 @@ class PaymentsApi(object):
         while not q.empty():
             datalist.append(q.get())
         df_out = pd.DataFrame(datalist, columns=['status', 'currency', 'amount', 'EnsekID', 'created_at'])
+
+        print(df_out[['currency', 'amount', 'EnsekID']].head(20))
 
         ### WRITE TO CSV
         #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
@@ -138,7 +146,7 @@ class PaymentsApi(object):
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
-        return df_out
+
 
     def sampletest(self):
         for single_date in self.daterange():
@@ -152,7 +160,7 @@ if __name__ == "__main__":
     p = PaymentsApi('2020-04-01', '2020-07-01')
 
     p1 = p.Normalise_payments()
-    print(p1[['EnsekID', 'status', 'amount', 'created_at']])
+    #print(p1[['EnsekID', 'status', 'amount', 'created_at']])
 
 
 
