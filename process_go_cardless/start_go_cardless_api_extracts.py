@@ -2,6 +2,8 @@ import sys
 from datetime import datetime
 import timeit
 import subprocess
+import json
+import gocardless_pro
 
 sys.path.append('../..')
 from common import process_glue_job as glue
@@ -17,6 +19,21 @@ class StartGoCardlessAPIExtracts:
         self.all_jobid = util.get_jobID()
         self.goCardless_jobid = util.get_jobID()
         self.square_jobid = util.get_jobID()
+
+
+    def retry_function(self, process):
+        tries = 3
+        for i in range(tries):
+            try:
+                process
+            except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                    gocardless_pro.errors.MalformedResponseError) as e:
+                if i < tries - 1:  # i is zero indexed
+                    continue
+                else:
+                    raise
+            break
+
 
     def extract_go_cardless_payments_job(self):
         """
@@ -195,83 +212,51 @@ if __name__ == '__main__':
 
     ## Payments API Endpoint
     print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_payments_job()
-            except Exception as e:
+    tries = 3
+    for i in range(tries):
+        try:
+            s.extract_go_cardless_payments_job()
+        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError) as e:
+            if i < tries - 1:  # i is zero indexed
                 continue
-            break
+            else:
+                raise
+        break
 
     ## Refunds API Endpoint
     print("{0}:  Go-Cardless Refunds API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_refunds_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process = s.extract_go_cardless_refunds_job())
+
 
     ## Payouts API Endpoint
     print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_payouts_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process = s.extract_go_cardless_payouts_job())
+
 
     ## Mandates API Endpoint
     print("{0}:  Go-Cardless Mandates API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_mandates_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process = s.extract_go_cardless_mandates_job())
+
 
     ## Events API Endpoint
     print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_events_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process= s.extract_go_cardless_events_job())
+
 
     ## Clients API Endpoint
     print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_customers_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process= s.extract_go_cardless_customers_job())
+
 
     ## Subscriptions API Endpoint
     print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_go_cardless_subscriptions_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process= s.extract_go_cardless_subscriptions_job())
+
 
     ## Square Payments API Endpoint
     print("{0}:  Square Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    for i in range(0, 10):
-        while True:
-            try:
-                s.extract_square_payments_job()
-            except Exception as e:
-                continue
-            break
+    s.retry_function(process = s.extract_square_payments_job())
 
 
 
