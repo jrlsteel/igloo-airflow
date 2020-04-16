@@ -25,13 +25,28 @@ class StartGoCardlessAPIExtracts:
         self.square_jobid = util.get_jobID()
 
 
-    def retry_function(self, process):
+    def retry_function(self, process, process_name):
         for i in range(0, 3):
             while True:
                 try:
                     process
-                except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError, subprocess.CalledProcessError) as e:
+                except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError, gocardless_pro.errors.MalformedResponseError, subprocess.CalledProcessError) as e:
+                    util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
+                    util.batch_logging_update(self.all_jobid, 'f', str(e))
+                    print("Error in Process {0} API extract :- {1}".format(process_name, str(e)) )
+                    continue
+                break
+
+
+    def retry_function_square(self, process, process_name):
+        for i in range(0, 3):
+            while True:
+                try:
+                    process
+                except subprocess.CalledProcessError as e:
+                    util.batch_logging_update(self.square_jobid, 'f', str(e))
+                    util.batch_logging_update(self.all_jobid, 'f', str(e))
+                    print("Error in Process {0} API extract :- {1}".format(process_name, str(e)) )
                     continue
                 break
 
@@ -47,7 +62,8 @@ class StartGoCardlessAPIExtracts:
         try:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payments.py', 'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_payments.py"], check=True)
+            ##subprocess.run([self.pythonAlias, "go_cardless_payments.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_payments.py"], check=True), process_name= 'Go-Cardless Payments')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Payments API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -68,7 +84,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_refunds.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_refunds.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_refunds.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_refunds.py"], check=True), process_name= 'Go-Cardless Refunds')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Refunds API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -89,7 +106,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_mandates.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_mandates.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_mandates.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_mandates.py"], check=True), process_name= 'Go-Cardless Mandates')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Mandates API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -110,7 +128,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payout.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True), process_name= 'Go-Cardless Payouts')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Payouts API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -131,7 +150,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_events.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True), process_name= 'Go-Cardless Events')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Events API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -152,7 +172,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_customers.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True), process_name= 'Go-Cardless Customers')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -173,7 +194,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_subscriptions.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "go_cardless_subscriptions.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "go_cardless_subscriptions.py"], check=True)
+            self.retry_function(process = subprocess.run([self.pythonAlias, "go_cardless_subscriptions.py"], check=True), process_name= 'Go-Cardless Subscriptions')
             util.batch_logging_update(self.goCardless_jobid, 'e')
             print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -194,7 +216,8 @@ class StartGoCardlessAPIExtracts:
             util.batch_logging_insert(self.square_jobid, 401, 'process_square_payments.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "../process_square/process_square_payments.py"], check=True)
+            ## subprocess.run([self.pythonAlias, "../process_square/process_square_payments.py"], check=True)
+            self.retry_function_square(process = subprocess.run([self.pythonAlias, "../process_square/process_square_payments.py"], check=True), process_name= 'Square Payments')
             util.batch_logging_update(self.square_jobid, 'e')
             print("{0}: Process Square Payments API extract completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
@@ -214,37 +237,36 @@ if __name__ == '__main__':
 
     ## Payments API Endpoint
     print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process = s.extract_go_cardless_payments_job())
-
+    s.extract_go_cardless_payments_job()
 
     ## Refunds API Endpoint
     print("{0}:  Go-Cardless Refunds API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process = s.extract_go_cardless_refunds_job())
+    s.extract_go_cardless_refunds_job()
 
 
     ## Payouts API Endpoint
     print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process = s.extract_go_cardless_payouts_job())
+    s.extract_go_cardless_payouts_job()
 
 
     ## Mandates API Endpoint
     print("{0}:  Go-Cardless Mandates API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process = s.extract_go_cardless_mandates_job())
+    s.extract_go_cardless_mandates_job()
 
 
     ## Events API Endpoint
     print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process= s.extract_go_cardless_events_job())
+    s.extract_go_cardless_events_job()
 
 
     ## Clients API Endpoint
     print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process= s.extract_go_cardless_customers_job())
+    s.extract_go_cardless_customers_job()
 
 
     ## Subscriptions API Endpoint
     print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.retry_function(process= s.extract_go_cardless_subscriptions_job())
+    s.extract_go_cardless_subscriptions_job()
 
 
 
