@@ -100,7 +100,7 @@ class PaymentsApi(object):
             print(start, end)
             k1 = self.transactions(start, end)
             ## print JSON
-            ## print(k1)
+            print(k1)
             if k1.get("payments"):
                 df = pd.DataFrame.from_dict(json_normalize(k1, record_path=['payments']))
                 k2 = df.loc[:, df.columns.isin(['status', 'amount_money', 'note', 'created_at', ])]
@@ -132,19 +132,17 @@ class PaymentsApi(object):
             datalist.append(q.get())
         df_out = pd.DataFrame(datalist, columns=['status', 'currency', 'amount', 'EnsekID', 'created_at'])
 
-        print(df_out[['currency', 'amount', 'EnsekID']].head(20))
+        print(df_out[['currency', 'amount', 'EnsekID']].head(200))
 
         ### WRITE TO CSV
         #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
+        '''
+        df_string = df_out.to_csv(None, index=False) 
 
-        df_string = df_out.to_csv(None, index=False)
-        # print(df_account_transactions_string)
-
-        ## s3.key = fileDirectory + os.sep + self.s3key + os.sep + self.filename
-        ## s3.key = Path(fileDirectory, self.s3key, self.filename)
         s3.key = fileDirectory + self.fkey + self.filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
+        '''
 
 
 
@@ -157,7 +155,7 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = PaymentsApi('2020-04-01', '2020-07-01')
+    p = PaymentsApi('2020-04-01', '2020-04-24')
 
     p1 = p.Normalise_payments()
     #print(p1[['EnsekID', 'status', 'amount', 'created_at']])
