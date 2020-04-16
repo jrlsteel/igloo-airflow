@@ -54,7 +54,7 @@ class StartSquareAPIExtracts:
 
         print("{0}: >>>> Process Square Payments API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            ##util.batch_logging_insert(self.square_jobid, 401, 'process_square_payments.py', 'start_square_api_extracts.py')
+            ##util.batch_logging_insert(self.square_jobid, 401, 'process_square_payments.py', 'start_process_square_extracts.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_square_payments.py"], check=True)
             #util.batch_logging_update(self.square_jobid, 'e')
