@@ -91,71 +91,74 @@ class GoCardlessPayments(object):
         df_out = pd.DataFrame()
         datalist = []
         ls = []
-        StartDate = _StartDate ### + "T00:00:00.000Z"
-        EndDate = _EndDate ### + "T00:00:00.000Z"
+        StartDate = _StartDate + "T00:00:00.000Z"
+        EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
 
         print('.....listing payments')
-        for payment in client.payments.all(params={"charge_date[gte]": StartDate, "charge_date[lte]": EndDate}):
-            EnsekAccountId = None
-            StatementId = None
-            if self.is_json(payment.id):
-                '''
-                if payment.metadata:
-                    if 'AccountId' in payment.metadata:
-                        EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
-                    if 'StatementId' in payment.metadata:
-                        StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
-                '''
-                id_js = json.loads(payment.id.decode("utf-8"))
-                amount_js = json.loads(payment.amount.decode("utf-8"))
-                amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
-                charge_date_js = json.loads(payment.charge_date.decode("utf-8"))
-                created_at_js = json.loads(payment.created_at.decode("utf-8"))
-                currency_js = json.loads(payment.currency.decode("utf-8"))
-                description_js = json.loads(payment.description.decode("utf-8"))
-                reference_js = json.loads(payment.reference.decode("utf-8"))
-                status_js = json.loads(payment.status.decode("utf-8"))
-                payout_js = json.loads(payment.links.payout.decode("utf-8"))
-                mandate_js = json.loads(payment.links.mandate.decode("utf-8"))
-                subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
-                EnsekID_js = EnsekAccountId
-                EnsekStatementId_js = StatementId
-                listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js,
-                           description_js,
-                           reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
-                           EnsekStatementId_js]
-                q.put(listRow)
-            else:
-                if payment.metadata:
-                    if 'AccountId' in payment.metadata:
-                        EnsekAccountId = payment.metadata['AccountId']
-                    if 'StatementId' in payment.metadata:
-                        StatementId = payment.metadata['StatementId']
-                ## print(payment.id)
-                id = payment.id
-                amount = payment.amount
-                amount_refunded = payment.amount_refunded
-                charge_date = payment.charge_date
-                created_at = payment.created_at
-                currency = payment.currency
-                description = payment.description
-                reference = payment.reference
-                status = payment.status
-                payout = payment.links.payout
-                mandate = payment.links.mandate
-                subscription = payment.links.subscription
-                EnsekID = EnsekAccountId
-                EnsekStatementId = StatementId
-                listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
-                           reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
-                q.put(listRow)
-            data = q.queue
-            for d in data:
-                datalist.append(d)
-            # Empty queue
-            with q.mutex:
-                q.queue.clear()
+        try:
+            for payment in client.payments.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
+                EnsekAccountId = None
+                StatementId = None
+                if self.is_json(payment.id):
+                    '''
+                    if payment.metadata:
+                        if 'AccountId' in payment.metadata:
+                            EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
+                        if 'StatementId' in payment.metadata:
+                            StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
+                    '''
+                    id_js = json.loads(payment.id.decode("utf-8"))
+                    amount_js = json.loads(payment.amount.decode("utf-8"))
+                    amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
+                    charge_date_js = json.loads(payment.charge_date.decode("utf-8"))
+                    created_at_js = json.loads(payment.created_at.decode("utf-8"))
+                    currency_js = json.loads(payment.currency.decode("utf-8"))
+                    description_js = json.loads(payment.description.decode("utf-8"))
+                    reference_js = json.loads(payment.reference.decode("utf-8"))
+                    status_js = json.loads(payment.status.decode("utf-8"))
+                    payout_js = json.loads(payment.links.payout.decode("utf-8"))
+                    mandate_js = json.loads(payment.links.mandate.decode("utf-8"))
+                    subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
+                    EnsekID_js = EnsekAccountId
+                    EnsekStatementId_js = StatementId
+                    listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js,
+                               description_js,
+                               reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
+                               EnsekStatementId_js]
+                    q.put(listRow)
+                else:
+                    if payment.metadata:
+                        if 'AccountId' in payment.metadata:
+                            EnsekAccountId = payment.metadata['AccountId']
+                        if 'StatementId' in payment.metadata:
+                            StatementId = payment.metadata['StatementId']
+                    ## print(payment.id)
+                    id = payment.id
+                    amount = payment.amount
+                    amount_refunded = payment.amount_refunded
+                    charge_date = payment.charge_date
+                    created_at = payment.created_at
+                    currency = payment.currency
+                    description = payment.description
+                    reference = payment.reference
+                    status = payment.status
+                    payout = payment.links.payout
+                    mandate = payment.links.mandate
+                    subscription = payment.links.subscription
+                    EnsekID = EnsekAccountId
+                    EnsekStatementId = StatementId
+                    listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
+                               reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                    q.put(listRow)
+
+        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError) as e:
+            pass
+
+        # Empty queue
+        while not q.empty():
+            datalist.append(q.get())
 
         df = pd.DataFrame(datalist, columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
                                              'currency', 'description', 'reference', 'status', 'payout', 'mandate',
@@ -171,8 +174,6 @@ class GoCardlessPayments(object):
         s3.key = fileDirectory + fkey + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
-
-        # df.to_csv('go_cardless_payments.csv', encoding='utf-8', index=False)
 
         return df
 
@@ -191,7 +192,7 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessPayments('2020-04-01', '2020-04-14')
+    ## p = GoCardlessPayments('2017-03-01', '2020-04-16')
     p = GoCardlessPayments()
 
     p1 = p.process_Payments()
