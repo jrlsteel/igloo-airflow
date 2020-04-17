@@ -137,9 +137,9 @@ class GoCardlessRefunds(object):
                                                  'reference', 'status', 'metadata',
                                                  'payment', 'mandate', 'EnsekID'])
 
-        print(df.head(50))
+        print(df.head(5))
 
-        '''
+
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
@@ -149,8 +149,6 @@ class GoCardlessRefunds(object):
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
-        # df.to_csv('go_cardless_Refunds.csv', encoding='utf-8', index=False)
-        '''
         return df
 
     def runDailyFiles(self):
@@ -168,12 +166,12 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    p = GoCardlessRefunds('2020-02-05', '2020-02-06')
+    p = GoCardlessRefunds('2020-01-01', '2020-04-01')
     ## p = GoCardlessRefunds()
 
-    p1 = p.process_Refunds()
+    ##p1 = p.process_Refunds()
     ### Extract return single Daily Files from Date Range Provided ###
-    ## p2 = p.runDailyFiles()
+    p2 = p.runDailyFiles()
 
 
 
