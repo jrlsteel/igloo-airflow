@@ -25,7 +25,7 @@ from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
                                        environment=con.go_cardless['environment'])
-refunds = client.refunds
+refund = client.refunds
 
 
 class GoCardlessRefunds(object):
@@ -36,7 +36,7 @@ class GoCardlessRefunds(object):
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Refunds']
-        self.refunds = refunds
+        self.refunds = refund
         self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays = -1)
@@ -119,30 +119,30 @@ class GoCardlessRefunds(object):
                         mandate, metadata, payment, reference, status]
             q.put(listRow)
 
-            while not q.empty():
-                datalist.append(q.get())
+        while not q.empty():
+            datalist.append(q.get())
 
-            df = pd.DataFrame(datalist, columns=['EnsekID', 'amount', 'created_at', 'currency','id',
-                                                  'mandate','metadata', 'payment','reference', 'status'
-                                                   ])
-
-
-            print(df.head(5))
+        df = pd.DataFrame(datalist, columns=['EnsekID', 'amount', 'created_at', 'currency','id',
+                                              'mandate','metadata', 'payment','reference', 'status'
+                                               ])
 
 
-            df_string = df.to_csv(None, index=False)
-            # print(df_account_transactions_string)
-
-            ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-            ## s3.key = Path(fileDirectory, s3key, filename)
-            s3.key = fileDirectory + fkey + filename
-            print(s3.key)
-            s3.set_contents_from_string(df_string)
-
-            # df.to_csv('go_cardless_refunds.csv', encoding='utf-8', index=False)
+        print(df.head(5))
 
 
-            return df
+        df_string = df.to_csv(None, index=False)
+        # print(df_account_transactions_string)
+
+        ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
+        ## s3.key = Path(fileDirectory, s3key, filename)
+        s3.key = fileDirectory + fkey + filename
+        print(s3.key)
+        s3.set_contents_from_string(df_string)
+
+        # df.to_csv('go_cardless_refunds.csv', encoding='utf-8', index=False)
+
+
+        return df
 
     def runDailyFiles(self):
         for single_date in self.daterange():
