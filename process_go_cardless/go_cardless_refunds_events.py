@@ -101,7 +101,7 @@ class GoCardlessRefunds(object):
         print(_StartDate, _EndDate)
         try:
             for event in Events.all(
-                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
+                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate , "resource_type": "refunds"}):
                 test = []
 
                 if event.links.refund and len(event.links.refund) != 0:
@@ -109,7 +109,7 @@ class GoCardlessRefunds(object):
                     refund_1 = (vars(refund))
                     refund_2 = refund_1['attributes']
 
-                    print(refund_2['id'])
+                    ## print(refund_2['id'])
                     id = refund_2['id']
                     amount = refund_2['amount']
                     created_at = refund_2['created_at']
