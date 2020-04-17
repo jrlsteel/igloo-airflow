@@ -115,18 +115,20 @@ class GoCardlessRefunds(object):
             mandate = refund.links.mandate
             EnsekID = EnsekAccountId
 
-            listRow = [id, amount, created_at, currency, reference, status, metadata,
-                       payment, mandate, EnsekID]
+            listRow = [EnsekID, amount, created_at, currency, id,
+                        mandate, metadata, payment, reference, status]
             q.put(listRow)
 
             while not q.empty():
                 datalist.append(q.get())
 
-            df = pd.DataFrame(datalist, columns=['id', 'amount', 'created_at', 'currency',
-                                                 'reference', 'status', 'metadata',
-                                                 'payment', 'mandate', 'EnsekID'])
+            df = pd.DataFrame(datalist, columns=['EnsekID', 'amount', 'created_at', 'currency','id',
+                                                  'mandate','metadata', 'payment','reference', 'status'
+                                                   ])
+
 
             print(df.head(5))
+
 
             df_string = df.to_csv(None, index=False)
             # print(df_account_transactions_string)
@@ -138,6 +140,7 @@ class GoCardlessRefunds(object):
             s3.set_contents_from_string(df_string)
 
             # df.to_csv('go_cardless_refunds.csv', encoding='utf-8', index=False)
+
 
             return df
 
@@ -155,11 +158,11 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessRefunds('2020-04-05', '2020-04-14')
+    ## p = GoCardlessRefunds('2020-04-01', '2020-04-17')
     p = GoCardlessRefunds()
 
     p1 = p.process_Refunds()
     ### Extract return single Daily Files from Date Range Provided ###
-    ## p2 = p.runDailyFiles()
+    ##p2 = p.runDailyFiles()
 
 
