@@ -273,7 +273,9 @@ uat = {
         "Payouts": "/go-cardless-api-payouts/",
         "Clients": "/go-cardless-api-clients/",
         "Events": "/go-cardless-api-events/",
-        "Subscriptions": "/go-cardless-api-subscriptions/"
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/"
     },
 
     "s3_finance_square_key": {
