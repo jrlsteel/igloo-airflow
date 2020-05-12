@@ -430,6 +430,144 @@ class GoCardlessMandatesSubscriptions(object):
 
 
 
+
+    def process_Payments(self, _StartDate=None, _EndDate=None):
+        EventsfileDirectory = self.EventsFileDirectory
+        PaymentsfileDirectory = self.PaymentsFileDirectory
+        s3 = self.s3
+        if _StartDate is None:
+            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+        if _EndDate is None:
+            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+        Events = self.Events
+        Payments = self.Payments
+        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
+        qtr = math.ceil(startdatetime.month / 3.)
+        yr = math.ceil(startdatetime.year)
+        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
+        print('Listing Payments.......')
+        # Loop through a page
+        q_payment = Queue()
+        payment_datalist = []
+        StartDate = _StartDate + "T00:00:00.000Z"
+        EndDate = _EndDate + "T00:00:00.000Z"
+        print(_StartDate, _EndDate)
+        try:
+            for event in Events.all(
+                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate, "resource_type": "payments"}):
+
+                #### Payments #####
+                if event.resource_type == 'payments':
+                    if event.links.payment and len(event.links.payment) != 0:
+                        payment = Payments.get(event.links.payment)
+                        payment_1 = (vars(payment))
+                        payment_2 = payment_1['attributes']
+
+                        EnsekAccountId= None
+                        StatementId = None
+                        amount_refunded = None
+                        charge_date = None
+                        currency= None
+                        description = None
+                        reference = None
+                        status = None
+                        payout = None
+                        mandate = None
+                        subscription = None
+
+                        try:
+                            EnsekAccountId = payment_2['metadata']['AccountId']
+                        except KeyError:
+                            pass
+                        try:
+                            StatementId = payment_2['metadata']['StatementId']
+                        except KeyError:
+                            pass
+                        print(payment_2['id'])
+                        id = payment_2['id']
+                        amount = payment_2['amount']
+                        try:
+                            amount_refunded = payment_2['amount_refunded']
+                        except KeyError:
+                            pass
+                        try:
+                            charge_date = payment_2['charge_date']
+                        except KeyError:
+                            pass
+                        try:
+                            currency = payment_2['currency']
+                        except KeyError:
+                            pass
+                        try:
+                            description = payment_2['description']
+                        except KeyError:
+                            pass
+                        try:
+                            reference = payment_2['reference']
+                        except KeyError:
+                            pass
+                        try:
+                            status = payment_2['status']
+                        except KeyError:
+                            pass
+                        try:
+                            payout = payment_2['links']['payout']
+                        except KeyError:
+                            pass
+                        try:
+                            mandate = payment_2['links']['mandate']
+                        except KeyError:
+                            pass
+                        try:
+                            subscription = payment_2['links']['subscription']
+                        except KeyError:
+                            pass
+
+                        created_at = payment_2['created_at']
+
+                        EnsekID = EnsekAccountId
+                        EnsekStatementId = StatementId
+                        payment_listRow =[id, amount, amount_refunded, charge_date, created_at, currency, description,
+                        reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                        q_payment.put(payment_listRow)
+
+
+
+
+        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError) as e:
+            pass
+
+        while not q_payment.empty():
+            payment_datalist.append(q_payment.get())
+
+        df = pd.DataFrame(payment_datalist, columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
+                                             'currency', 'description', 'reference', 'status', 'payout', 'mandate',
+                                             'subscription', 'EnsekID', 'StatementId'])
+
+        for row in df.itertuples(index=True, name='Pandas'):
+            id = row.id
+            r_1 = [row.id, row.amount, row.amount_refunded, row.charge_date, row.created_at, row.currency,
+                   row.description, row.reference, row.status, row.payout, row.mandate,
+                   row.subscription, row.EnsekID, row.StatementId]
+
+            print(r_1)
+            df_1 = pd.DataFrame([r_1],
+                                columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
+                                         'currency', 'description', 'reference', 'status', 'payout', 'mandate',
+                                         'subscription', 'EnsekID', 'StatementId'])
+
+            filename = 'go_cardless_Payments_' + id + '.csv'
+            df_string = df_1.to_csv(None, index=False)
+            s3.key = PaymentsfileDirectory + filename
+            print(s3.key)
+            s3.set_contents_from_string(df_string)
+
+
+
+
+
     def runDailyFiles(self):
         for single_date in self.daterange():
             start = single_date
@@ -454,8 +592,10 @@ if __name__ == "__main__":
     p2 = p.process_Mandates()
     ### SUBSCRIPTIONS ###
     p3 = p.process_Subscriptions()
+    ### SUBSCRIPTIONS ###
+    p4 = p.process_Payments()
     ### Extract return single Daily Files from Date Range Provided ###
-    ##p4 = p.runDailyFiles()
+    ##p5 = p.runDailyFiles()
 
 
 
