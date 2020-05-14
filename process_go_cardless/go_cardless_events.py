@@ -6,9 +6,12 @@ import pandas as pd
 import numpy as np
 import requests
 import json
+import multiprocessing
 from multiprocessing import freeze_support
 from datetime import datetime, date, time, timedelta
 import math
+from ratelimit import limits, sleep_and_retry
+import time
 
 from queue import Queue
 from pandas.io.json import json_normalize
@@ -29,9 +32,10 @@ Events = client.events
 Refunds = client.refunds
 Mandates = client.mandates
 Subscriptions = client.subscriptions
+Payments = client.payments
 
 
-class GoCardlessMandatesSubscriptions(object):
+class GoCardlessEvents(object):
 
     def __init__(self, _execStartDate = None, _execEndDate = None):
         self.env = util.get_env()
@@ -41,9 +45,11 @@ class GoCardlessMandatesSubscriptions(object):
         self.EventsFileDirectory = self.dir['s3_finance_goCardless_key']['Events']
         self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
         self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
+        self.PaymentsFileDirectory = self.dir['s3_finance_goCardless_key']['Payments-Files']
         self.Events = Events
         self.Mandates = Mandates
         self.Subscriptions = Subscriptions
+        self.Payments = Payments
         self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays = -1)
@@ -546,6 +552,12 @@ class GoCardlessMandatesSubscriptions(object):
                                              'currency', 'description', 'reference', 'status', 'payout', 'mandate',
                                              'subscription', 'EnsekID', 'StatementId'])
 
+        return df
+
+    def writeCSVs_payments(self, df):
+        PaymentsfileDirectory = self.PaymentsFileDirectory
+        s3 = self.s3
+
         for row in df.itertuples(index=True, name='Pandas'):
             id = row.id
             r_1 = [row.id, row.amount, row.amount_refunded, row.charge_date, row.created_at, row.currency,
@@ -584,7 +596,7 @@ if __name__ == "__main__":
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
     ## p = GoCardlessMandatesSubscriptions('2020-04-18', '2020-04-19')
-    p = GoCardlessMandatesSubscriptions()
+    p = GoCardlessEvents()
 
     ### EVENTS ###
     p1 = p.process_Events()
@@ -592,10 +604,49 @@ if __name__ == "__main__":
     p2 = p.process_Mandates()
     ### SUBSCRIPTIONS ###
     p3 = p.process_Subscriptions()
-    ### SUBSCRIPTIONS ###
-    p4 = p.process_Payments()
-    ### Extract return single Daily Files from Date Range Provided ###
-    ##p5 = p.runDailyFiles()
+
+    ### PAYMENTS ###
+    df_payment = p.process_Payments()
+
+    ##### Multiprocessing Starts #########
+
+    env = util.get_env()
+    if env == 'uat':
+        n = 12  # number of process to run in parallel
+    else:
+        n = 12
+
+    k = int(len(df_payment) / n)  # get equal no of files for each process
+
+    print(len(df_payment))
+    print(k)
+
+    processes = []
+    lv = 0
+    start = timeit.default_timer()
+
+    for i in range(n + 1):
+        print(i)
+        uv = i * k
+        if i == n:
+            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:],))
+        else:
+            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:uv],))
+        lv = uv
+
+        processes.append(t)
+
+    for p in processes:
+        p.start()
+        time.sleep(2)
+
+    for process in processes:
+        process.join()
+    ####### Multiprocessing Ends #########
+
+    print("Process payments completed in " + str(timeit.default_timer() - start) + ' seconds')
+
+
 
 
 
