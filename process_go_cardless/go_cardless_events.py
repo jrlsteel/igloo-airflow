@@ -46,10 +46,12 @@ class GoCardlessEvents(object):
         self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
         self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
         self.PaymentsFileDirectory = self.dir['s3_finance_goCardless_key']['Payments-Files']
+        self.RefundsFileDirectory = self.dir['s3_finance_goCardless_key']['Refunds-Files']
         self.Events = Events
         self.Mandates = Mandates
         self.Subscriptions = Subscriptions
         self.Payments = Payments
+        self.Refunds = Refunds
         self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays = -1)
@@ -87,6 +89,10 @@ class GoCardlessEvents(object):
             yield seq_date.strftime(dateFormat)
         return seq_date
 
+
+
+
+    ''' EVENTS '''
     def process_Events(self, _StartDate = None, _EndDate = None):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
@@ -200,7 +206,6 @@ class GoCardlessEvents(object):
         while not q_Event.empty():
             event_datalist.append(q_Event.get())
 
-
         df_event = pd.DataFrame(event_datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
                                              'cause', 'description', 'origin', 'reason_code', 'scheme', 'will_attempt_retry',
                                              'mandate' , 'new_customer_bank_account' , 'new_mandate' , 'organisation' ,
@@ -215,13 +220,12 @@ class GoCardlessEvents(object):
         s3.key = EventsfileDirectory + fkey + filenameEvents
         print(s3.key)
         s3.set_contents_from_string(df_string)
-
-
         return df_event
 
 
 
 
+    ''' MANDATES '''
     def process_Mandates(self, _StartDate = None, _EndDate = None):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
@@ -304,6 +308,12 @@ class GoCardlessEvents(object):
                                              'customer_bank_account',
                                              'EnsekID', 'EnsekStatementId'])
 
+        return df
+
+    def writeCSVs_Mandates(self, df):
+        MandatesFileDirectory = self.MandatesFileDirectory
+        s3 = self.s3
+
         for row in df.itertuples(index=True, name='Pandas'):
             id = row.mandate_id
             r_1 = [row.mandate_id, row.CustomerId, row.new_mandate_id, row.created_at, row.next_possible_charge_date,
@@ -320,13 +330,15 @@ class GoCardlessEvents(object):
             filename = 'go_cardless_mandates_' + id + '.csv'
 
             df_string = df_1.to_csv(None, index=False)
-            s3.key = MandatesfileDirectory + filename
+            s3.key = MandatesFileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
 
 
 
+
+    ''' SUBSCRIPTIONS '''
     def process_Subscriptions(self, _StartDate = None, _EndDate = None):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
@@ -399,7 +411,6 @@ class GoCardlessEvents(object):
 
                         q_Subscription.put(subscription_listRow)
 
-
         except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
                 gocardless_pro.errors.MalformedResponseError) as e:
             pass
@@ -412,6 +423,12 @@ class GoCardlessEvents(object):
                                    'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
                                    'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
                                    'charge_date', 'amount_subscription'])
+
+        return df
+
+    def writeCSVs_Subscriptions(self, df):
+        SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
+        s3 = self.s3
 
         for row in df.itertuples(index=True, name='Pandas'):
             id = row.id
@@ -437,6 +454,8 @@ class GoCardlessEvents(object):
 
 
 
+
+    ''' PAYMENTS '''
     def process_Payments(self, _StartDate=None, _EndDate=None):
         EventsfileDirectory = self.EventsFileDirectory
         PaymentsfileDirectory = self.PaymentsFileDirectory
@@ -538,9 +557,6 @@ class GoCardlessEvents(object):
                         reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
                         q_payment.put(payment_listRow)
 
-
-
-
         except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
                 gocardless_pro.errors.MalformedResponseError) as e:
             pass
@@ -554,7 +570,7 @@ class GoCardlessEvents(object):
 
         return df
 
-    def writeCSVs_payments(self, df):
+    def writeCSVs_Payments(self, df):
         PaymentsfileDirectory = self.PaymentsFileDirectory
         s3 = self.s3
 
@@ -580,6 +596,176 @@ class GoCardlessEvents(object):
 
 
 
+
+    ''' REFUNDS '''
+    def process_Refunds(self, _StartDate=None, _EndDate=None):
+        EventsfileDirectory = self.EventsFileDirectory
+        RefundsfileDirectory = self.RefundsFileDirectory
+        s3 = self.s3
+        if _StartDate is None:
+            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+        if _EndDate is None:
+            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+        Events = self.Events
+        Refunds = self.Refunds
+        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
+        qtr = math.ceil(startdatetime.month / 3.)
+        yr = math.ceil(startdatetime.year)
+        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
+        print('Listing Refunds.......')
+        # Loop through a page
+        q_refund = Queue()
+        refund_datalist = []
+        StartDate = _StartDate + "T00:00:00.000Z"
+        EndDate = _EndDate + "T00:00:00.000Z"
+        print(_StartDate, _EndDate)
+        try:
+            for event in Events.all(
+                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate, "resource_type": "refunds"}):
+
+                #### Refunds #####
+                if event.resource_type == 'refunds':
+                    if event.links.refund and len(event.links.refund) != 0:
+                        refund = Refunds.get(event.links.refund)
+                        refund_1 = (vars(refund))
+                        refund_2 = refund_1['attributes']
+
+                        EnsekID = None
+                        EnsekStatementId = None
+                        amount = None
+                        created_at = None
+                        currency = None
+                        id = None
+                        mandate = None
+                        metadata = None
+                        payment = None
+                        reference = None
+                        status = None
+
+                        try:
+                            EnsekID = refund_2['metadata']['AccountId']
+                        except KeyError:
+                            pass
+
+                        print(refund_2['id'])
+                        id = refund_2['id']
+                        amount = refund_2['amount']
+                        created_at = refund_2['created_at']
+
+                        try:
+                            amount_refunded = refund_2['amount_refunded']
+                        except KeyError:
+                            pass
+                        try:
+                            currency = refund_2['currency']
+                        except KeyError:
+                            pass
+                        try:
+                            mandate = refund_2['links']['mandate']
+                        except KeyError:
+                            pass
+                        try:
+                            metadata = refund_2['metadata']
+                        except KeyError:
+                            pass
+                        try:
+                            payment = refund_2['links']['payment']
+                        except KeyError:
+                            pass
+                        try:
+                            reference = refund_2['reference']
+                        except KeyError:
+                            pass
+                        try:
+                            status = refund_2['status']
+                        except KeyError:
+                            pass
+
+                        Refund_listRow = [EnsekID, amount, created_at, currency, id,
+                                               mandate, metadata, payment, reference, status]
+
+                        q_refund.put(Refund_listRow)
+
+        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError) as e:
+            pass
+
+        while not q_refund.empty():
+            refund_datalist.append(q_refund.get())
+
+        df = pd.DataFrame(refund_datalist, columns=['EnsekID', 'amount', 'created_at', 'currency','id',
+                                                      'mandate','metadata', 'payment','reference', 'status'
+                                                   ])
+
+        return df
+
+    def writeCSVs_Refunds(self, df):
+        RefundsfileDirectory = self.RefundsFileDirectory
+        s3 = self.s3
+
+        for row in df.itertuples(index=True, name='Pandas'):
+            id = row.id
+            r_1 = [row.EnsekID, row.amount, row.created_at, row.currency, row.id,
+                   row.mandate, row.metadata, row.payment, row.reference, row.status]
+
+            print(r_1)
+            df_1 = pd.DataFrame([r_1],
+                                columns=['EnsekID', 'amount', 'created_at', 'currency', 'id',
+                                         'mandate', 'metadata', 'payment', 'reference', 'status'
+                                         ])
+
+            filename = 'go_cardless_Refunds_' + id + '.csv'
+            df_string = df_1.to_csv(None, index=False)
+            s3.key = RefundsfileDirectory + filename
+            print(s3.key)
+            s3.set_contents_from_string(df_string)
+
+
+
+
+
+    def Multiprocess_Event(self, df, method):
+        env = util.get_env()
+        if env == 'uat':
+            n = 12  # number of process to run in parallel
+        else:
+            n = 12
+
+        k = int(len(df) / n)  # get equal no of files for each process
+
+        print(len(df))
+        print(k)
+
+        processes = []
+        lv = 0
+        start = timeit.default_timer()
+
+        for i in range(n + 1):
+            print(i)
+            uv = i * k
+            if i == n:
+                t = multiprocessing.Process(target= method, args=(df[lv:],))
+            else:
+                t = multiprocessing.Process(target= method, args=(df[lv:uv],))
+            lv = uv
+
+            processes.append(t)
+
+        for p in processes:
+            p.start()
+            time.sleep(2)
+
+        for process in processes:
+            process.join()
+        ####### Multiprocessing Ends #########
+
+        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+
+
+
+
+
     def runDailyFiles(self):
         for single_date in self.daterange():
             start = single_date
@@ -600,51 +786,22 @@ if __name__ == "__main__":
 
     ### EVENTS ###
     p1 = p.process_Events()
+
     ### MANDATES ###
-    p2 = p.process_Mandates()
+    df_mandates = p.process_Mandates()
+    pMandates = p.Multiprocess_Event(df=df_mandates, method=p.writeCSVs_Mandates)
+
     ### SUBSCRIPTIONS ###
-    p3 = p.process_Subscriptions()
+    df_subscriptions = p.process_Subscriptions()
+    pSubscriptions = p.Multiprocess_Event(df=df_subscriptions, method=p.writeCSVs_Subscriptions)
 
     ### PAYMENTS ###
-    df_payment = p.process_Payments()
+    df_payments = p.process_Payments()
+    pPayments = p.Multiprocess_Event(df=df_payments, method=p.writeCSVs_Payments)
 
-    ##### Multiprocessing Starts #########
-
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
-    else:
-        n = 12
-
-    k = int(len(df_payment) / n)  # get equal no of files for each process
-
-    print(len(df_payment))
-    print(k)
-
-    processes = []
-    lv = 0
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        print(i)
-        uv = i * k
-        if i == n:
-            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:],))
-        else:
-            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:uv],))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
-    ####### Multiprocessing Ends #########
-
-    print("Process payments completed in " + str(timeit.default_timer() - start) + ' seconds')
+    ## REFUNDS ##
+    df_refunds = p.process_Refunds()
+    pRefunds = p.Multiprocess_Event(df=df_refunds, method=p.writeCSVs_Refunds)
 
 
 
