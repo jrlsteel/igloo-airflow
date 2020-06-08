@@ -136,13 +136,13 @@ class PaymentsApi(object):
 
         ### WRITE TO CSV
         #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
-        '''
+
         df_string = df_out.to_csv(None, index=False) 
 
         s3.key = fileDirectory + self.fkey + self.filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
-        '''
+
 
 
 
