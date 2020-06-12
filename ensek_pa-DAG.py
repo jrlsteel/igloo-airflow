@@ -24,9 +24,15 @@ dag = DAG(
     tags=['cdw']
 )
 
+process_customerdb = BashOperator(
+    task_id='process_customerdb',
+    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_customerdb_jobs.py',
+    dag=dag,
+)
+
 process_ensek_meterpoints_no_history = BashOperator(
     task_id='process_ensek_meterpoints_no_history',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
+    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
 
@@ -42,4 +48,4 @@ start_ensek_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_ensek_meterpoints_no_history >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
+process_customerdb >> process_ensek_meterpoints_no_history >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
