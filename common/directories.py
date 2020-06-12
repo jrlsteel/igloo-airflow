@@ -124,7 +124,7 @@ uat = {
 
     },
 
-    "s3_bucket": "igloo-data-warehouse-uat",
+    "s3_bucket": "igloo-data-warehouse-dev-555393537168",
 
     "s3_key": {
         "Accounts": "stage1/Accounts/",
@@ -537,7 +537,7 @@ prod = {
         "internal_readings": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
         },
-        
+
         "occupier_accounts": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/DataSources/GetData?name=OccupierAccounts"
         },
