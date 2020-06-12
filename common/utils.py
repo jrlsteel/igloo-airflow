@@ -26,6 +26,8 @@ def get_multiprocess(source):
 def get_dir():
     dir = ''
     env_conf = get_env()
+    if env_conf == 'dev':
+        dir = dirs3.dev
     if env_conf == 'uat':
         dir = dirs3.uat
     if env_conf == 'prod':
