@@ -468,6 +468,22 @@ uat = {
         "Raw": "stage1/ReadingsNOSIGas/",
         "SFTP": "NOSI"
     },
+    "s3_ensekflow_key": {
+        "outbound":{
+        "EFfileStore": "stage1Flows/outbound/subfiles/",
+        "EFprefix": "/stage1Flows/outbound/master/",
+        "EFStartAfter": "stage1Flows/outbound/master",
+        "outputTable": "ref_dataflows_outbound",
+        "EFSuffix": ".uff"
+        },
+        "inbound":{
+        "EFfileStore": "stage1Flows/inbound/subfiles/",
+        "EFprefix": "/stage1Flows/inbound/master/",
+        "EFStartAfter": "stage1Flows/inbound/master",
+        "outputTable": "ref_dataflows_inbound",
+        "EFSuffix": ".usr"
+        }
+    },
 
     "glue_ensek_job_name": "_process_ref_tables_uat",
     "glue_d18_job_name": "_process_ref_tables_uat",
@@ -497,6 +513,24 @@ uat = {
     "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_uat",
     "glue_meets_eligibility_job_name": "_process_ref_tables_uat",
     "glue_reporting_job_name": "_process_ref_tables_uat",
+
+    "s3_finance_bucket": "igloo-data-warehouse-uat-finance",
+
+    "s3_finance_goCardless_key": {
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/"
+    },
+
+    "s3_finance_square_key": {
+        "Payments": "/square-api-payments/"
+    },
 }
 
 preprod = {

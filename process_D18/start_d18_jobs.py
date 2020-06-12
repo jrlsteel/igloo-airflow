@@ -33,7 +33,7 @@ class StartD18Jobs:
         try:
             util.batch_logging_insert(self.d18_download_jobid, 27, 'd18_download_pyscript','start_d18_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([pythonAlias, "download_d18.py"])
+            subprocess.run([pythonAlias, "download_d18.py"], check=True)
             util.batch_logging_update(self.d18_download_jobid, 'e')
             print("{0}: download_d18 completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                           float(timeit.default_timer() - start)))
@@ -53,7 +53,7 @@ class StartD18Jobs:
         try:
             util.batch_logging_insert(self.d18_jobid, 28, 'd18_extract_pyscript','start_d18_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_d18.py"])
+            subprocess.run([self.pythonAlias, "process_d18.py"], check=True)
             util.batch_logging_update(self.d18_jobid, 'e')
             print("{0}: Process D18 files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
         except Exception as e:

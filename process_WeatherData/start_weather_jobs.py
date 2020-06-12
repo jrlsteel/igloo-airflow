@@ -55,7 +55,7 @@ class Weather:
         try:
             util.batch_logging_insert(self.weather_jobid, 21, 'weather_extract_pyscript','start_weather_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "processHistoricalWeatherData.py"])
+            subprocess.run([self.pythonAlias, "processHistoricalWeatherData.py"], check=True)
             util.batch_logging_update(self.weather_jobid, 'e')
             print("{0}: Processing of {2} Data completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start), self.process_name))

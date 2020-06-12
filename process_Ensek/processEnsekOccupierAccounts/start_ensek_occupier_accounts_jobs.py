@@ -29,7 +29,7 @@ class StartOccupierAccountsJobs:
         try:
             util.batch_logging_insert(self.occupier_accounts_extract_jobid , 51, 'Occupier Accounts pyscript', 'start_ensek_occupier_accounts_jobs.py')
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_occupier_accounts.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_occupier_accounts.py"], check=True)
             print("{0}: Process Ensek Occupier  completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
             util.batch_logging_update(self.occupier_accounts_extract_jobid, 'e')
