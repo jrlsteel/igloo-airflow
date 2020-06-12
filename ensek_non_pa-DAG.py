@@ -18,7 +18,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='ensek_pa',
+    dag_id='ensek_non_pa',
     default_args=args,
     schedule_interval=None,
     tags=['cdw']
@@ -30,11 +30,11 @@ process_ensek_registration_meterpoint_status = BashOperator(
     dag=dag,
 )
 
-process_ensek_internal_estimates = BashOperator(
-    task_id='process_ensek_internal_estimates',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekEstimates/process_ensek_internal_estimates.py',
-    dag=dag,
-)
+# process_ensek_internal_estimates = BashOperator(
+#     task_id='process_ensek_internal_estimates',
+#     bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekEstimates/process_ensek_internal_estimates.py',
+#     dag=dag,
+# )
 
 process_ensek_tariffs_history = BashOperator(
     task_id='process_ensek_tariffs_history',
@@ -66,4 +66,4 @@ start_ensek_non_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_ensek_registration_meterpoint_status >> process_ensek_internal_estimates >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
+process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
