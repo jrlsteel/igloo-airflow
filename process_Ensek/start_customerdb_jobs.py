@@ -24,7 +24,7 @@ class StartCustomerDBJobs:
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
-            obj_customerDB = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='')
+            obj_customerDB = glue.ProcessGlueJob(job_name=jobname, s3_bucket=s3_bucket, environment=environment, processJob='mirror_all_cdb')
             job_response = obj_customerDB.run_glue_job()
             if job_response:
                 print("{0}: CustomerDB Glue Job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
