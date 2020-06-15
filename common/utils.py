@@ -189,9 +189,9 @@ def get_accountID_fromDB(get_max, filter='live'):
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
-        print(account_id_df.values[0])
+        #print(account_id_df.values[0])
         account_id_list1 = [row[0] for row in account_id_list]
-        print(account_id_list[0])
+        #print(account_id_list[0])
         # logic to get max external id and process all the id within them
         if get_max:
             account_ids = list(range(1, max(account_id_list1) + 1))
