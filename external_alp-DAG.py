@@ -66,4 +66,7 @@ start_alp_historical_calc_jobs = BashOperator(
     dag=dag,
 )
 
-process_land_registry >> start_land_registry_staging_jobs >> start_land_registry_ref_jobs
+process_ALP_DAF >> process_ALP_PN >> processALP_CV >> process_ALP_PN >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
+
+
+
