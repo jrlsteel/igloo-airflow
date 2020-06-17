@@ -45,7 +45,7 @@ start_d18_staging_jobs = BashOperator(
 
 start_d18_ref_jobs = BashOperator(
     task_id='start_d18_ref_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readingsprocess_D18 && ../.venv/bin/python start_d18_ref_jobs.py',
+    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_ref_jobs.py',
     dag=dag,
 )
 
