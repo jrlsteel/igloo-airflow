@@ -19,6 +19,7 @@ from conf import config as con
 from common import utils as util
 from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
+from common import api_filters as apif
 
 
 class LandRegistry:
@@ -30,6 +31,7 @@ class LandRegistry:
         self.end_date = datetime.datetime.today().date()
         self.api_url, self.head, self.key = util.get_api_info(api="land_registry", header_type="json")
         self.num_days_per_api_calls = 7
+        self.sql = apif.land_registry_postcodes['daily']  # there is no need for a weekly run here
 
     def get_params(self, address):
 
@@ -173,10 +175,8 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    # land_registry_address_sql = con.test_config['land_registry_address_sql']
-    # addresses_df = p.get_adress_details(land_registry_address_sql)
-
-    addresses_df = util.get_accountID_fromDB(False, filter='land-registry')
+    land_registry_address_sql = p.sql
+    addresses_df = p.get_adress_details(land_registry_address_sql)
 
     # print(weather_postcodes)
     # if False:
