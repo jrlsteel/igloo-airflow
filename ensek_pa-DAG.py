@@ -32,10 +32,9 @@ process_customerdb = BashOperator(
 
 process_ensek_meterpoints_no_history = BashOperator(
     task_id='process_ensek_meterpoints_no_history',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek/processEnsekMeterpoints && ../.venv/bin/python process_ensek_meterpoints_no_history.py',
+    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
-
 start_ensek_pa_staging_jobs = BashOperator(
     task_id='start_ensek_pa_staging_jobs',
     bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_ensek_pa_staging_jobs.py',
