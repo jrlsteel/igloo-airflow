@@ -48,4 +48,6 @@ start_ensek_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_customerdb >> process_ensek_meterpoints_no_history >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
+#process_customerdb >> process_ensek_meterpoints_no_history >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
+
+process_ensek_meterpoints_no_history >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
