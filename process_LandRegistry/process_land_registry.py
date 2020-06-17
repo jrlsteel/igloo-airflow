@@ -173,8 +173,10 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
 
-    land_registry_address_sql = con.test_config['land_registry_address_sql']
-    addresses_df = p.get_adress_details(land_registry_address_sql)
+    # land_registry_address_sql = con.test_config['land_registry_address_sql']
+    # addresses_df = p.get_adress_details(land_registry_address_sql)
+
+    addresses_df = util.get_accountID_fromDB(False, filter='land-registry')
 
     # print(weather_postcodes)
     # if False:
