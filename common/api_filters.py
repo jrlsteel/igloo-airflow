@@ -12,13 +12,13 @@ acc_mp_ids = {
 
 pending_acc_ids = {
     "daily": """select * from vw_etl_pending_acc_ids_weekly order by account_id""",
-    "weekly": """select * from vw_etl_pending_acc_ids_weekly order by account_id"""
+    "weekly": """select * from vw_etl_pending_acc_ids_weekly order by account_id""",
 }
 
 
 tariff_diff_acc_ids = {
     "daily": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id """,
-    "weekly": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id"""
+    "weekly": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id""",
 }
 
 
@@ -31,5 +31,11 @@ epc_postcodes = {
 land_registry_postcodes = {
     "daily": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
     "weekly": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
+
+}
+
+weather_postcodes = {
+    "daily": """select * from vw_etl_weather_postcodes_daily order by postcode""",
+    "weekly": """select * from vw_etl_weather_postcodes_daily order by postcode""",
 
 }

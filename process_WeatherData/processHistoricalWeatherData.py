@@ -19,6 +19,7 @@ from conf import config as con
 from common import utils as util
 from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
+from common import api_filters as apif
 
 
 class HistoricalWeather:
@@ -32,6 +33,7 @@ class HistoricalWeather:
         self.start_date = (datetime.today().date() + timedelta(days=(7-self.day_of_week))) - timedelta(days=35)
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
+        self.sql = apif.weather_postcodes['daily']
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -151,7 +153,8 @@ if __name__ == "__main__":
     s3 = s3_con(bucket_name)
     # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SL6') group by left(postcode, len(postcode) - 3)"
     # weather_postcode_sql = weather_sql
-    weather_postcode_sql = con.test_config['weather_sql']
+
+    weather_postcode_sql = p.sql
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
     # print(weather_postcodes)
