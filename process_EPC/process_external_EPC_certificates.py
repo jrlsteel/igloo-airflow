@@ -49,18 +49,18 @@ class IglooEPCCertificates:
                         return response_json
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -104,7 +104,7 @@ class IglooEPCCertificates:
                 t = con.api_config['total_no_of_calls']
                 print('postcode:' + str(postcode_sector))
                 msg_ac = 'ac:' + str(postcode_sector)
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
                 api_url1 = api_url.format(postcode_sector)
                 # print(api_url1)
                 epc_data_response = self.get_api_response(api_url1, head)
