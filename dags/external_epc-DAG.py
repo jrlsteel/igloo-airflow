@@ -27,19 +27,19 @@ dag = DAG(
 
 start_epc_full_processing_jobs = BashOperator(
     task_id='start_epc_full_processing_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_processing_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_processing_jobs.py',
     dag=dag,
 )
 
 start_epc_full_staging_jobs = BashOperator(
     task_id='start_epc_full_staging_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_staging_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_staging_jobs.py',
     dag=dag,
 )
 
 start_epc_full_ref_jobs = BashOperator(
     task_id='start_epc_full_ref_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_ref_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_EPC && ../.venv/bin/python start_epc_full_ref_jobs.py',
     dag=dag,
 )
 

@@ -26,19 +26,19 @@ dag = DAG(
 
 process_land_registry = BashOperator(
     task_id='process_land_registry',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python process_land_registry.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python process_land_registry.py',
     dag=dag,
 )
 
 start_land_registry_staging_jobs = BashOperator(
     task_id='start_land_registry_staging_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python start_land_registry_staging_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python start_land_registry_staging_jobs.py',
     dag=dag,
 )
 
 start_land_registry_ref_jobs = BashOperator(
     task_id='start_land_registry_ref_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python process_land_registry.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_LandRegistry && ../.venv/bin/python process_land_registry.py',
     dag=dag,
 )
 
