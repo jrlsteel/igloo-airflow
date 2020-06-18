@@ -26,43 +26,43 @@ dag = DAG(
 
 process_ALP_DAF = BashOperator(
     task_id='process_ALP_DAF',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_DAF.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_DAF.py',
     dag=dag,
 )
 
 process_ALP_PN = BashOperator(
     task_id='process_ALP_PN',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_PN.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_PN.py',
     dag=dag,
 )
 
 processALP_CV = BashOperator(
     task_id='processALP_CV',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python processALP_CV.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python processALP_CV.py',
     dag=dag,
 )
 
 processALP_WCF = BashOperator(
     task_id='processALP_WCF',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python processALP_WCF.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python processALP_WCF.py',
     dag=dag,
 )
 
 start_alp_historical_staging_jobs = BashOperator(
     task_id='start_alp_historical_staging_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_staging_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_staging_jobs.py',
     dag=dag,
 )
 
 start_alp_historical_ref_jobs = BashOperator(
     task_id='start_alp_historical_ref_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_ref_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_ref_jobs.py',
     dag=dag,
 )
 
 start_alp_historical_calc_jobs = BashOperator(
     task_id='start_alp_historical_calc_jobs',
-    bash_command='cd /usr/local/airflow/dags/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_calc_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_calc_jobs.py',
     dag=dag,
 )
 

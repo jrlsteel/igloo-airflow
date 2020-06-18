@@ -30,7 +30,6 @@ pandas-redshift==2.0.3
 paramiko==2.7.1
 pipreqs==0.4.10
 protobuf==3.12.2
-psycopg2==2.8.5
 psycopg2-binary==2.8.5
 pyasn1==0.4.8
 pycparser==2.20
