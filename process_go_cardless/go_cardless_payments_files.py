@@ -32,7 +32,7 @@ Events = client.events
 Refunds = client.refunds
 Mandates = client.mandates
 Subscriptions = client.subscriptions
-payments = client.payments
+Payments = client.payments
 
 
 class GoCardlessPayments(object):
@@ -43,16 +43,24 @@ class GoCardlessPayments(object):
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
         self.EventsFileDirectory = self.dir['s3_finance_goCardless_key']['Events']
+        self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
+        self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
         self.PaymentsFileDirectory = self.dir['s3_finance_goCardless_key']['Payments-Files']
+        self.RefundsFileDirectory = self.dir['s3_finance_goCardless_key']['Refunds-Files']
         self.Events = Events
-        self.Payments = payments
+        self.Mandates = Mandates
+        self.Subscriptions = Subscriptions
+        self.Payments = Payments
+        self.Refunds = Refunds
         self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays=-1)
+            _execStartDate = self.get_date(self.toDay, _addDays = -1)
         self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
         if _execEndDate is None:
             _execEndDate = self.toDay
         self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+
+
 
     def is_json(self, myjson):
         try:
@@ -136,7 +144,7 @@ class GoCardlessPayments(object):
                                description_js,
                                reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
                                EnsekStatementId_js]
-                    q.put(listRow)
+                    ##q.put(listRow)
                 else:
                     if payment.metadata:
                         if 'AccountId' in payment.metadata:
@@ -158,9 +166,9 @@ class GoCardlessPayments(object):
                     subscription = payment.links.subscription
                     EnsekID = EnsekAccountId
                     EnsekStatementId = StatementId
-                    listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
-                               reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
-                    q_payment.put(listRow)
+                    payment_listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
+                                       reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                    q_payment.put(payment_listRow)
 
         except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
                 gocardless_pro.errors.MalformedResponseError) as e:
@@ -177,7 +185,7 @@ class GoCardlessPayments(object):
 
         return df
 
-    def writeCSVs_payments(self, df):
+    def writeCSVs_Payments(self, df):
         PaymentsfileDirectory = self.PaymentsFileDirectory
         s3 = self.s3
 
@@ -199,6 +207,19 @@ class GoCardlessPayments(object):
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
+
+
+    def WriteToS3(self, df):
+        s3=self.s3
+        pdf =  df
+
+        filename = 'go_cardless_Payments_Merged.csv'
+        df_string = pdf.to_csv(None, index=False)
+        s3.key = "/go-cardless-api-paymentsMerged-files/go_cardless_Payments_Merged.csv"
+        print(s3.key)
+        s3.set_contents_from_string(df_string)
+
+
     def runDailyFiles(self):
         for single_date in self.daterange():
             start = single_date
@@ -208,55 +229,61 @@ class GoCardlessPayments(object):
             self.process_Payments(start, end)
 
 
+
+
+    def Multiprocess_Event(self, df, method):
+        env = util.get_env()
+        if env == 'uat':
+            n = 12  # number of process to run in parallel
+        else:
+            n = 12
+
+        k = int(len(df) / n)  # get equal no of files for each process
+
+        print(len(df))
+        print(k)
+
+        processes = []
+        lv = 0
+        start = timeit.default_timer()
+
+        for i in range(n + 1):
+            print(i)
+            uv = i * k
+            if i == n:
+                t = multiprocessing.Process(target= method, args=(df[lv:],))
+            else:
+                t = multiprocessing.Process(target= method, args=(df[lv:uv],))
+            lv = uv
+
+            processes.append(t)
+
+        for p in processes:
+            p.start()
+            time.sleep(2)
+
+        for process in processes:
+            process.join()
+        ####### Multiprocessing Ends #########
+
+        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+
+
+
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    p = GoCardlessPayments('2020-01-01', '2020-05-14')
+    p = GoCardlessPayments('2017-03-01', '2020-06-17')
     ##p = GoCardlessPayments()
 
-    df_payment = p.process_Payments()
 
-    ##### Multiprocessing Starts #########
-
-    env = util.get_env()
-    if env == 'uat':
-        n = 12  # number of process to run in parallel
-    else:
-        n = 12
-
-    k = int(len(df_payment) / n)  # get equal no of files for each process
-
-    print(len(df_payment))
-    print(k)
-
-    processes = []
-    lv = 0
-    start = timeit.default_timer()
-
-    for i in range(n + 1):
-        ##p1 = GoCardlessPayments('2017-05-01', '2018-01-01')
-        print(i)
-        uv = i * k
-        if i == n:
-            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:],))
-        else:
-            t = multiprocessing.Process(target=p.writeCSVs_payments, args=(df_payment[lv:uv],))
-        lv = uv
-
-        processes.append(t)
-
-    for p in processes:
-        p.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
-    ####### Multiprocessing Ends #########
-
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    ### PAYMENTS ###
+    df_payments = p.process_Payments()
+    AllPay = p.WriteToS3(df_payments)
+    ##pPayments = p.Multiprocess_Event(df=df_payments, method=p.writeCSVs_Payments)
 
 
 

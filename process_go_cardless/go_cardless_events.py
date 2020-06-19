@@ -1,7 +1,7 @@
 import os
 import gocardless_pro
 import timeit
-
+from io import StringIO
 import pandas as pd
 import numpy as np
 import requests
@@ -568,7 +568,13 @@ class GoCardlessEvents(object):
                                              'currency', 'description', 'reference', 'status', 'payout', 'mandate',
                                              'subscription', 'EnsekID', 'StatementId'])
 
-        return df
+        remove_duplicates_df = df.drop_duplicates(subset=['id'], keep='first')
+        df_string = remove_duplicates_df.to_csv(None, index=False)
+        s3.key = "/go-cardless-api-paymentsMerged-files/go_cardless_Payments_Update_20200619.csv"
+        print(s3.key)
+        s3.set_contents_from_string(df_string)
+        return remove_duplicates_df
+
 
     def writeCSVs_Payments(self, df):
         PaymentsfileDirectory = self.PaymentsFileDirectory
@@ -591,6 +597,93 @@ class GoCardlessEvents(object):
             s3.key = PaymentsfileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
+
+
+    def Update_Events_Driven_Payments(self, df2):
+        s3 = db.get_finance_S3_Connections_client()
+
+        s31 = db.get_finance_S3_Connections_resources()
+        dir_s3 = util.get_dir()
+        bucket = dir_s3['s3_finance_bucket']
+
+        ##file1 = 'go-cardless-api-paymentsNewTesting-files/go_cardless_Payments_file.csv'
+        ##file2 = 'go-cardless-api-paymentsMerged-files/go_cardless_Payments_Update_20200618.csv'
+
+        paymentsFileName = 'go-cardless-api-paymentsNewTesting-files/go_cardless_Payments_file.csv'
+
+        # archive File
+        print('....Archiving File.....')
+        keypath = 'go-cardless-api-Archived_Files/Payment_Files/go_cardless_Payments_file.csv'
+        copy_source = {
+            'Bucket': bucket,
+            'Key': paymentsFileName
+        }
+
+        s3.copy(copy_source, bucket, keypath)
+        print('....Archiving Completed.....')
+
+        ## Previous Payments
+        df1 = self.read_files_to_df(paymentsFileName)
+
+        ## Today's Event Driven Payments
+        ##df2 = self.read_files_to_df(file2)
+
+        ## SELECT NEW or UPDATED Payment IDs
+        df2_ID = df2[['id']].copy()
+
+        ## Merge Previous Payments with (Updated or New) Payments
+        df_all = df1.merge(df2_ID.drop_duplicates(), on=['id'],
+                           how='left', indicator=True)
+        df_all = df_all[df_all['_merge'] == 'left_only']
+
+        df_update = df2.copy()
+        df_Right = df_all.drop(['_merge'], axis=1).copy()
+        df_All_Payments = pd.concat([df_Right, df_update], sort=False)
+        df_All_Payments[["amount", "EnsekID", "StatementId"]] = df_All_Payments[
+            ["amount", "EnsekID", "StatementId"]].apply(pd.to_numeric)
+        cols_to_use = df_All_Payments.columns
+
+        ## WRITE All Payments TO s3
+        self.WritePaymentFilesToS3(df_All_Payments)
+
+
+    def read_files_to_df(self, files):
+
+        ##prefix = 'go-cardless-api-payments-files'
+        prefix = ''
+        s31 = db.get_finance_S3_Connections_resources()
+        s3 =  self.s3
+        bucket = s31.Bucket(self.bucket_name)
+        prefix_df = pd.DataFrame()
+        df = pd.DataFrame()
+        prefix = files
+        prefix_objs = bucket.objects.filter(Prefix=prefix)
+
+        for obj in prefix_objs:
+            key = obj.key
+            print(key)
+            body = obj.get()['Body'].read()
+            ### CONVERT Bytes To String
+            s = str(body, 'utf-8')
+            data = StringIO(s)
+
+            df = pd.read_csv(data, low_memory=False)
+            prefix_df=prefix_df.append(df)
+        return prefix_df
+
+
+    def WritePaymentFilesToS3(self, df):
+        s3=self.s3
+        pdf =  df
+
+        ##filename = 'go_cardless_Payments_Merged.csv'
+        df_string = pdf.to_csv(None, index=False)
+        s3.key = "/go-cardless-api-paymentsNewTesting-files/go_cardless_Payments_file.csv"
+        print(s3.key)
+        s3.set_contents_from_string(df_string)
+
+
+
 
 
 
@@ -798,6 +891,9 @@ if __name__ == "__main__":
     ### PAYMENTS ###
     df_payments = p.process_Payments()
     pPayments = p.Multiprocess_Event(df=df_payments, method=p.writeCSVs_Payments)
+    ## Payment-Files
+    pPaymentsFiles = p.Update_Events_Driven_Payments(df2=df_payments)
+
 
     ## REFUNDS ##
     df_refunds = p.process_Refunds()
