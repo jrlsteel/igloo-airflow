@@ -606,10 +606,10 @@ class GoCardlessEvents(object):
         dir_s3 = util.get_dir()
         bucket = dir_s3['s3_finance_bucket']
 
-        ##file1 = 'go-cardless-api-paymentsNewTesting-files/go_cardless_Payments_file.csv'
+        ##file1 = 'go-cardless-api-paymentsnewtesting-files/go_cardless_Payments_file.csv'
         ##file2 = 'go-cardless-api-paymentsMerged-files/go_cardless_Payments_Update_20200618.csv'
 
-        paymentsFileName = 'go-cardless-api-paymentsNewTesting-files/go_cardless_Payments_file.csv'
+        paymentsFileName = 'go-cardless-api-paymentsnewtesting-files/go_cardless_Payments_file.csv'
 
         # archive File
         print('....Archiving File.....')
