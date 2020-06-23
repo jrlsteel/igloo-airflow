@@ -233,7 +233,7 @@ class StartGoCardlessAPIExtracts:
     def submit_go_cardless_staging_gluejob(self):
         try:
             jobName = self.dir['glue_staging_job_name']
-            s3_bucket = self.dir['s3_finance_bucket']
+            s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
