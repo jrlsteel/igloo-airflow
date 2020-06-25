@@ -24,18 +24,6 @@ dag = DAG(
     tags=['cdw']
 )
 
-process_ALP_DAF = BashOperator(
-    task_id='process_ALP_DAF',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_DAF.py',
-    dag=dag,
-)
-
-process_ALP_PN = BashOperator(
-    task_id='process_ALP_PN',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python process_ALP_PN.py',
-    dag=dag,
-)
-
 processALP_CV = BashOperator(
     task_id='processALP_CV',
     bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python processALP_CV.py',
@@ -66,7 +54,7 @@ start_alp_historical_calc_jobs = BashOperator(
     dag=dag,
 )
 
-process_ALP_DAF >> processALP_CV >> process_ALP_PN >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
+ processALP_CV >>  processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
 
 
 
