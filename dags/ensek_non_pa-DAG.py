@@ -30,11 +30,11 @@ process_ensek_registration_meterpoint_status = BashOperator(
     dag=dag,
 )
 
-# process_ensek_internal_estimates = BashOperator(
-#     task_id='process_ensek_internal_estimates',
-#     bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekEstimates/process_ensek_internal_estimates.py',
-#     dag=dag,
-# )
+process_ensek_internal_estimates = BashOperator(
+    task_id='process_ensek_internal_estimates',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekEstimates/process_ensek_internal_estimates.py',
+    dag=dag,
+)
 
 process_ensek_tariffs_history = BashOperator(
     task_id='process_ensek_tariffs_history',
