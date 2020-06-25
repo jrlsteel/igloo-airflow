@@ -91,4 +91,6 @@ start_ensek_non_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_customerdb >> process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
+#process_customerdb >> process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
+
+process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
