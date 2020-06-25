@@ -23,12 +23,12 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw']
 )
-
-process_customerdb = BashOperator(
-    task_id='process_customerdb',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_customerdb_jobs.py',
-    dag=dag,
-)
+#
+# process_customerdb = BashOperator(
+#     task_id='process_customerdb',
+#     bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_customerdb_jobs.py',
+#     dag=dag,
+# )
 
 
 process_ensek_meterpoints_no_history = BashOperator(
