@@ -30,12 +30,12 @@ process_customerdb = BashOperator(
     dag=dag,
 )
 
+
 process_ensek_meterpoints_no_history = BashOperator(
     task_id='process_ensek_meterpoints_no_history',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python process_ensek_meterpoints_no_history.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
-
 
 process_ensek_registration_meterpoint_status = BashOperator(
     task_id='process_ensek_registration_meterpoint_status.py',
