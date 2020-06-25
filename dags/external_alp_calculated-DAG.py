@@ -48,8 +48,13 @@ start_alp_historical_ref_jobs = BashOperator(
     dag=dag,
 )
 
+start_alp_historical_calc_jobs = BashOperator(
+    task_id='start_alp_historical_calc_jobs',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && ../.venv/bin/python start_alp_historical_calc_jobs.py',
+    dag=dag,
+)
 
-processALP_CV >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs 
+processALP_CV >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
 
 
 
