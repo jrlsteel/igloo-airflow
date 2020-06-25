@@ -38,9 +38,7 @@ process_ensek_internal_readings = BashOperator(
     dag=dag,
 )
 
-start_ensek_pa_staging_jobs = BashOperator(
 
-
-process_ensek_meterpoints_no_history >> process_ensek_internal_readings 
+process_ensek_meterpoints_no_history >> process_ensek_internal_readings
 
 #process_ensek_meterpoints_no_history >> process_ensek_internal_readings >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
