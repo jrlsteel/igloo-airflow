@@ -37,8 +37,7 @@ processALP_WCF = BashOperator(
 )
 
 
-
-processALP_CV >> processALP_WCF 
+processALP_CV >> processALP_WCF
 
 
 
