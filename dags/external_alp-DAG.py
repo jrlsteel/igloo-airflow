@@ -54,7 +54,7 @@ start_alp_historical_calc_jobs = BashOperator(
     dag=dag,
 )
 
- processALP_CV >>  processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
+processALP_CV >>  processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs >> start_alp_historical_calc_jobs
 
 
 
