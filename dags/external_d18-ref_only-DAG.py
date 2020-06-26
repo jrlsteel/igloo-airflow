@@ -24,24 +24,6 @@ dag = DAG(
     tags=['cdw']
 )
 
-start_d18_download_jobs = BashOperator(
-    task_id='start_d18_download_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_download_jobs.py',
-    dag=dag,
-)
-
-
-start_d18_processing_jobs = BashOperator(
-    task_id='start_d18_processing_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_processing_jobs.py',
-    dag=dag,
-)
-
-start_d18_staging_jobs = BashOperator(
-    task_id='start_d18_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_staging_jobs.py',
-    dag=dag,
-)
 
 start_d18_ref_jobs = BashOperator(
     task_id='start_d18_ref_jobs',
@@ -49,5 +31,5 @@ start_d18_ref_jobs = BashOperator(
     dag=dag,
 )
 
-start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs
+start_d18_ref_jobs
 
