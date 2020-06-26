@@ -18,7 +18,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='igloo_d18',
+    dag_id='igloo_d18_ref_only',
     default_args=args,
     schedule_interval=None,
     tags=['cdw']
@@ -49,5 +49,5 @@ start_d18_ref_jobs = BashOperator(
     dag=dag,
 )
 
-#start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs
-start_d18_ref_jobs
+start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs
+
