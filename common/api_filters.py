@@ -15,6 +15,7 @@ account_ids = {
                                     from ref_meterpoints_raw
                                     group by account_id) acc_sed on acc_sed.account_id = full_account_list.account_id
                 where datediff(days, nvl(sed, getdate() + 1000), getdate()) < 56
+                  and full_account_list.account_id is not null
                 union
                 distinct
                 -- accounts whose most recent transaction was within the past 4 weeks or left a non-zero balance
@@ -26,6 +27,7 @@ account_ids = {
                       from ref_account_transactions) ordered_transactions
                 where rn = 1
                   and (currentbalance != 0 or datediff(days, creationdetail_createddate, getdate()) < 28)
+                  and account_id is not null
                 union
                 distinct
                 -- accounts present in the manual override table
@@ -33,6 +35,7 @@ account_ids = {
                 from dwh_manual_batch_accounts
                 where getdate() between nvl(use_from, getdate() - 1) and nvl(use_until, getdate() + 1)
                   and daily_batch
+                  and account_id is not null
                 order by account_id""",
     "weekly": """-- account_ids in our database that are live, meterpoint data absent or closed in the last 365 days
                 select full_account_list.account_id
@@ -50,6 +53,7 @@ account_ids = {
                                     from ref_meterpoints_raw
                                     group by account_id) acc_sed on acc_sed.account_id = full_account_list.account_id
                 where datediff(days, nvl(sed, getdate() + 1000), getdate()) < 365
+                  and full_account_list.account_id is not null
                 union
                 distinct
                 -- accounts whose most recent transaction was within the past year or left a non-zero balance
@@ -61,12 +65,14 @@ account_ids = {
                       from ref_account_transactions) ordered_transactions
                 where rn = 1
                   and (currentbalance != 0 or datediff(days, creationdetail_createddate, getdate()) < 365)
+                  and account_id is not null
                 union
                 distinct
                 -- accounts present in the manual override table
                 select account_id
                 from dwh_manual_batch_accounts
                 where getdate() between nvl(use_from, getdate() - 1) and nvl(use_until, getdate() + 1)
+                  and account_id is not null
                 order by account_id""",
 
 }
