@@ -17,8 +17,10 @@ pending_acc_ids = {
 
 
 tariff_diff_acc_ids = {
-    "daily": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id """,
-    "weekly": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id""",
+    #"daily": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id """,
+    #"weekly": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id""",
+    "daily": """select * from vw_etl_account_ids_daily order by account_id """,
+    "weekly": """select * from vw_etl_account_ids_daily order by account_id""",
 }
 
 
