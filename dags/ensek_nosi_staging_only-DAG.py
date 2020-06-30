@@ -31,4 +31,4 @@ start_ensek_readings_nosi_staging_jobs = BashOperator(
     dag=dag,
 )
 
-start_ensek_readings_nosi_ref_jobs
+start_ensek_readings_nosi_staging_jobs
