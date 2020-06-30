@@ -24,22 +24,11 @@ dag = DAG(
     tags=['cdw']
 )
 
-process_ensek_occupier_accounts = BashOperator(
-    task_id='process_ensek_occupier_accounts',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekOccupierAccounts/process_ensek_occupier_accounts.py',
-    dag=dag,
-)
-
 start_ensek_occupier_accounts_staging_jobs = BashOperator(
     task_id='start_ensek_occupier_accounts_staging_jobs',
     bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekOccupierAccounts/start_ensek_occupier_accounts_staging_jobs.py',
     dag=dag,
 )
 
-start_ensek_occupier_accounts_ref_jobs = BashOperator(
-    task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekOccupierAccounts/start_ensek_occupier_accounts_ref_jobs.py',
-    dag=dag,
-)
 
-process_ensek_occupier_accounts >> start_ensek_occupier_accounts_staging_jobs >> start_ensek_occupier_accounts_ref_jobs
+start_ensek_occupier_accounts_staging_jobs
