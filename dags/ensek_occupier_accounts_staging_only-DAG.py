@@ -18,7 +18,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='ensek_occupier_accounts',
+    dag_id='ensek_occupier_accounts_staging_only',
     default_args=args,
     schedule_interval=None,
     tags=['cdw']
