@@ -27,7 +27,7 @@ dag = DAG(
 
 start_ensek_occupier_accounts_ref_jobs = BashOperator(
     task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekOccupierAccounts/start_ensek_occupier_accounts_ref_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && ../../.venv/bin/python processEnsekOccupierAccounts/start_ensek_occupier_accounts_ref_jobs.py',
     dag=dag,
 )
 
