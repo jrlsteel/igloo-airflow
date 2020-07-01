@@ -191,7 +191,7 @@ if __name__ == "__main__":
         account_ids = util.get_accountID_fromDB(False, filter='tariff-diffs')
 
     if con.test_config['enable_db_max'] == 'Y':
-        account_ids = util.get_accountID_fromDB(True, filter='tariff-diffs')
+        account_ids = util.get_accountID_fromDB(True, filter='live')
 
     # Enable to test without multiprocessing.
     # p.processAccounts(account_ids, s3, dir_s3)
