@@ -26,7 +26,7 @@ dag = DAG(
 
 start_d18_download_jobs = BashOperator(
     task_id='start_d18_download_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_download_jobs.py',
+    bash_command='export PATH=`realpath ../.venv/bin`:$PATH && cd /opt/code/enzek-meterpoint-readings/process_D18 && ../.venv/bin/python start_d18_download_jobs.py',
     dag=dag,
 )
 
