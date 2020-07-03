@@ -279,7 +279,7 @@ if __name__ == '__main__':
 
 
     ## Events API Endpoint
-    print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Go-Cardless Everokwf4twgr5nt API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.extract_go_cardless_events_job()
 
 

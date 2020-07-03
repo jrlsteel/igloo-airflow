@@ -569,10 +569,6 @@ class GoCardlessEvents(object):
                                              'subscription', 'EnsekID', 'StatementId'])
 
         remove_duplicates_df = df.drop_duplicates(subset=['id'], keep='first')
-        df_string = remove_duplicates_df.to_csv(None, index=False)
-        s3.key = "/go-cardless-api-paymentsMerged-files/go_cardless_Payments_Update_20200619.csv"
-        print(s3.key)
-        s3.set_contents_from_string(df_string)
         return remove_duplicates_df
 
 
@@ -673,10 +669,12 @@ class GoCardlessEvents(object):
 
 
     def WritePaymentFilesToS3(self, df):
+        PaymentsfileDirectory = self.PaymentsFileDirectory
         s3=self.s3
         pdf =  df
 
-        ##filename = 'go_cardless_Payments_Merged.csv'
+        filename = 'go_cardless_Payments_file.csv'
+        s3.key = PaymentsfileDirectory + filename
         df_string = pdf.to_csv(None, index=False)
         s3.key = "/go-cardless-api-payments-files/go_cardless_Payments_file.csv"
         print(s3.key)
@@ -890,8 +888,6 @@ if __name__ == "__main__":
 
     ### PAYMENTS ###
     df_payments = p.process_Payments()
-    pPayments = p.Multiprocess_Event(df=df_payments, method=p.writeCSVs_Payments)
-    ## Payment-Files
     pPaymentsFiles = p.Update_Events_Driven_Payments(df2=df_payments)
 
 

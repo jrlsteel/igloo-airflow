@@ -223,7 +223,7 @@ class GoCardlessEvents(object):
         df_string = df_event.to_csv(None, index=False)
         s3.key = EventsfileDirectory + fkey + filenameEvents
         print(s3.key)
-        ##s3.set_contents_from_string(df_string)
+        s3.set_contents_from_string(df_string)
         return df_event
 
 
@@ -289,7 +289,7 @@ class GoCardlessEvents(object):
                     StatementId = mandate.metadata['StatementId']
 
                 mandate_id = mandate.id
-                ##print(mandate_id)
+                print(mandate_id)
 
                 CustomerId = mandate.links.customer
                 new_mandate_id = mandate.links.new_mandate
@@ -351,7 +351,7 @@ class GoCardlessEvents(object):
             df_string = df_1.to_csv(None, index=False)
             s3.key = MandatesFileDirectory + filename
             print(s3.key)
-            ##s3.set_contents_from_string(df_string)
+            s3.set_contents_from_string(df_string)
 
 
 
@@ -387,7 +387,7 @@ class GoCardlessEvents(object):
                 amount_subscription = None
                 mandate = None
                 id = subscription.id
-                ##print(id)
+                print(id)
 
                 upcoming_payments = subscription.upcoming_payments
                 if len(upcoming_payments) > 0:
@@ -458,7 +458,7 @@ class GoCardlessEvents(object):
             df_string = df_1.to_csv(None, index=False)
             s3.key = SubscriptionsfileDirectory + filename
             print(s3.key)
-            ##s3.set_contents_from_string(df_string)
+            s3.set_contents_from_string(df_string)
 
 
 
@@ -522,7 +522,7 @@ class GoCardlessEvents(object):
                         if 'StatementId' in payment.metadata:
                             StatementId = payment.metadata['StatementId']
 
-                    ##print(payment.id)
+                    print(payment.id)
                     id = payment.id
 
                     amount = payment.amount
@@ -579,7 +579,7 @@ class GoCardlessEvents(object):
             df_string = df_1.to_csv(None, index=False)
             s3.key = PaymentsfileDirectory + filename
             print(s3.key)
-            ##s3.set_contents_from_string(df_string)
+            s3.set_contents_from_string(df_string)
 
     def Update_Events_Driven_Payments(self, df2):
         s3 = db.get_finance_S3_Connections_client()
@@ -662,7 +662,7 @@ class GoCardlessEvents(object):
         df_string = pdf.to_csv(None, index=False)
         s3.key = "/go-cardless-api-payments-files/go_cardless_Payments_file.csv"
         print(s3.key)
-        ##s3.set_contents_from_string(df_string)
+        s3.set_contents_from_string(df_string)
 
 
 
@@ -743,7 +743,7 @@ class GoCardlessEvents(object):
             df_string = df_1.to_csv(None, index=False)
             s3.key = RefundsfileDirectory + filename
             print(s3.key)
-            ##s3.set_contents_from_string(df_string)
+            s3.set_contents_from_string(df_string)
 
 
 
@@ -922,13 +922,7 @@ class GoCardlessEvents(object):
 
 
 
-    def runDailyFiles(self):
-        for single_date in self.daterange():
-            start = single_date
-            end = self.get_date(start)
-            ## print(start, end)
-            ### Execute Job ###
-            self.process_Events(start, end)
+
 
 
 
