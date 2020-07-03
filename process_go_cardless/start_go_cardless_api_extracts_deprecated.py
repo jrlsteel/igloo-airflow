@@ -259,9 +259,23 @@ if __name__ == '__main__':
     util.batch_logging_insert(s.all_jobid, 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
 
 
+    ## Payments API Endpoint
+    print("{0}:  Go-Cardless Payments API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.extract_go_cardless_payments_job()
+
+    ## Refunds API Endpoint
+    print("{0}:  Go-Cardless Refunds API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.extract_go_cardless_refunds_job()
+
+
     ## Payouts API Endpoint
     print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.extract_go_cardless_payouts_job()
+
+
+    ## Mandates API Endpoint
+    print("{0}:  Go-Cardless Mandates API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.extract_go_cardless_mandates_job()
 
 
     ## Events API Endpoint
@@ -272,6 +286,11 @@ if __name__ == '__main__':
     ## Clients API Endpoint
     print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
     s.extract_go_cardless_customers_job()
+
+
+    ## Subscriptions API Endpoint
+    print("{0}:  Go-Cardless Subscriptions API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.extract_go_cardless_subscriptions_job()
 
 
     # Go Cardless Staging Jobs
