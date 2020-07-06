@@ -45,18 +45,18 @@ class DirectDebit:
                     return json.loads(response.content.decode('utf-8'))
                 else:
                     print ('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -107,7 +107,7 @@ class DirectDebit:
             # Get Direct Debit
             print('ac: ' + str(account_id))
             msg_ac = 'ac:' + str(account_id)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             api_url1 = api_url.format(account_id)
             dd_response = self.get_api_response(api_url1, head)
             if dd_response:
@@ -117,12 +117,12 @@ class DirectDebit:
             else:
                 print('ac:' + str(account_id) + ' has no data')
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
             # Get Direct Debit Health Check
             print('ac: ' + str(account_id))
             msg_ac = 'ac:' + str(account_id)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             api_url_ddh1 = api_url_ddh.format(account_id)
             ddh_response = self.get_api_response(api_url_ddh1, head_ddh)
             if ddh_response:
@@ -132,7 +132,7 @@ class DirectDebit:
             else:
                 print('ac:' + str(account_id) + ' has no data')
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":

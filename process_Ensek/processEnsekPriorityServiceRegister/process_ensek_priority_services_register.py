@@ -61,18 +61,18 @@ class TstApi:
                     return response_json
                 else:
                     # print(response.text)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    ##self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    ##self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    ##self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -136,7 +136,7 @@ class TstApi:
 
                 print('ac:' + str(account_id))
                 msg_ac = 'ac:' + str(account_id)
-                self.log_error(msg_ac, '')
+                ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
                 # print(json.dumps(internal_data_response, indent=4))
@@ -176,7 +176,7 @@ class TstApi:
 
                 print('ac:' + str(account_id))
                 msg_ac = 'ac:' + str(account_id)
-                self.log_error(msg_ac, '')
+                ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
                 # print(json.dumps(internal_data_response, indent=4))

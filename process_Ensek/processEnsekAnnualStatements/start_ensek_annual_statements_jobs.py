@@ -23,7 +23,7 @@ class StartAnnualStatementsJobs:
         print("{0}: >>>> Process Ensek Annual Statements  <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
             start = timeit.default_timer()
-            subprocess.run([self.pythonAlias, "process_ensek_annual_statements.py"])
+            subprocess.run([self.pythonAlias, "process_ensek_annual_statements.py"] , check=True)
             print("{0}: Process Ensek Annual Statements completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
                                                                                float(timeit.default_timer() - start)))
         except Exception as e:

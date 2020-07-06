@@ -61,19 +61,19 @@ class AccountTransactions:
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
                     exit_type = 'format_error'
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 total_api_time += time.time() - api_call_start
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     exit_type = 'connection_error'
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -132,7 +132,7 @@ class AccountTransactions:
             else:
                 print('ac:' + str(account_id) + ' has no data for Account Transactions')
                 msg_ac = 'ac:' + str(account_id) + ' has no data for Account Transactions'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":

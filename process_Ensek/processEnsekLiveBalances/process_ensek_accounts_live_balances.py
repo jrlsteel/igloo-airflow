@@ -45,18 +45,18 @@ class LiveBalances:
                     return json.loads(response.content.decode('utf-8'))
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -120,7 +120,7 @@ class LiveBalances:
             else:
                 print('ac:' + str(account_id) + ' has no data for Live Balances')
                 msg_ac = 'ac:' + str(account_id) + ' has no data for Live Balances'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
             # Get Accounts Live Balances with Detail
             api_url_lbd1 = api_url_lbd.format(account_id)
@@ -132,7 +132,7 @@ class LiveBalances:
             else:
                 print('ac:' + str(account_id) + ' has no data for Live Balances With Details')
                 msg_ac = 'ac:' + str(account_id) + ' has no data for Live Balances With Details'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":

@@ -62,19 +62,19 @@ class MeterPoints:
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
                     exit_type = 'format_error'
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 total_api_time += time.time() - api_call_start
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     exit_type = 'connection_error'
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -115,7 +115,7 @@ class MeterPoints:
         df_meters = json_normalize(data, record_path=['meters'], meta=['id'], meta_prefix='meter_point_')
         if df_meters.empty:
             print(" - has no meters data")
-            self.log_error(" - has no meters data")
+            #self.log_error(" - has no meters data")
         else:
             df_meters['account_id'] = account_id
             df_meters1 = df_meters[meta_meters + ['account_id']]
@@ -132,7 +132,7 @@ class MeterPoints:
                                        meta_prefix='meter_point_')
         if df_attributes.empty:
             print(" - has no attributes data")
-            self.log_error(" - has no attributes data")
+            #self.log_error(" - has no attributes data")
 
         else:
             df_attributes['account_id'] = account_id
@@ -154,7 +154,7 @@ class MeterPoints:
                                       meta_prefix='meter_point_', record_prefix='registers_', sep='_')
         if df_registers.empty:
             print(" - has no registers data")
-            self.log_error(" - has no registers data")
+            #self.log_error(" - has no registers data")
 
         else:
             df_registers1 = df_registers[ordered_columns]
@@ -179,7 +179,7 @@ class MeterPoints:
                                                 sep='_')
         if df_registersAttributes.empty:
             print(" - has no registers data")
-            self.log_error(" - has no registers data")
+            #self.log_error(" - has no registers data")
 
         else:
             df_registersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
@@ -199,7 +199,7 @@ class MeterPoints:
                                              meta_prefix='meter_point_', record_prefix='metersAttributes_', sep='_')
         if df_metersAttributes.empty:
             print(" - has no registers data")
-            self.log_error(" - has no registers data")
+            #self.log_error(" - has no registers data")
 
         else:
             df_metersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
@@ -246,7 +246,7 @@ class MeterPoints:
             t = con.api_config['total_no_of_calls']
             print('ac:' + str(account_id))
             msg_ac = 'ac:' + str(account_id)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             api_url_mp1 = api_url_mp.format(account_id)
             meter_info_response = self.get_api_response(api_url_mp1, head_mp, account_id)
             # print(type(meter_info_response))
@@ -256,11 +256,11 @@ class MeterPoints:
                 for each_meter_point in meter_points:
                     print('mp:' + str(each_meter_point))
                     msg_mp = 'mp:' + str(each_meter_point)
-                    self.log_error(msg_mp, '')
+                    #self.log_error(msg_mp, '')
             else:
                 print('ac:' + str(account_id) + ' has no data')
                 msg_ac = 'ac:' + str(account_id) + ' has no data'
-                self.log_error(msg_ac, '')
+                #self.log_error(msg_ac, '')
 
     def callApisNoProcessing(self, account_ids):
         api_url_mp, head_mp = util.get_ensek_api_info1('meterpoints')
@@ -269,7 +269,7 @@ class MeterPoints:
             t = con.api_config['total_no_of_calls']
             print('ac:' + str(account_id))
             msg_ac = 'ac:' + str(account_id) + ' no processing'
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             api_url_mp1 = api_url_mp.format(account_id)
             self.get_api_response(api_url_mp1, head_mp, account_id)
 

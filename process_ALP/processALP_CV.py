@@ -82,18 +82,18 @@ class ALPHistoricalCV:
                         print(response_xml)
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -146,7 +146,7 @@ class ALPHistoricalCV:
             # postcodes[:2]:
             t = con.api_config['total_no_of_calls']
             msg_ac = 'cv_folders:' + str(cv_folders)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call

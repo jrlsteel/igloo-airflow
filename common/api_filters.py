@@ -1,55 +1,43 @@
 account_ids = {
-    "daily": """select coalesce(sc.external_id, oa.account_id, mr.account_id)            as acc_id,
-                       case when count(mp_sed) < count(*) then null else max(mp_sed) end as sed
-                from ref_cdb_supply_contracts sc
-                         full join ref_occupier_accounts oa on sc.external_id = oa.account_id
-                         full join (select account_id, least(supplyenddate, associationenddate) as mp_sed
-                                    from ref_meterpoints_raw) mr on mr.account_id = coalesce(oa.account_id, sc.external_id)
-                group by acc_id
-                having acc_id is not null
-                   and (sed is null or datediff(days, sed, getdate()) < 56)
-                order by acc_id""",
-    "weekly": """select coalesce(sc.external_id, oa.account_id, mr.account_id)            as acc_id,
-                       case when count(mp_sed) < count(*) then null else max(mp_sed) end as sed
-                from ref_cdb_supply_contracts sc
-                         full join ref_occupier_accounts oa on sc.external_id = oa.account_id
-                         full join (select account_id, least(supplyenddate, associationenddate) as mp_sed
-                                    from ref_meterpoints_raw) mr on mr.account_id = coalesce(oa.account_id, sc.external_id)
-                group by acc_id
-                having acc_id is not null
-                   and (sed is null or datediff(days, sed, getdate()) < 365)
-                order by acc_id""",
+    "daily": """-- account_ids in our database that are live, meterpoint data absent or closed in the last 56 days
+                select * from vw_etl_account_ids_daily order by account_id""",
+    "weekly": """-- account_ids in our database that are live, meterpoint data absent or closed in the last 365 days
+                 select * from vw_etl_account_ids_weekly order by account_id""",
 
 }
 
 acc_mp_ids = {
-    "daily": """select distinct account_id, meter_point_id, meterpointnumber, meterpointtype
-                from ref_meterpoints_raw
-                where datediff(days, greatest(supplystartdate, associationstartdate), getdate()) < 7
-                order by account_id""",
+    "daily": """select * from vw_etl_acc_mp_ids order by account_id""",
 }
 
 pending_acc_ids = {
-    "daily": """select account_id, min(greatest(associationstartdate, supplystartdate)) as ssd
-from ref_meterpoints
-group by account_id
-having datediff(days, ssd, getdate()) <= 7""",
-    "weekly": """select account_id, min(greatest(associationstartdate, supplystartdate)) as ssd
-from ref_meterpoints
-group by account_id
-having datediff(days, ssd, getdate()) <= 7"""
+    "daily": """select * from vw_etl_pending_acc_ids_weekly order by account_id""",
+    "weekly": """select * from vw_etl_pending_acc_ids_weekly order by account_id""",
 }
 
 
 tariff_diff_acc_ids = {
-    "daily": """select distinct account_id
-                from vw_tariff_checks
-                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
-                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
-    "weekly": """select distinct account_id
-                from vw_tariff_checks
-                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
-                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
-                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')"""
+    #"daily": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id """,
+    #"weekly": """select * from vw_etl_tariff_diff_acc_ids_daily order by account_id""",
+    "daily": """select * from vw_etl_account_ids_daily order by account_id """,
+    "weekly": """select * from vw_etl_account_ids_daily order by account_id""",
 }
 
+
+epc_postcodes = {
+    "daily": """select * from vw_etl_epc_postcodes_daily order by postcode""",
+    "weekly": """select * from vw_etl_epc_postcodes_daily order by postcode""",
+
+}
+
+land_registry_postcodes = {
+    "daily": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
+    "weekly": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
+
+}
+
+weather_postcodes = {
+    "daily": """select * from vw_etl_weather_postcodes_daily order by postcode""",
+    "weekly": """select * from vw_etl_weather_postcodes_daily order by postcode""",
+
+}
