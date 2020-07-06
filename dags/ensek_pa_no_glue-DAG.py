@@ -28,13 +28,13 @@ dag = DAG(
 
 process_ensek_meterpoints_no_history = BashOperator(
     task_id='process_ensek_meterpoints_no_history',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
 
 process_ensek_internal_readings = BashOperator(
     task_id='process_ensek_internal_readings',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekReadings/process_ensek_internal_readings.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py',
     dag=dag,
 )
 

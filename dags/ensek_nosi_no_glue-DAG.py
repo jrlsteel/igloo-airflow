@@ -26,7 +26,7 @@ dag = DAG(
 
 download_nosi = BashOperator(
     task_id='download_nosi',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Nosi && ../.venv/bin/python download_nosi.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python download_nosi.py',
     dag=dag,
 )
 
