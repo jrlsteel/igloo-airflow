@@ -28,7 +28,7 @@ dag = DAG(
 
 start_epc_full_staging_jobs = BashOperator(
     task_id='start_epc_full_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_EPC && python start_epc_full_staging_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_EPC && python start_epc_full_staging_jobs.py',
     dag=dag,
 )
 

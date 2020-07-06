@@ -26,7 +26,7 @@ dag = DAG(
 
 process_ensek_registration_meterpoint_status = BashOperator(
     task_id='process_ensek_registration_meterpoint_status.py',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekStatus/process_ensek_registration_meterpoint_status.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekStatus/process_ensek_registration_meterpoint_status.py',
     dag=dag,
 )
 

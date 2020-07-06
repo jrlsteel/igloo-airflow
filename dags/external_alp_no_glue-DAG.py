@@ -26,13 +26,13 @@ dag = DAG(
 
 processALP_CV = BashOperator(
     task_id='processALP_CV',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && python processALP_CV.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_CV.py',
     dag=dag,
 )
 
 processALP_WCF = BashOperator(
     task_id='processALP_WCF',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_ALP && python processALP_WCF.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_WCF.py',
     dag=dag,
 )
 

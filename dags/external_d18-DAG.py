@@ -26,26 +26,26 @@ dag = DAG(
 
 start_d18_download_jobs = BashOperator(
     task_id='start_d18_download_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && python start_d18_download_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_d18_download_jobs.py',
     dag=dag,
 )
 
 
 start_d18_processing_jobs = BashOperator(
     task_id='start_d18_processing_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && python start_d18_processing_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_d18_processing_jobs.py',
     dag=dag,
 )
 
 start_d18_staging_jobs = BashOperator(
     task_id='start_d18_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && python start_d18_staging_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_d18_staging_jobs.py',
     dag=dag,
 )
 
 start_d18_ref_jobs = BashOperator(
     task_id='start_d18_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_D18 && python start_d18_ref_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_d18_ref_jobs.py',
     dag=dag,
 )
 
