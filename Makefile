@@ -7,8 +7,8 @@ HEAD_COMMIT_HASH  := $(shell git rev-parse HEAD)
 VERSION           := $(shell git describe --tags $(HEAD_COMMIT_HASH) 2> /dev/null || echo v0.0.0)
 PYTHON            := python3
 PACKAGE_INCLUDE   := * .venv
-PACKAGE_EXCLUDE   := .git .gitignore $(PACKAGE_NAME)-*.zip
-AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-$(AWS_ACCOUNT_ID)
+PACKAGE_EXCLUDE   := .git .gitignore .venv $(PACKAGE_NAME)-*.zip
+AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${AWS_ENVIRONMENT}-$(AWS_ACCOUNT_ID)
 
 .PHONY: git-flow-init
 .PHONY: test
@@ -40,12 +40,13 @@ $(PACKAGE_NAME)-$(VERSION).zip:
 	# We need to copy the code to /opt/code/enzek-meterpoint-readings, then
 	# we need to create a .venv inside that directory, then we need to zip
 	# up the whole lot.
-	mkdir -p /opt/code/enzek-meterpoint-readings
-	cp -r * /opt/code/enzek-meterpoint-readings
-	cd /opt/code/enzek-meterpoint-readings
+	#mkdir -p /opt/code/enzek-meterpoint-readings
+	#cp -r * /opt/code/enzek-meterpoint-readings
+	#cd /opt/code/enzek-meterpoint-readings
 	# Create a zipfile named appropriately that contains all the code
-	cd /opt/code/enzek-meterpoint-readings && \
-	zip -r $(BITBUCKET_CLONE_DIR)/$(PACKAGE_NAME)-$(VERSION).zip $(PACKAGE_INCLUDE) -x $(PACKAGE_EXCLUDE)
+	#cd /opt/code/enzek-meterpoint-readings &&
+	#zip -r $(BITBUCKET_CLONE_DIR)/$(PACKAGE_NAME)-$(VERSION).zip $(PACKAGE_INCLUDE) -x $(PACKAGE_EXCLUDE)
+	git archive --format=zip -o enzek-meterpoint-readings-${VERSION}.zip HEAD
 
 package: $(PACKAGE_NAME)-$(VERSION).zip
 
