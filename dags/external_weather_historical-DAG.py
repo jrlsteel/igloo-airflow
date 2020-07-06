@@ -26,19 +26,19 @@ dag = DAG(
 
 start_weather_processing_jobs = BashOperator(
     task_id='start_weather_processing_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && ../.venv/bin/python start_weather_processing_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && python start_weather_processing_jobs.py',
     dag=dag,
 )
 
 start_weather_staging_jobs = BashOperator(
     task_id='start_weather_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && ../.venv/bin/python start_weather_staging_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && python start_weather_staging_jobs.py',
     dag=dag,
 )
 
 start_weather_ref_jobs = BashOperator(
     task_id='start_weather_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && ../.venv/bin/python start_weather_ref_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_WeatherData && python start_weather_ref_jobs.py',
     dag=dag,
 )
 

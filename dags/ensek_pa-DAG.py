@@ -26,31 +26,31 @@ dag = DAG(
 
 process_customerdb = BashOperator(
     task_id='process_customerdb',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_customerdb_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python start_customerdb_jobs.py',
     dag=dag,
 )
 
 process_ensek_meterpoints_no_history = BashOperator(
     task_id='process_ensek_meterpoints_no_history',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
 
 process_ensek_internal_readings = BashOperator(
     task_id='process_ensek_internal_readings',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python processEnsekReadings/process_ensek_internal_readings.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py',
     dag=dag,
 )
 
 start_ensek_pa_staging_jobs = BashOperator(
     task_id='start_ensek_pa_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_ensek_pa_staging_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python start_ensek_pa_staging_jobs.py',
     dag=dag,
 )
 
 start_ensek_pa_ref_jobs = BashOperator(
     task_id='start_ensek_pa_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && ../.venv/bin/python start_ensek_pa_ref_jobs.py',
+    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python start_ensek_pa_ref_jobs.py',
     dag=dag,
 )
 
