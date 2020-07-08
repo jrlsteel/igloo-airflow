@@ -43,17 +43,24 @@ process_ensek_registration_meterpoint_status = BashOperator(
     dag=dag,
 )
 
-# process_ensek_internal_estimates = BashOperator(
-#     task_id='process_ensek_internal_estimates',
-#     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py',
-#     dag=dag,
-# )
+process_ensek_internal_estimates = BashOperator(
+    task_id='process_ensek_internal_estimates',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py',
+    dag=dag,
+)
 
 process_ensek_tariffs_history = BashOperator(
     task_id='process_ensek_tariffs_history',
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekTariffs/process_ensek_tariffs_history.py',
     dag=dag,
 )
+
+process_ensek_internal_readings = BashOperator(
+    task_id='process_ensek_internal_readings',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py',
+    dag=dag,
+)
+
 
 process_ensek_account_settings = BashOperator(
     task_id='process_ensek_account_settings',
@@ -93,4 +100,8 @@ start_ensek_non_pa_ref_jobs = BashOperator(
 
 #process_customerdb >> process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
 
-process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
+process_ensek_meterpoints_no_history >> process_ensek_registration_meterpoint_status >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions
+
+process_ensek_internal_readings >> process_ensek_internal_estimates
+
+process_ensek_transactions >> process_ensek_internal_estimates >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
