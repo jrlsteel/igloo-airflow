@@ -32,37 +32,37 @@ process_ensek_registration_meterpoint_status = BashOperator(
 
 process_ensek_internal_estimates = BashOperator(
     task_id='process_ensek_internal_estimates',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py',
     dag=dag,
 )
 
 process_ensek_tariffs_history = BashOperator(
     task_id='process_ensek_tariffs_history',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekTariffs/process_ensek_tariffs_history.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekTariffs/process_ensek_tariffs_history.py',
     dag=dag,
 )
 
 process_ensek_account_settings = BashOperator(
     task_id='process_ensek_account_settings',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekAccountSettings/process_ensek_account_settings.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekAccountSettings/process_ensek_account_settings.py',
     dag=dag,
 )
 
 process_ensek_transactions = BashOperator(
     task_id='process_ensek_transactions',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python processEnsekTransactions/process_ensek_transactions.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekTransactions/process_ensek_transactions.py',
     dag=dag,
 )
 
 start_ensek_non_pa_staging_jobs = BashOperator(
     task_id='start_ensek_non_pa_staging_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_staging_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_staging_jobs.py',
     dag=dag,
 )
 
 start_ensek_non_pa_ref_jobs = BashOperator(
     task_id='start_ensek_non_pa_ref_jobs',
-    bash_command='cd /opt/code/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_ref_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_ref_jobs.py',
     dag=dag,
 )
 

@@ -18,12 +18,16 @@ AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${AWS_ENVIRONMENT}-$(AWS_ACCOUNT_
 .PHONY: release-finish
 
 git-flow-init:
+ifeq ($(CI),true)
+    # Bitbucket only checks out $(BITBUCKET_BRANCH) so git flow init fails
+	# because there are no develop/master branches available.
 	# Make sure that we have the master and develop branches available
 	# so that we can `git flow init`.
 	git fetch origin "+refs/heads/*:refs/remotes/origin/*"
 	git checkout -b develop origin/develop
 	# Switch back to the original branch
 	git checkout $(BITBUCKET_BRANCH)
+endif
 	# And finally, initialise git-flow with all defaults and v prefix for version tags
 	git flow init -f -d -t v
 
@@ -37,15 +41,6 @@ build:
 	# TODO
 
 $(PACKAGE_NAME)-$(VERSION).zip:
-	# We need to copy the code to /opt/code/enzek-meterpoint-readings, then
-	# we need to create a .venv inside that directory, then we need to zip
-	# up the whole lot.
-	#mkdir -p /opt/code/enzek-meterpoint-readings
-	#cp -r * /opt/code/enzek-meterpoint-readings
-	#cd /opt/code/enzek-meterpoint-readings
-	# Create a zipfile named appropriately that contains all the code
-	#cd /opt/code/enzek-meterpoint-readings &&
-	#zip -r $(BITBUCKET_CLONE_DIR)/$(PACKAGE_NAME)-$(VERSION).zip $(PACKAGE_INCLUDE) -x $(PACKAGE_EXCLUDE)
 	git archive --format=zip -o enzek-meterpoint-readings-${VERSION}.zip HEAD
 
 package: $(PACKAGE_NAME)-$(VERSION).zip
