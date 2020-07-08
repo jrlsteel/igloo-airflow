@@ -118,7 +118,7 @@ pipelines:
             - echo "No action"
       - step:
           trigger: manual
-          name: Build & Push to ECR
+          name: Deploy to Production
           deployment: Production
           image:
             #name: 630944350233.dkr.ecr.eu-west-1.amazonaws.com/build-tools/aws-sam-cli:latest
