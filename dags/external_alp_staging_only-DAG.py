@@ -33,7 +33,7 @@ start_alp_historical_staging_jobs = BashOperator(
 
 
 
-processALP_WCF >> start_alp_historical_staging_jobs
+start_alp_historical_staging_jobs
 
 
 
