@@ -36,8 +36,8 @@ class StartEnsekJobs:
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
             r.process_sync(env={
-                'AWS_ACCESS_KEY_ID': con['s3_config']['access_key'],
-                'AWS_SECRET_ACCESS_KEY': con['s3_config']['secret_key']
+                'AWS_ACCESS_KEY_ID': con.s3_config['access_key'],
+                'AWS_SECRET_ACCESS_KEY': con.s3_config['secret_key']
             })
 
             util.batch_logging_update(self.mirror_jobid, 'e')
