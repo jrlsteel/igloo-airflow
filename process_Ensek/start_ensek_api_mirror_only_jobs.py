@@ -9,7 +9,7 @@ from common import process_glue_job as glue
 
 from common import utils as util
 from common import Refresh_UAT as refresh
-
+from conf import config as con
 
 class StartEnsekJobs:
 
@@ -35,7 +35,10 @@ class StartEnsekJobs:
                                       'start_ensek_api_jobs.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
-            r.process_sync()
+            r.process_sync(env={
+                'AWS_ACCESS_KEY_ID': con['s3_config']['access_key'],
+                'AWS_SECRET_ACCESS_KEY': con['s3_config']['secret_key']
+            })
 
             util.batch_logging_update(self.mirror_jobid, 'e')
             print("ensek_extract_mirror-" + source_input + "-" + self.env +" files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),float(timeit.default_timer() - start)))
