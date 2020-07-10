@@ -84,7 +84,7 @@ if __name__ == '__main__':
         s.submit_all_ensek_scripts()
 
         print("Ensek Account Status  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        source_input = "s3://" + s3_source_bucket + "stage1/AccountStatus/"
+        source_input = "s3://" + s3_source_bucket + "/stage1/AccountStatus/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/AccountStatus/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
