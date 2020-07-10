@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
         # run PA Ensek Jobs in UAT PreProd Limit of 100 accounts
         print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_all_ensek_pa_scripts()
+        #s.submit_all_ensek_pa_scripts()
 
         print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/MeterPoints/"
