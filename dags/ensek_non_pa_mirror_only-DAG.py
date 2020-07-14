@@ -25,7 +25,7 @@ dag = DAG(
 )
 
 start_ensek_api_mirror_only_jobs = BashOperator(
-    task_id='start_ensek_non_pa_ref_jobs',
+    task_id='start_ensek_api_mirror_only_jobs',
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_api_mirror_only_jobs.py',
     dag=dag,
 )
