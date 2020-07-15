@@ -24,9 +24,9 @@ dag = DAG(
     tags=['cdw']
 )
 
-download_nosi = BashOperator(
-    task_id='download_nosi',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python download_nosi.py',
+mirror_nosi = BashOperator(
+    task_id='mirror_nosi',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi__mirror_only_jobs.py',
     dag=dag,
 )
 
@@ -42,4 +42,4 @@ start_ensek_readings_nosi_ref_jobs = BashOperator(
     dag=dag,
 )
 
-download_nosi >> start_ensek_readings_nosi_staging_jobs >> start_ensek_readings_nosi_ref_jobs
+mirror_nosi >> start_ensek_readings_nosi_staging_jobs >> start_ensek_readings_nosi_ref_jobs
