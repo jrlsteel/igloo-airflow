@@ -66,4 +66,10 @@ start_ensek_non_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_ensek_registration_meterpoint_status >> process_ensek_internal_estimates >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
+start_ensek_api_mirror_only_jobs = BashOperator(
+    task_id='start_ensek_api_mirror_only_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_api_mirror_only_jobs.py',
+    dag=dag,
+)
+
+process_ensek_registration_meterpoint_status >> process_ensek_internal_estimates >> process_ensek_tariffs_history >> process_ensek_account_settings >> process_ensek_transactions >> start_ensek_api_mirror_only_jobs >> start_ensek_non_pa_staging_jobs >> start_ensek_non_pa_ref_jobs
