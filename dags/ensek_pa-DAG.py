@@ -20,7 +20,7 @@ args = {
 dag = DAG(
     dag_id='ensek_pa',
     default_args=args,
-    schedule_interval=None,
+    schedule_interval='@daily',
     tags=['cdw']
 )
 
@@ -35,6 +35,13 @@ process_ensek_meterpoints_no_history = BashOperator(
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekMeterpoints/process_ensek_meterpoints_no_history.py',
     dag=dag,
 )
+
+start_ensek_api_pa_mirror_only_jobs = BashOperator(
+    task_id='start_ensek_api_pa_mirror_only_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_api_pa_mirror_only_jobs.py',
+    dag=dag,
+)
+
 
 process_ensek_internal_readings = BashOperator(
     task_id='process_ensek_internal_readings',
@@ -54,6 +61,6 @@ start_ensek_pa_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_customerdb >> process_ensek_meterpoints_no_history >> process_ensek_internal_readings >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
+process_customerdb >> process_ensek_meterpoints_no_history >> start_ensek_api_pa_mirror_only_jobs >> process_ensek_internal_readings >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
 
 #process_ensek_meterpoints_no_history >> process_ensek_internal_readings >> start_ensek_pa_staging_jobs >> start_ensek_pa_ref_jobs
