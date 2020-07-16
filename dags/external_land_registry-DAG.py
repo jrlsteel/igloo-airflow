@@ -20,7 +20,7 @@ args = {
 dag = DAG(
     dag_id='igloo_land_registry',
     default_args=args,
-    schedule_interval='45 15 * * *',
+    schedule_interval='15 16 * * *',
     tags=['cdw']
 )
 
