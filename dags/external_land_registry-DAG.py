@@ -17,10 +17,11 @@ args = {
     'start_date': days_ago(2), # don't know what this is doing
 }
 
+
 dag = DAG(
     dag_id='igloo_land_registry',
     default_args=args,
-    schedule_interval='15 16 * * *',
+    schedule_interval='30 16 * * *',
     tags=['cdw']
 )
 
