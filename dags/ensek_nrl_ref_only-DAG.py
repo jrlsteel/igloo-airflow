@@ -18,7 +18,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='nrl_ref_only',
+    dag_id='ensek_nrl_ref_only',
     default_args=args,
     schedule_interval=None,
     tags=['cdw']
