@@ -20,13 +20,13 @@ args = {
 dag = DAG(
     dag_id='igloo_weather_historical',
     default_args=args,
-    schedule_interval=None,
+    schedule_interval='45 03 * * *',
     tags=['cdw']
 )
 
-start_weather_processing_jobs = BashOperator(
+start_weather_mirror_jobs = BashOperator(
     task_id='start_weather_processing_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_processing_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_mirror_jobs.py',
     dag=dag,
 )
 
@@ -42,4 +42,4 @@ start_weather_ref_jobs = BashOperator(
     dag=dag,
 )
 
-start_weather_processing_jobs >> start_weather_staging_jobs >> start_weather_ref_jobs
+start_weather_mirror_jobs >> start_weather_staging_jobs >> start_weather_ref_jobs
