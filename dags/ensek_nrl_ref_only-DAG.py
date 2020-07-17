@@ -24,17 +24,6 @@ dag = DAG(
     tags=['cdw']
 )
 
-mirror_nrl = BashOperator(
-    task_id='mirror_nrl',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_nrl && python start_ensek_readings_nrl_mirror_only_jobs.py',
-    dag=dag,
-)
-
-start_ensek_readings_nrl_staging_jobs = BashOperator(
-    task_id='start_ensek_readings_nrl_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_nrl && python start_ensek_readings_nrl_staging_jobs.py',
-    dag=dag,
-)
 
 start_ensek_readings_nrl_ref_jobs = BashOperator(
     task_id='start_ensek_readings_nrl_ref_jobs',
@@ -42,4 +31,4 @@ start_ensek_readings_nrl_ref_jobs = BashOperator(
     dag=dag,
 )
 
-mirror_nrl >> start_ensek_readings_nrl_staging_jobs >> start_ensek_readings_nrl_ref_jobs
+start_ensek_readings_nrl_ref_jobs

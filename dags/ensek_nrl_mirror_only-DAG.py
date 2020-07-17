@@ -30,16 +30,5 @@ mirror_nrl = BashOperator(
     dag=dag,
 )
 
-start_ensek_readings_nrl_staging_jobs = BashOperator(
-    task_id='start_ensek_readings_nrl_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_nrl && python start_ensek_readings_nrl_staging_jobs.py',
-    dag=dag,
-)
 
-start_ensek_readings_nrl_ref_jobs = BashOperator(
-    task_id='start_ensek_readings_nrl_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_nrl && python start_ensek_readings_nrl_ref_jobs.py',
-    dag=dag,
-)
-
-mirror_nrl >> start_ensek_readings_nrl_staging_jobs >> start_ensek_readings_nrl_ref_jobs
+mirror_nrl
