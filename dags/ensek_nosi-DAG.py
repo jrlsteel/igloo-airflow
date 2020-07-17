@@ -26,7 +26,7 @@ dag = DAG(
 
 mirror_nosi = BashOperator(
     task_id='mirror_nosi',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi__mirror_only_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi_mirror_only_jobs.py',
     dag=dag,
 )
 
