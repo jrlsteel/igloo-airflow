@@ -30,11 +30,12 @@ process_ensek_occupier_accounts = BashOperator(
     dag=dag,
 )
 
-start_ensek_occupier_accounts_staging_jobs = BashOperator(
-    task_id='start_ensek_occupier_accounts_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_staging_jobs.py',
-    dag=dag,
-)
+#Not required as very small file
+# start_ensek_occupier_accounts_staging_jobs = BashOperator(
+#     task_id='start_ensek_occupier_accounts_staging_jobs',
+#     bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_staging_jobs.py',
+#     dag=dag,
+# )
 
 start_ensek_occupier_accounts_ref_jobs = BashOperator(
     task_id='start_ensek_occupier_accounts_ref_jobs',
@@ -42,4 +43,4 @@ start_ensek_occupier_accounts_ref_jobs = BashOperator(
     dag=dag,
 )
 
-process_ensek_occupier_accounts >> start_ensek_occupier_accounts_staging_jobs >> start_ensek_occupier_accounts_ref_jobs
+process_ensek_occupier_accounts >> start_ensek_occupier_accounts_ref_jobs
