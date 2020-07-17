@@ -7,6 +7,7 @@ sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
 from common import Refresh_UAT as refresh
+from conf import config as con
 
 class StartReadingsNRLJobs:
     def __init__(self):
@@ -33,7 +34,10 @@ class StartReadingsNRLJobs:
                                       'start_nrl_jobs.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
-            r.process_sync()
+            r.process_sync(env={
+                'AWS_ACCESS_KEY_ID': con.s3_config['access_key'],
+                'AWS_SECRET_ACCESS_KEY': con.s3_config['secret_key']
+            })
 
             util.batch_logging_update(self.mirror_jobid, 'e')
             print(
@@ -52,18 +56,17 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 133, 'all_nrl_jobs', 'start_nrl_jobs.py')
 
+    s3_destination_bucket = s.dir['s3_bucket']
+    s3_source_bucket = s.dir['s3_source_bucket']
+
     if s.env == 'prod':
         print("{0}: download_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_download_nrl_job()
-
-        print("{0}: process_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_process_nrl_job()
 
     else:
         # # run processing mirror job
         print("NRL  Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        source_input = "s3://igloo-data-warehouse-prod/stage1/ReadingsNRL/"
-        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/ReadingsNRL/"
+        source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsNRL/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsNRL/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     print("{0}: All NRL completed successfully".format(datetime.now().strftime('%H:%M:%S')))
