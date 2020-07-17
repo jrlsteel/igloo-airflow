@@ -26,19 +26,19 @@ dag = DAG(
 
 mirror_nrl = BashOperator(
     task_id='mirror_nrl',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_ensek_readings_nrl_mirror_only_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_nrl_mirror_only_jobs.py',
     dag=dag,
 )
 
 start_ensek_readings_nrl_staging_jobs = BashOperator(
     task_id='start_ensek_readings_nrl_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_ensek_readings_nrl_staging_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_nrl_staging_jobs.py',
     dag=dag,
 )
 
 start_ensek_readings_nrl_ref_jobs = BashOperator(
     task_id='start_ensek_readings_nrl_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_ensek_readings_nrl_ref_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_nrl_ref_jobs.py',
     dag=dag,
 )
 
