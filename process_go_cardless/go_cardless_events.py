@@ -749,9 +749,9 @@ class GoCardlessEvents(object):
         itr = IterableQueue
         env = util.get_env()
         if env == 'uat':
-            n = 6  # number of process to run in parallel
+            n = 4  # number of process to run in parallel
         else:
-            n = 6
+            n = 4
         print(len(df))
         k = int(len(df) / n)  # get equal no of files for each process
         print(k)
@@ -813,9 +813,9 @@ class GoCardlessEvents(object):
         itr = IterableQueue
         env = util.get_env()
         if env == 'uat':
-            n = 8  # number of process to run in parallel
+            n = 4  # number of process to run in parallel
         else:
-            n = 8
+            n = 4
         print(len(df))
         k = int(len(df) / n)  # get equal no of files for each process
         print(k)
