@@ -43,3 +43,4 @@ start_weather_ref_jobs = BashOperator(
 )
 
 start_weather_mirror_jobs >> start_weather_staging_jobs >> start_weather_ref_jobs
+
