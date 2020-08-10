@@ -17,14 +17,11 @@ Parameters:
 Mappings:
   EnvironmentMap:
     uat:
-      AirflowCoreSqlAlchemyConn: mysql://igloo:GxvMCYujHqribAndMtSzJ9Bp1LA58zju@uat-rds-instance-aurora-cluster.cluster-cqpohxjor8ea.eu-west-1.rds.amazonaws.com:3306/igloo_airflow_dev
-      AirflowSentrySentryDsn: https://3ea8fcfaa6d34809be59e801eac6dc64@o97690.ingest.sentry.io/5286896
+      SentryDsn: AWS::NoValue
     staging:
-      AirflowCoreSqlAlchemyConn: AWS::NoValue
-      AirflowSentrySentryDsn: AWS::NoValue
+      SentryDsn: AWS::NoValue
     prod:
-      AirflowCoreSqlAlchemyConn: AWS::NoValue
-      AirflowSentrySentryDsn: AWS::NoValue
+      SentryDsn: AWS::NoValue
 
 
 Resources:

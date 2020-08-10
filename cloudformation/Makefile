@@ -1,3 +1,18 @@
+AWS_ACCOUNT_ID_UAT=555393537168
+
+# If CI=true then we always expect the AWS_ACCOUNT_ID and ENVIRONMENT
+# variables to be set, however if we are running outside of CI (e.g.
+# locally in a terminal) then we provide some sensible defaults.
+ifneq ($(CI),true)
+# AWS_ACCOUNT_ID should be passed on the command line, e.g.
+# make -e AWS_ACCOUNT_ID=1234
+AWS_ACCOUNT_ID ?= $(AWS_ACCOUNT_ID_UAT)
+
+# The ENVIRONMENT variable must be set to one of the allowed values for the
+# Environment parameter of the SAM template.
+ENVIRONMENT ?= uat
+endif
+
 # The commit hash of the current HEAD of the repo.
 HEAD_COMMIT_HASH  := $(shell git rev-parse HEAD)
 
@@ -13,19 +28,23 @@ CI_DEPLOYMENT_ROLE_ARN := arn:aws:iam::$(AWS_ACCOUNT_ID):role/ci-deployment-role
 
 SAM_STACK_NAME    := enzek-meterpoint-readings
 
-# The ENVIRONMENT variable must be set to one of the allowed values for the
-# Environment parameter of the SAM template.
-AWS_ENVIRONMENT := uat
-
 # If we are running in CI (Bitbucket) then there is no need to set the
 # --use-container argument as we should be running inside an appropriate
 # container anyway.
 
 ifeq ($(CI),true)
-SAM_BUILD_OPTS=
+SAM_BUILD_OPTS=--parameter-overrides Environment=$(ENVIRONMENT)
 else
-SAM_BUILD_OPTS=--use-container
+SAM_BUILD_OPTS=--use-container --parameter-overrides Environment=$(ENVIRONMENT)
 endif
+
+SAM_DEPLOY_OPTS=--stack-name $(SAM_STACK_NAME) \
+--s3-bucket ci-artifacts-$(AWS_ACCOUNT_ID)-eu-west-1 \
+--capabilities CAPABILITY_NAMED_IAM \
+--region eu-west-1 \
+--role-arn $(CI_DEPLOYMENT_ROLE_ARN) \
+--no-fail-on-empty-changeset \
+--parameter-overrides Environment=$(ENVIRONMENT)
 
 .PHONY: git-flow-init
 .PHONY: test
@@ -82,7 +101,7 @@ sam-deploy:
 	export AWS_SECRET_ACCESS_KEY=`echo $${KST} | awk '{print $$2}'` ; \
 	export AWS_SESSION_TOKEN=`echo $${KST} | awk '{print $$3}'` ; \
 	export AWS_SECURITY_TOKEN=`echo $${KST} | awk '{print $$3}'` ; \
-	sam deploy --stack-name $(SAM_STACK_NAME) --s3-bucket ci-artifacts-$(AWS_ACCOUNT_ID)-eu-west-1 --capabilities CAPABILITY_NAMED_IAM --region eu-west-1 --role-arn $(CI_DEPLOYMENT_ROLE_ARN) --no-fail-on-empty-changeset
+	sam deploy $(SAM_DEPLOY_OPTS)
 
 test-functions-deploy:
 	echo "TODO: test-functions-deploy"

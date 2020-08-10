@@ -8,7 +8,7 @@ VERSION           := $(shell git describe --tags $(HEAD_COMMIT_HASH) 2> /dev/nul
 PYTHON            := python3
 PACKAGE_INCLUDE   := * .venv
 PACKAGE_EXCLUDE   := .git .gitignore .venv $(PACKAGE_NAME)-*.zip
-AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${AWS_ENVIRONMENT}-$(AWS_ACCOUNT_ID)
+AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${ENVIRONMENT}-$(AWS_ACCOUNT_ID)
 
 .PHONY: git-flow-init
 .PHONY: test
