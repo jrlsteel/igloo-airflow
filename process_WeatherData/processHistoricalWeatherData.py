@@ -19,6 +19,7 @@ from conf import config as con
 from common import utils as util
 from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
+from common import api_filters as apif
 
 
 class HistoricalWeather:
@@ -32,6 +33,7 @@ class HistoricalWeather:
         self.start_date = (datetime.today().date() + timedelta(days=(7-self.day_of_week))) - timedelta(days=35)
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
+        self.sql = apif.weather_postcodes['daily']
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -53,18 +55,18 @@ class HistoricalWeather:
                         return response_json
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -111,7 +113,7 @@ class HistoricalWeather:
             t = con.api_config['total_no_of_calls']
             print('postcode:' + str(postcode))
             msg_ac = 'ac:' + str(postcode)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call
@@ -151,7 +153,8 @@ if __name__ == "__main__":
     s3 = s3_con(bucket_name)
     # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SL6') group by left(postcode, len(postcode) - 3)"
     # weather_postcode_sql = weather_sql
-    weather_postcode_sql = con.test_config['weather_sql']
+
+    weather_postcode_sql = p.sql
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
 
     # print(weather_postcodes)
@@ -180,9 +183,9 @@ if __name__ == "__main__":
         print(i)
         uv = i * k
         if i == n:
-            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3_con(bucket_name), dir_s3))
         else:
-            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)

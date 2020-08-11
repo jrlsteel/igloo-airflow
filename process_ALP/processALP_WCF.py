@@ -82,18 +82,18 @@ class ALPHistoricalWCF:
                         print(response_xml)
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -144,7 +144,7 @@ class ALPHistoricalWCF:
             # postcodes[:2]:
             t = con.api_config['total_no_of_calls']
             msg_ac = 'wcf_folders:' + str(wcf_folders)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call
@@ -202,9 +202,9 @@ if __name__ == "__main__":
         print(i)
         uv = i * k
         if i == n:
-            t = multiprocessing.Process(target=p1.processData, args=(wcf_folders[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processData, args=(wcf_folders[lv:], s3_con(bucket_name), dir_s3))
         else:
-            t = multiprocessing.Process(target=p1.processData, args=(wcf_folders[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processData, args=(wcf_folders[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)

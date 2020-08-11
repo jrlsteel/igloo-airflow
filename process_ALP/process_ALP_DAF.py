@@ -14,7 +14,7 @@ class ProcessALPDAF:
 
     def __init__(self):
 
-        self.bucket_name = 'igloo-uat-bucket'
+        self.bucket_name = 'igloo-data-warehouse-dev-555393537168'
         self.prefix = 'ensek-meterpoints/alp-daf'
         self.suffix = '.txt'
         self.alp_daf_archive_key = 'ensek-meterpoints/alp/alp-daf-archive'

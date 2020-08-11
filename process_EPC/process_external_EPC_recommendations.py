@@ -50,18 +50,18 @@ class IglooEPCRecommendations:
                         return response_json
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    #self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    #self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    #self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -106,7 +106,7 @@ class IglooEPCRecommendations:
             t = con.api_config['total_no_of_calls']
             # print('lmkkey:' + str(lmkkey_sector))
             msg_ac = 'ac:' + str(lmkkey_sector)
-            self.log_error(msg_ac, '')
+            #self.log_error(msg_ac, '')
             api_url1 = api_url.format(lmkkey_sector)
             # print(api_url1)
             epc_data_response = self.get_api_response(api_url1, head)
@@ -162,9 +162,9 @@ if __name__ == "__main__":
         print(i)
         uv = i * k
         if i == n:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:], s3_con(bucket_name), dir_s3))
         else:
-            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:uv], s3, dir_s3))
+            t = multiprocessing.Process(target=p1.processAccounts, args=(lmkkey_sectors[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)

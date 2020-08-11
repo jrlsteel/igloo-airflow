@@ -26,6 +26,8 @@ def get_multiprocess(source):
 def get_dir():
     dir = ''
     env_conf = get_env()
+    if env_conf == 'dev':
+        dir = dirs3.dev
     if env_conf == 'uat':
         dir = dirs3.uat
     if env_conf == 'prod':
@@ -152,6 +154,10 @@ def get_accountID_fromDB(get_max, filter='live'):
         sql_group = apif.pending_acc_ids
     elif filter == 'tariff-diffs':
         sql_group = apif.tariff_diff_acc_ids
+    elif filter == 'land-registry':
+        sql_group = apif.land_registry_postcodes
+    elif filter == 'historical-weather':
+        sql_group = apif.weather_postcodes
     else:
         sql_group = {}
 
@@ -187,9 +193,9 @@ def get_accountID_fromDB(get_max, filter='live'):
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         account_id_list = account_id_df.values.tolist()
-        print(account_id_df.values[0])
+        #print(account_id_df.values[0])
         account_id_list1 = [row[0] for row in account_id_list]
-        print(account_id_list[0])
+        #print(account_id_list[0])
         # logic to get max external id and process all the id within them
         if get_max:
             account_ids = list(range(1, max(account_id_list1) + 1))
@@ -404,14 +410,3 @@ def get_keys_from_s3(s3, bucket_name, prefix, suffix):
         if obj['Key'].endswith(suffix):
             s3_keys.append(obj['Key'])
     return s3_keys
-
-
-def get_credentials(_IAM):
-    IAM = ''
-    enzek_credentials = _IAM
-    if enzek_credentials == 'inbound':
-        IAM = con.Enseks3_ensek_inbound
-    if enzek_credentials == 'outbound':
-        IAM = con.Enseks3_ensek_outbound
-
-    return IAM

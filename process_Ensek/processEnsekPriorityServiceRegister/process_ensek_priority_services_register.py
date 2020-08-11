@@ -61,18 +61,18 @@ class TstApi:
                     return response_json
                 else:
                     # print(response.text)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    ##self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    ##self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
                     print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    ##self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -136,7 +136,7 @@ class TstApi:
 
                 print('ac:' + str(account_id))
                 msg_ac = 'ac:' + str(account_id)
-                self.log_error(msg_ac, '')
+                ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
                 # print(json.dumps(internal_data_response, indent=4))
@@ -176,7 +176,7 @@ class TstApi:
 
                 print('ac:' + str(account_id))
                 msg_ac = 'ac:' + str(account_id)
-                self.log_error(msg_ac, '')
+                ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
                 # print(json.dumps(internal_data_response, indent=4))
@@ -271,10 +271,10 @@ if __name__ == "__main__":
     #     uv = i * k
     #     if i == n:
     #         # print(d18_keys_s3[l:])
-    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3, dir_s3))
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
     #     else:
     #         # print(d18_keys_s3[l:u])
-    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3, dir_s3))
+    #         t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
     #     lv = uv
     #
     #     processes.append(t)
