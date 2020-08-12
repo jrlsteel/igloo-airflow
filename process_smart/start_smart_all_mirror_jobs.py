@@ -11,15 +11,12 @@ from conf import config as con
 
 class Weather:
     def __init__(self):
-        self.process_name = "Historical Weather"
+        self.process_name = "Smart All Mirror Job"
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
 
         self.all_jobid = util.get_jobID()
-        self.weather_jobid = util.get_jobID()
-        self.weather_staging_jobid = util.get_jobID()
-        self.weather_ref_jobid = util.get_jobID()
         self.mirror_jobid = util.get_jobID()
 
     def submit_process_s3_mirror_job(self, source_input, destination_input):
@@ -30,7 +27,7 @@ class Weather:
 
             print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
             try:
-                util.batch_logging_insert(self.mirror_jobid, 21, 'weather_extract_mirror-' + source_input + '-' + self.env,
+                util.batch_logging_insert(self.mirror_jobid, 605, 'weather_extract_mirror-' + source_input + '-' + self.env,
                                           'start_weather_jobs.py')
                 start = timeit.default_timer()
                 r = refresh.SyncS3(source_input, destination_input)
@@ -42,7 +39,7 @@ class Weather:
 
                 util.batch_logging_update(self.mirror_jobid, 'e')
                 print(
-                    "weather_extract_mirror-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(
+                    "SMart all_mirror-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(
                         datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
             except Exception as e:
                 util.batch_logging_update(self.mirror_jobid, 'f', str(e))
@@ -66,9 +63,21 @@ if __name__ == '__main__':
 
     else:
         # # run processing mirror job
-        print("Weather Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        source_input = "s3://" + s3_source_bucket + "/stage1/HistoricalWeather/"
-        destination_input = "s3://" + s3_destination_bucket + "/stage1/HistoricalWeather/"
+        print("Smart All Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_source_bucket + "/stage1/Inventory/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/Inventory/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print("Smart All Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsSmart/MeterReads/Elec/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/MeterReads/Elec/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+        
+        # # run processing mirror job
+        print("Smart All Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsSmart/MeterReads/Gas/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/MeterReads/Gas/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
