@@ -18,38 +18,26 @@ args = {
 }
 
 dag = DAG(
-    dag_id='igloo_alp',
+    dag_id='igloo_smart_all',
     default_args=args,
-    schedule_interval='00 09 * * *',
+    schedule_interval='00 10 * * *',
     tags=['cdw']
 )
 
-processALP_CV = BashOperator(
-    task_id='processALP_CV',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_CV.py',
+start_smart_all_staging_jobs = BashOperator(
+    task_id='start_smart_all_staging_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_staging_jobs.py',
     dag=dag,
 )
 
-processALP_WCF = BashOperator(
-    task_id='processALP_WCF',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_WCF.py',
-    dag=dag,
-)
-
-start_alp_historical_staging_jobs = BashOperator(
-    task_id='start_alp_historical_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_staging_jobs.py',
-    dag=dag,
-)
-
-start_alp_historical_ref_jobs = BashOperator(
-    task_id='start_alp_historical_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_ref_jobs.py',
+start_smart_all_ref_jobs = BashOperator(
+    task_id='start_smart_all_ref_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_reporting_jobs.py',
     dag=dag,
 )
 
 
-processALP_CV >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs
+start_smart_all_staging_jobs >> start_smart_all_ref_jobs
 
 
 
