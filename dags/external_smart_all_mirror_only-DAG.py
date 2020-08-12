@@ -18,21 +18,21 @@ args = {
 }
 
 dag = DAG(
-    dag_id='igloo_smart_all_staging',
+    dag_id='igloo_smart_all_mirror',
     default_args=args,
     schedule_interval=None,
     tags=['cdw']
 )
 
-start_smart_all_staging_jobs = BashOperator(
-    task_id='start_smart_all_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_staging_jobs.py',
+start_smart_all_mirror_jobs = BashOperator(
+    task_id='start_smart_all_mirror_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_mirror_jobs.py',
     dag=dag,
 )
 
 
 
-start_smart_all_staging_jobs
+start_smart_all_mirror_jobs
 
 
 
