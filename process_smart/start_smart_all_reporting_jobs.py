@@ -19,7 +19,7 @@ class ReportingJobs:
             environment = self.env
 
             # Batch Logging
-            util.batch_logging_insert(self.reporting_jobid, 602, 'daily_reporting_gluejob', 'start_reporting_jobs.py')
+            util.batch_logging_insert(self.reporting_jobid, 602, 'smart_reader_daily_reporting', 'start_reporting_jobs.py')
 
             daily_reporting_job_response = glue.ProcessGlueJob(job_name=job_name,
                                                                s3_bucket=s3_bucket,
