@@ -80,6 +80,18 @@ if __name__ == '__main__':
         destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/MeterReads/Gas/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
+        # # run processing mirror job
+        print("Smart All Mirror MeterReads Elec job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsSmart/ProfileData/Elec/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/ProfileData/Elec/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print("Smart All Mirror MeterReads Gas job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsSmart/ProfileData/Gas/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/ProfileData/Gas/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
     util.batch_logging_update(s.all_jobid, 'e')
