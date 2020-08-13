@@ -41,3 +41,8 @@ weather_postcodes = {
     "weekly": """select * from vw_etl_weather_postcodes_daily order by postcode""",
 
 }
+
+smart-reads-billing = {
+    "daily": """select * from vw_etl_smart_billing_reads""",
+
+}
