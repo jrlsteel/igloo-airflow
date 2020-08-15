@@ -69,6 +69,36 @@ class SmartReadsBillings:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
+    def post_api_response(self, api_url, body, head, query_string, auth):
+        session = requests.Session()
+        status_code = 0
+        response_json = json.loads('{}')
+
+        try:
+            response = session.post(api_url, data=body, params=query_string, headers=head, auth=auth)
+            response_json = json.loads(response.content.decode('utf-8'))
+            status_code = response.status_code
+        except ConnectionError:
+            self.log_error('Unable to Connect')
+            response_json = json.loads('{message: "Connection Error"}')
+
+        return response_json, status_code
+
+    @staticmethod
+    def extract_data_response(data, filename, _param):
+        data['setup'] = _param
+        df = json_normalize(data)
+        if df.empty:
+            print(" - No Data")
+        else:
+            csv_filename = Path('results/' + filename + datetime.datetime.today().strftime("%y%m%d") + '.csv')
+            if csv_filename.exists():
+                df.to_csv(csv_filename, mode='a', index=False, header=False)
+            else:
+                df.to_csv(csv_filename, mode='w', index=False)
+
+            print("df_string: {0}".format(df))
+
     def processData(self, addresses, k, _dir_s3):
 
         for index, address in addresses.iterrows():
@@ -80,16 +110,14 @@ class SmartReadsBillings:
 
             if api_response:
                 formatted_json = self.format_json_response(api_response)
-                # print(formatted_json)
-                self.extract_land_registry_data(formatted_json, address, k, _dir_s3)
 
     def smart_reads_billing_details(self, config_sql):
         pr = db.get_redshift_connection()
-        addresses_df = pr.redshift_to_pandas(config_sql)
+        smart_reads_get_df = pr.redshift_to_pandas(config_sql)
         db.close_redshift_connection()
         # addresses_list = addresses_df.values.tolist()
 
-        return addresses_df
+        return smart_reads_get_df
 
 
 if __name__ == "__main__":

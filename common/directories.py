@@ -655,7 +655,10 @@ preprod = {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         },
-
+        "smart_reads_billing": {
+            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging",
+            "token": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6"
+        },
     },
     # All bad practice here needs to be sorted
     "s3_source_bucket": "igloo-data-warehouse-preprod",
