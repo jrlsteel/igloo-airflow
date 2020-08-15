@@ -33,35 +33,6 @@ class SmartReadsBillings:
         self.num_days_per_api_calls = 7
         self.sql = apif.smart_reads_billing['daily']  # there is no need for a weekly run here
 
-    def get_params(self, address):
-
-        params = {}
-        street = address['thoroughfare']
-
-        # add a space into the postcode
-        # ARE ALL POSTCODES X + 3 digits?
-        postcode = address['postcode'][:-3] + ' ' + address['postcode'][-3:]
-
-        # building number
-        paon = address['building_name_number']
-
-        # get any sub number e.g. address
-        saon = address['sub_building_name_number']
-
-        if street:
-            params['propertyAddress.street'] = street.upper()
-
-        if postcode:
-            params['propertyAddress.postcode'] = postcode
-
-        if paon:
-            params['propertyAddress.paon'] = paon
-
-        if saon:
-            params['propertyAddress.saon'] = saon
-
-        return params
-
 
     def get_api_response(self, api_url, head, query_string, auth):
         session = requests.Session()
@@ -78,26 +49,6 @@ class SmartReadsBillings:
 
         return response_json, status_code
 
-    def extract_land_registry_data(self, data, address, k, dir_s3):
-        meta_landreg = ['transactionDate', 'newBuild', 'pricePaid', 'transactionId']
-        land_registry_df = json_normalize(data)
-
-        if land_registry_df.empty:
-            print(" - has no land registry data")
-        else:
-            land_registry_df1 = land_registry_df[meta_landreg]
-            land_registry_df1._is_copy = False
-            land_registry_df1['propertyType'] = land_registry_df['propertyType.prefLabel'][0][0]['_value']
-            land_registry_df1['recordStatus'] = land_registry_df['recordStatus.prefLabel'][0][0]['_value']
-            land_registry_df1['transactionCategory'] = land_registry_df['transactionCategory.prefLabel'][0][0]['_value']
-
-            land_registry_df1['uprn'] = address['uprn']
-            land_registry_df1['id'] = address['id']
-
-            land_registry_string = land_registry_df1.to_csv(None, index=False)
-            file_name_landreg = 'land_registry_' + str(address['id']).strip() + '.csv'
-            k.key = dir_s3['s3_land_reg_key']['LandRegistry'] + file_name_landreg
-            k.set_contents_from_string(land_registry_string)
 
     def format_json_response(self, data):
         """
