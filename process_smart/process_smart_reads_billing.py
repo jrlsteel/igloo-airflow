@@ -35,20 +35,6 @@ class SmartReadsBillings:
         self.sql = apif.smart_reads_billing['daily']  # there is no need for a weekly run here
 
 
-    def get_api_response(self, api_url, head, query_string, auth):
-        session = requests.Session()
-        status_code = 0
-        response_json = json.loads('{}')
-
-        try:
-            response = session.get(api_url, params=query_string, headers=head, auth=auth)
-            response_json = json.loads(response.content.decode('utf-8'))
-            status_code = response.status_code
-        except ConnectionError:
-            self.log_error('Unable to Connect')
-            response_json = json.loads('{message: "Connection Error"}')
-
-        return response_json, status_code
 
 
     def format_json_response(self, data):
@@ -65,7 +51,7 @@ class SmartReadsBillings:
         logs_dir_path = sys.path[0] + '/logs/'
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(logs_dir_path + 'land_registry_log' + time.strftime('%d%m%Y') + '.csv',
+        with open(logs_dir_path + 'smart_reads_billing' + time.strftime('%d%m%Y') + '.csv',
                   mode='a') as errorlog:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
@@ -107,12 +93,12 @@ class SmartReadsBillings:
         for index, df in _df.iterrows():
             # Get Elec details
             formatted_url_smart_reads = api_url_smart_reads.format(df['account_id'], df['meterpointnumber'])
-            response_smart_reads = self.get_api_response(formatted_url_smart_reads, head_elec)
+            response_smart_reads = self.post_api_response(formatted_url_smart_reads, head_elec)
             # print(account_elec_response)
 
             if response_smart_reads:
                 formated_response_smart_reads = self.format_json_response(response_smart_reads)
-                self.extract_reg_elec_json(formated_response_smart_reads, df, k, _dir_s3)
+                print(formated_response_smart_reads)
             else:
                 print('ac:' + str(df['account_id']) + ' has no data for Elec status')
                 msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Elec status'
