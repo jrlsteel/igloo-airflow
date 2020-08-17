@@ -9,6 +9,7 @@ import csv
 import multiprocessing
 from multiprocessing import freeze_support
 import datetime
+from pathlib import Path
 
 import sys
 import os
@@ -29,7 +30,7 @@ class SmartReadsBillings:
     def __init__(self):
         self.start_date = datetime.datetime.strptime('2018-01-01', '%Y-%m-%d').date()
         self.end_date = datetime.datetime.today().date()
-        self.api_url, self.head, self.key = util.get_api_info(api="land_registry", header_type="json")
+        self.api_url, self.head, self.key = util.get_api_info(api="smart_reads_billing", header_type="json")
         self.num_days_per_api_calls = 7
         self.sql = apif.smart_reads_billing['daily']  # there is no need for a weekly run here
 
@@ -99,17 +100,24 @@ class SmartReadsBillings:
 
             print("df_string: {0}".format(df))
 
-    def processData(self, addresses, k, _dir_s3):
 
-        for index, address in addresses.iterrows():
-            print('addres_id:' + str(address['id']))
-            msg_ac = 'ac:' + str(address['id'])
-            self.log_error(msg_ac, '')
+    def processAccounts(self, _df, k, _dir_s3):
+        api_url_smart_reads, head_elec = util.get_smart_read_billing_api_info('smart_reads_billing')
 
-            api_response = self.get_api_response(address)
+        for index, df in _df.iterrows():
+            # Get Elec details
+            formatted_url_smart_reads = api_url_smart_reads.format(df['account_id'], df['meterpointnumber'])
+            response_smart_reads = self.get_api_response(formatted_url_smart_reads, head_elec)
+            # print(account_elec_response)
 
-            if api_response:
-                formatted_json = self.format_json_response(api_response)
+            if response_smart_reads:
+                formated_response_smart_reads = self.format_json_response(response_smart_reads)
+                self.extract_reg_elec_json(formated_response_smart_reads, df, k, _dir_s3)
+            else:
+                print('ac:' + str(df['account_id']) + ' has no data for Elec status')
+                msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Elec status'
+                # self.log_error(msg_ac, '')
+                # self.log_error(msg_ac, '')
 
     def smart_reads_billing_details(self, config_sql):
         pr = db.get_redshift_connection()

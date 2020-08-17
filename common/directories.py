@@ -657,7 +657,8 @@ preprod = {
         },
         "smart_reads_billing": {
             "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging",
-            "token": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6"
+            "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
+            "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com"
         },
     },
     # All bad practice here needs to be sorted
