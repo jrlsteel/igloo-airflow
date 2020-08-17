@@ -232,10 +232,9 @@ def get_ensek_api_info1(api):
         token = dir['apis']['token']
 
     head = {'Content-Type': 'application/json',
-            'Authorization': 'Bearer {0}'.format(token)
-            'Host'},
-
+            'Authorization': 'Bearer {0}'.format(token)}
     return api_url, head
+ 
 
 def get_smart_read_billing_api_info(api):
     dir = get_dir()
