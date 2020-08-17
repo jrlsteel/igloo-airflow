@@ -35,8 +35,6 @@ class SmartReadsBillings:
         self.sql = apif.smart_reads_billing['daily']  # there is no need for a weekly run here
 
 
-
-
     def format_json_response(self, data):
         """
         This function replaces the null values in the json data to empty string.
@@ -91,9 +89,22 @@ class SmartReadsBillings:
         api_url_smart_reads, head_elec = util.get_smart_read_billing_api_info('smart_reads_billing')
 
         for index, df in _df.iterrows():
-            # Get Elec details
-            formatted_url_smart_reads = api_url_smart_reads.format(df['account_id'], df['meterpointnumber'])
-            response_smart_reads = self.post_api_response(formatted_url_smart_reads, head_elec)
+            # Get SMart Reads Billing
+            body = json.dumps({
+                "manualMeterReadingId": 0,
+                "accountId": df["accountid"],
+                "meterReadingDateTime": df["meterreadingdatetime"],
+                "meterType": df["metertype"],
+                "meterPointNumber": df["meterpointnumber"],
+                "meter": df["meter"],
+                "register": df["register"],
+                "reading": df["reading"],
+                "source": df["source"],
+                "createdBy": df["createdby"],
+                "dateCreated": str(datetime.datetime.now())
+            })
+
+            response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_elec)
             # print(account_elec_response)
 
             if response_smart_reads:
