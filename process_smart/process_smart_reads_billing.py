@@ -127,8 +127,8 @@ class SmartReadsBillings:
 
 if __name__ == "__main__":
 
+    start = timeit.default_timer()
     freeze_support()
-
     p = SmartReadsBillings()
 
     dir_s3 = util.get_dir()
@@ -139,12 +139,8 @@ if __name__ == "__main__":
     smart_reads_billing_sql = p.sql
     smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
 
-    # print(weather_postcodes)
-    # if False:
-    #     p.processData(addresses_df, s3, dir_s3)
+    p.processAccounts(smart_reads_billing_df, s3, dir_s3)
 
     print(len(smart_reads_billing_df))
-
-    start = timeit.default_timer()
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
