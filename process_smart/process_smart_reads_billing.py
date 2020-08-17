@@ -86,7 +86,7 @@ class SmartReadsBillings:
 
 
     def processAccounts(self, _df, k, _dir_s3):
-        api_url_smart_reads, head_elec = util.get_smart_read_billing_api_info('smart_reads_billing')
+        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info('smart_reads_billing')
 
         for index, df in _df.iterrows():
             # Get SMart Reads Billing
@@ -104,7 +104,7 @@ class SmartReadsBillings:
                 "dateCreated": str(datetime.datetime.now())
             })
 
-            response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_elec)
+            response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_smart_reads)
             # print(account_elec_response)
 
             if response_smart_reads:
