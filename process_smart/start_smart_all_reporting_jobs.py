@@ -24,7 +24,7 @@ class ReportingJobs:
             daily_reporting_job_response = glue.ProcessGlueJob(job_name=job_name,
                                                                s3_bucket=s3_bucket,
                                                                environment=environment,
-                                                               processJob='daily_reporting').run_glue_job()
+                                                               processJob='smart_reader_daily_reporting').run_glue_job()
 
             if daily_reporting_job_response:
                 print("{0}: Daily Reporting Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
