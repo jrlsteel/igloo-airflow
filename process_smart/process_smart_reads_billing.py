@@ -54,13 +54,13 @@ class SmartReadsBillings:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
-    def post_api_response(self, api_url, body, head, query_string, auth):
+    def post_api_response(self, api_url, body, head, query_string='', auth=''):
         session = requests.Session()
         status_code = 0
         response_json = json.loads('{}')
 
         try:
-            response = session.post(api_url, data=body, params=query_string, headers=head, auth=auth)
+            response = session.post(api_url, data=body, headers=head)
             response_json = json.loads(response.content.decode('utf-8'))
             status_code = response.status_code
         except ConnectionError:
@@ -85,13 +85,12 @@ class SmartReadsBillings:
             print("df_string: {0}".format(df))
 
 
-    def processAccounts(self, _df, k, _dir_s3):
+    def processAccounts(self, _df):
         api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info('smart_reads_billing')
 
         for index, df in _df.iterrows():
             # Get SMart Reads Billing
             body = json.dumps({
-                "manualMeterReadingId": 0,
                 "accountId": df["accountid"],
                 "meterReadingDateTime": df["meterreadingdatetime"],
                 "meterType": df["metertype"],
@@ -102,7 +101,7 @@ class SmartReadsBillings:
                 "source": df["source"],
                 "createdBy": df["createdby"],
                 "dateCreated": str(datetime.datetime.now())
-            })
+            }, default = str)
 
             response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_smart_reads)
             # print(account_elec_response)
@@ -131,15 +130,10 @@ if __name__ == "__main__":
     freeze_support()
     p = SmartReadsBillings()
 
-    dir_s3 = util.get_dir()
-    bucket_name = dir_s3['s3_bucket']
-
-    s3 = s3_con(bucket_name)
-
     smart_reads_billing_sql = p.sql
     smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
 
-    p.processAccounts(smart_reads_billing_df, s3, dir_s3)
+    p.processAccounts(smart_reads_billing_df)
 
     print(len(smart_reads_billing_df))
 

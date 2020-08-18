@@ -242,8 +242,8 @@ def get_smart_read_billing_api_info(api):
     env_api = dir['apis'][api]
     api_url = env_api['api_url']
 
-    api_key = dir['apis']['api_key']
-    host = dir['apis']['host']
+    api_key = env_api['api_key']
+    host = env_api['host']
 
     head = {'Content-Type': 'application/json',
             'Host':'{0}'.format(host),
