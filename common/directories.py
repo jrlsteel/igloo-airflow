@@ -121,11 +121,19 @@ dev = {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         },
-
+        "smart_reads_billing": {
+            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging/api/v1/meter-reads",
+            "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
+            "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com"
+        },
     },
-
-    "s3_bucket": "igloo-data-warehouse-dev-555393537168",
-
+    # All bad practice here needs to be sorted
+    "s3_source_bucket": "igloo-data-warehouse-preprod",
+    "s3_bucket": "igloo-data-warehouse-preprod-835569423516",
+    # All bad practice here needs to be sorted
+    "s3_smart_source_bucket": "igloo-data-warehouse-smart-meter-data-prod-630944350233",
+    "s3_smart_bucket": "igloo-data-warehouse-smart-meter-data-preprod-835569423516",
+    
     "s3_key": {
         "Accounts": "stage1/Accounts/",
         "MeterPoints": "stage1/MeterPoints/",
