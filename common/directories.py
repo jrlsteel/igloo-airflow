@@ -133,7 +133,7 @@ dev = {
     # All bad practice here needs to be sorted
     "s3_smart_source_bucket": "igloo-data-warehouse-smart-meter-data-prod-630944350233",
     "s3_smart_bucket": "igloo-data-warehouse-smart-meter-data-preprod-835569423516",
-    
+
     "s3_key": {
         "Accounts": "stage1/Accounts/",
         "MeterPoints": "stage1/MeterPoints/",
