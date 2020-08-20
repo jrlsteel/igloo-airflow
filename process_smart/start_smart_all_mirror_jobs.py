@@ -102,7 +102,7 @@ if __name__ == '__main__':
         # # run processing mirror job
         print("Smart Temp Stage 2 All Mirror Half Hourly Elec job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_destination_bucket + "/stage2/stage2_SmartHalfHourlyReads_Elec/"
-        destination_input = "s3://" + s3_temp_destination_uat_bucket + "/stage2_SmartHalfHourlyReads_Elec/"
+        destination_input = "s3://" + s3_temp_destination_uat_bucket + "/stage2/stage2_SmartHalfHourlyReads_Elec/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))

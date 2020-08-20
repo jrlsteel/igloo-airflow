@@ -76,7 +76,7 @@ if __name__ == '__main__':
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_all_ensek_scripts()
 
-    elif s.env in ['preprod', 'uat']:
+    elif s.env in ['preprod', 'uat', 'newprod']:
 
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
