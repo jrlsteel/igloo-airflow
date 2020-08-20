@@ -60,6 +60,11 @@ class SyncS3:
                 status = subprocess.run(command, shell=True, env=env)
                 print(status)
 
+            print("Remove existing files in {0}".format(self._destination_path))
+            command = "aws s3 rm {0} --recursive".format(self._destination_path)
+            status = subprocess.run(command, shell=True, env=env)
+            print(status)
+
             print("Sync files in s3 from {0} to {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path))
             command = "aws s3 sync {0} {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path)
             status = subprocess.run(command, shell=True, env=env)
