@@ -47,6 +47,37 @@ class SyncS3:
 
             print("completed")
 
+    def copy_sync(self, env=None):
+        if 'prod' in self._destination_path:
+            print("error: please check the destination path. PROD keyword detected in destination path")
+        else:
+            if 'stage2' in self._source_path:
+                print("Remove existing files in {0}".format(self._destination_path))
+                command = "aws s3 cp {0} --metadata-directive REPLACE".format(self._destination_path)
+                status = subprocess.run(command, shell=True, env=env)
+                print(status)
+
+            print("Sync files in s3 from {0} to {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path))
+            command = "aws s3 sync {0} {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path)
+            status = subprocess.run(command, shell=True, env=env)
+            print(status)
+            print("completed")
+
+        if 'preprod' in self._destination_path:
+            print("Warning you are overwriting input data in Pre-Production ")
+            if 'stage2' in self._source_path:
+                print("Remove existing files in {0} --metadata-directive REPLACE".format(self._destination_path))
+                command = "aws s3 cp {0} --metadata-directive REPLACE".format(self._destination_path)
+                status = subprocess.run(command, shell=True, env=env)
+                print(status)
+
+            print("Sync files in s3 from {0} to {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path))
+            command = "aws s3 cp {0} {1} --metadata-directive REPLACE".format(self._source_path, self._destination_path)
+            status = subprocess.run(command, shell=True, env=env)
+            print(status)
+
+            print("completed")
+
 
 if __name__ == "__main__":
 

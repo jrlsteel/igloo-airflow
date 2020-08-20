@@ -47,6 +47,35 @@ class Weather:
                 print("Error in process :- " + str(e))
                 sys.exit(1)
 
+    def submit_process_s3_copy_job(self, source_input, destination_input):
+            """
+            Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+            :return: None
+            """
+
+            print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+            try:
+                util.batch_logging_insert(self.mirror_jobid, 605, 'weather_extract_mirror-' + source_input + '-' + self.env,
+                                          'start_weather_jobs.py')
+                start = timeit.default_timer()
+                r = refresh.SyncS3(source_input, destination_input)
+
+                r.copy_sync(env={
+                    'AWS_ACCESS_KEY_ID': con.s3_config['access_key'],
+                    'AWS_SECRET_ACCESS_KEY': con.s3_config['secret_key']
+                })
+
+                util.batch_logging_update(self.mirror_jobid, 'e')
+                print(
+                    "SMart all_mirror-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(
+                        datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+            except Exception as e:
+                util.batch_logging_update(self.mirror_jobid, 'f', str(e))
+                util.batch_logging_update(self.all_jobid, 'f', str(e))
+                print("Error in process :- " + str(e))
+                sys.exit(1)
+
+
 
 if __name__ == '__main__':
 
@@ -97,13 +126,13 @@ if __name__ == '__main__':
         print("Smart Temp Stage 2 All Mirror Half Hourly Gas job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_destination_bucket + "/stage2/stage2_SmartHalfHourlyReads_Gas/"
         destination_input = "s3://" + s3_temp_destination_uat_bucket + "/stage2/stage2_SmartHalfHourlyReads_Gas/"
-        s.submit_process_s3_mirror_job(source_input, destination_input)
+        s.submit_process_s3_copy_job(source_input, destination_input)
 
         # # run processing mirror job
         print("Smart Temp Stage 2 All Mirror Half Hourly Elec job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_destination_bucket + "/stage2/stage2_SmartHalfHourlyReads_Elec/"
         destination_input = "s3://" + s3_temp_destination_uat_bucket + "/stage2/stage2_SmartHalfHourlyReads_Elec/"
-        s.submit_process_s3_mirror_job(source_input, destination_input)
+        s.submit_process_s3_copy_job(source_input, destination_input)
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 
