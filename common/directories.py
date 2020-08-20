@@ -132,6 +132,7 @@ dev = {
     "s3_bucket": "igloo-data-warehouse-dev-555393537168",
     # All bad practice here needs to be sorted
     "s3_smart_source_bucket": "igloo-data-warehouse-smart-meter-data-prod-630944350233",
+    "s3_temp_hh_uat_bucket": "igloo-data-warehouse-uat",
     "s3_smart_bucket": "igloo-data-warehouse-smart-meter-data-dev-555393537168",
 
     "s3_key": {
@@ -673,6 +674,7 @@ preprod = {
     "s3_source_bucket": "igloo-data-warehouse-preprod",
     "s3_bucket": "igloo-data-warehouse-preprod-835569423516",
     # All bad practice here needs to be sorted
+    "s3_temp_hh_uat_bucket": "igloo-data-warehouse-uat",
     "s3_smart_source_bucket": "igloo-data-warehouse-smart-meter-data-prod-630944350233",
     "s3_smart_bucket": "igloo-data-warehouse-smart-meter-data-preprod-835569423516",
 

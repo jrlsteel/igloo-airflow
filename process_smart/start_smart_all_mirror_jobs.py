@@ -55,6 +55,7 @@ if __name__ == '__main__':
     util.batch_logging_insert(s.all_jobid, 600, 'start_smart_all_mirror_jobs', 'start_smart_all_mirror_jobs.py')
     s3_destination_bucket = s.dir['s3_smart_bucket']
     s3_source_bucket = s.dir['s3_smart_source_bucket']
+    s3_temp_destination_uat_bucket = s.dir['s3_temp_hh_uat_bucket']
 
     if s.env == 'prod':
         # run processing weather python script
@@ -90,6 +91,18 @@ if __name__ == '__main__':
         print("Smart All Mirror ProfileData Gas job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/ReadingsSmart/ProfileData/Gas/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsSmart/ProfileData/Gas/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print("Smart Temp Stage 2 All Mirror Half Hourly Gas job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_destination_bucket + "/SmartHalfHourlyReads_Gas/"
+        destination_input = "s3://" + s3_temp_destination_uat_bucket + "/SmartHalfHourlyReads_Gas/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print("Smart Temp Stage 2 All Mirror Half Hourly Elec job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        source_input = "s3://" + s3_destination_bucket + "/SmartHalfHourlyReads_Elec/"
+        destination_input = "s3://" + s3_temp_destination_uat_bucket + "/SmartHalfHourlyReads_Elec/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
