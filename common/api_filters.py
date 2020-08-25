@@ -43,6 +43,6 @@ weather_postcodes = {
 }
 
 smart_reads_billing = {
-    "daily": """select * from vw_etl_smart_billing_reads limit 100""",
+    "daily": """select * from vw_etl_smart_billing_reads""",
 
 }
