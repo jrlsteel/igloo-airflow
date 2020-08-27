@@ -42,8 +42,10 @@ start_smart_all_ref_jobs = BashOperator(
     dag=dag,
 )
 
+start_smart_all_billing_reads_jobs = BashOperator(
+    task_id='start_smart_all_billing_reads_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_smart_reads_billing.py',
+    dag=dag,
+)
 
-start_smart_all_mirror_jobs >> start_smart_all_staging_jobs >> start_smart_all_ref_jobs
-
-
-
+start_smart_all_mirror_jobs >> start_smart_all_staging_jobs >> start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
