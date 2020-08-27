@@ -20,7 +20,7 @@ args = {
 dag = DAG(
     dag_id='igloo_smart_process_billing_reads',
     default_args=args,
-    schedule_interval='00 12 * * *',
+    schedule_interval=None,
     tags=['cdw']
 )
 
