@@ -42,7 +42,7 @@ weather_postcodes = {
 
 }
 
-smart_reads_billing_elec = {
+smart_reads_billing = {
     "elec": """select * from vw_etl_smart_billing_reads_elec""",
     "gas": """select * from vw_etl_smart_billing_reads_gas""",
 
