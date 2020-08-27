@@ -42,9 +42,13 @@ class SmartReadsBillings:
         :param data: The json response returned from api
         :return: json data
         """
-        data_str = json.dumps(data, indent=4).replace('null', '""')
-        data_json = json.loads(data_str)
-        return data_json
+        try:
+            data_str = json.dumps(data, indent=4).replace('null', '""')
+            data_json = json.loads(data_str)
+            return data_json
+        except Exception as e:
+            print(e)
+            return json.dumps('{message: "malformed response error"}')
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
@@ -93,8 +97,8 @@ class SmartReadsBillings:
         for index, df in _df.iterrows():
             # Get SMart Reads Billing
             body = json.dumps({
-                "accountId": df["accountid"],
                 "meterReadingDateTime": df["meterreadingdatetime"],
+                "accountId": df["accountid"],
                 "meterType": df["metertype"],
                 "meterPointNumber": df["meterpointnumber"],
                 "meter": df["meter"],
