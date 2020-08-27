@@ -125,11 +125,11 @@ Resources:
               - s3:PutObject
               - s3:DeleteBucket
             Resource:
-              - !Fn::Join [ "/", !ImportValue CoreIglooDataWarehouseS3BucketArn, "*" ]
-              - !Fn::Join [ "/", !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn, "*" ]
-              - !Fn::Join [ "/", !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn, "*" ]
-              - !Fn::Join [ "/", !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn, "*" ]
-              - !Fn::Join [ "/", !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn, "*" ]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn, "*" ]]
 
   S3SyncUser:
     Type: AWS::IAM::User
