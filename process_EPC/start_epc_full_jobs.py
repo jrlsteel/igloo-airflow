@@ -159,9 +159,7 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 108, 'all_epc_jobs', 'start_epc_full_jobs.py')
 
-
-
-    if s.env in ('prod', 'uat','preprod'):
+    if s.env in ('prod', 'uat', 'preprod', 'newprod'):
         # run processing download epc data script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_epc_full_name))
         s.submit_process_epc_full_job()

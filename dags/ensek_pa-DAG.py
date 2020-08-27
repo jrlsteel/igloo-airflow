@@ -20,7 +20,8 @@ args = {
 dag = DAG(
     dag_id='ensek_pa',
     default_args=args,
-    schedule_interval='45 03 * * *',
+    # schedule_interval='45 03 * * *',
+    schedule_interval=None,
     tags=['cdw']
 )
 
