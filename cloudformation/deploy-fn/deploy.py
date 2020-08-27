@@ -16,6 +16,16 @@ api_configs = {
             'path': 's3.object.key'
         }]
     },
+    'enzek-meterpoint-readings-artifacts-staging-835569423516': {
+        'type': 'jenkins',
+        'auth': ('ci-agent', '11673e1ae064ca46c9a88337e2b91a427f'),
+        'url': 'http://internal-igloo-jenkins-elb-14111292.eu-west-1.elb.amazonaws.com/job/deploy-enzek-meterpoint-readings-dags-preprod/buildWithParameters',
+        'token': 'f8e32a3e-3602-4d0f-aef3-ed1e66881ca2',
+        'parameters_from_event_record': [{
+            'name': 's3key',
+            'path': 's3.object.key'
+        }]
+    },
     'enzek-meterpoint-readings-artifacts-prod-630944350233': {
         'type': 'jenkins',
         'auth': ('ci-agent', '11673e1ae064ca46c9a88337e2b91a427f'),
