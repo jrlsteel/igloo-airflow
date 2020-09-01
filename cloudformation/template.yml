@@ -23,6 +23,11 @@ Mappings:
     prod:
       SentryDsn: AWS::NoValue
 
+Conditions:
+  UATEnvironment: !Equals [ !Ref Environment, uat ]
+  StagingEnvironment: !Equals [ !Ref Environment, staging ]
+  ProdEnvironment: !Equals [ !Ref Environment, prod ]
+  UATOrStagingEnvironment: !Or [ Condition: UATEnvironment, Condition: StagingEnvironment ]
 
 Resources:
   ArtifactBucket:
@@ -97,3 +102,57 @@ Resources:
         SecurityGroupIds:
           - !GetAtt DeployFnSecurityGroup.GroupId
         SubnetIds: !Split [ ",", !ImportValue CorePrivateSubnets ]
+
+  WriteCDWSourceDataBucketsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: "A managed policy that allows write access to all CDW Source Data buckets"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !ImportValue CoreIglooDataWarehouseS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteBucket
+            Resource:
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn, "*" ]]
+
+  S3SyncUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: s3-sync
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - !Ref WriteCDWSourceDataBucketsPolicy
+      Tags:
+        - Key: category
+          Value: cdw
+
+  S3SyncUserAccessKey:
+    Condition: UATOrStagingEnvironment
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref S3SyncUser
+
+Outputs:
+  S3SyncUserAccessKey:
+    Condition: UATOrStagingEnvironment
+    Value: !Ref S3SyncUserAccessKey
+  
+  S3SyncUserSecretAccessKey:
+    Condition: UATOrStagingEnvironment
+    Value: !GetAtt S3SyncUserAccessKey.SecretAccessKey

@@ -42,9 +42,13 @@ class SmartReadsBillings:
         :param data: The json response returned from api
         :return: json data
         """
-        data_str = json.dumps(data, indent=4).replace('null', '""')
-        data_json = json.loads(data_str)
-        return data_json
+        try:
+            data_str = json.dumps(data, indent=4).replace('null', '""')
+            data_json = json.loads(data_str)
+            return data_json
+        except Exception as e:
+            print(e)
+            return json.dumps('{message: "malformed response error"}')
 
     def log_error(self, error_msg, error_code=''):
         logs_dir_path = sys.path[0] + '/logs/'
@@ -59,6 +63,8 @@ class SmartReadsBillings:
         session = requests.Session()
         status_code = 0
         response_json = json.loads('{}')
+
+        print(body)
 
         try:
             response = session.post(api_url, data=body, headers=head)
@@ -93,8 +99,8 @@ class SmartReadsBillings:
         for index, df in _df.iterrows():
             # Get SMart Reads Billing
             body = json.dumps({
-                "accountId": df["accountid"],
                 "meterReadingDateTime": df["meterreadingdatetime"],
+                "accountId": df["accountid"],
                 "meterType": df["metertype"],
                 "meterPointNumber": df["meterpointnumber"],
                 "meter": df["meter"],
@@ -112,8 +118,8 @@ class SmartReadsBillings:
                 formated_response_smart_reads = self.format_json_response(response_smart_reads)
                 print(formated_response_smart_reads)
             else:
-                print('ac:' + str(df['account_id']) + ' has no data for Elec status')
-                msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Elec status'
+                print('ac:' + str(df['accountid']) + ' has no data for Elec status')
+                msg_ac = 'ac:' + str(df['accountid']) + ' has no data for Elec status'
                 # self.log_error(msg_ac, '')
                 # self.log_error(msg_ac, '')
 

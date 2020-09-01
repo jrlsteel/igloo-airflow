@@ -20,8 +20,7 @@ args = {
 dag = DAG(
     dag_id='igloo_weather_historical',
     default_args=args,
-    # schedule_interval='00 17 * * *',
-    schedule_interval=None,
+    schedule_interval='00 17 * * *',
     tags=['cdw']
 )
 
