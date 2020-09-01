@@ -64,6 +64,8 @@ class SmartReadsBillings:
         status_code = 0
         response_json = json.loads('{}')
 
+        print(body)
+
         try:
             response = session.post(api_url, data=body, headers=head)
             response_json = json.loads(response.content.decode('utf-8'))
@@ -116,8 +118,8 @@ class SmartReadsBillings:
                 formated_response_smart_reads = self.format_json_response(response_smart_reads)
                 print(formated_response_smart_reads)
             else:
-                print('ac:' + str(df['account_id']) + ' has no data for Elec status')
-                msg_ac = 'ac:' + str(df['account_id']) + ' has no data for Elec status'
+                print('ac:' + str(df['accountid']) + ' has no data for Elec status')
+                msg_ac = 'ac:' + str(df['accountid']) + ' has no data for Elec status'
                 # self.log_error(msg_ac, '')
                 # self.log_error(msg_ac, '')
 
