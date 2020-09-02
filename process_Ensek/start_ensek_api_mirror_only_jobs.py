@@ -84,7 +84,7 @@ if __name__ == '__main__':
         # run NonPA Ensek Jobs in UAT PreProd Limit of 100 accounts
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
         #This needs to be uncommented when we have access to internal apis at ensek
-        s.submit_all_ensek_scripts()
+        # s.submit_all_ensek_scripts()
 
         print("Ensek Account Status  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/AccountStatus/"
