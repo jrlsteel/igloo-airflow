@@ -35,7 +35,7 @@ def get_dir():
     if env_conf == 'preprod':
         dir = dirs3.preprod
     if env_conf == 'newprod':
-        dir = dirs3.preprod
+        dir = dirs3.newprod
 
     return dir
 
