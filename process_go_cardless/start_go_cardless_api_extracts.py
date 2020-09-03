@@ -251,6 +251,27 @@ class StartGoCardlessAPIExtracts:
             sys.exit(1)
 
 
+    def submit_go_cardless_reporting_gluejob(self):
+        try:
+            jobName = self.dir['glue_reporting_job_name']
+            s3_bucket = self.dir['s3_bucket']
+            environment = self.env
+
+            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
+                                            processJob='go_cardless_reporting')
+            job_response = obj_stage.run_glue_job()
+            if job_response:
+                print("{0}: Reporting Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                # return staging_job_response
+            else:
+                print("Error occurred in Reporting Job")
+                # return staging_job_response
+                raise Exception
+        except Exception as e:
+            print("Error in Reporting Job :- " + str(e))
+            sys.exit(1)
+
+
 
 if __name__ == '__main__':
 
@@ -277,6 +298,11 @@ if __name__ == '__main__':
     # Go Cardless Staging Jobs
     print("{0}:  Go Cardlesss Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
     s.submit_go_cardless_staging_gluejob()
+
+
+    # Go Cardless Reporting Jobs
+    print("{0}:  Go Cardlesss Reporting Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    s.submit_go_cardless_reporting_gluejob()
 
 
 
