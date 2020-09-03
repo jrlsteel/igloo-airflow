@@ -129,10 +129,57 @@ if __name__ == "__main__":
     startdateDF = util.execute_query(p.sql)
     ReportEndDate = str(p.execEndDate) + str(".000Z")
     ReportStartDate = str(startdateDF.iat[0,0])
-    print('ReportStartDate:  {0}'.format(ReportStartDate))
-    print('ReportEndDate:  {0}'.format(ReportEndDate))
+    print('Most Recent Report StartDate:  {0}'.format(ReportStartDate))
+    tz_start = '-01T00:00:00.000Z'
+    tz_stop = '-01T00:00:00.000Z'
 
-    p1 = p.process_Payouts(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
+    dict_runtime = {1:['01','04'],
+                    2: ['04', '07'],
+                    3: ['07', '10'],
+                    4: ['10', '01']
+                    }
+
+    ReportStartDate = datetime.strptime(ReportStartDate, '%Y-%m-%dT%H:%M:%S.%fZ')
+    ReportEndDate = datetime.strptime(ReportEndDate, '%Y-%m-%dT%H:%M:%S.%fZ')
+    lsd  = [ReportStartDate, ReportEndDate]
+    date_time_obj = min(lsd) ##datetime.strptime(min(lsd), '%Y-%m-%dT%H:%M:%S.%fZ')
+    qtr = math.ceil(date_time_obj.month / 3.)
+    yr = math.ceil(date_time_obj.year)
+    qtr_rs = math.ceil(ReportEndDate.month / 3.)
+    yr_rs = math.ceil(ReportEndDate.year)
+    ReportEndYr = None
+    if qtr <= 3:
+        ReportEndYr = yr
+    else:
+        ReportEndYr = yr + 1
+
+    qtrList = [qtr, qtr_rs]
+    yrList = [yr, yr_rs]
+    reportQtr = list(set(qtrList))
+    reportYr = list(set(yrList))
+    noQtrs = len(reportQtr)
+    noYrs = len(reportYr)
+
+    n = 0
+    while n < noQtrs:
+        lkpkey = reportQtr[n]
+        dateList = dict_runtime[lkpkey]
+        if n == 0 and noYrs < 2:
+            rptStart =  str(yr)+'-'+dateList[0]+tz_start
+            rptEnd =  str(ReportEndYr)+'-'+dateList[1]+tz_stop
+            print('ReportStartDate:  {0}'.format(rptStart))
+            print('ReportEndDate:  {0}'.format(rptEnd))
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd)
+        else:
+            rptStart = str(reportYr[1]) + '-' + dateList[0] + tz_start
+            rptEnd = str(reportYr[1]) + '-' + dateList[1] + tz_stop
+            print('ReportStartDate:  {0}'.format(rptStart))
+            print('ReportEndDate:  {0}'.format(rptEnd))
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd)
+        n+=1
+
+
+    ##p1 = p.process_Payouts(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
 
 
 
