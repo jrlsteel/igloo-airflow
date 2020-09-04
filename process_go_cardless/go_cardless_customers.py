@@ -34,15 +34,11 @@ class GoCardlessClients(object):
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
+        self.sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_clients '
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Clients']
         self.clients = clients
+        self.execEndDate = datetime.now().replace(microsecond=0).isoformat() ##datetime.today().strftime('%Y-%m-%d')
         self.toDay = datetime.today().strftime('%Y-%m-%d')
-        if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays=-1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
-        if _execEndDate is None:
-            _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
 
     def is_json(self, myjson):
         try:
@@ -64,27 +60,24 @@ class GoCardlessClients(object):
 
         return dateEnd.strftime(dateFormat)
 
-    def daterange(self, dateFormat="%Y-%m-%d"):
-        start_date = self.execStartDate
-        end_date = self.execEndDate
+    def daterange(self, start_date, dateFormat="%Y-%m-%d"):
+        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')   ##self.execEndDate
         for n in range(int((end_date - start_date).days)):
             seq_date = start_date + timedelta(n)
             yield seq_date.strftime(dateFormat)
         return seq_date
 
 
-    def process_Clients(self, _StartDate=None, _EndDate=None):
+    def process_Clients(self, _StartDate, _EndDate):
         fileDirectory = self.fileDirectory
         s3 = self.s3
-        if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
-        if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+        RpStartDate = _StartDate
+        RpEndDate = _EndDate
         clients = self.clients
         filename = 'go_cardless_clients_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(startdatetime.year)
+        fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
+        qtr = math.ceil(fileDate.month / 3.)
+        yr = math.ceil(fileDate.year)
         fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         print('Listing clients.......')
         # Loop through a page
@@ -92,12 +85,10 @@ class GoCardlessClients(object):
         df_out = pd.DataFrame()
         datalist = []
         ls = []
-        StartDate = _StartDate + "T00:00:00.000Z"
-        EndDate = _EndDate + "T00:00:00.000Z"
-        print(_StartDate, _EndDate)
+        print(RpStartDate, _EndDate)
 
         for client in clients.all(
-                params={"created_at[gte]": StartDate , "created_at[lte]": EndDate }):
+                params={"created_at[gt]": RpStartDate , "created_at[lte]": RpEndDate }):
             EnsekAccountId = None
             if client.metadata:
                 if 'ensekAccountId' in client.metadata:
@@ -135,25 +126,16 @@ class GoCardlessClients(object):
 
         return df
 
-    def runDailyFiles(self):
-        for single_date in self.daterange():
-            start = single_date
-            end = self.get_date(start)
-            ## print(start, end)
-            ### Execute Job ###
-            self.process_Clients(start, end)
-
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
-    ### StartDate & EndDate in YYYY-MM-DD format ###
-    ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
-    ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessClients('2020-04-01', '2020-04-14')
     p = GoCardlessClients()
+    startdateDF = util.execute_query(p.sql)
+    ReportEndDate = str(p.execEndDate) + str(".000Z")
+    ReportStartDate = str(startdateDF.iat[0,0])
+    print('ReportStartDate:  {0}'.format(ReportStartDate))
+    print('ReportEndDate:  {0}'.format(ReportEndDate))
 
-    p1 = p.process_Clients()
-    ### Extract return single Daily Files from Date Range Provided ###
-    ## p2 = p.runDailyFiles()
+    p1 = p.process_Clients(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
 
 

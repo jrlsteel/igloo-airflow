@@ -29,7 +29,7 @@ from connections.connect_db import get_finance_S3_Connections as s3_con
 from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                               environment=con.go_cardless['environment'])
+                                       environment=con.go_cardless['environment'])
 Events = client.events
 Refunds = client.refunds
 Mandates = client.mandates
@@ -38,15 +38,14 @@ Payments = client.payments
 
 
 class IterableQueue():
-    def __init__(self, source_queue):
-        self.source_queue = source_queue
-
+    def __init__(self,source_queue):
+            self.source_queue = source_queue
     def __iter__(self):
         while True:
             try:
-                yield self.source_queue.get_nowait()
+               yield self.source_queue.get_nowait()
             except queue.Empty:
-                return
+               return
 
 
 class GoCardlessEvents(object):
@@ -67,7 +66,7 @@ class GoCardlessEvents(object):
         self.Subscriptions = Subscriptions
         self.Payments = Payments
         self.Refunds = Refunds
-        self.execEndDate = datetime.now().replace(microsecond=0).isoformat()  ##datetime.today().strftime('%Y-%m-%d')
+        self.execEndDate = datetime.now().replace(microsecond=0).isoformat() ##datetime.today().strftime('%Y-%m-%d')
         self.toDay = datetime.today().strftime('%Y-%m-%d')
 
     def is_json(self, myjson):
@@ -77,7 +76,8 @@ class GoCardlessEvents(object):
             return False
         return True
 
-    def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
+
+    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
         dateStart = _date
         dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
         if _addDays is None:
@@ -91,14 +91,16 @@ class GoCardlessEvents(object):
         return dateEnd.strftime(dateFormat)
 
     def daterange(self, start_date, dateFormat="%Y-%m-%d"):
-        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')  ##self.execEndDate
+        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')   ##self.execEndDate
         for n in range(int((end_date - start_date).days)):
             seq_date = start_date + timedelta(n)
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    ''' EVENTS '''
 
+
+
+    ''' EVENTS '''
     def process_Events(self, _StartDate, _EndDate):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
@@ -112,7 +114,7 @@ class GoCardlessEvents(object):
         filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
         fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
         qtr = math.ceil(fileDate.month / 3.)  ## math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(fileDate.year)  ## math.ceil(startdatetime.year)
+        yr = math.ceil(fileDate.year) ## math.ceil(startdatetime.year)
         fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         print('Listing Events.......')
         # Loop through a page
@@ -121,7 +123,7 @@ class GoCardlessEvents(object):
         print(RpStartDate, _EndDate)
         try:
             for event in Events.all(
-                    params={"created_at[gt]": RpStartDate, "created_at[lte]": RpEndDate}):
+                    params={"created_at[gt]": RpStartDate, "created_at[lte]": RpEndDate }):
 
                 id = None
 
@@ -208,16 +210,14 @@ class GoCardlessEvents(object):
         while not q_Event.empty():
             event_datalist.append(q_Event.get())
 
-        df_event = pd.DataFrame(event_datalist,
-                                columns=['id', 'created_at', 'resource_type', 'action', 'customer_notifications',
-                                         'cause', 'description', 'origin', 'reason_code', 'scheme',
-                                         'will_attempt_retry',
-                                         'mandate', 'new_customer_bank_account', 'new_mandate', 'organisation',
-                                         'parent_event', 'payment', 'payout', 'previous_customer_bank_account',
-                                         'refund',
-                                         'subscription'])
+        df_event = pd.DataFrame(event_datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
+                                             'cause', 'description', 'origin', 'reason_code', 'scheme', 'will_attempt_retry',
+                                             'mandate' , 'new_customer_bank_account' , 'new_mandate' , 'organisation' ,
+                                             'parent_event' , 'payment' , 'payout', 'previous_customer_bank_account' , 'refund' ,
+                                             'subscription'])
 
         print(df_event.head(5))
+
 
         ### EVENTS ####
         df_string = df_event.to_csv(None, index=False)
@@ -226,11 +226,15 @@ class GoCardlessEvents(object):
         s3.set_contents_from_string(df_string)
         return df_event
 
+
+
     def ResourceType(self, df, resource):
         resource_df = df.copy()  ##df[df['mandate'].notnull()]
         resource_sr = resource_df[resource].dropna().unique()
         resource_ToList = resource_sr.tolist()
         return resource_ToList
+
+
 
     def f_put(self, method, df, q):
         print("f_put start")
@@ -238,7 +242,7 @@ class GoCardlessEvents(object):
         q.put(data)
 
     def f_get(self, q):
-        # print("f_get start")
+        #print("f_get start")
         while (1):
             data = pd.DataFrame()
             loop = 0
@@ -250,9 +254,17 @@ class GoCardlessEvents(object):
             time.sleep(1.)
             # self.redshift_upsert(df=data, crud_type='i')
 
-    ''' MANDATES '''
 
-    def process_Mandates(self, df, q, _StartDate=None, _EndDate=None):
+
+
+
+
+
+
+
+
+    ''' MANDATES '''
+    def process_Mandates(self, df, q, _StartDate = None, _EndDate = None ):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
         MandatesfileDirectory = self.MandatesFileDirectory
@@ -324,17 +336,15 @@ class GoCardlessEvents(object):
         for row in df.itertuples(index=True, name='Pandas'):
             id = row.mandate_id
             r_1 = [row.mandate_id, row.CustomerId, row.new_mandate_id, row.created_at, row.next_possible_charge_date,
-                   row.payments_require_approval,
-                   row.reference, row.scheme, row.status, row.creditor, row.customer_bank_account, row.EnsekID,
-                   row.EnsekStatementId]
+                    row.payments_require_approval,
+                    row.reference, row.scheme, row.status, row.creditor, row.customer_bank_account, row.EnsekID, row.EnsekStatementId]
 
             print(r_1)
             df_1 = pd.DataFrame([r_1], columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                                'next_possible_charge_date',
-                                                'payments_require_approval', 'reference', 'scheme', 'status',
-                                                'creditor',
-                                                'customer_bank_account',
-                                                'EnsekID', 'EnsekStatementId'])
+                                             'next_possible_charge_date',
+                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
+                                             'customer_bank_account',
+                                             'EnsekID', 'EnsekStatementId'] )
 
             filename = 'go_cardless_mandates_' + id + '.csv'
 
@@ -342,6 +352,18 @@ class GoCardlessEvents(object):
             s3.key = MandatesFileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
+
+
+
+
+
+
+
+
+
+
+
+
 
     ''' SUBSCRIPTIONS '''
 
@@ -437,6 +459,16 @@ class GoCardlessEvents(object):
             s3.key = SubscriptionsfileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
+
+
+
+
+
+
+
+
+
+
 
     ''' PAYMENTS '''
 
@@ -632,6 +664,14 @@ class GoCardlessEvents(object):
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
+
+
+
+
+
+
+
+
     ''' REFUNDS '''
 
     def process_Refunds(self, df, q, _StartDate=None, _EndDate=None):
@@ -705,6 +745,11 @@ class GoCardlessEvents(object):
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
+
+
+
+
+
     def Multiprocess_Event(self, df, method):
         env = util.get_env()
         if env == 'uat':
@@ -742,6 +787,7 @@ class GoCardlessEvents(object):
 
         print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
 
+
     def MultiProcessDataframe(self, df, method):
         df_All = pd.DataFrame()
         start = timeit.default_timer()
@@ -749,9 +795,9 @@ class GoCardlessEvents(object):
         itr = IterableQueue
         env = util.get_env()
         if env == 'uat':
-            n = 4  # number of process to run in parallel
+            n = 6  # number of process to run in parallel
         else:
-            n = 4
+            n = 6
         print(len(df))
         k = int(len(df) / n)  # get equal no of files for each process
         print(k)
@@ -794,17 +840,20 @@ class GoCardlessEvents(object):
             # Completed Parallel Processes
             print(q2.qsize())
 
+
             # Concatenate Dataframes
             for dfIQ in IterableQueue(q2):
                 df_All = pd.concat([df_All, dfIQ], sort=False)
         except gocardless_pro.errors.InvalidApiUsageError as e:
             print('Error: {0}'.format(e))
 
+
         ####### multiprocessing Ends #########
 
         print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
 
         return df_All
+
 
     def MultiProcessDataframe_v2(self, df, method):
         df_All = pd.DataFrame()
@@ -813,9 +862,9 @@ class GoCardlessEvents(object):
         itr = IterableQueue
         env = util.get_env()
         if env == 'uat':
-            n = 4  # number of process to run in parallel
+            n = 8  # number of process to run in parallel
         else:
-            n = 4
+            n = 8
         print(len(df))
         k = int(len(df) / n)  # get equal no of files for each process
         print(k)
@@ -857,6 +906,7 @@ class GoCardlessEvents(object):
         # Completed Parallel Processes
         print(q2.qsize())
 
+
         # Concatenate Dataframes
         for dfIQ in IterableQueue(q2):
             df_All = pd.concat([df_All, dfIQ], sort=False)
@@ -870,6 +920,14 @@ class GoCardlessEvents(object):
         return df_All
 
 
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
@@ -877,12 +935,13 @@ if __name__ == "__main__":
     p = GoCardlessEvents()
     startdateDF = util.execute_query(p.sql)
     ReportEndDate = str(p.execEndDate) + str(".000Z")
-    ReportStartDate = str(startdateDF.iat[0, 0])
+    ReportStartDate = str(startdateDF.iat[0,0])
     print('ReportStartDate:  {0}'.format(ReportStartDate))
     print('ReportEndDate:  {0}'.format(ReportEndDate))
 
     ### EVENTS ###
     eventsDF = p.process_Events(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
+
 
     ### MANDATES ###
     mandateList = p.ResourceType(df=eventsDF, resource='mandate')
@@ -894,10 +953,12 @@ if __name__ == "__main__":
     df_subscriptions = p.MultiProcessDataframe(df=subscriptionList, method=p.process_Subscriptions)
     pSubscriptions = p.Multiprocess_Event(df=df_subscriptions, method=p.writeCSVs_Subscriptions)
 
+
     ### PAYMENTS ###
     paymentList = p.ResourceType(df=eventsDF, resource='payment')
-    df_payments = p.MultiProcessDataframe(df=paymentList, method=p.process_Payments)
+    df_payments = p.MultiProcessDataframe(df=paymentList, method=p.process_Payments) 
     pPaymentsFiles = p.Update_Events_Driven_Payments(df2=df_payments)
+
 
     ## REFUNDS ##
     refundList = p.ResourceType(df=eventsDF, resource='refund')
