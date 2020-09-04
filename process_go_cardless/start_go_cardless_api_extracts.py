@@ -8,7 +8,7 @@ from square.client import Client
 from queue import Queue
 from pandas.io.json import json_normalize
 
-sys.path.append('../..')
+sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
 import process_square
