@@ -5,6 +5,7 @@ import pymysql as psql
 import pysftp
 import boto
 from boto.s3.key import Key
+import psycopg2
 
 sys.path.append('..')
 from conf import config as con
@@ -147,6 +148,8 @@ def get_finance_S3_Connections_client():
 
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
+
+
 
 
 if __name__ == "__main__":
