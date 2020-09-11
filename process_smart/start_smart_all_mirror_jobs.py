@@ -87,10 +87,12 @@ if __name__ == '__main__':
     s3_temp_destination_uat_bucket = s.dir['s3_temp_hh_uat_bucket']
 
     if s.env == 'prod':
-        # run processing weather python script
-        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        # run processing Smart Meter Mirror python script
+        print("{0}: {1} Prod Env so skipping this step...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         #s.submit_process_weather_job()
-
+    elif s.env == 'newprod':
+        print("{0}: {1} New Prod Env so skipping this step...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                      s.process_name))
     else:
         # # run processing mirror job
         print("Smart All Mirror Inventory job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
