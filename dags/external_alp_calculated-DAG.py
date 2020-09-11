@@ -20,7 +20,7 @@ args = {
 dag = DAG(
     dag_id='igloo_alp_calculated',
     default_args=args,
-    schedule_interval=None,
+    schedule_interval='00 09 * * *',
     tags=['cdw']
 )
 
