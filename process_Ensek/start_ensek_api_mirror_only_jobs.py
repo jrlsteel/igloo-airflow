@@ -117,7 +117,7 @@ if __name__ == '__main__':
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek Tariff History Elec Stand Charge Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),s.process_name))
-        source_input = "s3://igloo-data-warehouse-preprod/stage1/TariffHistoryElecStandCharge/"
+        source_input = "s3://" + s3_source_bucket + "/stage1/TariffHistoryElecStandCharge/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/TariffHistoryElecStandCharge/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
