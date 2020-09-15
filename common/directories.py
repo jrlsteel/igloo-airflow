@@ -935,6 +935,10 @@ newprod = {
     # All bad practice here needs to be sorted
     "s3_source_bucket": "igloo-data-warehouse-prod",
     "s3_bucket": "igloo-data-warehouse-prod-630944350233",
+    # All bad practice here needs to be sorted
+    "s3_temp_hh_uat_bucket": "none",
+    "s3_smart_source_bucket": "none",
+    "s3_smart_bucket": "none",
 
     "s3_key": {
         "Accounts": "stage1/Accounts/",
