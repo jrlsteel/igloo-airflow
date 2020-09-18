@@ -49,5 +49,12 @@ start_d18_ref_jobs = BashOperator(
     dag=dag,
 )
 
-start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs
+start_d18_mirror_only_jobs = BashOperator(
+    task_id='start_processD18_mirror_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_processD18_mirror_jobs.py',
+    dag=dag,
+)
+
+
+start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs >> start_d18_mirror_only_jobs
 
