@@ -115,38 +115,38 @@ def get_boto_S3_Connections(bucket_name):
     return k
 
 
-def get_finance_S3_Connections(bucket_name):
-    # global k
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
-    bucket = con.igloo_finance_config['bucket_name']
-    # print(access_key)
-    # print(secret_key)
+# def get_finance_S3_Connections(bucket_name):
+#     # global k
+#     access_key = con.igloo_finance_config['access_key']
+#     secret_key = con.igloo_finance_config['secret_key']
+#     bucket = con.igloo_finance_config['bucket_name']
+#     # print(access_key)
+#     # print(secret_key)
 
-    s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    bucket = s3.get_bucket(bucket)
-    k = Key(bucket)
-    return k
-
-
-def get_finance_S3_Connections_resources():
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
-    # print(access_key)
-    # print(secret_key)
-
-    s3 = boto3.resource('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    return s3
+#     s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+#     bucket = s3.get_bucket(bucket)
+#     k = Key(bucket)
+#     return k
 
 
-def get_finance_S3_Connections_client():
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
-    # print(access_key)
-    # print(secret_key)
+# def get_finance_S3_Connections_resources():
+#     access_key = con.igloo_finance_config['access_key']
+#     secret_key = con.igloo_finance_config['secret_key']
+#     # print(access_key)
+#     # print(secret_key)
 
-    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-    return s3
+#     s3 = boto3.resource('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+#     return s3
+
+
+# def get_finance_S3_Connections_client():
+#     access_key = con.igloo_finance_config['access_key']
+#     secret_key = con.igloo_finance_config['secret_key']
+#     # print(access_key)
+#     # print(secret_key)
+
+#     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+#     return s3
 
 
 if __name__ == "__main__":
