@@ -56,5 +56,5 @@ start_d18_mirror_only_jobs = BashOperator(
 )
 
 
-start_d18_download_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs  >> start_d18_ref_jobs >> start_d18_mirror_only_jobs
+start_d18_mirror_only_jobs >> start_d18_processing_jobs >> start_d18_staging_jobs >> start_d18_ref_jobs
 
