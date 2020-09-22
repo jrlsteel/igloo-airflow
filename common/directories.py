@@ -283,6 +283,10 @@ uat = {
     "s3_finance_square_key": {
         "Payments": "/square-api-payments/"
     },
+
+    "master_sources": {
+        "go_cardless": "uat"
+    }
 }
 
 preprod = {

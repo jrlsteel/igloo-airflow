@@ -8,6 +8,7 @@ import gocardless_pro
 sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
+from common import Refresh_UAT as refresh
 
 
 class GoCardlessAPIExtracts:
@@ -20,6 +21,8 @@ class GoCardlessAPIExtracts:
         self.square_jobid = util.get_jobID()
         self.staging_jobid = util.get_jobID()
         self.ref_jobid = util.get_jobID()
+        self.mirror_jobid = util.get_jobID()
+        self.current_environment = self.env
 
     def retry_function(self, process, process_name):
         for i in range(0, 3):
@@ -44,7 +47,6 @@ class GoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payout.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            ## subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
             self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True),
                                 process_name='Go-Cardless Payouts')
             util.batch_logging_update(self.goCardless_jobid, 'e')
@@ -68,7 +70,6 @@ class GoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_events.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            ## subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True)
             self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True),
                                 process_name='Go-Cardless Events')
             util.batch_logging_update(self.goCardless_jobid, 'e')
@@ -92,7 +93,6 @@ class GoCardlessAPIExtracts:
             util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_customers.py',
                                       'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
-            ## subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True)
             self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True),
                                 process_name='Go-Cardless Customers')
             util.batch_logging_update(self.goCardless_jobid, 'e')
@@ -149,23 +149,77 @@ class GoCardlessAPIExtracts:
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
+    def submit_process_s3_mirror_job(self, source_input, destination_input):
+        """
+        Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination folder
+        :return: None
+        """
+
+        print("{0}: >>>> Process GoCardless mirror {1}<<<<".format(datetime.now().strftime('%H:%M:%S'),
+                                                                   source_input.split('/')[-1]))
+        try:
+            util.batch_logging_insert(self.mirror_jobid, 405, 'GoCardless_extract_mirror-' + source_input + '-' +
+                                      self.env, 'start_go_cardless_api_extracts.py')
+            start = timeit.default_timer()
+            r = refresh.SyncS3(source_input, destination_input)
+            r.process_sync()
+
+            util.batch_logging_update(self.mirror_jobid, 'e')
+            print(
+                "GoCardless_extract_mirror-" + source_input + "-" + self.env +
+                " files completed in {1:.2f} seconds".format(
+                    datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in process :- " + str(e))
+            sys.exit(1)
+
+    def submit_all_mirror_jobs(self, source_env):
+        folder_list = [
+            self.dir['s3_finance_goCardless_key']['Payouts'],
+            self.dir['s3_finance_goCardless_key']['Events'],
+            self.dir['s3_finance_goCardless_key']['Mandates-Files'],
+            self.dir['s3_finance_goCardless_key']['Subscriptions-Files'],
+            self.dir['s3_finance_goCardless_key']['Payments-Files'],
+            self.dir['s3_finance_goCardless_key']['Refunds-Files'],
+            self.dir['s3_finance_goCardless_key']['Clients']
+        ]
+
+        destination_bucket = "s3://{0}/".format(self.dir["s3_finance_bucket"])
+        source_bucket = destination_bucket.replace(self.env, source_env)
+
+        for folder in folder_list:
+            print("{0}: GC {1} Mirror job running...".format(datetime.now().strftime('%H:%M:%S'), folder.strip('/')))
+            source_input = source_bucket + folder
+            destination_input = destination_bucket + folder
+            s.submit_process_s3_mirror_job(source_input, destination_input)
+
 
 if __name__ == '__main__':
     s = GoCardlessAPIExtracts()
 
     util.batch_logging_insert(s.all_jobid, 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
 
-    ## Payouts API Endpoint
-    print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.extract_go_cardless_payouts_job()
+    master_source = util.get_master_source("go_cardless")
+    current_env = util.get_env()
+    if master_source == current_env:  # current environment is master source, run the data extract script
+        # Payouts API Endpoint
+        print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.extract_go_cardless_payouts_job()
 
-    ## Events API Endpoint
-    print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.extract_go_cardless_events_job()
+        # Events API Endpoint
+        print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.extract_go_cardless_events_job()
 
-    ## Clients API Endpoint
-    print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-    s.extract_go_cardless_customers_job()
+        # Clients API Endpoint
+        print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.extract_go_cardless_customers_job()
+
+    else:  # current environment is not the master source, mirror the new data from the master source
+        # Go Cardless Mirror Jobs
+        print("{0}:  Go Cardless Mirror Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_all_mirror_jobs(master_source)
 
     # Go Cardless Staging Jobs
     print("{0}:  Go Cardlesss Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
