@@ -118,6 +118,7 @@ class GoCardlessAPIExtracts:
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                util.batch_logging_update(self.staging_jobid, 'e')
             else:
                 print("Error occurred in Staging Job")
                 raise Exception
@@ -140,6 +141,7 @@ class GoCardlessAPIExtracts:
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Ref Glue Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                util.batch_logging_update(self.ref_jobid, 'e')
             else:
                 print("Error occurred in Ref Glue Job")
                 raise Exception
