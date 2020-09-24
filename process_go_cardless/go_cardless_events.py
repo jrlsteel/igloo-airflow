@@ -903,4 +903,3 @@ if __name__ == "__main__":
     refundList = p.ResourceType(df=eventsDF, resource='refund')
     df_refunds = p.MultiProcessDataframe(df=refundList, method=p.process_Refunds)
     pRefunds = p.Multiprocess_Event(df=df_refunds, method=p.writeCSVs_Refunds)
-
