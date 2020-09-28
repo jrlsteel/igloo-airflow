@@ -16,94 +16,125 @@ class GoCardlessAPIExtracts:
         self.pythonAlias = util.get_pythonAlias()
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.all_jobid = util.get_jobID()
-        self.goCardless_jobid = util.get_jobID()
-        self.square_jobid = util.get_jobID()
-        self.staging_jobid = util.get_jobID()
-        self.ref_jobid = util.get_jobID()
-        self.mirror_jobid = util.get_jobID()
+        self.job_ids = {
+            "all": util.get_jobID(),
+            "payouts": util.get_jobID(),
+            "events": util.get_jobID(),
+            "customers": util.get_jobID(),
+            "mirror": util.get_jobID(),
+            "staging": util.get_jobID(),
+            "ref": util.get_jobID()
+        }
         self.current_environment = self.env
 
-    def retry_function(self, process, process_name):
-        for i in range(0, 3):
-            try:
-                process
-            except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                    gocardless_pro.errors.MalformedResponseError, subprocess.CalledProcessError) as e:
-                util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
-                util.batch_logging_update(self.all_jobid, 'f', str(e))
-                print("Error in Process {0} API extract :- {1}".format(process_name, str(e)))
-                continue
-            break
+    # def retry_function(self, process, process_name):
+    #     for i in range(0, 3):
+    #         try:
+    #             process
+    #         except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
+    #                 gocardless_pro.errors.MalformedResponseError, subprocess.CalledProcessError) as e:
+    #             util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
+    #             util.batch_logging_update(self.job_ids["all"], 'f', str(e))
+    #             print("Error in Process {0} API extract :- {1}".format(process_name, str(e)))
+    #             continue
+    #         break
 
-    def extract_go_cardless_payouts_job(self):
+    def run_subprocess_extract(self, pyfile, parent_pyfile, job_code, job_name, quit_on_fail=True):
         """
-        Calls the GoCardless Payouts API extract: go_cardless_payouts.py.
+        Calls the pyfile using subprocess.run and handles logging
         :return: None
         """
 
-        print("{0}: >>>> Process Go-Cardless Payouts API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        print(
+            "{0}: >>>> Process Go-Cardless {1} API extract  <<<<".format(datetime.now().strftime('%H:%M:%S'), job_name))
         try:
-            util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_payout.py',
-                                      'start_go_cardless_api_extracts.py')
+            # log job start
+            util.batch_logging_insert(self.job_ids[job_name], job_code, pyfile, parent_pyfile)
+            # start timer
             start = timeit.default_timer()
-            self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True),
-                                process_name='Go-Cardless Payouts')
-            util.batch_logging_update(self.goCardless_jobid, 'e')
-            print("{0}: Process Go-Cardless Payouts API extract completed in {1:.2f} seconds".format(
+            # run job
+            subprocess.run([self.pythonAlias, pyfile], check=True)
+            # log job end
+            util.batch_logging_update(self.job_ids[job_name], 'e')
+            print("{0}: Process Go-Cardless {2} API extract completed in {1:.2f} seconds".format(
                 datetime.now().strftime('%H:%M:%S'),
-                float(timeit.default_timer() - start)))
+                float(timeit.default_timer() - start),
+                job_name))
         except Exception as e:
-            util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
-            print("Error in Process Go-Cardless Payouts API extract :- " + str(e))
-            sys.exit(1)
+            # log job failure
+            util.batch_logging_update(self.job_ids[job_name], 'f', str(e))
+            print("Error in Process Go-Cardless {0} API extract :- ".format(job_name) + str(e))
+            # if quit_on_fail is True, log all-job failure & exit
+            if quit_on_fail:
+                util.batch_logging_update(self.job_ids["all"], 'f', str(e))
+                sys.exit(1)
 
-    def extract_go_cardless_events_job(self):
-        """
-        Calls the GoCardless Events API extract: go_cardless_events.py.
-        :return: None
-        """
+    # def extract_go_cardless_payouts_job(self):
+    #     """
+    #     Calls the GoCardless Payouts API extract: go_cardless_payouts.py.
+    #     :return: None
+    #     """
+    #
+    #     print("{0}: >>>> Process Go-Cardless Payouts API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    #     try:
+    #         util.batch_logging_insert(self.job_ids["payouts"], 400, 'go_cardless_payout.py',
+    #                                   'start_go_cardless_api_extracts.py')
+    #         start = timeit.default_timer()
+    #         subprocess.run([self.pythonAlias, "go_cardless_payout.py"], check=True)
+    #         util.batch_logging_update(self.job_ids["payouts"], 'e')
+    #         print("{0}: Process Go-Cardless Payouts API extract completed in {1:.2f} seconds".format(
+    #             datetime.now().strftime('%H:%M:%S'),
+    #             float(timeit.default_timer() - start)))
+    #     except Exception as e:
+    #         util.batch_logging_update(self.job_ids["payouts"], 'f', str(e))
+    #         util.batch_logging_update(self.job_ids["all"], 'f', str(e))
+    #         print("Error in Process Go-Cardless Payouts API extract :- " + str(e))
+    #         sys.exit(1)
 
-        print("{0}: >>>> Process Go-Cardless Events API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
-        try:
-            util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_events.py',
-                                      'start_go_cardless_api_extracts.py')
-            start = timeit.default_timer()
-            self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True),
-                                process_name='Go-Cardless Events')
-            util.batch_logging_update(self.goCardless_jobid, 'e')
-            print("{0}: Process Go-Cardless Events API extract completed in {1:.2f} seconds".format(
-                datetime.now().strftime('%H:%M:%S'),
-                float(timeit.default_timer() - start)))
-        except Exception as e:
-            util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
-            print("Error in Process Go-Cardless events API extract :- " + str(e))
-            sys.exit(1)
+    # def extract_go_cardless_events_job(self):
+    #     """
+    #     Calls the GoCardless Events API extract: go_cardless_events.py.
+    #     :return: None
+    #     """
+    #
+    #     print("{0}: >>>> Process Go-Cardless Events API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    #     try:
+    #         util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_events.py',
+    #                                   'start_go_cardless_api_extracts.py')
+    #         start = timeit.default_timer()
+    #         subprocess.run([self.pythonAlias, "go_cardless_events.py"], check=True)
+    #         util.batch_logging_update(self.goCardless_jobid, 'e')
+    #         print("{0}: Process Go-Cardless Events API extract completed in {1:.2f} seconds".format(
+    #             datetime.now().strftime('%H:%M:%S'),
+    #             float(timeit.default_timer() - start)))
+    #     except Exception as e:
+    #         util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
+    #         util.batch_logging_update(self.job_ids["all"], 'f', str(e))
+    #         print("Error in Process Go-Cardless events API extract :- " + str(e))
+    #         sys.exit(1)
 
-    def extract_go_cardless_customers_job(self):
-        """
-        Calls the GoCardless Clients API extract: go_cardless_customers.py.
-        :return: None
-        """
-
-        print("{0}: >>>> Process Go-Cardless Clients API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
-        try:
-            util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_customers.py',
-                                      'start_go_cardless_api_extracts.py')
-            start = timeit.default_timer()
-            self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True),
-                                process_name='Go-Cardless Customers')
-            util.batch_logging_update(self.goCardless_jobid, 'e')
-            print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(
-                datetime.now().strftime('%H:%M:%S'),
-                float(timeit.default_timer() - start)))
-        except Exception as e:
-            util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
-            print("Error in Process Go-Cardless Clients API extract :- " + str(e))
-            sys.exit(1)
+    # def extract_go_cardless_customers_job(self):
+    #     """
+    #     Calls the GoCardless Clients API extract: go_cardless_customers.py.
+    #     :return: None
+    #     """
+    #
+    #     print("{0}: >>>> Process Go-Cardless Clients API extract  <<<<".format(datetime.now().strftime('%H:%M:%S')))
+    #     try:
+    #         util.batch_logging_insert(self.goCardless_jobid, 400, 'go_cardless_customers.py',
+    #                                   'start_go_cardless_api_extracts.py')
+    #         start = timeit.default_timer()
+    #         self.retry_function(process=subprocess.run([self.pythonAlias, "go_cardless_customers.py"], check=True),
+    #                             process_name='Go-Cardless Customers')
+    #         util.batch_logging_update(self.goCardless_jobid, 'e')
+    #         print("{0}: Process Go-Cardless Clients API extract completed in {1:.2f} seconds".format(
+    #             datetime.now().strftime('%H:%M:%S'),
+    #             float(timeit.default_timer() - start)))
+    #     except Exception as e:
+    #         util.batch_logging_update(self.goCardless_jobid, 'f', str(e))
+    #         util.batch_logging_update(self.job_ids["all"], 'f', str(e))
+    #         print("Error in Process Go-Cardless Clients API extract :- " + str(e))
+    #         sys.exit(1)
 
     def submit_go_cardless_staging_gluejob(self):
         print("{0}: >>>> Process Go-Cardless staging glue job <<<<".format(datetime.now().strftime('%H:%M:%S')))
@@ -111,20 +142,20 @@ class GoCardlessAPIExtracts:
             jobName = self.dir['glue_staging_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
-            util.batch_logging_insert(self.staging_jobid, 403, 'GoCardless staging gluejob',
+            util.batch_logging_insert(self.job_ids["staging"], 403, 'GoCardless staging gluejob',
                                       'start_go_cardless_api_extracts.py')
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
                                             processJob='go_cardless')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Staging Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                util.batch_logging_update(self.staging_jobid, 'e')
+                util.batch_logging_update(self.job_ids["staging"], 'e')
             else:
                 print("Error occurred in Staging Job")
                 raise Exception
         except Exception as e:
-            util.batch_logging_update(self.staging_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            util.batch_logging_update(self.job_ids["staging"], 'f', str(e))
+            util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             print("Error in Staging Job :- " + str(e))
             sys.exit(1)
 
@@ -134,20 +165,20 @@ class GoCardlessAPIExtracts:
             jobName = self.dir['glue_reporting_job_name']
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
-            util.batch_logging_insert(self.ref_jobid, 404, 'GoCardless ref gluejob',
+            util.batch_logging_insert(self.job_ids["ref"], 404, 'GoCardless ref gluejob',
                                       'start_go_cardless_api_extracts.py')
             obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
                                             processJob='go_cardless_reporting')
             job_response = obj_stage.run_glue_job()
             if job_response:
                 print("{0}: Ref Glue Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-                util.batch_logging_update(self.ref_jobid, 'e')
+                util.batch_logging_update(self.job_ids["ref"], 'e')
             else:
                 print("Error occurred in Ref Glue Job")
                 raise Exception
         except Exception as e:
-            util.batch_logging_update(self.ref_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            util.batch_logging_update(self.job_ids["ref"], 'f', str(e))
+            util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             print("Error in Ref Glue Job :- " + str(e))
             sys.exit(1)
 
@@ -160,20 +191,20 @@ class GoCardlessAPIExtracts:
         print("{0}: >>>> Process GoCardless mirror {1}<<<<".format(datetime.now().strftime('%H:%M:%S'),
                                                                    source_input.split('/')[-1]))
         try:
-            util.batch_logging_insert(self.mirror_jobid, 405, 'GoCardless_extract_mirror-' + source_input + '-' +
+            util.batch_logging_insert(self.job_ids["mirror"], 405, 'GoCardless_extract_mirror-' + source_input + '-' +
                                       self.env, 'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
             r.process_sync()
 
-            util.batch_logging_update(self.mirror_jobid, 'e')
+            util.batch_logging_update(self.job_ids["mirror"], 'e')
             print(
                 "GoCardless_extract_mirror-" + source_input + "-" + self.env +
                 " files completed in {1:.2f} seconds".format(
                     datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
         except Exception as e:
-            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            util.batch_logging_update(self.job_ids["mirror"], 'f', str(e))
+            util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -201,22 +232,35 @@ class GoCardlessAPIExtracts:
 if __name__ == '__main__':
     s = GoCardlessAPIExtracts()
 
-    util.batch_logging_insert(s.all_jobid, 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
+    util.batch_logging_insert(s.job_ids["all"], 402, 'all_go_cardless_api_jobs', 'start_go_cardless_api_extracts.py')
 
     master_source = util.get_master_source("go_cardless")
     current_env = util.get_env()
+    print("Current environment: {0}, Master_Source: {1}".format(current_env, master_source))
     if master_source == current_env:  # current environment is master source, run the data extract script
         # Payouts API Endpoint
         print("{0}:  Go-Cardless Payouts API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.extract_go_cardless_payouts_job()
+        # s.extract_go_cardless_payouts_job()
+        s.run_subprocess_extract(pyfile='go_cardless_payout.py',
+                                 parent_pyfile='start_go_cardless_api_extracts.py',
+                                 job_code=400,
+                                 job_name='payouts')
 
         # Events API Endpoint
         print("{0}:  Go-Cardless Event API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.extract_go_cardless_events_job()
+        # s.extract_go_cardless_events_job()
+        s.run_subprocess_extract(pyfile='go_cardless_events.py',
+                                 parent_pyfile='start_go_cardless_api_extracts.py',
+                                 job_code=400,
+                                 job_name='events')
 
         # Clients API Endpoint
         print("{0}:  Go-Cardless Customers API extract running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.extract_go_cardless_customers_job()
+        # s.extract_go_cardless_customers_job()
+        s.run_subprocess_extract(pyfile='go_cardless_customers.py',
+                                 parent_pyfile='start_go_cardless_api_extracts.py',
+                                 job_code=400,
+                                 job_name='customers')
 
     else:  # current environment is not the master source, mirror the new data from the master source
         # Go Cardless Mirror Jobs
@@ -232,4 +276,4 @@ if __name__ == '__main__':
     s.submit_go_cardless_ref_gluejob()
 
     print("{0}: All Go-Cardless API extracts completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-    util.batch_logging_update(s.all_jobid, 'e')
+    util.batch_logging_update(s.job_ids["all"], 'e')
