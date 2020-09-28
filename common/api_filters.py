@@ -108,3 +108,8 @@ tariff_diff_acc_ids = {
                                      'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')"""
 }
 
+smart_reads_billing = {
+    "elec": """select * from vw_etl_smart_billing_reads_elec""",
+    "gas": """select * from vw_etl_smart_billing_reads_gas""",
+
+}
