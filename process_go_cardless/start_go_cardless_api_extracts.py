@@ -140,14 +140,16 @@ class GoCardlessAPIExtracts:
             self.dir['s3_finance_goCardless_key']['Clients']
         ]
 
-        destination_bucket = "s3://{0}/".format(self.dir["s3_finance_bucket"])
+        destination_bucket = "s3://{0}".format(self.dir["s3_finance_bucket"])
         source_bucket = destination_bucket.replace(self.env, source_env)
 
         for folder in folder_list:
             print("{0}: GC {1} Mirror job running...".format(datetime.now().strftime('%H:%M:%S'), folder.strip('/')))
-            source_input = source_bucket + folder
-            destination_input = destination_bucket + folder
-            s.submit_process_s3_mirror_job(source_input, destination_input)
+            source_path = source_bucket + folder
+            print("source: {0}".format(source_path))
+            destination_path = destination_bucket + folder
+            print("destination: {0}".format(destination_path))
+            s.submit_process_s3_mirror_job(source_path, destination_path)
 
 
 if __name__ == '__main__':
