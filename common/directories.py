@@ -290,7 +290,7 @@ uat = {
     },
 
     "master_sources": {
-        "go_cardless": "preprod"
+        "go_cardless": "prod"
     }
 }
 
@@ -559,7 +559,7 @@ preprod = {
     },
 
     "master_sources": {
-        "go_cardless": "preprod"
+        "go_cardless": "prod"
     }
 }
 
@@ -806,4 +806,23 @@ prod = {
     "glue_meets_eligibility_job_name": "_process_ref_tables_prod",
     "glue_reporting_job_name": "_process_ref_tables_prod",
 
+    "s3_finance_bucket": "igloo-data-warehouse-prod-finance",
+
+    "s3_finance_goCardless_key": {
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/",
+        "Payments-Files": "/go-cardless-api-payments-files/",
+        "Refunds-Files": "/go-cardless-api-refunds-files/"
+    },
+
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
