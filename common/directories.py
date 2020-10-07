@@ -290,7 +290,7 @@ uat = {
     },
 
     "master_sources": {
-        "go_cardless": "prod"
+        "go_cardless": "uat"
     }
 }
 
