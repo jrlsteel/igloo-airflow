@@ -69,7 +69,7 @@ class GoCardlessPayouts(object):
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    def process_Payouts(self, _StartDate, _EndDate):
+    def process_Payouts(self, _StartDate, _EndDate, _Qtr):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         RpStartDate = _StartDate
@@ -77,7 +77,7 @@ class GoCardlessPayouts(object):
         payouts = self.payouts
         filename = 'go_cardless_payouts_' + _StartDate + '_' + _EndDate + '.csv'
         fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
-        qtr = math.ceil(fileDate.month / 3.)
+        qtr = _Qtr  ##math.ceil(fileDate.month / 3.)
         yr = math.ceil(fileDate.year)
         fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         print('Listing payouts.......')
@@ -126,13 +126,22 @@ if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_S3_Connections_client()
     p = GoCardlessPayouts()
+
+    ### Get latest record from aws_fin_stage1_extracts.fin_go_cardless_api_payouts
     startdateDF = util.execute_query(p.sql)
+
+    ### Assign Report End Date as Script Execution Timestamp
     ReportEndDate = str(p.execEndDate) + str(".000Z")
+
+    ### Assign Report Start  Date After latest record
+    ### from aws_fin_stage1_extracts.fin_go_cardless_api_payouts
     ReportStartDate = str(startdateDF.iat[0,0])
+
     print('Most Recent Report StartDate:  {0}'.format(ReportStartDate))
     tz_start = '-01T00:00:00.000Z'
     tz_stop = '-01T00:00:00.000Z'
 
+    ### Dictionary to determine Quarter from Report StartDate
     dict_runtime = {1:['01','04'],
                     2: ['04', '07'],
                     3: ['07', '10'],
@@ -141,10 +150,16 @@ if __name__ == "__main__":
 
     ReportStartDate = datetime.strptime(ReportStartDate, '%Y-%m-%dT%H:%M:%S.%fZ')
     ReportEndDate = datetime.strptime(ReportEndDate, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    ### Create a List of ReportStartDate, ReportEndDate
     lsd  = [ReportStartDate, ReportEndDate]
+
+    ### Derive Report Quarter Start
     date_time_obj = min(lsd) ##datetime.strptime(min(lsd), '%Y-%m-%dT%H:%M:%S.%fZ')
     qtr = math.ceil(date_time_obj.month / 3.)
     yr = math.ceil(date_time_obj.year)
+
+    ### Derive Report Quarter End
     qtr_rs = math.ceil(ReportEndDate.month / 3.)
     yr_rs = math.ceil(ReportEndDate.year)
     ReportEndYr = None
@@ -153,33 +168,40 @@ if __name__ == "__main__":
     else:
         ReportEndYr = yr + 1
 
+    ### List of Report Quarters to process
     qtrList = [qtr, qtr_rs]
+
+    ### List of Report Years to process
     yrList = [yr, yr_rs]
+
     reportQtr = list(set(qtrList))
     reportYr = list(set(yrList))
     noQtrs = len(reportQtr)
     noYrs = len(reportYr)
 
+    ### Loop through set of Report Quarters to process
     n = 0
     while n < noQtrs:
         lkpkey = reportQtr[n]
         dateList = dict_runtime[lkpkey]
-        if n == 0 and noYrs < 2:
+        ### IF Report Year overlaps, Set Report Year plus one
+        if dateList[0] > dateList[1]:
+            ReportEndYr = ReportEndYr + 1
+        if n == 0: ## and noYrs < 2:
             rptStart =  str(yr)+'-'+dateList[0]+tz_start
             rptEnd =  str(ReportEndYr)+'-'+dateList[1]+tz_stop
             print('ReportStartDate:  {0}'.format(rptStart))
             print('ReportEndDate:  {0}'.format(rptEnd))
-            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd)
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd, _Qtr= lkpkey)
         else:
-            rptStart = str(reportYr[1]) + '-' + dateList[0] + tz_start
-            rptEnd = str(reportYr[1]) + '-' + dateList[1] + tz_stop
+            rptStart = str(reportYr[0]) + '-' + dateList[0] + tz_start
+            rptEnd = str(ReportEndYr) + '-' + dateList[1] + tz_stop
             print('ReportStartDate:  {0}'.format(rptStart))
             print('ReportEndDate:  {0}'.format(rptEnd))
-            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd)
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd, _Qtr= lkpkey)
         n+=1
 
 
-    ##p1 = p.process_Payouts(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
 
 
 
