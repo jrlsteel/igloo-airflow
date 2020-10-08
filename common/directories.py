@@ -290,7 +290,7 @@ uat = {
     },
 
     "master_sources": {
-        "go_cardless": "uat"
+        "go_cardless": "preprod"
     }
 }
 
@@ -559,7 +559,7 @@ preprod = {
     },
 
     "master_sources": {
-        "go_cardless": "prod"
+        "go_cardless": "preprod"
     }
 }
 
