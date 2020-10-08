@@ -68,9 +68,10 @@ class SmartReadsBillings:
 
         try:
             response = session.post(api_url, data=body, headers=head)
-            response_json = json.loads(response.content.decode('utf-8'))
             status_code = response.status_code
-            print(response_json)
+            if status_code != 201:
+                response_json = json.loads(response.content.decode('utf-8'))
+                print(response_json)
         except ConnectionError:
             self.log_error('Unable to Connect')
             response_json = json.loads('{message: "Connection Error"}')
