@@ -99,7 +99,10 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "hourly_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -201,7 +204,8 @@ uat = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "HourlyWeather": "stage1/HourlyForecast/forecast_issued={0}/"
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
