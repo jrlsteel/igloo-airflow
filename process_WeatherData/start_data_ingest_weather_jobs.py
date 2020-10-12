@@ -162,19 +162,19 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(all_jobid, 107, 'all_weather_jobs', 'start_weather_jobs.py')
     
-    historical_weather = Weather(
-        all_jobid = all_jobid,
-        process_name = 'Historical Weather',
-        job_script = 'processHistoricalWeatherData.py',
-        glue_job = 'historicalweather',
-        s3_key = '/stage1/HistoricalWeather/',
-        mirror_job_num = 21,
-        weather_job_num = 21,
-        staging_glue_job_num = 22,
-        ref_glue_job_num = 23
-    )
+    # historical_weather = Weather(
+    #     all_jobid = all_jobid,
+    #     process_name = 'Historical Weather',
+    #     job_script = 'processHistoricalWeatherData.py',
+    #     glue_job = 'historicalweather',
+    #     s3_key = '/stage1/HistoricalWeather/',
+    #     mirror_job_num = 21,
+    #     weather_job_num = 21,
+    #     staging_glue_job_num = 22,
+    #     ref_glue_job_num = 23
+    # )
 
-    historical_weather.process()
+    # historical_weather.process()
     
     hourly_weather = Weather(
         all_jobid = all_jobid,
