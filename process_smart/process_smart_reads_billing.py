@@ -1,6 +1,7 @@
 import timeit
 import requests
 import json
+import pandas as pd
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import time
@@ -67,8 +68,10 @@ class SmartReadsBillings:
         print(body)
 
         try:
+            print("POST {}".format(api_url))
             response = session.post(api_url, data=body, headers=head)
             status_code = response.status_code
+            print("status_code: {}".format(status_code))
             if status_code != 201:
                 response_json = json.loads(response.content.decode('utf-8'))
                 print(response_json)
@@ -96,10 +99,10 @@ class SmartReadsBillings:
     def processAccounts(self, _df):
         api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info('smart_reads_billing')
 
-        for index, df in _df.iterrows(): 
-            # Get SMart Reads Billing
+        for index, df in _df.iterrows():
+            # Get Smart Reads Billing
             body = json.dumps({
-                "meterReadingDateTime": df["meterreadingdatetime"],
+                "meterReadingDateTime": df["meterreadingdatetime"].to_pydatetime().replace(tzinfo=datetime.timezone.utc).isoformat(),
                 "accountId": df["accountid"],
                 "meterType": df["metertype"],
                 "meterPointNumber": df["meterpointnumber"],
@@ -108,7 +111,7 @@ class SmartReadsBillings:
                 "reading": df["reading"],
                 "source": df["source"],
                 "createdBy": df["createdby"],
-                "dateCreated": str(datetime.datetime.now())
+                "dateCreated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             }, default=str)
 
             response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_smart_reads)

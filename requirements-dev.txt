@@ -1,3 +1,4 @@
 -r requirements.txt
 moto
 pyarrow
+freezegun==1.0.0
