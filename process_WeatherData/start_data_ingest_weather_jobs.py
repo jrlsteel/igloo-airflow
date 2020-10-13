@@ -44,26 +44,26 @@ class Weather:
 
     def process(self):
 
-        if self.env == 'prod':
-            # run processing weather python script
-            print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
-            self.submit_process_weather_job()
+        # if self.env == 'prod':
 
-        else:
-            # # run processing mirror job
-            print("{0}: Weather Mirror job {1} is running...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
-            source_input = f"{prod_dir['s3_bucket']}{self.s3_key}"
-            destination_input = f"{self.dir['s3_bucket']}{self.s3_key}"
-            self.submit_process_s3_mirror_job(source_input, destination_input)
+        # run processing weather python script
+        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        self.submit_process_weather_job()
 
+        # else:
+        #     # # run processing mirror job
+        #     print("{0}: Weather Mirror job {1} is running...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        #     source_input = f"{prod_dir['s3_bucket']}{self.s3_key}"
+        #     destination_input = f"{self.dir['s3_bucket']}{self.s3_key}"
+        #     self.submit_process_s3_mirror_job(source_input, destination_input)
 
-        # run staging glue job
-        print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
-        self.submit_staging_gluejob()
+        # # run staging glue job
+        # print("{0}: Staging Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        # self.submit_staging_gluejob()
 
-        # run ref glue job
-        print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
-        self.submit_ref_gluejob()
+        # # run ref glue job
+        # print("{0}: Glue Job running for {1}...".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        # self.submit_ref_gluejob()
 
         print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
 
@@ -99,7 +99,7 @@ class Weather:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.weather_jobid, self.mirror_job_num, 'weather_extract_pyscript','start_weather_jobs.py')
+            util.batch_logging_insert(self.weather_jobid, self.mirror_job_num, 'weather_extract_pyscript','start_data_ingest_weather_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, self.weather_job_script], check=True)
             util.batch_logging_update(self.weather_jobid, 'e')
@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     all_jobid = util.get_jobID()
 
-    util.batch_logging_insert(all_jobid, 107, 'all_weather_jobs', 'start_weather_jobs.py')
+    util.batch_logging_insert(all_jobid, 107, 'all_weather_jobs', 'start_data_ingest_weather_jobs.py')
     
     # historical_weather = Weather(
     #     all_jobid = all_jobid,
