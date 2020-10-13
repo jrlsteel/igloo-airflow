@@ -34,6 +34,7 @@ class SmartReadsBillings:
         self.num_days_per_api_calls = 7
         self.sql_elec = apif.smart_reads_billing['elec']  # there is no need for a weekly run here
         self.sql_gas = apif.smart_reads_billing['gas']  # there is no need for a weekly run here
+        self.sql_all = apif.smart_reads_billing['all']  # there is no need for a weekly run here
 
     def format_json_response(self, data):
         """
@@ -135,14 +136,7 @@ if __name__ == "__main__":
     freeze_support()
     p = SmartReadsBillings()
 
-    smart_reads_billing_sql = p.sql_elec
-    smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
-
-    p.processAccounts(smart_reads_billing_df)
-
-    print(len(smart_reads_billing_df))
-
-    smart_reads_billing_sql = p.sql_gas
+    smart_reads_billing_sql = p.sql_all
     smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
 
     p.processAccounts(smart_reads_billing_df)

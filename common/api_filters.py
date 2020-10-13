@@ -111,7 +111,7 @@ tariff_diff_acc_ids = {
 smart_reads_billing = {
     "elec": """select * from vw_etl_smart_billing_reads_elec""",
     "gas": """select * from vw_etl_smart_billing_reads_gas""",
-
+    "all": """select * from vw_etl_smart_billing_reads_all""",
 }
 
 weather_forecast = {
