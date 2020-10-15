@@ -99,7 +99,10 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "hourly_weather": {
+            "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -201,7 +204,8 @@ uat = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "HourlyWeather": "stage1/HourlyForecast/forecast_issued={0}/"
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -246,7 +250,7 @@ uat = {
     "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_uat",
     "glue_meterpoints_status_job_name": "_process_ref_tables_uat",
     "glue_zendesk_job_name": "_process_ref_tables_uat",
-    "glue_historicalweather_jobname": "_process_ref_tables_uat",
+    "glue_weather_jobname": "_process_ref_tables_uat",
     "glue_eac_aq_job_name": "_process_ref_tables_uat",
     "glue_igl_ind_eac_aq_job_name": "_process_ref_tables_uat",
     "glue_epc_job_name": "_process_ref_tables_uat",
@@ -519,7 +523,7 @@ preprod = {
     "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_preprod",
     "glue_meterpoints_status_job_name": "_process_ref_tables_preprod",
     "glue_zendesk_job_name": "_process_ref_tables_preprod",
-    "glue_historicalweather_jobname": "_process_ref_tables_preprod",
+    "glue_weather_jobname": "_process_ref_tables_preprod",
     "glue_eac_aq_job_name": "_process_ref_tables_preprod",
     "glue_igl_ind_eac_aq_job_name": "_process_ref_tables_preprod",
     "glue_epc_job_name": "_process_ref_tables_preprod",
@@ -783,7 +787,7 @@ prod = {
     "glue_direct_debits_job_name": "_process_ref_tables_prod",
     "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_prod",
     "glue_meterpoints_status_job_name": "_process_ref_tables_prod",
-    "glue_historicalweather_jobname": "_process_ref_tables_prod",
+    "glue_weather_jobname": "_process_ref_tables_prod",
     "glue_eac_aq_job_name": "_process_ref_tables_prod",
     "glue_igl_ind_eac_aq_job_name": "_process_ref_tables_prod",
     "glue_epc_job_name": "_process_ref_tables_prod",
