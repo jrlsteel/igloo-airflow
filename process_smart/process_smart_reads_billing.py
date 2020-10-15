@@ -94,7 +94,7 @@ class SmartReadsBillings:
     def processAccounts(self, _df):
         api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info('smart_reads_billing')
 
-        for index, df in _df.iterrows():
+        for index, df in _df.iterrows(): 
             # Get SMart Reads Billing
             body = json.dumps({
                 "meterReadingDateTime": df["meterreadingdatetime"],
