@@ -101,6 +101,7 @@ class HourlyWeather:
 
             if api_response:
                 api_response['outcode'] = postcode
+                api_response['forecast_issued'] = self.extract_date
                 formatted_json = self.format_json_response(api_response)
                 
                 self.post_to_s3(formatted_json, postcode, k, dir_s3, self.start_date, self.end_date)
