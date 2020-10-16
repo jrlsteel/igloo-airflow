@@ -113,3 +113,7 @@ smart_reads_billing = {
     "gas": """select * from vw_etl_smart_billing_reads_gas""",
 
 }
+
+weather_forecast = {
+    "hourly": """select * from vw_etl_weather_forecast_hourly"""
+}
