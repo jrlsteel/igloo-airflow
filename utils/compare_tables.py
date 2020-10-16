@@ -11,7 +11,7 @@ class TableDiffChecker:
     def set_environment_config(self, env_name, env_config):
         self.env_configs[env_name] = env_config
 
-    def compare_objects(self, comparison_type, env_a_name, object_a_def, env_b_name=None, object_b_def=None):
+    def compare_objects(self, comparison_type, env_a_name, object_a_def, key_cols, env_b_name=None, object_b_def=None):
         # set object def and/or env def for b to a if b is not provided (indicating same value)
         if object_b_def is None:
             object_b_def = object_a_def
@@ -63,8 +63,52 @@ class TableDiffChecker:
         return comparison_log
 
     @staticmethod
+    def compare_key_sets(df_a, df_b, key_cols):
+        # key_cols should be a python list of strings, one string per field, such as ['account_id', 'meterpoint_id']
+        keyset_res = {
+            "table_a": {
+                "total_rows": "",
+                "num_key_sets": "",
+                "num_unique_key_sets": "return a list of these internally only",
+                "num_duplicated_key_sets": ""
+            },
+            "table_b": {
+                "total_rows": "",
+                "num_key_sets": "",
+                "num_unique_key_sets": "return a list of these internally only",
+                "num_duplicated_key_sets": ""
+            },
+            "comparison": {
+                "num_unique_keys_a_only": "",
+                "num_unique_keys_common": "return a list of these internally only",
+                "num_unique_keys_b_only": "",
+            }
+        }
+
+        key_fields_a = df_a[key_cols]
+        key_fields_b = df_b[key_cols]
+
+        return keyset_res
+
+    # Gets the number of unique rows, split into those used only once and those used many times, from the dataframe
+    @staticmethod
+    def get_counts_on_slice(df_slice):
+        unique_row_counts = df_slice.value_counts()
+        single_use_rows = unique_row_counts[unique_row_counts == 1]
+
+        slice_counts_res = {
+            "total_rows": len(df_slice.index),
+            "num_key_sets": len(unique_row_counts.index),
+            "num_unique_key_sets": len(single_use_rows.index)
+        }
+        slice_counts_res["num_duplicated_key_sets"] = slice_counts_res["num_key_sets"] - slice_counts_res[
+            "num_unique_key_sets"]
+
+        return slice_counts_res
+
+    @staticmethod
     def compare_schemas(df_a, df_b):
-        res = {
+        schemas_res = {
             "full_match": True,
             "field_match": True,
             "type_match": True,
@@ -76,44 +120,44 @@ class TableDiffChecker:
         }
 
         # compare field names and data types
-        for field, dtype in res["schema_a"].items():
-            if field in res["schema_b"].keys():
+        for field, dtype in schemas_res["schema_a"].items():
+            if field in schemas_res["schema_b"].keys():
                 # field present in both schemas, check for type mismatch
-                if dtype != res["schema_b"][field]:
-                    res["type_mismatches"].append({
+                if dtype != schemas_res["schema_b"][field]:
+                    schemas_res["type_mismatches"].append({
                         "field": field,
                         "dtype_a": dtype,
-                        "dtype_b": res["schema_b"][field]
+                        "dtype_b": schemas_res["schema_b"][field]
                     })
-                    res["type_match"] = False
-                    res["full_match"] = False
+                    schemas_res["type_match"] = False
+                    schemas_res["full_match"] = False
                 else:
                     # exact match
-                    res["common_fields"].append({
+                    schemas_res["common_fields"].append({
                         "field": field,
                         "dtype": dtype
                     })
             else:
                 # field unique to query a
-                res["unique_fields"].append({
+                schemas_res["unique_fields"].append({
                     "field_name": field,
                     "dtype": dtype,
                     "unique_to": "A"
                 })
-                res["field_match"] = False
-                res["full_match"] = False
-        for field, dtype in res["schema_b"].items():
-            if field not in res["schema_a"].keys():
+                schemas_res["field_match"] = False
+                schemas_res["full_match"] = False
+        for field, dtype in schemas_res["schema_b"].items():
+            if field not in schemas_res["schema_a"].keys():
                 # field unique to query b
-                res["unique_fields"].append({
+                schemas_res["unique_fields"].append({
                     "field_name": field,
                     "dtype": dtype,
                     "unique_to": "B"
                 })
-                res["field_match"] = False
-                res["full_match"] = False
+                schemas_res["field_match"] = False
+                schemas_res["full_match"] = False
 
-        return res
+        return schemas_res
 
     @staticmethod
     def compare_row_count(df_a, df_b):
@@ -154,15 +198,22 @@ class TableDiffChecker:
 
 
 if __name__ == '__main__':
-    from conf.config import redshift_config as uat_config
+    from conf.config import redshift_config as olduat_config
 
-    uat_config["database_type"] = "redshift"
+    olduat_config["database_type"] = "redshift"
+    from conf.config import redshift_config_prod as oldprod_config
+
+    oldprod_config["database_type"] = "redshift"
+    from conf.config import redshift_newprod as newprod_config
+
+    newprod_config["database_type"] = "redshift"
 
     tdc = TableDiffChecker()
-    tdc.set_environment_config(env_name="uat", env_config=uat_config)
-    res = tdc.compare_objects(comparison_type="query",
-                              env_a_name="uat",
-                              object_a_def="select * from ref_meterpoints limit 100",
-                              object_b_def="select * from ref_meters limit 100")
+    tdc.set_environment_config(env_name="old_prod", env_config=oldprod_config)
+    tdc.set_environment_config(env_name="new_prod", env_config=newprod_config)
+    res = tdc.compare_objects(comparison_type="table",
+                              env_a_name="old_prod",
+                              env_b_name="new_prod",
+                              object_a_def="ref_tariffs")
     print(res)
     print(json.dumps(res, indent=4))
