@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     all_jobid = util.get_jobID()
 
-    util.batch_logging_insert(all_jobid, 109, 'all_weather_jobs', 'start_data_ingest_weather_jobs.py')
+    util.batch_logging_insert(all_jobid, 107, 'all_weather_jobs', 'start_data_ingest_weather_jobs.py')
     
     hourly_weather = Weather(
         all_jobid = all_jobid,
