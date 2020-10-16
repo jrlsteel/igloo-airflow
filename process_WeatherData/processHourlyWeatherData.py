@@ -16,6 +16,7 @@ sys.path.append('..')
 
 from conf import config as con
 from common import utils as util
+from common import api_filters as apif
 from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
 
@@ -31,6 +32,8 @@ class HourlyWeather:
         self.end_date = (datetime.today().date() + timedelta(hours=48)).strftime('%Y-%m-%d')
         self.api_url, self.key = util.get_weather_url_token('hourly_weather')
         self.hours = 48
+        self.weather_sql = apif.weather_forecast['hourly']  # there is no need for a weekly run here
+
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -101,6 +104,7 @@ class HourlyWeather:
 
             if api_response:
                 api_response['outcode'] = postcode
+                api_response['forecast_issued'] = self.extract_date
                 formatted_json = self.format_json_response(api_response)
                 
                 self.post_to_s3(formatted_json, postcode, k, dir_s3, self.start_date, self.end_date)
@@ -123,8 +127,7 @@ if __name__ == "__main__":
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
     s3 = s3_con(bucket_name)
-    weather_postcode_sql = con.test_config['weather_sql']
-    weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
+    weather_postcodes = p.get_weather_postcode(p.weather_sql)
 
     ##### Multiprocessing Starts #########
     env = util.get_env()
