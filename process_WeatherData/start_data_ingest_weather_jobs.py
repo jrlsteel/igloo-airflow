@@ -45,7 +45,7 @@ class Weather:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.weather_jobid, self.weather_job_num, 'weather_extract_pyscript','start_data_ingest_weather_jobs.py')
+            util.batch_logging_insert(self.weather_jobid, self.weather_job_num, 'weather_forecast_extract_pyscript','start_data_ingest_weather_jobs.py')
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, self.weather_job_script], check=True)
             util.batch_logging_update(self.weather_jobid, 'e')
