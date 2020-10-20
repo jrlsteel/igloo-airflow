@@ -325,10 +325,10 @@ def compare_calculated_tables(stage=None):
             else:
                 results["failure"][table_name] = res
 
-            time = dt.now().strftime("%Y%m%d-%H%M%S")
-            fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
-            with open(fname, 'w') as outfile:
-                json.dump(results, outfile, indent=4)
+        time = dt.now().strftime("%Y%m%d-%H%M%S")
+        fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
+        with open(fname, 'w') as outfile:
+            json.dump(results, outfile, indent=4)
     except Exception as e:
         print("Error in calculated table comparison script: " + str(e))
         batch_logging_update(job_id, 'f', str(e))
