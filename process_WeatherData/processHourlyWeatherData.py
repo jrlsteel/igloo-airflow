@@ -55,7 +55,7 @@ class HourlyWeather:
                         return response_json
                 else:
                     print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    self.log_error(f'Response Error: Problem grabbing data for URL {api_url}', response.status_code)
                     return None
 
             except ConnectionError:
