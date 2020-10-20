@@ -6,6 +6,7 @@ from datetime import datetime as dt
 import pymysql
 import sys
 sys.path.append('..')
+sys.path.append('/home/ec2-user/python/enzek-meterpoint-readings')
 from common.utils import batch_logging_insert, batch_logging_update, get_jobID
 
 
