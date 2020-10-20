@@ -292,7 +292,7 @@ def compare_calculated_tables(stage=None):
 
     try:
         from process_table_comparisons.table_definitions import calculated_table_keys
-        from conf.config import redshift_configs
+        from conf.config import redshift_comparison_configs
         if stage is None:
             from conf.config import environment_config as current_environment
             stage = current_environment["environment"]
@@ -300,8 +300,8 @@ def compare_calculated_tables(stage=None):
         new_env_name = "new_" + stage
 
         tdc = TableDiffChecker()
-        tdc.set_environment_config(env_name=old_env_name, env_config=redshift_configs[old_env_name])
-        tdc.set_environment_config(env_name=new_env_name, env_config=redshift_configs[new_env_name])
+        tdc.set_environment_config(env_name=old_env_name, env_config=redshift_comparison_configs["old_env"])
+        tdc.set_environment_config(env_name=new_env_name, env_config=redshift_comparison_configs["new_env"])
 
         results = {
             "success": {
