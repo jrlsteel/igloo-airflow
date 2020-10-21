@@ -205,7 +205,8 @@ class TableDiffChecker:
             "schema_b": {field: df_b[field].dtype.name for field in list(df_b.columns)},
             "common_fields": {},
             "type_mismatches": {},
-            "unique_fields": {}
+            "unique_to_a": {},
+            "unique_to_b": {}
         }
 
         # compare field names and data types
