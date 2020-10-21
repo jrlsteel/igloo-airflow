@@ -97,6 +97,7 @@ class TableDiffChecker:
         except Exception:
             comparison_log["exec_success"] = False
             comparison_log["exception"] = traceback.format_exc()
+            traceback.print_exc()
 
         return comparison_log
 
@@ -109,7 +110,8 @@ class TableDiffChecker:
         for comparison_col in common_cols:
             # find equivalence between dataframes
             cols = key_cols.copy()
-            cols.append(comparison_col)
+            if comparison_col not in key_cols:
+                cols.append(comparison_col)
             # the following two slices are only necessary due to the size of some tables (such as the daily metering
             # report). The merge method below can work directly on full tables but runs out of memory on the large ones
             df_a_slice = df_a[cols]
