@@ -315,10 +315,13 @@ def compare_calculated_tables(stage=None):
         tdc.set_environment_config(env_name=new_env_name, env_config=redshift_comparison_configs["new_env"])
 
         results = {
-            "success": {
+            "full_match": {
 
             },
-            "mismatch": {
+            "schema_mismatch": {
+
+            },
+            "data_mismatch": {
 
             },
             "exec_failure": {
@@ -333,10 +336,12 @@ def compare_calculated_tables(stage=None):
                                       key_cols=key_cols)
             if not res["exec_success"]:
                 results["exec_failure"][table_name] = res
+            elif not res["schemas"]["full_match"]:
+                results["schema_mismatch"][table_name] = res
             elif res["overall_match"]:
-                results["success"][table_name] = res
+                results["full_match"][table_name] = res
             else:
-                results["mismatch"][table_name] = res
+                results["data_mismatch"][table_name] = res
 
         time = dt.now().strftime("%Y%m%d-%H%M%S")
         fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
