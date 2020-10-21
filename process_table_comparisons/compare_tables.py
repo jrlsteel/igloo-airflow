@@ -336,7 +336,7 @@ def compare_calculated_tables(stage=None):
             elif res["overall_match"]:
                 results["success"][table_name] = res
             else:
-                results["failure"][table_name] = res
+                results["mismatch"][table_name] = res
 
         time = dt.now().strftime("%Y%m%d-%H%M%S")
         fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
