@@ -109,7 +109,11 @@ class TableDiffChecker:
             # find equivalence between dataframes
             cols = key_cols.copy()
             cols.append(comparison_col)
-            tagged_rows = df_a.merge(df_b, on=cols, how='outer', indicator=True)
+            # the following two slices are only necessary due to the size of some tables (such as the daily metering
+            # report). The merge method below can work directly on full tables but runs out of memory on the large ones
+            df_a_slice = df_a[cols]
+            df_b_slice = df_b[cols]
+            tagged_rows = df_a_slice.merge(df_b_slice, on=cols, how='outer', indicator=True)
 
             # there will be the same number of right_only and left_only tags, no need to log both
             differing_values = sum(tagged_rows["_merge"] == "left_only")
