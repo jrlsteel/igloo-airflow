@@ -146,9 +146,9 @@ class TableDiffChecker:
         # key_cols should be a python list of strings, one string per field, such as ['account_id', 'meterpoint_id']
 
         if not set(key_cols).issubset(df_a.columns):
-            return {"ERROR": "Dataframe A does not contain the specified key columns"}, pd.DataFrame(columns=key_cols)
+            raise RuntimeError("Dataframe A does not contain the specified key columns")
         if not set(key_cols).issubset(df_b.columns):
-            return {"ERROR": "Dataframe B does not contain the specified key columns"}, pd.DataFrame(columns=key_cols)
+            raise RuntimeError("Dataframe B does not contain the specified key columns")
 
         key_res_a, key_set_a = TableDiffChecker.get_unique_key_stats(df_a, key_cols)
         key_res_b, key_set_b = TableDiffChecker.get_unique_key_stats(df_b, key_cols)
@@ -332,7 +332,7 @@ def compare_calculated_tables(stage=None):
                                       object_a_def=table_name,
                                       key_cols=key_cols)
             if not res["exec_success"]:
-                results["exec_failure"] = res
+                results["exec_failure"][table_name] = res
             elif res["overall_match"]:
                 results["success"][table_name] = res
             else:
