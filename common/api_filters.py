@@ -115,5 +115,5 @@ smart_reads_billing = {
 }
 
 weather_forecast = {
-    "hourly": """select * from vw_etl_weather_forecast_hourly"""
+    "hourly": """select * from vw_etl_weather_forecast_hourly limit 5"""
 }

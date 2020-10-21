@@ -70,6 +70,65 @@ class HourlyWeather:
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
 
+    def flatten(self, weather_json):
+
+        postcode_weather = json.loads(weather_json)
+
+        def get_row(hourly_forecast):
+
+            row = dict()
+
+            row['wind_cdir'] = hourly_forecast['wind_cdir']
+            row['rh'] = hourly_forecast['rh']
+            row['pod'] = hourly_forecast['pod']
+            row['timestamp_utc'] = hourly_forecast['timestamp_utc']
+            row['pres'] = hourly_forecast['pres']
+            row['solar_rad'] = hourly_forecast['solar_rad']
+            row['ozone'] = hourly_forecast['ozone']
+            row['icon'] = hourly_forecast['weather']['icon']
+            row['code'] = hourly_forecast['weather']['code']
+            row['description'] = hourly_forecast['weather']['description']
+            row['wind_gust_spd'] = hourly_forecast['wind_gust_spd']
+            row['timestamp_local'] = hourly_forecast['timestamp_local']
+            row['snow_depth'] = hourly_forecast['snow_depth']
+            row['clouds'] = hourly_forecast['clouds']
+            row['ts'] = hourly_forecast['ts']
+            row['wind_spd'] = hourly_forecast['wind_spd']
+            row['pop'] = hourly_forecast['pop']
+            row['wind_cdir_full'] = hourly_forecast['wind_cdir_full']
+            row['slp'] = hourly_forecast['slp']
+            row['dni'] = hourly_forecast['dni']
+            row['dewpt'] = hourly_forecast['dewpt']
+            row['snow'] = hourly_forecast['snow']
+            row['uv'] = hourly_forecast['uv']
+            row['wind_dir'] = hourly_forecast['wind_dir']
+            row['clouds_hi'] = hourly_forecast['clouds_hi']
+            row['precip'] = hourly_forecast['precip']
+            row['vis'] = hourly_forecast['vis']
+            row['dhi'] = hourly_forecast['dhi']
+            row['app_temp'] = hourly_forecast['app_temp']
+            row['datetime'] = hourly_forecast['datetime']
+            row['temp'] = hourly_forecast['temp']
+            row['ghi'] = hourly_forecast['ghi']
+            row['clouds_mid'] = hourly_forecast['clouds_mid']
+            row['clouds_low'] = hourly_forecast['clouds_low']
+            row['city_name'] = postcode_weather['city_name']
+            row['lon'] = postcode_weather['lon']
+            row['timezone'] = postcode_weather['timezone']
+            row['lat'] = postcode_weather['lat']
+            row['country_code'] = postcode_weather['country_code']
+            row['state_code'] = postcode_weather['state_code']
+            row['outcode'] = postcode_weather['outcode']
+            row['forecast_issued'] = postcode_weather['forecast_issued']
+            row['etlchange'] = datetime.utcnow()
+
+            return row
+
+        hourly_forecasts = postcode_weather['data']
+        rows = [ get_row(hourly_forecast) for hourly_forecast in hourly_forecasts ]
+
+        return rows
+
     def post_to_s3(self, data, postcode, k, dir_s3, start_date, end_date):
 
         if data:
@@ -107,7 +166,10 @@ class HourlyWeather:
                 api_response['forecast_issued'] = self.extract_date
                 formatted_json = self.format_json_response(api_response)
                 
-                self.post_to_s3(formatted_json, postcode, k, dir_s3, self.start_date, self.end_date)
+                # self.post_to_s3(formatted_json, postcode, k, dir_s3, self.start_date, self.end_date)
+                
+                flattened_data = self.flatten(formatted_json)
+                print(flattened_data)
 
     def get_weather_postcode(self, config_sql):
 
