@@ -49,9 +49,6 @@ calculated_table_keys = {
   "ref_calculated_tado_efficiency_batch": [
     "account_id"
   ],
-  "ref_calculated_tado_efficiency_interim": [
-    "external_id"
-  ],
   "ref_calculated_tado_fuel": [
     "fuel_id"
   ],
