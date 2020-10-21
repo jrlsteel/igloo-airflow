@@ -5,6 +5,7 @@ import traceback
 from datetime import datetime as dt
 import pymysql
 import sys
+
 sys.path.append('..')
 sys.path.append('/home/ec2-user/python/enzek-meterpoint-readings')
 from common.utils import batch_logging_insert, batch_logging_update, get_jobID
@@ -315,7 +316,10 @@ def compare_calculated_tables(stage=None):
             "success": {
 
             },
-            "failure": {
+            "mismatch": {
+
+            },
+            "exec_failure": {
 
             }
         }
@@ -325,7 +329,9 @@ def compare_calculated_tables(stage=None):
                                       env_b_name=new_env_name,
                                       object_a_def=table_name,
                                       key_cols=key_cols)
-            if res["overall_match"] and res["exec_success"]:
+            if not res["exec_success"]:
+                results["exec_failure"] = res
+            elif res["overall_match"]:
                 results["success"][table_name] = res
             else:
                 results["failure"][table_name] = res
@@ -334,6 +340,10 @@ def compare_calculated_tables(stage=None):
         fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
         with open(fname, 'w') as outfile:
             json.dump(results, outfile, indent=4)
+
+        if len(results["exec_failure"]) > 0:
+            raise RuntimeError("{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
+                num_exec_fail=len(results["exec_failure"])))
     except Exception as e:
         print("Error in calculated table comparison script: " + str(e))
         batch_logging_update(job_id, 'f', str(e))
