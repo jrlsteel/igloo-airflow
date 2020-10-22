@@ -1,11 +1,13 @@
 import timeit
 import requests
 import json
-from ratelimit import limits, sleep_and_retry
+import pandas as pd
 import time
-from requests import ConnectionError
 import csv
-import multiprocessing
+import io
+import pyarrow
+from ratelimit import limits, sleep_and_retry
+from requests import ConnectionError
 from multiprocessing import freeze_support
 from datetime import datetime, timedelta
 
@@ -33,7 +35,8 @@ class HourlyWeather:
         self.api_url, self.key = util.get_weather_url_token('hourly_weather')
         self.hours = 48
         self.weather_sql = apif.weather_forecast['hourly']  # there is no need for a weekly run here
-
+        self.dataframe = pd.DataFrame()
+        self.parquet_file_name = '{}.parquet'.format(util.get_jobID())
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
@@ -54,8 +57,8 @@ class HourlyWeather:
                         response_json = json.loads(response.content.decode('utf-8'))
                         return response_json
                 else:
-                    print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error(f'Response Error: Problem grabbing data for URL {api_url}', response.status_code)
+                    print(f'Problem grabbing data for URL {api_url}:', response.status_code)
+                    self.log_error(f'Response Error: Problem grabbing data for URL {api_url}:', response.status_code)
                     return None
 
             except ConnectionError:
@@ -129,17 +132,32 @@ class HourlyWeather:
 
         return rows
 
-    def post_to_s3(self, data, postcode, k, dir_s3, start_date, end_date):
+    def add_to_dataframe(self, columns_dict):
+
+        self.dataframe = self.dataframe.append(columns_dict, ignore_index=True)
+
+    def create_parquet_file(self):
+
+        parquet_file = io.BytesIO()
+        self.dataframe.to_parquet(parquet_file)
+
+        return parquet_file
+
+    def post_stage1_to_s3(self, data, postcode, k, stage1_dir_s3):
 
         if data:
             file_name = f'{postcode.strip()}_hourly_{self.start_date}_to_{self.end_date}.json'
-            k.key = dir_s3['s3_weather_key']['HourlyWeather'].format(self.extract_date) + file_name
+            k.key = stage1_dir_s3.format(self.extract_date) + file_name
             k.set_contents_from_string(data)
         else:
             print(f'{postcode.strip()} has no weather')
 
-    '''Format Json to handle null values'''
+    def post_stage2_to_s3(self, parquet_file, k, stage2_dir_s3):
 
+        k.key = stage2_dir_s3.format(self.extract_date) + self.parquet_file_name
+        k.set_contents_from_file(parquet_file, rewind=True)
+
+    '''Format Json to handle null values'''
     def format_json_response(self, data):
         return json.dumps(data, indent=4).replace('null', '""')
 
@@ -154,7 +172,7 @@ class HourlyWeather:
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
-    def processData(self, postcodes, k, dir_s3):
+    def processData(self, postcodes, k, stage1_dir_s3, stage2_dir_s3):
 
         for postcode in postcodes:
 
@@ -166,11 +184,15 @@ class HourlyWeather:
                 api_response['forecast_issued'] = self.extract_date
                 formatted_json = self.format_json_response(api_response)
                 
-                # self.post_to_s3(formatted_json, postcode, k, dir_s3, self.start_date, self.end_date)
+                self.post_stage1_to_s3(formatted_json, postcode, k, stage1_dir_s3)
                 
                 flattened_data = self.flatten(formatted_json)
-                print(flattened_data)
+                
+                self.add_to_dataframe(flattened_data)
 
+        parquet_file = self.create_parquet_file()
+        self.post_stage2_to_s3(parquet_file, k, stage2_dir_s3)        
+                
     def get_weather_postcode(self, config_sql):
 
         pr = db.get_redshift_connection()
@@ -180,49 +202,32 @@ class HourlyWeather:
 
         return postcodes_list
 
-if __name__ == "__main__":
+    # def copy_dataframe_to_redshift():
 
-    freeze_support()
+    #     pr = db.get_redshift_connection()
+
+    #     pr.pandas_to_redshift(
+    #         data_frame = self.dataframe, 
+    #         redshift_table_name = '',
+    #         append = True)
+
+    #     pr.close_up_shop()
+      
+
+if __name__ == "__main__":
 
     p = HourlyWeather()
 
     dir_s3 = util.get_dir()
     bucket_name = dir_s3['s3_bucket']
+    stage1_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage1']
+    stage2_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage2']
+    
     s3 = s3_con(bucket_name)
     weather_postcodes = p.get_weather_postcode(p.weather_sql)
 
-    ##### Multiprocessing Starts #########
-    env = util.get_env()
-
-    number_of_processes = 12 if env == 'uat' else 12 # number of process to run in parallel
-    number_of_postcodes = len(weather_postcodes) 
-    files_per_process = number_of_postcodes // number_of_processes
-
-    processes = []
-    lv = 0
     start = timeit.default_timer()
 
-    for process in range(number_of_processes + 1):
-        
-        p1 = HourlyWeather()
-
-        uv = process * files_per_process
-        if process == number_of_processes:
-            # do the remaining postcodes
-            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:], s3_con(bucket_name), dir_s3))
-        else:
-            # get the next chunk of postcodes
-            t = multiprocessing.Process(target=p1.processData, args=(weather_postcodes[lv:uv], s3_con(bucket_name), dir_s3))
-        lv = uv
-
-        processes.append(t)
-
-    for process in processes:
-        process.start()
-        time.sleep(2)
-
-    for process in processes:
-        process.join()
+    p.processData(weather_postcodes, s3, stage1_dir_s3, stage2_dir_s3)
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
-    ####### Multiprocessing Ends #########
