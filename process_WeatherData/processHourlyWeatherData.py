@@ -1,21 +1,18 @@
+import io
 import timeit
-import requests
 import json
-import pandas as pd
 import time
 import csv
-import io
+import sys
+import os
+from datetime import datetime, timedelta
+import requests
+import pandas as pd
 import pyarrow
 from ratelimit import limits, sleep_and_retry
 from requests import ConnectionError
-from multiprocessing import freeze_support
-from datetime import datetime, timedelta
-
-import sys
-import os
 
 sys.path.append('..')
-
 from conf import config as con
 from common import utils as util
 from common import api_filters as apif
@@ -34,7 +31,7 @@ class HourlyWeather:
         self.end_date = (datetime.today().date() + timedelta(hours=48)).strftime('%Y-%m-%d')
         self.api_url, self.key = util.get_weather_url_token('hourly_weather')
         self.hours = 48
-        self.weather_sql = apif.weather_forecast['hourly']  # there is no need for a weekly run here
+        self.weather_sql = apif.weather_forecast['hourly']['stage1']
         self.dataframe = pd.DataFrame()
         self.parquet_file_name = '{}.parquet'.format(util.get_jobID())
 
@@ -132,14 +129,14 @@ class HourlyWeather:
 
         return rows
 
-    def add_to_dataframe(self, columns_dict):
+    def add_to_dataframe(self, rows):
 
-        self.dataframe = self.dataframe.append(columns_dict, ignore_index=True)
+        self.dataframe = self.dataframe.append(rows)
 
     def create_parquet_file(self):
 
         parquet_file = io.BytesIO()
-        self.dataframe.to_parquet(parquet_file)
+        self.dataframe.to_parquet(parquet_file, index=False)
 
         return parquet_file
 
@@ -157,14 +154,13 @@ class HourlyWeather:
         k.key = stage2_dir_s3.format(self.extract_date) + self.parquet_file_name
         k.set_contents_from_file(parquet_file, rewind=True)
 
-    '''Format Json to handle null values'''
     def format_json_response(self, data):
         return json.dumps(data, indent=4).replace('null', '""')
 
     def log_error(self, error_msg, error_code=''):
 
         logs_dir_path = sys.path[0] + '/logs/'
-        
+
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
         with open(logs_dir_path + 'hourly_weather_log' + time.strftime('%d%m%Y') + '.csv',
@@ -176,23 +172,23 @@ class HourlyWeather:
 
         for postcode in postcodes:
 
-            api_url = self.api_url.format(postcode, self.hours, self.key)
+            api_url = self.api_url.format(postcode.strip(), self.hours, self.key)
             api_response = self.get_api_response(api_url)
 
             if api_response:
                 api_response['outcode'] = postcode
                 api_response['forecast_issued'] = self.extract_date
                 formatted_json = self.format_json_response(api_response)
-                
+
                 self.post_stage1_to_s3(formatted_json, postcode, k, stage1_dir_s3)
-                
+
                 flattened_data = self.flatten(formatted_json)
-                
+
                 self.add_to_dataframe(flattened_data)
 
         parquet_file = self.create_parquet_file()
-        self.post_stage2_to_s3(parquet_file, k, stage2_dir_s3)        
-                
+        self.post_stage2_to_s3(parquet_file, k, stage2_dir_s3)
+
     def get_weather_postcode(self, config_sql):
 
         pr = db.get_redshift_connection()
@@ -202,18 +198,6 @@ class HourlyWeather:
 
         return postcodes_list
 
-    # def copy_dataframe_to_redshift():
-
-    #     pr = db.get_redshift_connection()
-
-    #     pr.pandas_to_redshift(
-    #         data_frame = self.dataframe, 
-    #         redshift_table_name = '',
-    #         append = True)
-
-    #     pr.close_up_shop()
-      
-
 if __name__ == "__main__":
 
     p = HourlyWeather()
@@ -222,7 +206,7 @@ if __name__ == "__main__":
     bucket_name = dir_s3['s3_bucket']
     stage1_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage1']
     stage2_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage2']
-    
+
     s3 = s3_con(bucket_name)
     weather_postcodes = p.get_weather_postcode(p.weather_sql)
 
