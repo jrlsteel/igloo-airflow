@@ -8,7 +8,6 @@ import os
 from datetime import datetime, timedelta
 import requests
 import pandas as pd
-import pyarrow
 from ratelimit import limits, sleep_and_retry
 from requests import ConnectionError
 
