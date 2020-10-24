@@ -205,7 +205,10 @@ uat = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": "stage1/HourlyForecast/forecast_issued={0}/"
+        "HourlyWeather": {
+            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_date={0}/"
+        }
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -498,7 +501,10 @@ preprod = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": "stage1/HourlyForecast/forecast_issued={0}/"
+        "HourlyWeather": {
+            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+        }
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -768,7 +774,10 @@ prod = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": "stage1/HourlyForecast/forecast_issued={0}/"
+        "HourlyWeather": {
+            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+        }
     },
     "s3_land_reg_key": {
         "LandRegistry": "stage1/LandRegistry/"
