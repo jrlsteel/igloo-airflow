@@ -40,7 +40,11 @@ install:
 install-test-deps:
 	pip3 install -r requirements-dev.txt
 
-test:
+conf/config.py:
+	mkdir -p conf/
+	cp test/config.py conf/
+
+test: conf/config.py
 	cd process_WeatherData && python3 -m unittest test_processHourlyWeatherData.py
 
 ci-test: install-test-deps test
