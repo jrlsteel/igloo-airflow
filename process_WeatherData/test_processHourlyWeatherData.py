@@ -1,7 +1,9 @@
 import sys
+import io
 import json
+import uuid
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from moto import mock_s3_deprecated
 
 sys.path.append('..')
@@ -60,11 +62,21 @@ api_returned_data = {
 
 postcodes=['GU14']
 dir_s3 = weather_module.util.get_dir()
+stage1_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage1']
+stage2_dir_s3 = dir_s3['s3_weather_key']['HourlyWeather']['stage2']
 bucket_name = dir_s3['s3_bucket']
+
+TEST_UUIDS_COUNT = 0
+
+def mock_uuid():
+    global TEST_UUIDS_COUNT
+    TEST_UUIDS_COUNT += 1
+    return uuid.UUID(int=TEST_UUIDS_COUNT)
 
 class TestProcessHourlyWeatherData(unittest.TestCase):
 
     @mock_s3_deprecated
+    @patch('uuid.uuid4', mock_uuid)
     def test_process_single_postcode(self):
 
         hw = HourlyWeather()
@@ -73,17 +85,25 @@ class TestProcessHourlyWeatherData(unittest.TestCase):
         s3 = boto.connect_s3(aws_access_key_id='XXXX', aws_secret_access_key='XXXX')
         bucket = s3.create_bucket(bucket_name)
         s3_key = boto.s3.key.Key(bucket)
-        
-        file_name = f'{postcodes[0].strip()}_hourly_{hw.start_date}_to_{hw.end_date}.json'
-        s3_key.key = dir_s3['s3_weather_key']['HourlyWeather'].format(hw.extract_date) + file_name
 
         hw.get_api_response = MagicMock(return_value=api_returned_data)
-        
-        hw.processData(postcodes, s3_key, dir_s3)
 
-        s3_object = json.loads(s3_key.get_contents_as_string().decode('utf-8'))
+        hw.processData(postcodes, s3_key, stage1_dir_s3, stage2_dir_s3)
 
-        self.assertDictEqual(s3_object, api_returned_data)
+        stage1_file_name = f'{postcodes[0].strip()}_hourly_{hw.start_date}_to_{hw.end_date}.json'
+        s3_key.key = stage1_dir_s3.format(hw.extract_date) + stage1_file_name
+        s3_stage1_object = json.loads(s3_key.get_contents_as_string().decode('utf-8'))
+
+
+        stage2_file_name = '{}.parquet'.format('00000000-0000-0000-0000-000000000001')
+        s3_key.key = stage2_dir_s3.format(hw.extract_date) + stage2_file_name
+        try:
+            s3_key.get_contents_as_string()
+        except Exception:
+
+            self.fail('Stage 2 parquet file was not found')
+
+        self.assertDictEqual(s3_stage1_object, api_returned_data)
 
 if __name__ == '__main__':
     unittest.main()

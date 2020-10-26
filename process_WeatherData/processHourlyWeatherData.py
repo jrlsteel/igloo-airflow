@@ -151,6 +151,8 @@ class HourlyWeather:
 
     def post_stage2_to_s3(self, parquet_file, k, stage2_dir_s3):
 
+        print(self.parquet_file_name)
+
         k.key = stage2_dir_s3.format(self.extract_date) + self.parquet_file_name
         k.set_contents_from_file(parquet_file, rewind=True)
 
