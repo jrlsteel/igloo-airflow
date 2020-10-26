@@ -135,7 +135,9 @@ class HourlyWeather:
     def create_parquet_file(self):
 
         parquet_file = io.BytesIO()
-        self.dataframe.to_parquet(parquet_file, index=False)
+        # Set allow_truncated_timestamp to avoid a pyarrow error that is seen in unit tests:
+        # pyarrow.lib.ArrowInvalid: Casting from timestamp[ns] to timestamp[ms] would lose data: 1603725177571636000
+        self.dataframe.to_parquet(parquet_file, index=False, allow_truncated_timestamps=True)
 
         return parquet_file
 
