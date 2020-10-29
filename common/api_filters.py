@@ -116,7 +116,11 @@ smart_reads_billing = {
 
 weather_forecast = {
     "hourly": {
-      "stage1": """select * from vw_etl_weather_forecast_hourly""",
+      "stage1": """select * from vw_etl_weather_postcode_sectors""",
       "stage2": """select * from vw_etl_weather_forecast_hourly_load"""
+    },
+    "daily": {
+      "stage1": """select * from vw_etl_weather_postcode_sectors""",
+      "stage2": """select * from vw_etl_weather_forecast_daily_load"""
     }
 }

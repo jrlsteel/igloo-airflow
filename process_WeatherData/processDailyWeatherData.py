@@ -1,15 +1,11 @@
-import io
-import timeit
-import json
-import time
-import csv
 import sys
 import timeit
 
 sys.path.append('..')
 from process_forecast_weather_data import ForecastWeather
 
-p = ForecastWeather(duration=48, forecast_resolution='hourly')
+
+p = ForecastWeather(duration=16, forecast_resolution='daily')
 
 start = timeit.default_timer()
 

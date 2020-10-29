@@ -9,7 +9,7 @@ from connections import connect_db as db
 from store_forecast_weather_data import ForecastWeather
 
 
-p = ForecastWeather(forecast_resolution='hourly')
+p = ForecastWeather(forecast_resolution='daily')
 
 start = timeit.default_timer()
 

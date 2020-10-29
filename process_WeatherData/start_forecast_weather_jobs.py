@@ -1,3 +1,4 @@
+import os
 import sys
 import timeit
 import subprocess
@@ -8,6 +9,8 @@ from common import utils as util
 from common import Refresh_UAT as refresh
 from common.directories import prod as prod_dir
 
+script_name = os.path.basename(__file__)
+
 class Weather:
     def __init__(
         self,
@@ -15,14 +18,12 @@ class Weather:
         process_name,
         process_job_script,
         store_job_script,
-        s3_key,
         process_weather_job_num,
         store_weather_job_num):
 
-        self.process_name = process_name 
+        self.process_name = process_name
         self.process_weather_job_script = process_job_script
         self.store_weather_job_script = store_job_script
-        self.s3_key = s3_key
         self.process_weather_job_num = process_weather_job_num
         self.store_weather_job_num = store_weather_job_num
 
@@ -51,7 +52,7 @@ class Weather:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.process_weather_jobid, self.process_weather_job_num, 'weather_forecast_extract_pyscript','start_data_ingest_weather_jobs.py')
+            util.batch_logging_insert(self.process_weather_jobid, self.process_weather_job_num, 'weather_forecast_extract_pyscript', script_name)
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, self.process_weather_job_script], check=True)
             util.batch_logging_update(self.process_weather_jobid, 'e')
@@ -71,7 +72,7 @@ class Weather:
 
         print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
         try:
-            util.batch_logging_insert(self.store_weather_jobid, self.store_weather_job_num, 'weather_forecast_store_pyscript','start_data_ingest_weather_jobs.py')
+            util.batch_logging_insert(self.store_weather_jobid, self.store_weather_job_num, 'weather_forecast_store_pyscript', script_name)
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, self.store_weather_job_script], check=True)
             util.batch_logging_update(self.store_weather_jobid, 'e')
@@ -87,18 +88,28 @@ if __name__ == '__main__':
 
     all_jobid = util.get_jobID()
 
-    util.batch_logging_insert(all_jobid, 109, 'all_weather_forecast_jobs', 'start_data_ingest_weather_jobs.py')
-    
+    util.batch_logging_insert(all_jobid, 109, 'all_weather_forecast_jobs', script_name)
+
     hourly_weather = Weather(
         all_jobid = all_jobid,
         process_name = 'Hourly Weather',
         process_job_script = 'processHourlyWeatherData.py',
         store_job_script = 'storeHourlyWeatherData.py',
-        s3_key = '/stage1/HourlyWeather/',
         process_weather_job_num = 61,
         store_weather_job_num = 61,
     )
 
     hourly_weather.process()
+
+    daily_weather = Weather(
+        all_jobid = all_jobid,
+        process_name = 'Daily Weather',
+        process_job_script = 'processDailyWeatherData.py',
+        store_job_script = 'storeDailyWeatherData.py',
+        process_weather_job_num = 61,
+        store_weather_job_num = 61,
+    )
+
+    daily_weather.process()
 
     util.batch_logging_update(all_jobid, 'e')

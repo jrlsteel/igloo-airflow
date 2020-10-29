@@ -99,9 +99,89 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-        "hourly_weather": {
-            "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
-            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
         },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
@@ -205,9 +285,15 @@ uat = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": {
-            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
-            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_date={0}/"
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
         }
     },
     "s3_alp_wcf": {
@@ -401,9 +487,89 @@ preprod = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-        "hourly_weather": {
-            "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
-            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
         },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
@@ -501,9 +667,15 @@ preprod = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": {
-            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
-            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
         }
     },
     "s3_alp_wcf": {
@@ -614,7 +786,7 @@ prod = {
         "internal_readings": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/account/{0}/meter-readings?sortField=meterReadingDateTime&sortDirection=Descending"
         },
-        
+
         "occupier_accounts": {
             "api_url": "https://igloo.ignition.ensek.co.uk/api/DataSources/GetData?name=OccupierAccounts"
         },
@@ -674,9 +846,89 @@ prod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
-        "hourly_weather": {
-            "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
-            "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
         },
         "igloo_epc_full": {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
@@ -779,9 +1031,15 @@ prod = {
 
     "s3_weather_key": {
         "HistoricalWeather": "stage1/HistoricalWeather/",
-        "HourlyWeather": {
-            "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
-            "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
         }
     },
     "s3_land_reg_key": {
