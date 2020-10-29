@@ -106,8 +106,8 @@ if __name__ == '__main__':
         process_name = 'Daily Weather',
         process_job_script = 'processDailyWeatherData.py',
         store_job_script = 'storeDailyWeatherData.py',
-        process_weather_job_num = 61,
-        store_weather_job_num = 61,
+        process_weather_job_num = 62,
+        store_weather_job_num = 62,
     )
 
     daily_weather.process()
