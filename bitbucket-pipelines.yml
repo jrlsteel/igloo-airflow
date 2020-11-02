@@ -13,7 +13,7 @@ pipelines:
           services:
             - docker
           script:
-            - make test
+            - make ci-test
 
     develop:
       - step:
@@ -26,7 +26,7 @@ pipelines:
           services:
             - docker
           script:
-            - make test
+            - make ci-test
       - step:
           name: Build, package and push to S3
           deployment: UAT
@@ -117,3 +117,4 @@ pipelines:
             - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_PROD
             - make -e ENVIRONMENT=prod -C cloudformation build deploy
             - make -e ENVIRONMENT=prod build package deploy
+

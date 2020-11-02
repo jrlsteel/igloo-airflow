@@ -1,6 +1,7 @@
 import timeit
 import requests
 import json
+import pandas as pd
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
 import time
@@ -34,7 +35,7 @@ class SmartReadsBillings:
         self.num_days_per_api_calls = 7
         self.sql_elec = apif.smart_reads_billing['elec']  # there is no need for a weekly run here
         self.sql_gas = apif.smart_reads_billing['gas']  # there is no need for a weekly run here
-
+        self.sql_all = apif.smart_reads_billing['all']  # there is no need for a weekly run here
 
     def format_json_response(self, data):
         """
@@ -67,10 +68,13 @@ class SmartReadsBillings:
         print(body)
 
         try:
+            print("POST {}".format(api_url))
             response = session.post(api_url, data=body, headers=head)
-            response_json = json.loads(response.content.decode('utf-8'))
             status_code = response.status_code
-            print(response_json)
+            print("status_code: {}".format(status_code))
+            if status_code != 201:
+                response_json = json.loads(response.content.decode('utf-8'))
+                print(response_json)
         except ConnectionError:
             self.log_error('Unable to Connect')
             response_json = json.loads('{message: "Connection Error"}')
@@ -92,14 +96,13 @@ class SmartReadsBillings:
 
             print("df_string: {0}".format(df))
 
-
     def processAccounts(self, _df):
         api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info('smart_reads_billing')
 
         for index, df in _df.iterrows():
-            # Get SMart Reads Billing
+            # Get Smart Reads Billing
             body = json.dumps({
-                "meterReadingDateTime": df["meterreadingdatetime"],
+                "meterReadingDateTime": df["meterreadingdatetime"].to_pydatetime().replace(tzinfo=datetime.timezone.utc).isoformat(),
                 "accountId": df["accountid"],
                 "meterType": df["metertype"],
                 "meterPointNumber": df["meterpointnumber"],
@@ -108,8 +111,8 @@ class SmartReadsBillings:
                 "reading": df["reading"],
                 "source": df["source"],
                 "createdBy": df["createdby"],
-                "dateCreated": str(datetime.datetime.now())
-            }, default = str)
+                "dateCreated": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            }, default=str)
 
             response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_smart_reads)
             # print(account_elec_response)
@@ -133,19 +136,11 @@ class SmartReadsBillings:
 
 
 if __name__ == "__main__":
-
     start = timeit.default_timer()
     freeze_support()
     p = SmartReadsBillings()
 
-    smart_reads_billing_sql = p.sql_elec
-    smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
-
-    p.processAccounts(smart_reads_billing_df)
-
-    print(len(smart_reads_billing_df))
-
-    smart_reads_billing_sql = p.sql_gas
+    smart_reads_billing_sql = p.sql_all
     smart_reads_billing_df = p.smart_reads_billing_details(smart_reads_billing_sql)
 
     p.processAccounts(smart_reads_billing_df)

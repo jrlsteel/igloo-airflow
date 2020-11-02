@@ -11,7 +11,10 @@ PACKAGE_EXCLUDE   := .git .gitignore .venv $(PACKAGE_NAME)-*.zip
 AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${ENVIRONMENT}-$(AWS_ACCOUNT_ID)
 
 .PHONY: git-flow-init
+.PHONY: install
+.PHONY: install-test-deps
 .PHONY: test
+.PHONY: ci-test
 .PHONY: version
 .PHONY: build
 .PHONY: deploy
@@ -31,8 +34,21 @@ endif
 	# And finally, initialise git-flow with all defaults and v prefix for version tags
 	git flow init -f -d -t v
 
-test:
-	# TODO: Implement tests
+install:
+	pip3 install -r requirements.txt
+
+install-test-deps:
+	pip3 install -r requirements-dev.txt
+
+conf/config.py:
+	mkdir -p conf/
+	cp test/config.py conf/
+
+test: conf/config.py
+	cd process_WeatherData && python3 -m unittest test_processHourlyWeatherData.py
+	cd process_smart && python3 -m unittest test_process_smart.py
+
+ci-test: install-test-deps test
 
 version:
 	@echo $(VERSION)
@@ -52,3 +68,4 @@ release-finish:
 	# Set GIT_MERGE_AUTOEDIT=no to avoid invoking the editor when merging
 	# to master.
 	GIT_MERGE_AUTOEDIT=no git flow release finish -p -m "$(DOCKER_IMAGE_NAME) $(DOCKER_IMAGE_TAG)"
+

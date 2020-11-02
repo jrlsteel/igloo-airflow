@@ -19,9 +19,16 @@ def get_env():
     return env_conf
 
 
+def get_master_source(job_name):
+    dir = get_dir()
+    master_source = dir.get("master_sources", {}).get(job_name, 'prod')  # default to prod
+    return master_source
+
+
 def get_multiprocess(source):
     env_total_processes = con.multi_process[source]
     return env_total_processes
+
 
 def get_dir():
     dir = ''
@@ -248,8 +255,8 @@ def get_smart_read_billing_api_info(api):
     host = env_api['host']
 
     head = {'Content-Type': 'application/json',
-            'Host':'{0}'.format(host),
-            'x-api-key':'{0}'.format(api_key)}
+            'Host': '{0}'.format(host),
+            'x-api-key': '{0}'.format(api_key)}
     return api_url, head
 
 def get_epc_api_info(api):

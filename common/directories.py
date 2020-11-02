@@ -99,7 +99,90 @@ dev = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -207,7 +290,17 @@ dev = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
+        }
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -360,7 +453,90 @@ uat = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -381,6 +557,11 @@ uat = {
         "igloo_eac_batch": {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
+        },
+        "smart_reads_billing": {
+            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging/api/v1/meter-reads",
+            "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
+            "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com"
         },
 
     },
@@ -457,7 +638,17 @@ uat = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
+        }
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -536,12 +727,18 @@ uat = {
         "Events": "/go-cardless-api-events/",
         "Subscriptions": "/go-cardless-api-subscriptions/",
         "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
-        "Mandates-Files": "/go-cardless-api-mandates-files/"
+        "Mandates-Files": "/go-cardless-api-mandates-files/",
+        "Payments-Files": "/go-cardless-api-payments-files/",
+        "Refunds-Files": "/go-cardless-api-refunds-files/"
     },
 
     "s3_finance_square_key": {
         "Payments": "/square-api-payments/"
     },
+
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
 
 preprod = {
@@ -644,7 +841,90 @@ preprod = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -801,7 +1081,25 @@ preprod = {
     "glue_meets_eligibility_job_name": "_process_ref_tables",
     "glue_reporting_job_name": "_process_ref_tables",
 
+    "s3_finance_bucket": "igloo-data-warehouse-finance-preprod-835569423516",
 
+    "s3_finance_goCardless_key": {
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/",
+        "Payments-Files": "/go-cardless-api-payments-files/",
+        "Refunds-Files": "/go-cardless-api-refunds-files/"
+    },
+    
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
 
 newprod = {
@@ -904,7 +1202,90 @@ newprod = {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
         },
-
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
+        },
         "historical_weather": {
             "api_url": "https://api.weatherbit.io/v2.0/history/hourly?postal_code={0}&start_date={1}&end_date={2}&key={3}",
             "token": "ee3b1ce4ed8c475c9919d0a024f9d265"
@@ -1009,7 +1390,17 @@ newprod = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
+        }
     },
     "s3_alp_wcf": {
         "AlpWCF": "stage1/ALP/AlpWCF/"
@@ -1061,7 +1452,25 @@ newprod = {
     "glue_meets_eligibility_job_name": "_process_ref_tables",
     "glue_reporting_job_name": "_process_ref_tables",
 
+    "s3_finance_bucket": "igloo-data-warehouse-finance-prod-630944350233",
 
+    "s3_finance_goCardless_key": {
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/",
+        "Payments-Files": "/go-cardless-api-payments-files/",
+        "Refunds-Files": "/go-cardless-api-refunds-files/"
+    },
+
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
 
 
@@ -1161,7 +1570,90 @@ prod = {
             "api_url": "https://epc.opendatacommunities.org/api/v1/domestic/recommendations/{0}",
             "token": "am9uYXRoYW4uc3RlZWxAaWdsb28uZW5lcmd5OjZhZDU0ZGY4NzM0MmI4YmEyYzI1YTYyZTFlOGYxNTM4NTA2ZTQyMzQ="
         },
-
+        "forecast_weather": {
+            "hourly": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/hourly?postal_code={0}&hours={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    "wind_cdir",
+                    "rh",
+                    "pod",
+                    "timestamp_utc",
+                    "pres",
+                    "solar_rad",
+                    "ozone",
+                    "wind_gust_spd",
+                    "timestamp_local",
+                    "snow_depth",
+                    "clouds",
+                    "ts",
+                    "wind_spd",
+                    "pop",
+                    "wind_cdir_full",
+                    "slp",
+                    "dni",
+                    "dewpt",
+                    "snow",
+                    "uv",
+                    "wind_dir",
+                    "clouds_hi",
+                    "precip",
+                    "vis",
+                    "dhi",
+                    "app_temp",
+                    "datetime",
+                    "temp",
+                    "ghi",
+                    "clouds_mid",
+                    "clouds_low"
+                ],
+                "redshift_table": "ref_weather_forecast_hourly"
+            },
+            "daily": {
+                "api_url": "https://api.weatherbit.io/v2.0/forecast/daily?postal_code={0}&days={1}&key={2}",
+                "token": "ee3b1ce4ed8c475c9919d0a024f9d265",
+                "data_keys": [
+                    'moonrise_ts',
+                    'wind_cdir',
+                    'rh',
+                    'pres',
+                    'high_temp',
+                    'sunset_ts',
+                    'ozone',
+                    'moon_phase',
+                    'wind_gust_spd',
+                    'snow_depth',
+                    'clouds',
+                    'ts',
+                    'sunrise_ts',
+                    'app_min_temp',
+                    'wind_spd',
+                    'pop',
+                    'wind_cdir_full',
+                    'slp',
+                    'moon_phase_lunation',
+                    'valid_date',
+                    'app_max_temp',
+                    'vis',
+                    'dewpt',
+                    'snow',
+                    'uv',
+                    'wind_dir',
+                    'max_dhi',
+                    'clouds_hi',
+                    'precip',
+                    'low_temp',
+                    'max_temp',
+                    'moonset_ts',
+                    'datetime',
+                    'temp',
+                    'min_temp',
+                    'clouds_mid',
+                    'clouds_low'
+                ],
+                "redshift_table": "ref_weather_forecast_daily"
+            }
+        },
         "igloo_epc_full": {
             "api_url": "https://epc.opendatacommunities.org/login-with-token?",
             "file_url": "https://epc.opendatacommunities.org/files/all-domestic-certificates.zip"
@@ -1183,6 +1675,11 @@ prod = {
         },
         "igloo_zendesk_historical": {
             "api_url": "https://iglooenergy.zendesk.com/api/v2/users/{0}/tickets/requested.json",
+        },
+        "smart_reads_billing": {
+            "api_url": "https://vpce-0aef8e00f3f1643c5-ew9hc5n2.execute-api.eu-west-1.vpce.amazonaws.com/prod/api/v1/meter-reads",
+            "api_key": "17EXj0FzF89jK3nTdZ5JG2ZSsctlxhJr463tFB2g",
+            "host": "vduzli2ylh.execute-api.eu-west-1.amazonaws.com",
         }
     },
 
@@ -1257,7 +1754,17 @@ prod = {
     },
 
     "s3_weather_key": {
-        "HistoricalWeather": "stage1/HistoricalWeather/"
+        "HistoricalWeather": "stage1/HistoricalWeather/",
+        "forecast_weather": {
+            "hourly": {
+                "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+            },
+            "daily": {
+                "stage1": "stage1/DailyForecast/forecast_issued={0}/",
+                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+            }
+        }
     },
     "s3_land_reg_key": {
         "LandRegistry": "stage1/LandRegistry/"
@@ -1307,4 +1814,23 @@ prod = {
     "glue_meets_eligibility_job_name": "_process_ref_tables_prod",
     "glue_reporting_job_name": "_process_ref_tables_prod",
 
+    "s3_finance_bucket": "igloo-data-warehouse-prod-finance",
+
+    "s3_finance_goCardless_key": {
+        "Refunds": "/go-cardless-api-refunds/",
+        "Payments": "/go-cardless-api-payments/",
+        "Mandates": "/go-cardless-api-mandates/",
+        "Payouts": "/go-cardless-api-payouts/",
+        "Clients": "/go-cardless-api-clients/",
+        "Events": "/go-cardless-api-events/",
+        "Subscriptions": "/go-cardless-api-subscriptions/",
+        "Subscriptions-Files": "/go-cardless-api-subscriptions-files/",
+        "Mandates-Files": "/go-cardless-api-mandates-files/",
+        "Payments-Files": "/go-cardless-api-payments-files/",
+        "Refunds-Files": "/go-cardless-api-refunds-files/"
+    },
+
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
