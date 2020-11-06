@@ -74,7 +74,8 @@ class TariffHistory(object):
         df_tariff_history1 = df_tariff_history[meta_tariff_history]
 
         filename_tariff_history = 'df_tariff_history_' + str(account_id) + '.csv'
-        df_tariff_history_string = df_tariff_history1.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'tariff_history')
+        df_tariff_history_string = df_tariff_history1.to_csv(None, columns=column_list, index=False)
         # k.key = 'ensek-meterpoints/TariffHistory/' + filename_tariff_history
         k.key = dir_s3['s3_key']['TariffHistory'] + filename_tariff_history
         k.set_contents_from_string(df_tariff_history_string)
@@ -88,7 +89,8 @@ class TariffHistory(object):
             if not df_elec_unit_rates.empty:
                 df_elec_unit_rates['account_id'] = account_id
                 filename_elec_unit_rates = 'th_elec_unitrates_' + str(account_id) + '.csv'
-                df_elec_unit_rates_string = df_elec_unit_rates.to_csv(None, index=False)
+                column_list = util.get_common_info('ensek_column_order', 'tariff_history_elec_unit_rates')
+                df_elec_unit_rates_string = df_elec_unit_rates.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryElecUnitRates/' + filename_elec_unit_rates
                 k.key = dir_s3['s3_key']['TariffHistoryElecUnitRates'] + filename_elec_unit_rates
                 k.set_contents_from_string(df_elec_unit_rates_string)
@@ -102,7 +104,8 @@ class TariffHistory(object):
                 df_elec_standing_charge['account_id'] = account_id
 
                 filename_elec_standing_charge = 'th_elec_standingcharge_' + str(account_id) + '.csv'
-                df_elec_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
+                column_list = util.get_common_info('ensek_column_order', 'tariff_history_elec_standing_charge')
+                df_elec_standing_charge_string = df_elec_standing_charge.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryElecStandCharge/' + filename_elec_standing_charge
                 k.key = dir_s3['s3_key']['TariffHistoryElecStandCharge'] + filename_elec_standing_charge
                 k.set_contents_from_string(df_elec_standing_charge_string)
@@ -118,7 +121,8 @@ class TariffHistory(object):
                 df_gas_unit_rates['account_id'] = account_id
 
                 filename_gas_unit_rates = 'th_gas_unitrates_' + str(account_id) + '.csv'
-                df_gas_unit_rates_string = df_gas_unit_rates.to_csv(None, index=False)
+                column_list = util.get_common_info('ensek_column_order', 'tariff_history_gas_unit_rates')
+                df_gas_unit_rates_string = df_gas_unit_rates.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryGasUnitRates/' + filename_gas_unit_rates
                 k.key = dir_s3['s3_key']['TariffHistoryGasUnitRates'] + filename_gas_unit_rates
                 k.set_contents_from_string(df_gas_unit_rates_string)
@@ -132,7 +136,8 @@ class TariffHistory(object):
                 df_elec_standing_charge['account_id'] = account_id
 
                 filename_gas_standing_charge = 'th_gas_standingcharge_' + str(account_id) + '.csv'
-                df_gas_standing_charge_string = df_elec_standing_charge.to_csv(None, index=False)
+                column_list = util.get_common_info('ensek_column_order', 'tariff_history_gas_standing_charge')
+                df_gas_standing_charge_string = df_elec_standing_charge.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryGasStandCharge/' + filename_gas_standing_charge
                 k.key = dir_s3['s3_key']['TariffHistoryGasStandCharge'] + filename_gas_standing_charge
                 k.set_contents_from_string(df_gas_standing_charge_string)

@@ -79,7 +79,8 @@ class OccupierAccounts:
         if df_occupier_accounts.empty:
             print(" - has no occupier accounts")
         else:
-            df_occupier_accounts_string = df_occupier_accounts.to_csv(None, index=False)
+            column_list = util.get_common_info('ensek_column_order', 'occupier_accounts')
+            df_occupier_accounts_string = df_occupier_accounts.to_csv(None, columns=column_list, index=False)
 
             file_name_occupier_accounts = 'occupier_accounts.csv'
             # k.key = 'ensek-meterpoints/ReadingsInternal/' + file_name_internal_readings
@@ -111,6 +112,7 @@ class OccupierAccounts:
         print(json.dumps(internal_data_response, indent=4))
 
         formatted_internal_data = self.format_json_response(internal_data_response)
+        print('formatted_internal_data:\n{}\n'.format(formatted_internal_data))
         self.extract_internal_data_response(formatted_internal_data, k, dir_s3)
 
 

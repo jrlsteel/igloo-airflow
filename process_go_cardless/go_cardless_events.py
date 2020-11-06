@@ -220,7 +220,8 @@ class GoCardlessEvents(object):
         print(df_event.head(5))
 
         ### EVENTS ####
-        df_string = df_event.to_csv(None, index=False)
+        column_list = util.get_common_info('go_cardless_column_order', 'events')
+        df_string = df_event.to_csv(None, columns=column_list, index=False)
         s3.key = EventsfileDirectory + fkey + filenameEvents
         print(s3.key)
         s3.set_contents_from_string(df_string)

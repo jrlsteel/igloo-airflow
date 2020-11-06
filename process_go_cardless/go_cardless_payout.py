@@ -114,7 +114,8 @@ class GoCardlessPayouts(object):
 
         print(df.head(5))
 
-        df_string = df.to_csv(None, index=False)
+        column_list = util.get_common_info('go_cardless_column_order', 'payouts')
+        df_string = df.to_csv(None, columns=column_list, index=False)
         # print(df_account_transactions_string)
         s3.key = fileDirectory + fkey + filename
         print(s3.key)

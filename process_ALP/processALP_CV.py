@@ -122,7 +122,12 @@ class ALPHistoricalCV:
                 year = start_date.strftime("%Y")
                 start_date_string = str(start_date)
                 # print(start_date)
-                alp_cv_df_string = alp_cv_df.to_csv(None, index=False)
+
+                # We specify the column order explicitly when writing the CSV file, as it
+                # must match the table schema order in Redshift.
+                column_list = util.get_common_info('alp_column_order', 'cv')
+
+                alp_cv_df_string = alp_cv_df.to_csv(None, columns=column_list, index=False)
                 file_name_alp_cv = 'alp_cv_historical' + '_' + cv_folder.strip() + '_' + start_date_string + '.csv'
                 k.key = dir_s3['s3_alp_cv']['AlpCV'] + file_name_alp_cv
                 k.set_contents_from_string(alp_cv_df_string)

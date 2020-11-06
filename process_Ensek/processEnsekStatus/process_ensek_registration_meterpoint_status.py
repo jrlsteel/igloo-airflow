@@ -72,7 +72,8 @@ class RegistrationsMeterpointsStatus:
         elec_json = json.loads(elec_str)
         df_elec = json_normalize(elec_json)
         filename_elec = 'reg_elec_mp_status_' + str(_df['account_id']) + '_' + str(_df['meterpointnumber']) + '.csv'
-        df_elec_string = df_elec.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'registrations_elec_meterpoint')
+        df_elec_string = df_elec.to_csv(None, columns=column_list, index=False)
         print(df_elec_string)
 
         k.key = _dir_s3['s3_key']['RegistrationsElecMeterpoint'] + filename_elec
@@ -85,7 +86,8 @@ class RegistrationsMeterpointsStatus:
         gas_json = json.loads(gas_str)
         df_gas = json_normalize(gas_json)
         filename_gas = 'reg_gas_mp_status_' + str(_df['account_id']) + '_' + str(_df['meterpointnumber']) + '.csv'
-        df_gas_string = df_gas.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'registrations_gas_meterpoint')
+        df_gas_string = df_gas.to_csv(None, columns=column_list, index=False)
         print(df_gas_string)
 
         k.key = _dir_s3['s3_key']['RegistrationsGasMeterpoint'] + filename_gas

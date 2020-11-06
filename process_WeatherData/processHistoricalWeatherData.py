@@ -71,7 +71,7 @@ class HistoricalWeather:
 
     def extract_weather_data(self, data, postcode, k, dir_s3, start_date, end_date):
         meta_weather = ['timezone', 'state_code', 'country_code', 'lat', 'lon', 'city_name', 'station_id', 'city_id']
-        weather_df = json_normalize(data, record_path='data', meta=meta_weather)
+        weather_df = json_normalize(data, record_path='data', meta=meta_weather, max_level=0)
         weather_df['sources'] = " ".join(data['sources'])
         weather_df['postcode'] = postcode
 
@@ -82,9 +82,11 @@ class HistoricalWeather:
             week_number_iso = start_date.strftime("%V")
             year = start_date.strftime("%Y")
 
-            weather_df_string = weather_df1.to_csv(None, index=False)
+            column_list = util.get_common_info('weather_column_order', 'historical_weather')
+            weather_df_string = weather_df1.to_csv(None, columns=column_list, index=False)
             file_name_weather = 'historical_weather' + '_' + postcode.strip() + '_' + year.strip() + '_' + week_number_iso.strip() + '.csv'
             k.key = dir_s3['s3_weather_key']['HistoricalWeather'] + file_name_weather
+
             # print(weather_df_string)
             k.set_contents_from_string(weather_df_string)
 

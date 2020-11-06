@@ -65,7 +65,10 @@ class AnnualStatements:
         df__extract = json_normalize(data)
         df__extract['account_id'] = account_id
         filename = 'annual_statements_' + str(account_id) + '.csv'
-        df_extract_string = df__extract.to_csv(None, index=False)
+
+        column_list = util.get_common_info('ensek_column_order', 'annual_statements')
+
+        df_extract_string = df__extract.to_csv(None, columns=column_list, index=False)
         # print(df_extract_string)
         k.key = dir_s3_key['s3_key']['AnnualStatements'] + filename
         k.set_contents_from_string(df_extract_string)

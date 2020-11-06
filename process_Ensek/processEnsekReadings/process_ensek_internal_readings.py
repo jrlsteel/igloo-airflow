@@ -74,13 +74,16 @@ class InternalReadings:
 
     def extract_internal_data_response(self, data, account_id, k, dir_s3):
         ''' Processing meter points data'''
+        column_list = util.get_common_info('ensek_column_order', 'ref_readings_internal')
+        print(column_list)
         df_internal_readings = json_normalize(data)
+        print(df_internal_readings.dtypes)
         # print(df_internal_readings)
         if (df_internal_readings.empty):
             print(" - has no readings data")
         else:
-            df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
-            # print(df_internal_readings_string)
+            df_internal_readings_string = df_internal_readings.to_csv(None, columns=column_list, index=False)
+            print(df_internal_readings_string)
             file_name_internal_readings = 'internal_readings_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/ReadingsInternal/' + file_name_internal_readings
             k.key = dir_s3['s3_key']['ReadingsInternal'] + file_name_internal_readings

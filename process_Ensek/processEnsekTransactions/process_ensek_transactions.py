@@ -86,7 +86,8 @@ class AccountTransactions:
         df_account_transactions.columns = df_account_transactions.columns.str.replace('.', '_')
         df_account_transactions['account_id'] = account_id
         filename_account_transactions = 'account_transactions_' + str(account_id) + '.csv'
-        df_account_transactions_string = df_account_transactions.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'account_transactions')
+        df_account_transactions_string = df_account_transactions.to_csv(None, columns=column_list, index=False)
         # print(df_account_transactions_string)
 
         k.key = dir_s3['s3_key']['AccountTransactions'] + filename_account_transactions

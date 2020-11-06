@@ -117,7 +117,7 @@ internalapi_config = {
                         "grant_type": "password"
 }
 environment_config = {
-                        "environment": "preprod"
+                        "environment": "uat"
 }
 ensek_sftp_config = {
                         "host": "52.214.39.234",

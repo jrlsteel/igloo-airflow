@@ -1,5 +1,7 @@
-from common import utils as util
 import sys
+sys.path.append('..')
+
+from common import utils as util
 
 import unittest
 from unittest.mock import patch, MagicMock
@@ -8,11 +10,11 @@ import numpy as np
 import json
 from datetime import datetime
 
-from .process_smart_reads_billing import SmartReadsBillings
+from process_smart_reads_billing import SmartReadsBillings
 
 from freezegun import freeze_time
 
-sys.path.append('..')
+
 
 # These are the columns that appear in vw_etl_smart_billing_reads_elec and vw_etl_smart_billing_reads_gas.
 elec_data_columns = ['manualmeterreadingid', 'accountid', 'meterreadingdatetime', 'metertype',

@@ -65,7 +65,8 @@ class AccountSettings:
         df__extract = json_normalize(data)
         df__extract['account_id'] = account_id
         filename = 'account_settings_' + str(account_id) + '.csv'
-        df_extract_string = df__extract.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'account_settings')
+        df_extract_string = df__extract.to_csv(None, columns=column_list, index=False)
         # print(df_extract_string)
         k.key = dir_s3_key['s3_key']['AccountSettings'] + filename
         k.set_contents_from_string(df_extract_string)
