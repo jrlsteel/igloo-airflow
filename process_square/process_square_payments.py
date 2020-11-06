@@ -136,8 +136,8 @@ class PaymentsApi(object):
 
         ### WRITE TO CSV
         #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
-
-        df_string = df_out.to_csv(None, index=False) 
+        column_list = util.get_common_info('square_column_order', 'square_payments')
+        df_string = df_out.to_csv(None, columns=column_list, index=False) 
 
         s3.key = fileDirectory + self.fkey + self.filename
         print(s3.key)

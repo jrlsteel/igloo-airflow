@@ -73,7 +73,8 @@ class IglooEPCCertificates:
             epc_rows_df.columns = epc_rows_df.columns.str.replace('-', '_')
             epc_rows_df = epc_rows_df.replace(',', '-', regex=True)
             epc_rows_df = epc_rows_df.replace('"', '', regex=True)
-            epc_rows_df_string = epc_rows_df.to_csv(None, index=False)
+            column_list = util.get_common_info('epc_column_order', 'epc_certificates')
+            epc_rows_df_string = epc_rows_df.to_csv(None, columns=column_list, index=False)
             file_name_epc = 'igloo_epc_certificates' + '_' + postcode_sector.replace(' ', '') + '.csv'
             k.key = dir_s3['s3_epc_key']['EPCCertificates'] + file_name_epc
             # print(epc_rows_df_string)

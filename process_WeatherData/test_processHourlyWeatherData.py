@@ -71,8 +71,6 @@ class TestProcessHourlyWeatherData(unittest.TestCase):
     @mock_s3_deprecated
     @patch('uuid.uuid4', mock_uuid)
     def test_process_daily_single_postcode(self):
-        print('dir_s3: '.format(dir_s3))
-
         stage1_dir_s3 = dir_s3['s3_weather_key']['forecast_weather']['daily']['stage1']
         stage2_dir_s3 = dir_s3['s3_weather_key']['forecast_weather']['daily']['stage2']
 

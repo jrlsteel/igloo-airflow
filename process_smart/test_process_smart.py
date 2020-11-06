@@ -4,7 +4,6 @@ sys.path.append('..')
 
 from common import utils as util
 
-
 import unittest
 from unittest.mock import patch, MagicMock
 import pandas as pd

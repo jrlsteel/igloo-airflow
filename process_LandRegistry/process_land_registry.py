@@ -117,7 +117,8 @@ class LandRegistry:
             land_registry_df1['uprn'] = address['uprn']
             land_registry_df1['id'] = address['id']
 
-            land_registry_string = land_registry_df1.to_csv(None, index=False)
+            column_list = util.get_common_info('land_registry_column_order', 'land_registry')
+            land_registry_string = land_registry_df1.to_csv(None, columns=column_list, index=False)
             file_name_landreg = 'land_registry_' + str(address['id']).strip() + '.csv'
             k.key = dir_s3['s3_land_reg_key']['LandRegistry'] + file_name_landreg
             k.set_contents_from_string(land_registry_string)

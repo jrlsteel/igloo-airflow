@@ -115,7 +115,8 @@ class GoCardlessClients(object):
                                              'company_name', 'country_code', 'EnsekID'])
 
         print(df.head(5))
-        df_string = df.to_csv(None, index=False)
+        column_list = util.get_common_info('go_cardless_column_order', 'customers')
+        df_string = df.to_csv(None, columns=column_list, index=False)
         # print(df_account_transactions_string)
 
         ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
