@@ -13,7 +13,7 @@ from conf import config as con
 
 def get_rds_connection():
     conn = psql.connect(host=con.rds_config['host'], port=con.rds_config['port'], user=con.rds_config['user'],
-                           passwd=con.rds_config['pwd'], db=con.rds_config['db'])
+                        passwd=con.rds_config['pwd'], db=con.rds_config['db'])
 
     return conn
 
@@ -84,7 +84,8 @@ def get_ensek_sftp_connection():
         cnopts.hostkeys = None
 
         # print(ensek_sftp)
-        sftp = pysftp.Connection(host=ensek_sftp['host'], username=ensek_sftp['username'], password=ensek_sftp['password'], cnopts=cnopts)
+        sftp = pysftp.Connection(host=ensek_sftp['host'], username=ensek_sftp['username'],
+                                 password=ensek_sftp['password'], cnopts=cnopts)
 
         return sftp
     except Exception as e:
@@ -116,13 +117,10 @@ def get_boto_S3_Connections(bucket_name):
     return k
 
 
-def get_finance_S3_Connections(bucket_name):
-    # global k
+def get_finance_s3_connections(bucket_name):
     access_key = con.igloo_finance_config['access_key']
     secret_key = con.igloo_finance_config['secret_key']
     bucket = con.igloo_finance_config['bucket_name']
-    # print(access_key)
-    # print(secret_key)
 
     s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     bucket = s3.get_bucket(bucket)
@@ -130,26 +128,20 @@ def get_finance_S3_Connections(bucket_name):
     return k
 
 
-def get_finance_S3_Connections_resources():
+def get_finance_s3_connections_resources():
     access_key = con.igloo_finance_config['access_key']
     secret_key = con.igloo_finance_config['secret_key']
-    # print(access_key)
-    # print(secret_key)
 
     s3 = boto3.resource('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
 
 
-def get_finance_S3_Connections_client():
+def get_finance_s3_connections_client():
     access_key = con.igloo_finance_config['access_key']
     secret_key = con.igloo_finance_config['secret_key']
-    # print(access_key)
-    # print(secret_key)
 
     s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
-
-
 
 
 if __name__ == "__main__":

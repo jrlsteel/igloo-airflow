@@ -20,7 +20,7 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
+from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
@@ -129,7 +129,7 @@ class GoCardlessClients(object):
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
+    s3 = db.get_finance_s3_connections_client()
     p = GoCardlessClients()
     startdateDF = util.execute_query(p.sql)
     ReportEndDate = str(p.execEndDate) + str(".000Z")

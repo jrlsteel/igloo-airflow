@@ -5,6 +5,10 @@ import pandas as pd
 import datetime
 from connections import connect_db as db
 import uuid
+import numpy as np
+import timeit
+import multiprocessing
+from time import sleep
 import os
 
 sys.path.append('..')
@@ -206,6 +210,35 @@ def get_accountID_fromDB(get_max, filter='live'):
     return account_ids
 
 
+def get_ids_from_redshift(entity_type):
+    if entity_type == 'mandate':
+        sql = r'select * from public.vw_gc_updates_mandates'
+    elif entity_type == 'subscription':
+        sql = r'select * from public.vw_gc_updates_subscriptions'
+    elif entity_type == 'refund':
+        sql = r'select * from public.vw_gc_updates_refunds'
+    elif entity_type == 'payment':
+        sql = r'select * from public.vw_gc_updates_payments'
+    else:
+        raise ValueError("Unsupported entity_type")
+
+    if get_env() == 'uat':
+        sql += ' limit 100'
+
+    pr = db.get_redshift_connection()
+    df = pr.redshift_to_pandas(sql)
+    db.close_redshift_connection()
+
+    return [row[0] for row in df.values.tolist()]
+
+
+def split_list(list_to_split, num_parts):
+    IglooLogger.in_test_env(message="input: " + str(list_to_split), source_name="split_list method")
+    split = [section.tolist() for section in np.array_split(list_to_split, num_parts)]
+    IglooLogger.in_test_env(message="output: " + str(split), source_name="split_list method")
+    return split
+
+
 def get_ensek_api_info(api, account_id):
     env = get_dir()
     env_api = env['apis'][api]
@@ -256,6 +289,7 @@ def get_smart_read_billing_api_info(api):
             'Host': '{0}'.format(host),
             'x-api-key': '{0}'.format(api_key)}
     return api_url, head
+
 
 def get_epc_api_info(api):
     dir = get_dir()
@@ -442,3 +476,45 @@ def get_credentials(_IAM):
         IAM = con.Enseks3_ensek_outbound
 
     return IAM
+
+
+def run_api_extract_multithreaded(id_list, method, num_processes=2):
+    split_id_list = split_list(id_list, num_processes)
+    processes = []
+
+    # initialise the threads
+    for process_num in range(num_processes):
+        processes.append(
+            multiprocessing.Process(target=method, args=(split_id_list[process_num], "Thread_{0}".format(process_num))))
+
+    start = timeit.default_timer()
+    # start the threads, allowing 2 seconds between each start to avoid setup conflicts
+    for p in processes:
+        p.start()
+        sleep(2)
+
+    # wait for each thread to return
+    for process in processes:
+        process.join()
+
+    # return the time taken
+    return timeit.default_timer() - start
+
+
+class IglooLogger:
+    @staticmethod
+    def in_test_env(message, source_name=None, include_timestamp=True):
+        if get_env() == 'uat':
+            IglooLogger.in_prod_env(message, source_name=source_name, include_timestamp=include_timestamp)
+
+    @staticmethod
+    def in_prod_env(message, source_name=None, include_timestamp=True):
+        if include_timestamp:
+            timestamp_string = datetime.datetime.now().strftime("%H:%M:%S - ")
+        else:
+            timestamp_string = ""
+        if source_name:
+            source_string = "from " + source_name + ": "
+        else:
+            source_string = ""
+        print(timestamp_string + source_string + message)
