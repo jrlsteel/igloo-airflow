@@ -56,7 +56,7 @@ pipelines:
           services:
             - docker
           script:
-            - make test
+            - make ci-test
       - step:
           name: Build & Push to ECR
           deployment: Staging
