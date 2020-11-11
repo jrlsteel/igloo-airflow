@@ -76,7 +76,8 @@ class InternalEstimates:
             print(" - has no readings data")
         else:
             df_internal_readings['account_id'] = account_id
-            df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
+            column_list = util.get_common_info('ensek_column_order', 'internal_estimates_elec')
+            df_internal_readings_string = df_internal_readings.to_csv(None, columns=column_list, index=False)
             file_name_internal_readings = 'internal_estimates_elec_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/EstimatesElecInternal/' + file_name_internal_readings
             k.key = dir_s3['s3_key']['EstimatesElecInternal'] + file_name_internal_readings
@@ -92,7 +93,8 @@ class InternalEstimates:
             print(" - has no readings data")
         else:
             df_internal_readings['account_id'] = account_id
-            df_internal_readings_string = df_internal_readings.to_csv(None, index=False)
+            column_list = util.get_common_info('ensek_column_order', 'internal_estimates_gas')
+            df_internal_readings_string = df_internal_readings.to_csv(None, columns=column_list, index=False)
             file_name_internal_readings = 'internal_estimates_gas_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/EstimatesGasInternal/' + file_name_internal_readings
             k.key = dir_s3['s3_key']['EstimatesGasInternal'] + file_name_internal_readings

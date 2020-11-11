@@ -22,7 +22,7 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
+from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
 client = Client(access_token=con.square['access_token'],
@@ -136,13 +136,13 @@ class PaymentsApi(object):
 
         ### WRITE TO CSV
         #df_out.to_csv('square_payments.csv', encoding='utf-8', index=False)
-        '''
-        df_string = df_out.to_csv(None, index=False) 
+        column_list = util.get_common_info('square_column_order', 'square_payments')
+        df_string = df_out.to_csv(None, columns=column_list, index=False) 
 
         s3.key = fileDirectory + self.fkey + self.filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
-        '''
+
 
 
 
@@ -153,9 +153,9 @@ class PaymentsApi(object):
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
+    s3 = db.get_finance_s3_connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
-    p = PaymentsApi('2020-04-01', '2020-04-24')
+    p = PaymentsApi('2020-04-01', '2020-07-01')
 
     p1 = p.Normalise_payments()
     #print(p1[['EnsekID', 'status', 'amount', 'created_at']])

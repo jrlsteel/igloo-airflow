@@ -99,12 +99,16 @@ class MeterPoints:
         if df_meterpoints.empty:
             print(" - has no meters points data")
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_meterpoints')
+            print('ref_meterpoints')
+            print(column_list)
             df_meterpoints['account_id'] = account_id
             df_meterpoints1 = df_meterpoints[meta_meters + ['account_id']]
             df_meterpoints1.rename(columns={'id': 'meter_point_id'}, inplace=True)
             meter_point_ids = df_meterpoints1['meter_point_id']
-            df_meter_points_string = df_meterpoints1.to_csv(None, index=False)
-            # print(df_meter_points_string)
+            print(df_meterpoints1.dtypes)
+            df_meter_points_string = df_meterpoints1.to_csv(None, columns=column_list, index=False)
+            print(df_meter_points_string)
             file_name_meterpoints = 'meter_points_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/MeterPoints/' + file_name_meterpoints
             k.key = dir_s3['s3_key']['MeterPoints'] + file_name_meterpoints
@@ -117,15 +121,19 @@ class MeterPoints:
             print(" - has no meters data")
             #self.log_error(" - has no meters data")
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_meters')
+            print('ref_meters')
+            print(column_list)
             df_meters['account_id'] = account_id
             df_meters1 = df_meters[meta_meters + ['account_id']]
             # df_meters1.to_csv('meters_'  + str(account_id) + '.csv')
-            df_meters_string = df_meters1.to_csv(None, index=False)
+            print(df_meters1.dtypes)
+            df_meters_string = df_meters1.to_csv(None, columns=column_list, index=False)
+            print(df_meters_string)
             filename_meters = 'meters_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/Meters/' + filename_meters
             k.key = dir_s3['s3_key']['Meters'] + filename_meters
             k.set_contents_from_string(df_meters_string)
-            # print(df_meters_string)
 
         ''' Processing attributes data'''
         df_attributes = json_normalize(data, record_path=['attributes'], record_prefix='attributes_', meta=['id'],
@@ -135,16 +143,20 @@ class MeterPoints:
             #self.log_error(" - has no attributes data")
 
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_meterpoints_attributes')
+            print('ref_meterpoints_attributes')
+            print(column_list)
             df_attributes['account_id'] = account_id
             df_attributes['attributes_attributeValue'] = df_attributes[
                 'attributes_attributeValue'].str.replace(",", " ")
             # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
-            df_attributes_string = df_attributes.to_csv(None, index=False)
+            print(df_attributes.dtypes)
+            df_attributes_string = df_attributes.to_csv(None, columns=column_list, index=False)
+            print(df_attributes_string)
             filename_attributes = 'mp_attributes_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/Attributes/' + filename_attributes
             k.key = dir_s3['s3_key']['MeterPointsAttributes'] + filename_attributes
             k.set_contents_from_string(df_attributes_string)
-            # print(df_attributes_string)
 
         ''' Processing registers data'''
         ordered_columns = ['registers_eacAq', 'registers_registerReference', 'registers_sourceIdType',
@@ -157,6 +169,9 @@ class MeterPoints:
             #self.log_error(" - has no registers data")
 
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_registers')
+            print('ref_registers')
+            print(column_list)
             df_registers1 = df_registers[ordered_columns]
             df_registers1.rename(columns={'meter_point_meters_meterId': 'meter_id', 'registers_id': 'register_id'},
                                  inplace=True)
@@ -165,12 +180,14 @@ class MeterPoints:
             df_registers1['registers_sourceIdType'] = df_registers1['registers_sourceIdType'].str.replace("\t",
                                                                                                           "").str.strip()
             # df_registers.to_csv('registers_' + str(account_id) + '.csv')
-            df_registers_string = df_registers1.to_csv(None, index=False)
+            print(df_registers1.dtypes)
+            df_registers_string = df_registers1.to_csv(None, columns=column_list, index=False)
+            print(df_registers_string)
             filename_registers = 'registers_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/Registers/' + filename_registers
             k.key = dir_s3['s3_key']['Registers'] + filename_registers
             k.set_contents_from_string(df_registers_string)
-            # print(df_registers_string)
+
 
         ''' Prcessing registers -> attributes data '''
         df_registersAttributes = json_normalize(data, record_path=['meters', 'registers', 'attributes'],
@@ -182,16 +199,20 @@ class MeterPoints:
             #self.log_error(" - has no registers data")
 
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_registers_attributes')
+            print('ref_registers_attributes')
+            print(column_list)
             df_registersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
             df_registersAttributes.rename(columns={'meter_point_meters_registers_id': 'register_id'}, inplace=True)
             df_registersAttributes['account_id'] = account_id
+            print(df_registersAttributes.dtypes)
             # df_registersAttributes.to_csv('registers_' + str(account_id) + '.csv')
-            df_registersAttributes_string = df_registersAttributes.to_csv(None, index=False)
+            df_registersAttributes_string = df_registersAttributes.to_csv(None, columns=column_list, index=False)
+            print(df_registersAttributes_string)
             filename_registersAttributes = 'registersAttributes_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/RegistersAttributes/' + filename_registersAttributes
             k.key = dir_s3['s3_key']['RegistersAttributes'] + filename_registersAttributes
             k.set_contents_from_string(df_registersAttributes_string)
-            # print(df_registersAttributes_string)
 
         ''' Prcessing Meters -> attributes data'''
         df_metersAttributes = json_normalize(data, record_path=['meters', 'attributes'],
@@ -202,17 +223,21 @@ class MeterPoints:
             #self.log_error(" - has no registers data")
 
         else:
+            column_list = util.get_common_info('ensek_column_order', 'ref_meters_attributes')
+            print('ref_meters_attributes')
+            print(column_list)
             df_metersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
             df_metersAttributes['account_id'] = account_id
             df_metersAttributes['metersAttributes_attributeValue'] = df_metersAttributes[
                 'metersAttributes_attributeValue'].str.replace(",", " ")
             # df_metersAttributes.to_csv('metersAttributes_' + str(account_id) + '.csv')
-            df_metersAttributes_string = df_metersAttributes.to_csv(None, index=False)
+            print(df_metersAttributes.dtypes)
+            df_metersAttributes_string = df_metersAttributes.to_csv(None, columns=column_list, index=False)
+            print(df_metersAttributes_string)
             filename_metersAttributes = 'metersAttributes_' + str(account_id) + '.csv'
             # k.key = 'ensek-meterpoints/MetersAttributes/' + filename_metersAttributes
             k.key = dir_s3['s3_key']['MetersAttributes'] + filename_metersAttributes
             k.set_contents_from_string(df_metersAttributes_string)
-            # print(df_metersAttributes_string)
 
         return meter_point_ids
 

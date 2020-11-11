@@ -20,28 +20,25 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
+from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                                       environment=con.go_cardless['environment'])
-Events = client.events
-Refunds = client.refunds
+                               environment=con.go_cardless['environment'])
+clients = client.customers
 
+class GoCardlessClients(object):
 
-class GoCardlessRefunds(object):
-
-    def __init__(self, _execStartDate = None, _execEndDate = None):
+    def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Refunds']
-        self.Events = Events
-        self.Refunds = Refunds
+        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Clients']
+        self.clients = clients
         self.toDay = datetime.today().strftime('%Y-%m-%d')
         if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays = -1)
+            _execStartDate = self.get_date(self.toDay, _addDays=-1)
         self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
         if _execEndDate is None:
             _execEndDate = self.toDay
@@ -54,8 +51,7 @@ class GoCardlessRefunds(object):
             return False
         return True
 
-
-    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
+    def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
         dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
         if _addDays is None:
@@ -76,7 +72,8 @@ class GoCardlessRefunds(object):
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    def process_Refunds(self, _StartDate = None, _EndDate = None):
+
+    def process_Clients(self, _StartDate=None, _EndDate=None):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         if _StartDate is None:
@@ -84,13 +81,12 @@ class GoCardlessRefunds(object):
         if _EndDate is None:
             _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
         startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
-        Events = self.Events
-        Refunds = self.Refunds
-        filename = 'go_cardless_refunds_' + _StartDate + '_' + _EndDate + '.csv'
+        clients = self.clients
+        filename = 'go_cardless_clients_' + _StartDate + '_' + _EndDate + '.csv'
         qtr = math.ceil(startdatetime.month / 3.)
         yr = math.ceil(startdatetime.year)
         fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Events.......')
+        print('Listing clients.......')
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -99,52 +95,40 @@ class GoCardlessRefunds(object):
         StartDate = _StartDate + "T00:00:00.000Z"
         EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
-        try:
-            for event in Events.all(
-                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate , "resource_type": "refunds"}):
-                test = []
 
-                if event.links.refund and len(event.links.refund) != 0:
-                    refund = Refunds.get(event.links.refund)
-                    refund_1 = (vars(refund))
-                    refund_2 = refund_1['attributes']
+        for client in clients.all(
+                params={"created_at[gte]": StartDate , "created_at[lte]": EndDate }):
+            EnsekAccountId = None
+            if client.metadata:
+                if 'ensekAccountId' in client.metadata:
+                    EnsekAccountId = client.metadata['ensekAccountId']
+            ## print(client.id)
+            client_id = client.id
+            created_at = client.created_at
+            email = client.email
+            given_name = client.given_name
+            family_name = client.family_name
+            company_name = client.company_name
+            country_code = client.country_code
+            EnsekID = EnsekAccountId
+            listRow = [client_id, created_at, email, given_name, family_name, company_name, country_code, EnsekID]
+            q.put(listRow)
+            data = q.queue
+        for d in data:
+            datalist.append(d)
+        # Empty queue
+        with q.mutex:
+            q.queue.clear()
 
-                    ## print(refund_2['id'])
-                    id = refund_2['id']
-                    amount = refund_2['amount']
-                    created_at = refund_2['created_at']
-                    currency = refund_2['currency']
-                    reference = refund_2['reference']
-                    status = refund_2['status']
-                    metadata = refund_2['metadata']
-                    payment = refund_2['links']['payment']
-                    mandate = refund_2['links']['mandate']
-                    EnsekID = None
-
-                    listRow = [id, amount, created_at, currency, reference, status, metadata,
-                               payment, mandate, EnsekID]
-                    q.put(listRow)
-
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
-            pass
-
-        while not q.empty():
-            datalist.append(q.get())
-
-
-        df = pd.DataFrame(datalist, columns=['id', 'amount', 'created_at', 'currency',
-                                                 'reference', 'status', 'metadata',
-                                                 'payment', 'mandate', 'EnsekID'])
+        df = pd.DataFrame(datalist, columns=['client_id', 'created_at', 'email', 'given_name', 'family_name',
+                                             'company_name', 'country_code', 'EnsekID'])
 
         print(df.head(5))
-
-
         df_string = df.to_csv(None, index=False)
         # print(df_account_transactions_string)
 
         ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-        ## s3.key = Path(fileDirectory, s3key, filename)
+        ## s3.key = Path(fileDirectory, k_key, filename)
         s3.key = fileDirectory + fkey + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
@@ -157,25 +141,19 @@ class GoCardlessRefunds(object):
             end = self.get_date(start)
             ## print(start, end)
             ### Execute Job ###
-            self.process_Refunds(start, end)
-
+            self.process_Clients(start, end)
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
+    s3 = db.get_finance_s3_connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessRefunds('2020-04-01', '2020-04-17')
-    p = GoCardlessRefunds()
+    ## p = GoCardlessClients('2020-04-01', '2020-04-29')
+    p = GoCardlessClients()
 
-    p1 = p.process_Refunds()
+    p1 = p.process_Clients()
     ### Extract return single Daily Files from Date Range Provided ###
-    ##p2 = p.runDailyFiles()
-
-
-
-
-
+    ## p2 = p.runDailyFiles()
 
 

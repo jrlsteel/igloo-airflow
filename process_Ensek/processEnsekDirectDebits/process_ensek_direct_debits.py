@@ -2,6 +2,7 @@ import multiprocessing
 import requests
 import json
 from pandas.io.json import json_normalize
+import pandas as pd
 from ratelimit import limits, sleep_and_retry
 import time
 from requests import ConnectionError
@@ -65,10 +66,13 @@ class DirectDebit:
         # global k
 
         df_direct_debit = json_normalize(data)
+        print('df_direct_debit: \n{}\n'.format(df_direct_debit.to_string()))
         df_direct_debit['account_id'] = account_id
         # print(df_direct_debit.to_string)
         filename_direct_debit = 'direct_debit' + str(account_id) + '.csv'
-        df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
+
+        column_list = util.get_common_info('ensek_column_order', 'direct_debit')
+        df_direct_debit_string = df_direct_debit.to_csv(None, columns=column_list, index=False)
         # k.key = 'ensek-meterpoints/DirectDebit/' + filename_direct_debit
         k.key = dir_s3_key['s3_key']['DirectDebit'] + filename_direct_debit
         k.set_contents_from_string(df_direct_debit_string)
@@ -80,7 +84,8 @@ class DirectDebit:
         df_direct_debit = json_normalize(data, record_path=['SubscriptionDetails'], meta=meta_data_subscription)
         df_direct_debit['account_id'] = account_id
         filename_direct_debit = 'dd_heath_check_' + str(account_id) + '.csv'
-        df_direct_debit_string = df_direct_debit.to_csv(None, index=False)
+        column_list = util.get_common_info('ensek_column_order', 'direct_debit_health_check')
+        df_direct_debit_string = df_direct_debit.to_csv(None, columns=column_list, index=False)
         # print(df_direct_debit_string)
         k.key = dir_s3_key['s3_key']['DirectDebitHealthCheck'] + filename_direct_debit
         k.set_contents_from_string(df_direct_debit_string)

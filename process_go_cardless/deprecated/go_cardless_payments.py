@@ -20,7 +20,7 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
+from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
@@ -188,11 +188,11 @@ class GoCardlessPayments(object):
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
+    s3 = db.get_finance_s3_connections_client()
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessPayments('2017-03-01', '2020-04-16')
+    ## p = GoCardlessPayments('2020-04-01', '2020-04-29')
     p = GoCardlessPayments()
 
     p1 = p.process_Payments()

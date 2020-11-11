@@ -20,7 +20,7 @@ sys.path.append('..')
 
 from common import utils as util
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
+from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
 client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
@@ -35,15 +35,11 @@ class GoCardlessPayouts(object):
         self.dir = util.get_dir()
         self.bucket_name = self.dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
+        self.sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_payouts '
         self.fileDirectory = self.dir['s3_finance_goCardless_key']['Payouts']
         self.payouts = payouts
+        self.execEndDate = datetime.now().replace(microsecond=0).isoformat() ##datetime.today().strftime('%Y-%m-%d')
         self.toDay = datetime.today().strftime('%Y-%m-%d')
-        if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays = -1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
-        if _execEndDate is None:
-            _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
 
     def is_json(self, myjson):
         try:
@@ -66,26 +62,23 @@ class GoCardlessPayouts(object):
 
         return dateEnd.strftime(dateFormat)
 
-    def daterange(self, dateFormat="%Y-%m-%d"):
-        start_date = self.execStartDate
-        end_date = self.execEndDate
+    def daterange(self, start_date, dateFormat="%Y-%m-%d"):
+        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')   ##self.execEndDate
         for n in range(int((end_date - start_date).days)):
             seq_date = start_date + timedelta(n)
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    def process_Payouts(self, _StartDate = None, _EndDate = None):
+    def process_Payouts(self, _StartDate, _EndDate, _Qtr):
         fileDirectory = self.fileDirectory
         s3 = self.s3
-        if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
-        if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+        RpStartDate = _StartDate
+        RpEndDate = _EndDate
         payouts = self.payouts
         filename = 'go_cardless_payouts_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(startdatetime.year)
+        fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
+        qtr = _Qtr  ##math.ceil(fileDate.month / 3.)
+        yr = math.ceil(fileDate.year)
         fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
         print('Listing payouts.......')
         # Loop through a page
@@ -93,13 +86,11 @@ class GoCardlessPayouts(object):
         df_out = pd.DataFrame()
         datalist = []
         ls = []
-        StartDate = _StartDate + "T00:00:00.000Z"
-        EndDate = _EndDate + "T00:00:00.000Z"
-        print(_StartDate, _EndDate)
+        print(RpStartDate, _EndDate)
 
         # Loop through a page of Payouts, printing each Payout's amount
         print('.....listing payouts')
-        for payout in client.payouts.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
+        for payout in client.payouts.all(params={"created_at[gt]": RpStartDate, "created_at[lte]": RpEndDate}):
             payout_id = payout.id
             amount = payout.amount
             arrival_date = payout.arrival_date
@@ -123,39 +114,95 @@ class GoCardlessPayouts(object):
 
         print(df.head(5))
 
-        df_string = df.to_csv(None, index=False)
+        column_list = util.get_common_info('go_cardless_column_order', 'payouts')
+        df_string = df.to_csv(None, columns=column_list, index=False)
         # print(df_account_transactions_string)
-
-        ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-        ## s3.key = Path(fileDirectory, s3key, filename)
         s3.key = fileDirectory + fkey + filename
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
-        # df.to_csv('go_cardless_payouts.csv', encoding='utf-8', index=False)
-
         return df
-
-    def runDailyFiles(self):
-        for single_date in self.daterange():
-            start = single_date
-            end = self.get_date(start)
-            ## print(start, end)
-            ### Execute Job ###
-            self.process_Payouts(start, end)
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
-    ### StartDate & EndDate in YYYY-MM-DD format ###
-    ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
-    ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessPayouts('2020-04-01', '2020-04-14')
+    s3 = db.get_finance_s3_connections_client()
     p = GoCardlessPayouts()
 
-    p1 = p.process_Payouts()
-    ### Extract return single Daily Files from Date Range Provided ###
-    ## p2 = p.runDailyFiles()
+    ### Get latest record from aws_fin_stage1_extracts.fin_go_cardless_api_payouts
+    startdateDF = util.execute_query(p.sql)
+
+    ### Assign Report End Date as Script Execution Timestamp
+    ReportEndDate = str(p.execEndDate) + str(".000Z")
+
+    ### Assign Report Start  Date After latest record
+    ### from aws_fin_stage1_extracts.fin_go_cardless_api_payouts
+    ReportStartDate = str(startdateDF.iat[0,0])
+
+    print('Most Recent Report StartDate:  {0}'.format(ReportStartDate))
+    tz_start = '-01T00:00:00.000Z'
+    tz_stop = '-01T00:00:00.000Z'
+
+    ### Dictionary to determine Quarter from Report StartDate
+    dict_runtime = {1:['01','04'],
+                    2: ['04', '07'],
+                    3: ['07', '10'],
+                    4: ['10', '01']
+                    }
+
+    ReportStartDate = datetime.strptime(ReportStartDate, '%Y-%m-%dT%H:%M:%S.%fZ')
+    ReportEndDate = datetime.strptime(ReportEndDate, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    ### Create a List of ReportStartDate, ReportEndDate
+    lsd  = [ReportStartDate, ReportEndDate]
+
+    ### Derive Report Quarter Start
+    date_time_obj = min(lsd) ##datetime.strptime(min(lsd), '%Y-%m-%dT%H:%M:%S.%fZ')
+    qtr = math.ceil(date_time_obj.month / 3.)
+    yr = math.ceil(date_time_obj.year)
+
+    ### Derive Report Quarter End
+    qtr_rs = math.ceil(ReportEndDate.month / 3.)
+    yr_rs = math.ceil(ReportEndDate.year)
+    ReportEndYr = None
+    if qtr <= 3:
+        ReportEndYr = yr
+    else:
+        ReportEndYr = yr + 1
+
+    ### List of Report Quarters to process
+    qtrList = [qtr, qtr_rs]
+
+    ### List of Report Years to process
+    yrList = [yr, yr_rs]
+
+    reportQtr = list(set(qtrList))
+    reportYr = list(set(yrList))
+    noQtrs = len(reportQtr)
+    noYrs = len(reportYr)
+
+    ### Loop through set of Report Quarters to process
+    n = 0
+    while n < noQtrs:
+        lkpkey = reportQtr[n]
+        dateList = dict_runtime[lkpkey]
+        ### IF Report Year overlaps, Set Report Year plus one
+        if dateList[0] > dateList[1]:
+            ReportEndYr = ReportEndYr + 1
+        if n == 0: ## and noYrs < 2:
+            rptStart =  str(yr)+'-'+dateList[0]+tz_start
+            rptEnd =  str(ReportEndYr)+'-'+dateList[1]+tz_stop
+            print('ReportStartDate:  {0}'.format(rptStart))
+            print('ReportEndDate:  {0}'.format(rptEnd))
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd, _Qtr= lkpkey)
+        else:
+            rptStart = str(reportYr[0]) + '-' + dateList[0] + tz_start
+            rptEnd = str(ReportEndYr) + '-' + dateList[1] + tz_stop
+            print('ReportStartDate:  {0}'.format(rptStart))
+            print('ReportEndDate:  {0}'.format(rptEnd))
+            p1 = p.process_Payouts(_StartDate=rptStart, _EndDate=rptEnd, _Qtr= lkpkey)
+        n+=1
+
+
 
 
 

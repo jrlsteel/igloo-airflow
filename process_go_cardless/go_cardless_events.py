@@ -1,465 +1,333 @@
-import os
 import gocardless_pro
-import timeit
-
 import pandas as pd
-import numpy as np
-import requests
 import json
 from multiprocessing import freeze_support
-from datetime import datetime, date, time, timedelta
+from datetime import datetime
 import math
-
-from queue import Queue
-from pandas.io.json import json_normalize
-from pathlib import Path
 
 import sys
 
 sys.path.append('..')
 
 from common import utils as util
+from common.utils import IglooLogger as iglog
 from conf import config as con
-from connections.connect_db import get_finance_S3_Connections as s3_con
-from connections import connect_db as db
-
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                                       environment=con.go_cardless['environment'])
-Events = client.events
-Refunds = client.refunds
-Mandates = client.mandates
-Subscriptions = client.subscriptions
+from connections.connect_db import get_finance_s3_connections as s3_con
 
 
-class GoCardlessMandatesSubscriptions(object):
+class GoCardlessEventProcessor:
 
-    def __init__(self, _execStartDate = None, _execEndDate = None):
-        self.env = util.get_env()
-        self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
-        self.s3 = s3_con(self.bucket_name)
-        self.EventsFileDirectory = self.dir['s3_finance_goCardless_key']['Events']
-        self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
-        self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
-        self.Events = Events
-        self.Mandates = Mandates
-        self.Subscriptions = Subscriptions
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
-        if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays = -1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
-        if _execEndDate is None:
-            _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+    def __init__(self):
+        self.last_run_sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_events '
 
-    def is_json(self, myjson):
-        try:
-            json_object = json.loads(myjson)
-        except ValueError as e:
-            return False
-        return True
+        dir_root = util.get_dir()
+        self.bucket_name = dir_root['s3_finance_bucket']
+        self.s3_conn = s3_con(self.bucket_name)
+        dir_gc = dir_root['s3_finance_goCardless_key']
+        self.events_directory = dir_gc['Events']
+        self.mandates_directory = dir_gc['Mandates-Files']
+        self.subscriptions_directory = dir_gc['Subscriptions-Files']
+        self.payments_directory = dir_gc['Payments-Files']
+        self.refunds_directory = dir_gc['Refunds-Files']
 
+        gc_api_client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
+                                              environment=con.go_cardless['environment'])
+        self.events_api = gc_api_client.events
+        self.mandates_api = gc_api_client.mandates
+        self.subscriptions_api = gc_api_client.subscriptions
+        self.payments_api = gc_api_client.payments
+        self.refunds_api = gc_api_client.refunds
 
-    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
-        dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
-        if _addDays is None:
-            _addDays = 1  ###self.noDays
-        addDays = _addDays
-        if (addDays != 0):
-            dateEnd = dateStart + timedelta(days=addDays)
-        else:
-            dateEnd = dateStart
+    @staticmethod
+    def list_to_csv_string(lst):
+        return ','.join(map(str, lst))
 
-        return dateEnd.strftime(dateFormat)
+    def process_events(self):
+        start_date = str(util.execute_query(gc_processor.last_run_sql).iat[0, 0])
+        end_date = str(datetime.now().replace(microsecond=0).isoformat()) + str(".000Z")
 
-    def daterange(self, dateFormat="%Y-%m-%d"):
-        start_date = self.execStartDate
-        end_date = self.execEndDate
-        for n in range(int((end_date - start_date).days)):
-            seq_date = start_date + timedelta(n)
-            yield seq_date.strftime(dateFormat)
-        return seq_date
-
-    def process_Events(self, _StartDate = None, _EndDate = None):
-        EventsfileDirectory = self.EventsFileDirectory
-        SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
-        MandatesfileDirectory = self.MandatesFileDirectory
-        s3 = self.s3
-        if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
-        if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
-        Events = self.Events
-        Mandates = self.Mandates
-        Subscriptions = self.Subscriptions
-        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Events.......')
-        # Loop through a page
-        q_Event = Queue()
+        iglog.in_prod_env('Listing Events between {start} and {end}'.format(start=start_date, end=end_date))
         event_datalist = []
-        StartDate = _StartDate + "T00:00:00.000Z"
-        EndDate = _EndDate + "T00:00:00.000Z"
-        print(_StartDate, _EndDate)
         try:
-            for event in Events.all(
-                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate }):
+            for event in self.events_api.all(params={"created_at[gt]": start_date, "created_at[lte]": end_date}):
+                iglog.in_test_env(event.id)
+                list_row = [
+                    event.id,
+                    event.created_at,
+                    event.resource_type,
+                    event.action,
+                    event.customer_notifications,
+                    event.details.cause,
+                    event.details.description,
+                    event.details.origin,
+                    event.details.reason_code,
+                    event.details.scheme,
+                    event.details.will_attempt_retry,
+                    event.links.mandate,
+                    event.links.new_customer_bank_account,
+                    event.links.new_mandate,
+                    event.links.organisation,
+                    event.links.parent_event,
+                    event.links.payment,
+                    event.links.payout,
+                    event.links.previous_customer_bank_account,
+                    event.links.refund,
+                    event.links.subscription
+                ]
+                event_datalist.append(list_row)
 
-                id = None
+        except (json.decoder.JSONDecodeError,
+                gocardless_pro.errors.GoCardlessInternalError,
+                gocardless_pro.errors.MalformedResponseError,
+                gocardless_pro.errors.InvalidApiUsageError,
+                AttributeError):
+            iglog.in_prod_env(
+                'Failed to update events between {start} and {end}'.format(start=start_date, end=end_date))
 
-                mandate = None
-                new_customer_bank_account = None
-                new_mandate = None
-                organisation = None
-                parent_event = None
-                payment = None
-                payout = None
-                previous_customer_bank_account = None
-                refund = None
-                subscription = None
+        iglog.in_test_env("converting to dataframe")
+        df_event = pd.DataFrame(event_datalist,
+                                columns=['id',
+                                         'created_at',
+                                         'resource_type',
+                                         'action',
+                                         'customer_notifications',
+                                         'cause',
+                                         'description',
+                                         'origin',
+                                         'reason_code',
+                                         'scheme',
+                                         'will_attempt_retry',
+                                         'mandate',
+                                         'new_customer_bank_account',
+                                         'new_mandate',
+                                         'organisation',
+                                         'parent_event',
+                                         'payment',
+                                         'payout',
+                                         'previous_customer_bank_account',
+                                         'refund',
+                                         'subscription'])
 
-                created_at = None
-                resource_type = None
-                action = None
-                customer_notifications = None
-                cause = None
-                description = None
-                origin = None
-                reason_code = None
-                scheme = None
-                will_attempt_retry = None
+        # write events retrieved during this execution out to S3 in a single file
+        iglog.in_test_env("Writing to S3")
+        column_list = util.get_common_info('go_cardless_column_order', 'events')
+        df_string = df_event.to_csv(index=False, columns=column_list)
+        s3_conn = self.s3_conn
+        file_name = 'go_cardless_events_{start}_{end}.csv'.format(start=start_date, end=end_date)
+        folder = 'timestamp={year}-Q{quarter}/'.format(year=math.ceil(datetime.today().year),
+                                                       quarter=math.ceil(datetime.today().month / 3.))
+        s3_conn.key = self.events_directory + folder + file_name
+        s3_conn.set_contents_from_string(df_string)
+        iglog.in_test_env("Events table updated")
 
-                if self.is_json(event.id):
-                    id_js = json.loads(event.id.decode("utf-8"))
-                elif len(event.id) > 0:
-                    id = event.id
-                created_at = event.created_at
-                print(id)
+    def process_mandates(self, mandate_ids, thread_name):
+        iglog.in_prod_env(source_name=thread_name,
+                          message='Updating {num_ids} mandates'.format(num_ids=len(mandate_ids)))
+        s3_conn = s3_con(self.bucket_name)
+        key_directory = self.mandates_directory
+        api = self.mandates_api
+        for m_id in mandate_ids:
+            try:
+                iglog.in_test_env(message=m_id, source_name=thread_name)
+                mandate = api.get(m_id)
+                mandate_row = [
+                    mandate.id,
+                    mandate.links.customer,
+                    mandate.links.new_mandate,
+                    mandate.created_at,
+                    mandate.next_possible_charge_date,
+                    mandate.payments_require_approval,
+                    mandate.reference,
+                    mandate.scheme,
+                    mandate.status,
+                    mandate.links.creditor,
+                    mandate.links.customer_bank_account,
+                    mandate.metadata.get('AccountId', None),
+                    mandate.metadata.get('StatementId', None),
+                    datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                ]
+                header = 'mandate_id,CustomerId,new_mandate_id,created_at,next_possible_charge_date,payments_require_approval,reference,scheme,status,creditor,customer_bank_account,EnsekID,EnsekStatementId,extract_timestamp'
+                csv_string = header + "\n" + self.list_to_csv_string(mandate_row)
+                s3_conn.key = '{directory}go_cardless_mandates_{entity_id}.csv'.format(directory=key_directory,
+                                                                                       entity_id=mandate.id)
+                s3_conn.set_contents_from_string(csv_string)
 
-                if event.links.mandate and len(event.links.mandate) != 0:
-                    mandate = event.links.mandate
-                if event.links.new_customer_bank_account and len(event.links.new_customer_bank_account) != 0:
-                    new_customer_bank_account = event.links.new_customer_bank_account
-                if event.links.new_mandate and len(event.links.new_mandate) != 0:
-                    new_mandate = event.links.new_mandate
-                if event.links.organisation and len(event.links.organisation) != 0:
-                    organisation = event.links.organisation
-                if event.links.parent_event and len(event.links.parent_event) != 0:
-                    parent_event = event.links.parent_event
-                if event.links.payment and len(event.links.payment) != 0:
-                    payment = event.links.payment
-                if event.links.payout and len(event.links.payout) != 0:
-                    payout = event.links.payout
-                if event.links.previous_customer_bank_account and len(event.links.previous_customer_bank_account) != 0:
-                    previous_customer_bank_account = event.links.previous_customer_bank_account
-                if event.links.refund and len(event.links.refund) != 0:
-                    refund = event.links.refund
-                if event.links.subscription and len(event.links.subscription) != 0:
-                    subscription = event.links.subscription
+            except (json.decoder.JSONDecodeError,
+                    gocardless_pro.errors.GoCardlessInternalError,
+                    gocardless_pro.errors.MalformedResponseError,
+                    gocardless_pro.errors.InvalidApiUsageError,
+                    AttributeError) as e:
+                iglog.in_prod_env(source_name=thread_name,
+                                  message="error processing mandate with id {entity_id}: {err}".format(entity_id=m_id,
+                                                                                                       err=e))
 
-                if event.resource_type and len(event.resource_type) != 0:
-                    resource_type = event.resource_type
-                if event.action and len(event.action) != 0:
-                    action = event.action
-                if event.customer_notifications and len(event.customer_notifications) != 0:
-                    customer_notifications = event.customer_notifications
-                if event.details.cause and len(event.details.cause) != 0:
-                    cause = event.details.cause
-                if event.details.description and len(event.details.description) != 0:
-                    description = event.details.description
-                if event.details.origin and len(event.details.origin) != 0:
-                    origin = event.details.origin
-                if event.details.reason_code and len(event.details.reason_code) != 0:
-                    reason_code = event.details.reason_code
-                if event.details.scheme and len(event.details.scheme) != 0:
-                    scheme = event.details.scheme
-                if event.details.will_attempt_retry and len(event.details.will_attempt_retry) != 0:
-                    will_attempt_retry = event.details.will_attempt_retry
+    def process_subscriptions(self, sub_id_list, thread_name=None):
+        iglog.in_prod_env(source_name=thread_name,
+                          message='Updating {num_ids} subscriptions'.format(num_ids=len(sub_id_list)))
+        s3_conn = s3_con(self.bucket_name)
+        key_directory = self.subscriptions_directory
+        api = self.subscriptions_api
 
-                listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
-                           reason_code, scheme, will_attempt_retry,
-                           mandate, new_customer_bank_account, new_mandate, organisation, parent_event, payment,
-                           payout, previous_customer_bank_account, refund, subscription]
-                q_Event.put(listRow)
+        for sub_id in sub_id_list:
+            try:
+                iglog.in_test_env(message=sub_id, source_name=thread_name)
+                subscription = api.get(sub_id)
+                upcoming_payments = subscription.upcoming_payments
+                if len(upcoming_payments) > 0:
+                    charge_date = upcoming_payments[0]['charge_date']
+                    amount_subscription = upcoming_payments[0]['amount']
+                else:
+                    charge_date = None
+                    amount_subscription = None
 
+                subscription_row = [
+                    subscription.id,
+                    subscription.created_at,
+                    subscription.amount,
+                    subscription.currency,
+                    subscription.status,
+                    subscription.name,
+                    subscription.start_date,
+                    subscription.end_date,
+                    subscription.interval,
+                    subscription.interval_unit,
+                    subscription.day_of_month,
+                    subscription.month,
+                    subscription.count,
+                    subscription.payment_reference,
+                    subscription.app_fee,
+                    subscription.retry_if_possible,
+                    subscription.links.mandate,
+                    charge_date,
+                    amount_subscription,
+                    datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                ]
+                header = 'id,created_at,amount,currency,status,name,start_date,end_date,interval,interval_unit,day_of_month,month,count_no,payment_reference,app_fee,retry_if_possible,mandate,charge_date,amount_subscription,extract_timestamp'
+                csv_string = header + "\n" + self.list_to_csv_string(subscription_row)
+                s3_conn.key = '{directory}go_cardless_subscriptions_{entity_id}.csv'.format(directory=key_directory,
+                                                                                            entity_id=subscription.id)
+                s3_conn.set_contents_from_string(csv_string)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
-            pass
+            except (json.decoder.JSONDecodeError,
+                    gocardless_pro.errors.GoCardlessInternalError,
+                    gocardless_pro.errors.MalformedResponseError,
+                    gocardless_pro.errors.InvalidApiUsageError,
+                    AttributeError):
+                iglog.in_prod_env(source_name=thread_name,
+                                  message="error processing subscription with id {entity_id}".format(entity_id=sub_id))
 
-        while not q_Event.empty():
-            event_datalist.append(q_Event.get())
+    def process_payments(self, payment_id_list, thread_name=None):
+        iglog.in_prod_env(source_name=thread_name,
+                          message='Updating {num_ids} payments'.format(num_ids=len(payment_id_list)))
+        s3_conn = s3_con(self.bucket_name)
+        key_directory = self.payments_directory
+        api = self.payments_api
+        for pay_id in payment_id_list:
+            try:
+                iglog.in_test_env(message=pay_id, source_name=thread_name)
+                payment = api.get(pay_id)
 
+                if payment.metadata:
+                    ensek_account_id = payment.metadata.get('AccountId', None)
+                    statement_id = payment.metadata.get('StatementId', None)
+                else:
+                    ensek_account_id = None
+                    statement_id = None
 
-        df_event = pd.DataFrame(event_datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
-                                             'cause', 'description', 'origin', 'reason_code', 'scheme', 'will_attempt_retry',
-                                             'mandate' , 'new_customer_bank_account' , 'new_mandate' , 'organisation' ,
-                                             'parent_event' , 'payment' , 'payout', 'previous_customer_bank_account' , 'refund' ,
-                                             'subscription'])
+                payment_row = [
+                    payment.id,
+                    payment.amount,
+                    payment.amount_refunded,
+                    payment.charge_date,
+                    payment.created_at,
+                    payment.currency,
+                    payment.description,
+                    payment.reference,
+                    payment.status,
+                    payment.links.payout,
+                    payment.links.mandate,
+                    payment.links.subscription,
+                    ensek_account_id,
+                    statement_id,
+                    datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                ]
+                header = 'id,amount,amount_refunded,charge_date,created_at,currency,description,reference,status,payout,mandate,subscription,EnsekID,StatementId,extract_timestamp'
+                csv_string = header + "\n" + self.list_to_csv_string(payment_row)
+                s3_conn.key = '{directory}go_cardless_Payments_{entity_id}.csv'.format(directory=key_directory,
+                                                                                       entity_id=payment.id)
+                s3_conn.set_contents_from_string(csv_string)
 
-        print(df_event.head(5))
+            except (json.decoder.JSONDecodeError,
+                    gocardless_pro.errors.GoCardlessInternalError,
+                    gocardless_pro.errors.MalformedResponseError,
+                    gocardless_pro.errors.InvalidApiUsageError,
+                    AttributeError):
+                iglog.in_prod_env(source_name=thread_name,
+                                  message="error processing payment with id {entity_id}".format(entity_id=pay_id))
 
+    def process_refunds(self, refund_id_list, thread_name=None):
+        iglog.in_prod_env(source_name=thread_name,
+                          message='Updating {num_ids} refunds'.format(num_ids=len(refund_id_list)))
+        s3_conn = s3_con(self.bucket_name)
+        key_directory = self.refunds_directory
+        api = self.refunds_api
 
-        ### EVENTS ####
-        df_string = df_event.to_csv(None, index=False) 
-        s3.key = EventsfileDirectory + fkey + filenameEvents
-        print(s3.key)
-        s3.set_contents_from_string(df_string)
+        for ref_id in refund_id_list:
+            try:
+                iglog.in_test_env(message=ref_id, source_name=thread_name)
+                refund = api.get(ref_id)
 
+                refund_row = [
+                    refund.metadata.get('AccountId', None),
+                    refund.amount,
+                    refund.created_at,
+                    refund.currency,
+                    refund.id,
+                    refund.links.mandate,
+                    refund.metadata,
+                    refund.links.payment,
+                    refund.reference,
+                    refund.status,
+                    datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                ]
+                header = 'EnsekID,amount,created_at,currency,id,mandate,metadata,payment,reference,status,extract_timestamp'
+                csv_string = header + "\n" + self.list_to_csv_string(refund_row)
+                s3_conn.key = '{directory}go_cardless_Refunds_{entity_id}.csv'.format(directory=key_directory,
+                                                                                      entity_id=refund.id)
+                s3_conn.set_contents_from_string(csv_string)
 
-        return df_event
-
-
-
-
-    def process_Mandates(self, _StartDate = None, _EndDate = None):
-        EventsfileDirectory = self.EventsFileDirectory
-        SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
-        MandatesfileDirectory = self.MandatesFileDirectory
-        s3 = self.s3
-        if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
-        if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
-        Events = self.Events
-        Mandates = self.Mandates
-        Subscriptions = self.Subscriptions
-        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Mandates.......')
-        # Loop through a page
-        q_Mandate = Queue()
-        datalist = []
-        StartDate = _StartDate + "T00:00:00.000Z"
-        EndDate = _EndDate + "T00:00:00.000Z"
-        print(_StartDate, _EndDate)
-        try:
-            for event in Events.all(
-                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate, "resource_type": "mandates"}):
-
-                #### MANDATES #####
-                if event.resource_type == 'mandates':
-                    if event.links.mandate and len(event.links.mandate) != 0:
-                        mandate = Mandates.get(event.links.mandate)
-                        mandate_1 = (vars(mandate))
-                        mandate_2 = mandate_1['attributes']
-
-                        EnsekAccountId = None
-                        StatementId = None
-                        if 'AccountId' in mandate_2['metadata'].keys():
-                            EnsekAccountId = mandate_2['metadata']['AccountId']
-                        if 'StatementId' in mandate_2['metadata'].keys():
-                            StatementId = mandate_2['metadata']['StatementId']
-
-                        print(mandate_2['id'])
-                        mandate_id = mandate_2['id']
-                        CustomerId = mandate_2['links']['customer']
-                        new_mandate_id = None
-                        if 'new_mandate' in mandate_2['links'].keys():
-                            new_mandate_id = mandate_2['links']['new_mandate']
-                        created_at = mandate_2['created_at']
-                        next_possible_charge_date = mandate_2['next_possible_charge_date']
-                        payments_require_approval = mandate_2['payments_require_approval']
-                        reference = mandate_2['reference']
-                        scheme = mandate_2['scheme']
-                        status = mandate_2['status']
-                        creditor = mandate_2['links']['creditor']
-                        customer_bank_account = mandate_2['links']['customer_bank_account']
-                        mandate_update = event.created_at
-                        EnsekID = EnsekAccountId
-                        EnsekStatementId = StatementId
-
-                        filenameMandates = 'go_cardless_mandates_' + mandate_id + '.csv'
-
-                        mandate_listRow = [mandate_id, CustomerId, new_mandate_id, created_at, next_possible_charge_date,
-                                   payments_require_approval,
-                                   reference, scheme, status, creditor, customer_bank_account, EnsekID, EnsekStatementId]
-
-
-                        q_Mandate.put(mandate_listRow)
-
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
-            pass
-
-
-        while not q_Mandate.empty():
-            datalist.append(q_Mandate.get())
-        df = pd.DataFrame(datalist, columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                             'next_possible_charge_date',
-                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
-                                             'customer_bank_account',
-                                             'EnsekID', 'EnsekStatementId'])
-
-        for row in df.itertuples(index=True, name='Pandas'):
-            id = row.mandate_id
-            r_1 = [row.mandate_id, row.CustomerId, row.new_mandate_id, row.created_at, row.next_possible_charge_date,
-                    row.payments_require_approval,
-                    row.reference, row.scheme, row.status, row.creditor, row.customer_bank_account, row.EnsekID, row.EnsekStatementId]
-
-            print(r_1)
-            df_1 = pd.DataFrame([r_1], columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                             'next_possible_charge_date',
-                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
-                                             'customer_bank_account',
-                                             'EnsekID', 'EnsekStatementId'] )
-
-            filename = 'go_cardless_mandates_' + id + '.csv'
-
-            df_string = df_1.to_csv(None, index=False)
-            s3.key = MandatesfileDirectory + filename
-            print(s3.key)
-            s3.set_contents_from_string(df_string)
-
-
-
-
-    def process_Subscriptions(self, _StartDate = None, _EndDate = None):
-        EventsfileDirectory = self.EventsFileDirectory
-        SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
-        MandatesfileDirectory = self.MandatesFileDirectory
-        s3 = self.s3
-        if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
-        if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
-        Events = self.Events
-        Mandates = self.Mandates
-        Subscriptions = self.Subscriptions
-        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Subscriptions.......')
-        # Loop through a page
-        q_Subscription = Queue()
-        subscription_datalist = []
-        StartDate = _StartDate + "T00:00:00.000Z"
-        EndDate = _EndDate + "T00:00:00.000Z"
-        print(_StartDate, _EndDate)
-        try:
-            for event in Events.all(
-                    params={"created_at[gte]": StartDate, "created_at[lte]": EndDate, "resource_type": "subscriptions" }):
-
-                #### SUBSCRIPTIONS #####
-                if event.resource_type == 'subscriptions':
-                    if event.links.subscription and len(event.links.subscription) != 0:
-                        subscription = Subscriptions.get(event.links.subscription)
-                        subscription_1 = (vars(subscription))
-                        subscription_2 = subscription_1['attributes']
-
-                        charge_date = None
-                        amount_subscription = None
-                        mandate = None
-
-                        print(subscription_2['id'])
-                        id = subscription_2['id']
-                        upcoming_payments = subscription_2['upcoming_payments']
-                        if len(upcoming_payments) > 0:
-                            charge_date = upcoming_payments[0]['charge_date']
-                            amount_subscription = upcoming_payments[0]['amount']
-                        created_at = subscription_2['created_at']
-                        amount = subscription_2['amount']
-                        currency = subscription_2['currency']
-                        status = subscription_2['status']
-                        name = subscription_2['name']
-                        start_date = subscription_2['start_date']
-                        end_date = subscription_2['end_date']
-                        interval = subscription_2['interval']
-                        interval_unit = subscription_2['interval_unit']
-                        day_of_month = subscription_2['day_of_month']
-                        month = subscription_2['month']
-                        count_no = subscription_2['count']
-                        payment_reference = subscription_2['payment_reference']
-                        app_fee = subscription_2['app_fee']
-                        retry_if_possible = subscription_2['retry_if_possible']
-                        # earliest_charge_date_after_resume = subscription.earliest_charge_date_after_resume
-                        if subscription_2['links']['mandate']:
-                            mandate = subscription_2['links']['mandate']
-                        subscription_update = event.created_at
-
-                        subscription_listRow = [id, created_at, amount, currency, status, name, start_date,
-                                   end_date, interval, interval_unit, day_of_month, month,
-                                   count_no, payment_reference, app_fee, retry_if_possible, mandate, charge_date,
-                                   amount_subscription ]
-
-                        q_Subscription.put(subscription_listRow)
-
-
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
-            pass
-
-        while not q_Subscription.empty():
-            subscription_datalist.append(q_Subscription.get())
-
-        df = pd.DataFrame(subscription_datalist,
-                          columns=['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date',
-                                   'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
-                                   'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
-                                   'charge_date', 'amount_subscription'])
-
-        for row in df.itertuples(index=True, name='Pandas'):
-            id = row.id
-            r_1 = [row.id, row.created_at, row.amount, row.currency, row.status, row.name, row.start_date,
-                   row.end_date, row.interval, row.interval_unit, row.day_of_month, row.month,
-                   row.count_no, row.payment_reference, row.app_fee, row.retry_if_possible, row.mandate,
-                   row.charge_date,
-                   row.amount_subscription]
-
-            print(r_1)
-            df_1 = pd.DataFrame([r_1],
-                                columns=['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date',
-                                         'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
-                                         'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
-                                         'charge_date', 'amount_subscription'])
-
-            filename = 'go_cardless_subscriptions_' + id + '.csv'
-            df_string = df_1.to_csv(None, index=False)
-            s3.key = SubscriptionsfileDirectory + filename
-            print(s3.key)
-            s3.set_contents_from_string(df_string)
-
-
-
-    def runDailyFiles(self):
-        for single_date in self.daterange():
-            start = single_date
-            end = self.get_date(start)
-            ## print(start, end)
-            ### Execute Job ###
-            self.process_Events(start, end)
+            except (json.decoder.JSONDecodeError,
+                    gocardless_pro.errors.GoCardlessInternalError,
+                    gocardless_pro.errors.MalformedResponseError,
+                    gocardless_pro.errors.InvalidApiUsageError,
+                    AttributeError):
+                iglog.in_prod_env(source_name=thread_name,
+                                  message="error processing refund with id {entity_id}".format(entity_id=ref_id))
 
 
 if __name__ == "__main__":
     freeze_support()
-    s3 = db.get_finance_S3_Connections_client()
-    ### StartDate & EndDate in YYYY-MM-DD format ###
-    ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
-    ### 2019-05-29 2019-05-30 ###
-    ## p = GoCardlessMandatesSubscriptions('2020-04-24', '2020-04-26')
-    p = GoCardlessMandatesSubscriptions()
 
-    ### EVENTS ###
-    p1 = p.process_Events()
-    ### MANDATES ###
-    p2 = p.process_Mandates()
-    ### SUBSCRIPTIONS ###
-    p3 = p.process_Subscriptions()
-    ### Extract return single Daily Files from Date Range Provided ###
-    ##p2 = p.runDailyFiles()
+    gc_processor = GoCardlessEventProcessor()
 
+    # EVENTS
+    gc_processor.process_events()
 
+    n_proc = 2
 
+    # MANDATES
+    man_ids = util.get_ids_from_redshift(entity_type='mandate')
+    iglog.in_test_env(message=str(man_ids))
+    util.run_api_extract_multithreaded(id_list=man_ids, method=gc_processor.process_mandates, num_processes=n_proc)
 
+    # SUBSCRIPTIONS
+    sub_ids = util.get_ids_from_redshift(entity_type='subscription')
+    util.run_api_extract_multithreaded(id_list=sub_ids, method=gc_processor.process_subscriptions, num_processes=n_proc)
 
+    # PAYMENTS
+    pay_ids = util.get_ids_from_redshift(entity_type='payment')
+    util.run_api_extract_multithreaded(id_list=pay_ids, method=gc_processor.process_payments, num_processes=n_proc)
 
-
+    # REFUNDS
+    ref_ids = util.get_ids_from_redshift(entity_type='refund')
+    util.run_api_extract_multithreaded(id_list=ref_ids, method=gc_processor.process_refunds, num_processes=n_proc)
