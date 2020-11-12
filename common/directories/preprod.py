@@ -297,7 +297,6 @@ preprod = {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         },
-
     },
 
     "s3_bucket": "igloo-data-warehouse-preprod",

@@ -281,10 +281,9 @@ def get_ensek_api_info1(api):
     return api_url, head
 
 
-def get_common_info(commonname, tablename):
+def get_common_info(section, subsection):
     dir = dirs3.common
-    column_list = dir[commonname][tablename]
-    return column_list
+    return dir[section][subsection]
 
 
 def get_smart_read_billing_api_info(api):

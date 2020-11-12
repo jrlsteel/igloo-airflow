@@ -64,6 +64,7 @@ test: conf/config.py
 	# cd process_mirror && pytest
 	# cd process_Nosi && pytest
 	# cd process_NRL && pytest
+	cd process_postcodes && pytest
 	# cd process_reports && pytest
 	cd process_smart && pytest
 	# cd process_square && pytest
