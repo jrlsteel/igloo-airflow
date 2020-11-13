@@ -5,6 +5,7 @@ import uuid
 import unittest
 from unittest.mock import MagicMock, patch
 from moto import mock_s3_deprecated
+import pandas as pd
 
 sys.path.append('..')
 
@@ -29,6 +30,102 @@ def mock_uuid():
     global TEST_UUIDS_COUNT
     TEST_UUIDS_COUNT += 1
     return uuid.UUID(int=TEST_UUIDS_COUNT)
+
+hourly_dtypes = {
+    'wind_cdir': 'object',
+    'rh': 'int64',
+    'pod': 'object',
+    'timestamp_utc': 'object',
+    'pres': 'float64',
+    'solar_rad': 'float64',
+    'ozone': 'float64',
+    'wind_gust_spd': 'float64',
+    'timestamp_local': 'object',
+    'snow_depth': 'float64',
+    'clouds': 'int64',
+    'ts': 'int64',
+    'wind_spd': 'float64',
+    'pop': 'int64',
+    'wind_cdir_full': 'object',
+    'slp': 'float64',
+    'dni': 'float64',
+    'dewpt': 'float64',
+    'snow': 'float64',
+    'uv': 'float64',
+    'wind_dir': 'int64',
+    'clouds_hi': 'int64',
+    'precip': 'float64',
+    'vis': 'float64',
+    'dhi': 'float64',
+    'app_temp': 'float64',
+    'datetime': 'object',
+    'temp': 'float64',
+    'ghi': 'float64',
+    'clouds_mid': 'int64',
+    'clouds_low': 'int64',
+    'icon': 'object',
+    'code': 'int64',
+    'description': 'object',
+    'city_name': 'object',
+    'lon': 'object',
+    'timezone': 'object',
+    'lat': 'object',
+    'country_code': 'object',
+    'state_code': 'object',
+    'outcode': 'object',
+    'etlchange': 'object',
+}
+
+daily_dtypes = {
+    'moonrise_ts': 'int64',
+    'wind_cdir': 'object',
+    'rh': 'int64',
+    'pres': 'float64',
+    'high_temp': 'float64',
+    'sunset_ts': 'int64',
+    'ozone': 'float64',
+    'moon_phase': 'float64',
+    'wind_gust_spd': 'float64',
+    'snow_depth': 'float64',
+    'clouds': 'int64',
+    'ts': 'int64',
+    'sunrise_ts': 'int64',
+    'app_min_temp': 'float64',
+    'wind_spd': 'float64',
+    'pop': 'int64',
+    'wind_cdir_full': 'object',
+    'slp': 'float64',
+    'moon_phase_lunation': 'float64',
+    'valid_date': 'object',
+    'app_max_temp': 'float64',
+    'vis': 'float64',
+    'dewpt': 'float64',
+    'snow': 'float64',
+    'uv': 'float64',
+    'wind_dir': 'int64',
+    'max_dhi': 'object',
+    'clouds_hi': 'int64',
+    'precip': 'float64',
+    'low_temp': 'float64',
+    'max_temp': 'float64',
+    'moonset_ts': 'int64',
+    'datetime': 'object',
+    'temp': 'float64',
+    'min_temp': 'float64',
+    'clouds_mid': 'int64',
+    'clouds_low': 'int64',
+    'icon': 'object',
+    'code': 'int64',
+    'description': 'object',
+    'city_name': 'object',
+    'lon': 'object',
+    'timezone': 'object',
+    'lat': 'object',
+    'country_code': 'object',
+    'state_code': 'object',
+    'outcode': 'object',
+    'etlchange': 'object',
+}
 
 class TestProcessHourlyWeatherData(unittest.TestCase):
 
@@ -61,12 +158,18 @@ class TestProcessHourlyWeatherData(unittest.TestCase):
         stage2_file_name = '{}.parquet'.format('00000000-0000-0000-0000-000000000002')
         s3_key.key = stage2_dir_s3.format(hw.extract_date) + stage2_file_name
         try:
-            s3_key.get_contents_as_string()
-        except Exception:
-
+            buf = io.BytesIO(s3_key.get_contents_as_string())
+            df = pd.read_parquet(buf)
+            for item in df.dtypes.items():
+                actual_dtype = item[1]
+                expected_dtype = hourly_dtypes[item[0]]
+                assert(actual_dtype == expected_dtype)
+        except Exception as e:
+            print(e)
             self.fail('Stage 2 parquet file was not found')
 
         self.assertDictEqual(s3_stage1_object, api_returned_data_hourly)
+
 
     @mock_s3_deprecated
     @patch('uuid.uuid4', mock_uuid)
@@ -96,8 +199,13 @@ class TestProcessHourlyWeatherData(unittest.TestCase):
         s3_key.key = stage2_dir_s3.format(hw.extract_date) + stage2_file_name
         try:
             s3_key.get_contents_as_string()
+            buf = io.BytesIO(s3_key.get_contents_as_string())
+            df = pd.read_parquet(buf)
+            for item in df.dtypes.items():
+                actual_dtype = item[1]
+                expected_dtype = daily_dtypes[item[0]]
+                assert(actual_dtype == expected_dtype)
         except Exception:
-
             self.fail('Stage 2 parquet file was not found')
 
         self.assertDictEqual(s3_stage1_object, api_returned_data_daily)

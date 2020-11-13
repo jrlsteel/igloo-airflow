@@ -54,6 +54,7 @@ class ForecastWeather:
         self.api_url = api_dir['api_url']
         self.key = api_dir['token']
         self.data_keys = api_dir['data_keys']
+        self.dtypes = api_dir['dtypes']
         self.parquet_file_name = '{}.parquet'.format(util.get_jobID())
         self.stage1_dir_s3 = s3_dir['stage1']
         self.stage2_dir_s3 = s3_dir['stage2']
@@ -181,7 +182,7 @@ class ForecastWeather:
         # the 2D array unpacked into a 1D array
         unpacked_rows = [ row for postcode_data in flattened_data_list for row in postcode_data ]
 
-        dataframe = pd.DataFrame(unpacked_rows)
+        dataframe = pd.DataFrame(unpacked_rows).astype(dtype=self.dtypes)
 
         parquet_file = self.create_parquet_file(dataframe)
 
