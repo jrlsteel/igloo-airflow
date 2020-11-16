@@ -57,7 +57,7 @@ test: conf/config.py
 	cd process_Ensek/processEnsekOccupierAccounts && pytest
 	# cd process_EPC && pytest
 	# cd process_EstimatedAdvance && pytest
-	# cd process_go_cardless && pytest
+	cd process_go_cardless && pytest
 	# cd process_Igloo && pytest
 	# cd process_IglooZendesk && pytest
 	# cd process_LandRegistry && pytest

@@ -580,10 +580,6 @@ uat = {
     "s3_finance_square_key": {
         "Payments": "/square-api-payments/"
     },
-
-    "master_sources": {
-        "go_cardless": "prod"
-    }
 }
 
 preprod = {
@@ -1036,10 +1032,6 @@ preprod = {
         "Payments-Files": "/go-cardless-api-payments-files/",
         "Refunds-Files": "/go-cardless-api-refunds-files/"
     },
-
-    "master_sources": {
-        "go_cardless": "prod"
-    }
 }
 
 prod = {
@@ -1491,8 +1483,4 @@ prod = {
         "Payments-Files": "/go-cardless-api-payments-files/",
         "Refunds-Files": "/go-cardless-api-refunds-files/"
     },
-
-    "master_sources": {
-        "go_cardless": "prod"
-    }
 }
