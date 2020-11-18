@@ -1,0 +1,41 @@
+{
+  "convention" : {
+    "commitTypes": [
+      "feat",
+      "fix",
+      "perf",
+      "refactor",
+      "style",
+      "test",
+      "build",
+      "ops",
+      "docs",
+      "merge",
+      "revert"
+    ],
+    "commitScopes": [],
+    "releaseTagGlobPattern": "v[0-9]*.[0-9]*.[0-9]*",
+    "issueRegexPattern": "(^|\\s)#\\d+(\\s|$)"
+  },
+
+  "changelog" : {
+    "commitTypes": [
+      "feat",
+      "fix",
+      "perf",
+      "merge"
+    ],
+    "commitIgnoreRegexPattern": "^WIP ",
+    "headlines": {
+      "feat": "Features",
+      "fix": "Bug Fixes",
+      "perf": "Performance Improvements",
+      "merge": "Merged Branches",
+      "breakingChange": "BREAKING CHANGES"
+    },
+
+    "commitUrl": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings/commits/%commit%",
+    "commitRangeUrl": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings/branches/compare/%from%..%to%",
+    "issueUrl": "https://iglooenergy.atlassian.net/browse/%issue%"
+  }
+}
