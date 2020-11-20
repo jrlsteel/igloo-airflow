@@ -176,10 +176,8 @@ if __name__ == '__main__':
 
     else:  # current environment is not the master source, mirror the new data from the master source
         # Go Cardless Mirror Jobs
-        # temporarily removed until releasing to Prod
-        # iglog.in_prod_env("Go Cardless Mirror Jobs running")
-        # s.submit_all_mirror_jobs(master_source)
-        pass
+        iglog.in_prod_env("Go Cardless Mirror Jobs running")
+        s.submit_all_mirror_jobs(master_source)
 
     # Go Cardless Staging Jobs
     iglog.in_prod_env("Go Cardlesss Staging Jobs running")
