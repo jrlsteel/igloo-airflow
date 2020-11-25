@@ -17,6 +17,9 @@ args = {
     'start_date': days_ago(2),
 }
 
+# This DAG is really just here to ensure that Airflow is able to connect to
+# the various Redshift instances in the different environments.
+
 dag = DAG(
     dag_id='igloo_table_comparisons_old_prod_new_prod',
     default_args=args,
@@ -25,9 +28,16 @@ dag = DAG(
 )
 
 ref_meterpoints_old_preprod_new_preprod = BashOperator(
-    task_id='compare_tables',
+    task_id='compare_tables_preprod',
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_meterpoints_old_preprod_new_preprod --output-to-s3',
     dag=dag,
 )
 
+ref_meterpoints_old_prod_new_prod = BashOperator(
+    task_id='compare_tables_prod',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_meterpoints_old_prod_new_prod --output-to-s3',
+    dag=dag,
+)
+
 ref_meterpoints_old_preprod_new_preprod
+ref_meterpoints_old_prod_new_prod
