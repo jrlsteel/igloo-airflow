@@ -377,7 +377,7 @@ def compare_tables(table_comparison_config_name, output_to_s3=False):
 
         tdc = TableDiffChecker()
         tdc.set_environment_config(env_name=old_env_name, env_config=table_comparison_config["old_env"]["redshift_config"])
-        tdc.set_environment_config(env_name=new_env_name, env_config=table_comparison_config["old_env"]["redshift_config"])
+        tdc.set_environment_config(env_name=new_env_name, env_config=table_comparison_config["new_env"]["redshift_config"])
 
         results = {
             "full_match": {
