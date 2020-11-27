@@ -1,17 +1,15 @@
 import os
-import gocardless_pro
 import timeit
-
 import pandas as pd
 import numpy as np
 import requests
-import json
-from multiprocessing import freeze_support
-from datetime import datetime, date, time, timedelta
 import math
+from datetime import datetime, date, time, timedelta
+
+import gocardless_pro
+from multiprocessing import freeze_support
 
 from queue import Queue
-from pandas.io.json import json_normalize
 from pathlib import Path
 
 import sys
@@ -27,116 +25,61 @@ client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
                                environment=con.go_cardless['environment'])
 clients = client.customers
 
-class GoCardlessClients(object):
+class GoCardlessCustomers(object):
 
-    def __init__(self, _execStartDate=None, _execEndDate=None):
-        self.env = util.get_env()
-        self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+    def __init__(self, logger=None):
+
+        if logger is None:
+            self.iglog = util.IglooLogger()
+        else:
+            self.iglog = logger
+
+        dir = util.get_dir()
+
+        self.file_directory = dir['s3_finance_goCardless_key']['Clients']
+        self.s3_key = self.file_directory
+        self.bucket_name = dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
         self.sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_clients '
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Clients']
-        self.clients = clients
-        self.execEndDate = datetime.now().replace(microsecond=0).isoformat() ##datetime.today().strftime('%Y-%m-%d')
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.exec_end_date = datetime.now().replace(microsecond=0).isoformat()
+        self.customer_columns = util.get_common_info('go_cardless_column_order', 'customers')
 
-    def is_json(self, myjson):
-        try:
-            json_object = json.loads(myjson)
-        except ValueError as e:
-            return False
-        return True
+    def get_customers_by_date(self, start_date, end_date):
 
-    def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
-        dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
-        if _addDays is None:
-            _addDays = 1  ###self.noDays
-        addDays = _addDays
-        if (addDays != 0):
-            dateEnd = dateStart + timedelta(days=addDays)
-        else:
-            dateEnd = dateStart
+        return clients.all(params={"created_at[gt]": start_date , "created_at[lte]": end_date })
 
-        return dateEnd.strftime(dateFormat)
+    def store_customers(self, customers):
 
-    def daterange(self, start_date, dateFormat="%Y-%m-%d"):
-        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')   ##self.execEndDate
-        for n in range(int((end_date - start_date).days)):
-            seq_date = start_date + timedelta(n)
-            yield seq_date.strftime(dateFormat)
-        return seq_date
+        for customer in customers:
+            customer_data = {
+                "client_id": customer.id,
+                "created_at": customer.created_at,
+                "email": customer.email,
+                "given_name": customer.given_name,
+                "family_name": customer.family_name,
+                "company_name": customer.company_name,
+                "country_code": customer.country_code,
+                "EnsekID": customer.metadata.get('ensekAccountId')
+            }
 
+            customer_object_name = customer.id + '.csv'
+            customer_df = pd.DataFrame(data=[customer_data], columns=self.customer_columns)
+            customer_csv_string = customer_df.to_csv(None, columns=self.customer_columns, index=False)
 
-    def process_Clients(self, _StartDate, _EndDate):
-        fileDirectory = self.fileDirectory
-        s3 = self.s3
-        RpStartDate = _StartDate
-        RpEndDate = _EndDate
-        clients = self.clients
-        filename = 'go_cardless_clients_' + _StartDate + '_' + _EndDate + '.csv'
-        fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
-        qtr = math.ceil(fileDate.month / 3.)
-        yr = math.ceil(fileDate.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing clients.......')
-        # Loop through a page
-        q = Queue()
-        df_out = pd.DataFrame()
-        datalist = []
-        ls = []
-        print(RpStartDate, _EndDate)
-
-        for client in clients.all(
-                params={"created_at[gt]": RpStartDate , "created_at[lte]": RpEndDate }):
-            EnsekAccountId = None
-            if client.metadata:
-                if 'ensekAccountId' in client.metadata:
-                    EnsekAccountId = client.metadata['ensekAccountId']
-            ## print(client.id)
-            client_id = client.id
-            created_at = client.created_at
-            email = client.email
-            given_name = client.given_name
-            family_name = client.family_name
-            company_name = client.company_name
-            country_code = client.country_code
-            EnsekID = EnsekAccountId
-            listRow = [client_id, created_at, email, given_name, family_name, company_name, country_code, EnsekID]
-            q.put(listRow)
-            data = q.queue
-        for d in data:
-            datalist.append(d)
-        # Empty queue
-        with q.mutex:
-            q.queue.clear()
-
-        df = pd.DataFrame(datalist, columns=['client_id', 'created_at', 'email', 'given_name', 'family_name',
-                                             'company_name', 'country_code', 'EnsekID'])
-
-        print(df.head(5))
-        column_list = util.get_common_info('go_cardless_column_order', 'customers')
-        df_string = df.to_csv(None, columns=column_list, index=False)
-        # print(df_account_transactions_string)
-
-        ## s3.key = fileDirectory + os.sep + s3key + os.sep + filename
-        ## s3.key = Path(fileDirectory, k_key, filename)
-        s3.key = fileDirectory + fkey + filename
-        print(s3.key)
-        s3.set_contents_from_string(df_string)
-
-        return df
+            s3_path = self.s3_key + customer_object_name
+            self.iglog.in_prod_env("writing data to {}".format(s3_path))
+            self.s3.key = s3_path
+            self.s3.set_contents_from_string(customer_csv_string)
 
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_s3_connections_client()
-    p = GoCardlessClients()
-    startdateDF = util.execute_query(p.sql)
-    ReportEndDate = str(p.execEndDate) + str(".000Z")
-    ReportStartDate = str(startdateDF.iat[0,0])
-    print('ReportStartDate:  {0}'.format(ReportStartDate))
-    print('ReportEndDate:  {0}'.format(ReportEndDate))
+    p = GoCardlessCustomers()
+    start_date_df = util.execute_query(p.sql)
+    end_date = str(p.exec_end_date) + str(".000Z")
+    start_date = str(start_date_df.iat[0,0])
 
-    p1 = p.process_Clients(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
+    customers = p.get_customers_by_date(start_date=start_date, end_date=end_date)
+    p.store_customers(customers)
 
 
