@@ -163,11 +163,7 @@ if __name__ == "__main__":
     ### Derive Report Quarter End
     qtr_rs = math.ceil(ReportEndDate.month / 3.)
     yr_rs = math.ceil(ReportEndDate.year)
-    ReportEndYr = None
-    if qtr <= 3:
-        ReportEndYr = yr
-    else:
-        ReportEndYr = yr + 1
+    ReportEndYr = yr
 
     ### List of Report Quarters to process
     qtrList = [qtr, qtr_rs]
@@ -185,9 +181,11 @@ if __name__ == "__main__":
     while n < noQtrs:
         lkpkey = reportQtr[n]
         dateList = dict_runtime[lkpkey]
+
         ### IF Report Year overlaps, Set Report Year plus one
-        if dateList[0] > dateList[1]:
+        if dateList[0] > dateList[1] :
             ReportEndYr = ReportEndYr + 1
+
         if n == 0: ## and noYrs < 2:
             rptStart =  str(yr)+'-'+dateList[0]+tz_start
             rptEnd =  str(ReportEndYr)+'-'+dateList[1]+tz_stop

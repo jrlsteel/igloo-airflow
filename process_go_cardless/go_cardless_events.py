@@ -10,7 +10,7 @@ import sys
 sys.path.append('..')
 
 from common import utils as util
-from common.utils import IglooLogger as iglog
+from common.utils import IglooLogger
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 
@@ -38,12 +38,9 @@ class GoCardlessEventProcessor:
         self.payments_api = gc_api_client.payments
         self.refunds_api = gc_api_client.refunds
 
-    @staticmethod
-    def list_to_csv_string(lst):
-        return ','.join(map(str, lst))
-
     def process_events(self):
-        start_date = str(util.execute_query(gc_processor.last_run_sql).iat[0, 0])
+        iglog = IglooLogger(source="process_events method")
+        start_date = str(util.execute_query(self.last_run_sql).iat[0, 0])
         end_date = str(datetime.now().replace(microsecond=0).isoformat()) + str(".000Z")
 
         iglog.in_prod_env('Listing Events between {start} and {end}'.format(start=start_date, end=end_date))
@@ -80,7 +77,9 @@ class GoCardlessEventProcessor:
                 gocardless_pro.errors.GoCardlessInternalError,
                 gocardless_pro.errors.MalformedResponseError,
                 gocardless_pro.errors.InvalidApiUsageError,
-                AttributeError):
+                AttributeError) as e:
+            print(sys.exc_info())
+
             iglog.in_prod_env(
                 'Failed to update events between {start} and {end}'.format(start=start_date, end=end_date))
 
@@ -120,15 +119,15 @@ class GoCardlessEventProcessor:
         s3_conn.set_contents_from_string(df_string)
         iglog.in_test_env("Events table updated")
 
-    def process_mandates(self, mandate_ids, thread_name):
-        iglog.in_prod_env(source_name=thread_name,
-                          message='Updating {num_ids} mandates'.format(num_ids=len(mandate_ids)))
+    def process_mandates(self, mandate_ids, thread_name=None):
+        iglog = IglooLogger(source=thread_name)
+        iglog.in_prod_env('Updating {num_ids} mandates'.format(num_ids=len(mandate_ids)))
         s3_conn = s3_con(self.bucket_name)
         key_directory = self.mandates_directory
         api = self.mandates_api
         for m_id in mandate_ids:
             try:
-                iglog.in_test_env(message=m_id, source_name=thread_name)
+                iglog.in_test_env(m_id)
                 mandate = api.get(m_id)
                 mandate_row = [
                     mandate.id,
@@ -146,31 +145,32 @@ class GoCardlessEventProcessor:
                     mandate.metadata.get('StatementId', None),
                     datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
                 ]
-                header = 'mandate_id,CustomerId,new_mandate_id,created_at,next_possible_charge_date,payments_require_approval,reference,scheme,status,creditor,customer_bank_account,EnsekID,EnsekStatementId,extract_timestamp'
-                csv_string = header + "\n" + self.list_to_csv_string(mandate_row)
+                header = ['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at', 'next_possible_charge_date',
+                          'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
+                          'customer_bank_account', 'EnsekID', 'EnsekStatementId', 'extract_timestamp']
+                csv_string = util.list_to_csv_string([header, mandate_row])
                 s3_conn.key = '{directory}go_cardless_mandates_{entity_id}.csv'.format(directory=key_directory,
                                                                                        entity_id=mandate.id)
                 s3_conn.set_contents_from_string(csv_string)
+                iglog.in_test_env("Written to {0}".format(s3_conn.key))
 
             except (json.decoder.JSONDecodeError,
                     gocardless_pro.errors.GoCardlessInternalError,
                     gocardless_pro.errors.MalformedResponseError,
                     gocardless_pro.errors.InvalidApiUsageError,
                     AttributeError) as e:
-                iglog.in_prod_env(source_name=thread_name,
-                                  message="error processing mandate with id {entity_id}: {err}".format(entity_id=m_id,
-                                                                                                       err=e))
+                iglog.in_prod_env("error processing mandate with id {entity_id}: {err}".format(entity_id=m_id, err=e))
 
     def process_subscriptions(self, sub_id_list, thread_name=None):
-        iglog.in_prod_env(source_name=thread_name,
-                          message='Updating {num_ids} subscriptions'.format(num_ids=len(sub_id_list)))
+        iglog = IglooLogger(source=thread_name)
+        iglog.in_prod_env('Updating {num_ids} subscriptions'.format(num_ids=len(sub_id_list)))
         s3_conn = s3_con(self.bucket_name)
         key_directory = self.subscriptions_directory
         api = self.subscriptions_api
 
         for sub_id in sub_id_list:
             try:
-                iglog.in_test_env(message=sub_id, source_name=thread_name)
+                iglog.in_test_env(sub_id)
                 subscription = api.get(sub_id)
                 upcoming_payments = subscription.upcoming_payments
                 if len(upcoming_payments) > 0:
@@ -202,29 +202,32 @@ class GoCardlessEventProcessor:
                     amount_subscription,
                     datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
                 ]
-                header = 'id,created_at,amount,currency,status,name,start_date,end_date,interval,interval_unit,day_of_month,month,count_no,payment_reference,app_fee,retry_if_possible,mandate,charge_date,amount_subscription,extract_timestamp'
-                csv_string = header + "\n" + self.list_to_csv_string(subscription_row)
+                header = ['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date', 'end_date',
+                          'interval', 'interval_unit', 'day_of_month', 'month', 'count_no', 'payment_reference',
+                          'app_fee', 'retry_if_possible', 'mandate', 'charge_date', 'amount_subscription',
+                          'extract_timestamp']
+                csv_string = util.list_to_csv_string([header, subscription_row])
                 s3_conn.key = '{directory}go_cardless_subscriptions_{entity_id}.csv'.format(directory=key_directory,
                                                                                             entity_id=subscription.id)
                 s3_conn.set_contents_from_string(csv_string)
+                iglog.in_test_env("Written to {0}".format(s3_conn.key))
 
             except (json.decoder.JSONDecodeError,
                     gocardless_pro.errors.GoCardlessInternalError,
                     gocardless_pro.errors.MalformedResponseError,
                     gocardless_pro.errors.InvalidApiUsageError,
                     AttributeError):
-                iglog.in_prod_env(source_name=thread_name,
-                                  message="error processing subscription with id {entity_id}".format(entity_id=sub_id))
+                iglog.in_prod_env("error processing subscription with id {entity_id}".format(entity_id=sub_id))
 
     def process_payments(self, payment_id_list, thread_name=None):
-        iglog.in_prod_env(source_name=thread_name,
-                          message='Updating {num_ids} payments'.format(num_ids=len(payment_id_list)))
+        iglog = IglooLogger(source=thread_name)
+        iglog.in_prod_env('Updating {num_ids} payments'.format(num_ids=len(payment_id_list)))
         s3_conn = s3_con(self.bucket_name)
         key_directory = self.payments_directory
         api = self.payments_api
         for pay_id in payment_id_list:
             try:
-                iglog.in_test_env(message=pay_id, source_name=thread_name)
+                iglog.in_test_env(pay_id)
                 payment = api.get(pay_id)
 
                 if payment.metadata:
@@ -251,30 +254,32 @@ class GoCardlessEventProcessor:
                     statement_id,
                     datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
                 ]
-                header = 'id,amount,amount_refunded,charge_date,created_at,currency,description,reference,status,payout,mandate,subscription,EnsekID,StatementId,extract_timestamp'
-                csv_string = header + "\n" + self.list_to_csv_string(payment_row)
+                header = ['id', 'amount', 'amount_refunded', 'charge_date', 'created_at', 'currency', 'description',
+                          'reference', 'status', 'payout', 'mandate', 'subscription', 'EnsekID', 'StatementId',
+                          'extract_timestamp']
+                csv_string = util.list_to_csv_string([header, payment_row])
                 s3_conn.key = '{directory}go_cardless_Payments_{entity_id}.csv'.format(directory=key_directory,
                                                                                        entity_id=payment.id)
                 s3_conn.set_contents_from_string(csv_string)
+                iglog.in_test_env("Written to {0}".format(s3_conn.key))
 
             except (json.decoder.JSONDecodeError,
                     gocardless_pro.errors.GoCardlessInternalError,
                     gocardless_pro.errors.MalformedResponseError,
                     gocardless_pro.errors.InvalidApiUsageError,
                     AttributeError):
-                iglog.in_prod_env(source_name=thread_name,
-                                  message="error processing payment with id {entity_id}".format(entity_id=pay_id))
+                iglog.in_prod_env("error processing payment with id {entity_id}".format(entity_id=pay_id))
 
     def process_refunds(self, refund_id_list, thread_name=None):
-        iglog.in_prod_env(source_name=thread_name,
-                          message='Updating {num_ids} refunds'.format(num_ids=len(refund_id_list)))
+        iglog = IglooLogger(source=thread_name)
+        iglog.in_prod_env('Updating {num_ids} refunds'.format(num_ids=len(refund_id_list)))
         s3_conn = s3_con(self.bucket_name)
         key_directory = self.refunds_directory
         api = self.refunds_api
 
         for ref_id in refund_id_list:
             try:
-                iglog.in_test_env(message=ref_id, source_name=thread_name)
+                iglog.in_test_env(ref_id)
                 refund = api.get(ref_id)
 
                 refund_row = [
@@ -290,44 +295,51 @@ class GoCardlessEventProcessor:
                     refund.status,
                     datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
                 ]
-                header = 'EnsekID,amount,created_at,currency,id,mandate,metadata,payment,reference,status,extract_timestamp'
-                csv_string = header + "\n" + self.list_to_csv_string(refund_row)
+                header = ['EnsekID', 'amount', 'created_at', 'currency', 'id', 'mandate', 'metadata', 'payment',
+                          'reference', 'status', 'extract_timestamp']
+                csv_string = util.list_to_csv_string([header, refund_row])
                 s3_conn.key = '{directory}go_cardless_Refunds_{entity_id}.csv'.format(directory=key_directory,
                                                                                       entity_id=refund.id)
                 s3_conn.set_contents_from_string(csv_string)
+                iglog.in_test_env("Written to {0}".format(s3_conn.key))
 
             except (json.decoder.JSONDecodeError,
                     gocardless_pro.errors.GoCardlessInternalError,
                     gocardless_pro.errors.MalformedResponseError,
                     gocardless_pro.errors.InvalidApiUsageError,
                     AttributeError):
-                iglog.in_prod_env(source_name=thread_name,
-                                  message="error processing refund with id {entity_id}".format(entity_id=ref_id))
+                iglog.in_prod_env("error processing refund with id {entity_id}".format(entity_id=ref_id))
 
 
 if __name__ == "__main__":
     freeze_support()
 
+    iglog = IglooLogger(source="GC Events Main Method")
+
     gc_processor = GoCardlessEventProcessor()
 
     # EVENTS
-    gc_processor.process_events()
+    master_source = util.get_master_source("go_cardless")
+    current_env = util.get_env()
+    iglog.in_prod_env("Current environment: {0}, Master_Source: {1}".format(current_env, master_source))
+    if master_source == current_env:  # current environment is master source, run the data extract script
+        gc_processor.process_events()
 
     n_proc = 2
 
     # MANDATES
-    man_ids = util.get_ids_from_redshift(entity_type='mandate')
+    man_ids = util.get_ids_from_redshift(entity_type='mandate', job_name='go_cardless')
     iglog.in_test_env(message=str(man_ids))
     util.run_api_extract_multithreaded(id_list=man_ids, method=gc_processor.process_mandates, num_processes=n_proc)
 
     # SUBSCRIPTIONS
-    sub_ids = util.get_ids_from_redshift(entity_type='subscription')
+    sub_ids = util.get_ids_from_redshift(entity_type='subscription', job_name='go_cardless')
     util.run_api_extract_multithreaded(id_list=sub_ids, method=gc_processor.process_subscriptions, num_processes=n_proc)
 
     # PAYMENTS
-    pay_ids = util.get_ids_from_redshift(entity_type='payment')
+    pay_ids = util.get_ids_from_redshift(entity_type='payment', job_name='go_cardless')
     util.run_api_extract_multithreaded(id_list=pay_ids, method=gc_processor.process_payments, num_processes=n_proc)
 
     # REFUNDS
-    ref_ids = util.get_ids_from_redshift(entity_type='refund')
+    ref_ids = util.get_ids_from_redshift(entity_type='refund', job_name='go_cardless')
     util.run_api_extract_multithreaded(id_list=ref_ids, method=gc_processor.process_refunds, num_processes=n_proc)
