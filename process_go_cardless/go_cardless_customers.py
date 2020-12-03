@@ -1,18 +1,8 @@
-import os
-import timeit
+import sys
+import traceback
 import pandas as pd
-import numpy as np
-import requests
-import math
-from datetime import datetime, date, time, timedelta
 
 import gocardless_pro
-from multiprocessing import freeze_support
-
-from queue import Queue
-from pathlib import Path
-
-import sys
 
 sys.path.append('..')
 
@@ -21,16 +11,16 @@ from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
+api = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
                                environment=con.go_cardless['environment'])
-clients = client.customers
+gc_customer_api = api.customers
 
 class GoCardlessCustomers(object):
 
     def __init__(self, logger=None):
 
         if logger is None:
-            self.iglog = util.IglooLogger()
+            self.iglog = util.IglooLogger(source='GoCardlessCustomers')
         else:
             self.iglog = logger
 
@@ -40,46 +30,69 @@ class GoCardlessCustomers(object):
         self.s3_key = self.file_directory
         self.bucket_name = dir['s3_finance_bucket']
         self.s3 = s3_con(self.bucket_name)
-        self.sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_clients '
-        self.exec_end_date = datetime.now().replace(microsecond=0).isoformat()
         self.customer_columns = util.get_common_info('go_cardless_column_order', 'customers')
 
-    def get_customers_by_date(self, start_date, end_date):
+    def get_customer_ids_from_view(self):
 
-        return clients.all(params={"created_at[gt]": start_date , "created_at[lte]": end_date })
+        return util.get_ids_from_redshift(entity_type='customer', job_name='go_cardless')
 
-    def store_customers(self, customers):
+    def get_customer_from_id(self, customer_id, thread_name=None):
 
-        for customer in customers:
-            customer_data = {
-                "client_id": customer.id,
-                "created_at": customer.created_at,
-                "email": customer.email,
-                "given_name": customer.given_name,
-                "family_name": customer.family_name,
-                "company_name": customer.company_name,
-                "country_code": customer.country_code,
-                "EnsekID": customer.metadata.get('ensekAccountId')
-            }
+        self.iglog.in_test_env("Thread {}: Getting customer {}".format(thread_name, customer_id))
 
-            customer_object_name = customer.id + '.csv'
-            customer_df = pd.DataFrame(data=[customer_data], columns=self.customer_columns)
-            customer_csv_string = customer_df.to_csv(None, columns=self.customer_columns, index=False)
+        try:
+            return gc_customer_api.get(customer_id)
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+            gocardless_pro.errors.InvalidApiUsageError,
+            AttributeError):
 
-            s3_path = self.s3_key + customer_object_name
-            self.iglog.in_prod_env("writing data to {}".format(s3_path))
-            self.s3.key = s3_path
-            self.s3.set_contents_from_string(customer_csv_string)
+            self.iglog.in_prod_env("error getting customer with id {customer_id}".format(customer_id))
+            self.iglog.in_prod_env(traceback.format_exc())
+
+    def store_customer(self, customer, thread_name=None):
+
+        customer_data = [
+            customer.id,
+            customer.created_at,
+            customer.email,
+            customer.given_name,
+            customer.family_name,
+            customer.company_name,
+            customer.country_code,
+            customer.metadata.get('ensekAccountId')
+        ]
+
+        customer_object_name = customer.id + '.csv'
+        customer_df = pd.DataFrame(data=[customer_data], columns=self.customer_columns)
+        customer_csv_string = customer_df.to_csv(None, columns=self.customer_columns, index=False)
+
+        s3_path = self.s3_key + customer_object_name
+        self.iglog.in_test_env("Thread: {}: Writing data to {}".format(thread_name, s3_path))
+        self.s3.key = s3_path
+        self.s3.set_contents_from_string(customer_csv_string)
+
+    def process_customers(self, customer_ids, thread_name=None):
+
+        self.iglog.in_prod_env('Thread {}: Processing {} customer IDs'.format(thread_name, len(customer_ids)))
+
+        for customer_id in customer_ids:
+            customer = self.get_customer_from_id(customer_id, thread_name)
+            if customer:
+                self.store_customer(customer, thread_name)
+
+        self.iglog.in_prod_env('Thread {}: Processing completed'.format(thread_name))
 
 if __name__ == "__main__":
-    freeze_support()
-    s3 = db.get_finance_s3_connections_client()
-    p = GoCardlessCustomers()
-    start_date_df = util.execute_query(p.sql)
-    end_date = str(p.exec_end_date) + str(".000Z")
-    start_date = str(start_date_df.iat[0,0])
 
-    customers = p.get_customers_by_date(start_date=start_date, end_date=end_date)
-    p.store_customers(customers)
+    num_processes = 2
+
+    gc_processor = GoCardlessCustomers()
+
+    customer_ids = gc_processor.get_customer_ids_from_view()
+    # p.process_customers(customer_ids)
+    util.run_api_extract_multithreaded(id_list=customer_ids, method=gc_processor.process_customers, num_processes=num_processes)
 
 
