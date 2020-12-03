@@ -23,11 +23,11 @@ class Customer():
         self.metadata = {"ensekAccountId": ensek_id} if ensek_id else {}
 
 # anonymised test data
-test_customers =[
-    Customer('CU001111111111', '2020-11-25T13:49:07.255Z', 'test.one@gmail.com', 'Abbie', 'Walker', None, 'GB', None),
-    Customer('CU002222222222', '2020-11-25T13:48:47.149Z','test2@hotmail.com', 'James', 'Wilsom', None ,'GB', 123456),
-    Customer('CU003333333333', '2020-11-25T13:45:07.025Z', 'testingtesting@yahoo.co.uk', 'Fred', 'Harris', None , 'GB', None)
-]
+test_customer = {
+    'CU001111111111': Customer('CU001111111111', '2020-11-25T13:49:07.255Z', 'test.one@gmail.com', 'Abbie', 'Walker', None, 'GB', None),
+    'CU002222222222': Customer('CU002222222222', '2020-11-25T13:48:47.149Z','test2@hotmail.com', 'James', 'Wilsom', None ,'GB', 123456),
+    'CU003333333333': Customer('CU003333333333', '2020-11-25T13:45:07.025Z', 'testingtesting@yahoo.co.uk', 'Fred', 'Harris', None , 'GB', None)
+}
 
 csv_heading = 'client_id,created_at,email,given_name,family_name,company_name,country_code,EnsekID'
 csv_outputs = [
@@ -36,9 +36,17 @@ csv_outputs = [
     'CU003333333333,2020-11-25T13:45:07.025Z,testingtesting@yahoo.co.uk,Fred,Harris,,GB,'
 ]
 
+customer_ids = list(test_customer.keys())
+
+def get_customer(customer_id, thread_name=None):
+
+    return test_customer[customer_id]
+
+
 class TestGoCardlessCustomers(unittest.TestCase):
+
     @mock_s3_deprecated
-    def test_process_customers(self):
+    def test_process_customers_by_ids(self):
 
         bucket_name = 'igloo-data-warehouse-uat-finance'
 
@@ -48,20 +56,14 @@ class TestGoCardlessCustomers(unittest.TestCase):
         bucket = s3.create_bucket(bucket_name)
         s3_key = boto.s3.key.Key(bucket)
 
-        gc_client_processor = GoCardlessCustomers()
+        gc_processor = GoCardlessCustomers()
+        gc_processor.get_customer_from_id = MagicMock(side_effect=get_customer)
 
-        start_date_df = pd.DataFrame([['2018-04-03T11:18:00.000Z']])
-        report_end_date = str(gc_client_processor.exec_end_date) + str(".000Z")
-        report_start_date = str(start_date_df.iat[0,0])
+        gc_processor.process_customers(customer_ids)
 
-        gc_client_processor.get_customers_by_date = MagicMock(return_value=test_customers)
+        output_s3_key = gc_processor.s3_key
 
-        customers = gc_client_processor.get_customers_by_date(start_date=report_start_date, end_date=report_end_date)
-        gc_client_processor.store_customers(customers)
-
-        output_s3_key = gc_client_processor.s3_key
-
-        for index, customer in enumerate(test_customers):
+        for index, customer in enumerate(test_customer.values()):
             s3_key.key = output_s3_key + customer.id + '.csv'
             s3_object = s3_key.get_contents_as_string().decode('utf-8')
             csv_lines = s3_object.split('\n')

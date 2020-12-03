@@ -227,6 +227,8 @@ def get_ids_from_redshift(entity_type, job_name='default'):
         sql = r'select * from public.vw_gc_updates_refunds'
     elif entity_type == 'payment':
         sql = r'select * from public.vw_gc_updates_payments'
+    elif entity_type == 'customer':
+        sql = r'select * from public.vw_gc_updates_customers'
     else:
         raise ValueError("Unsupported entity_type")
 
