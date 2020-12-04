@@ -34,7 +34,7 @@ start_ensek_api_mirror_only_jobs = BashOperator(
 
 start_ensek_occupier_accounts_ref_jobs = BashOperator(
     task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
     dag=dag,
 )
 
