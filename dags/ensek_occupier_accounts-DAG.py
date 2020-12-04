@@ -49,4 +49,4 @@ start_ensek_api_mirror_only_jobs = BashOperator(
     dag=dag,
 )
 
-process_ensek_occupier_accounts >> start_ensek_occupier_accounts_ref_jobs
+start_ensek_api_mirror_only_jobs >> start_ensek_occupier_accounts_ref_jobs
