@@ -24,28 +24,17 @@ dag = DAG(
     tags=['cdw']
 )
 
-process_ensek_occupier_accounts = BashOperator(
-    task_id='process_ensek_occupier_accounts',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python process_ensek_occupier_accounts.py',
-    dag=dag,
-)
-
-#Not required as very small file
-# start_ensek_occupier_accounts_staging_jobs = BashOperator(
-#     task_id='start_ensek_occupier_accounts_staging_jobs',
-#     bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_staging_jobs.py',
-#     dag=dag,
-# )
-
-start_ensek_occupier_accounts_ref_jobs = BashOperator(
-    task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
-    dag=dag,
-)
 
 start_ensek_api_mirror_only_jobs = BashOperator(
     task_id='start_ensek_occupier_accounts_mirror_jobs.py',
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_mirror_jobs.py',
+    dag=dag,
+)
+
+
+start_ensek_occupier_accounts_ref_jobs = BashOperator(
+    task_id='start_ensek_occupier_accounts_ref_jobs',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
     dag=dag,
 )
 
