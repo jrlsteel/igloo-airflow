@@ -24,7 +24,7 @@ lxml==4.5.1
 mock==4.0.2
 numpy==1.18.5
 ordereddict==1.1
-pandas==1.0.4
+pandas==1.1.4
 pandas-redshift==2.0.3
 paramiko==2.7.1
 pipreqs==0.4.10

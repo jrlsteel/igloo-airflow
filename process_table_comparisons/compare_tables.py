@@ -5,6 +5,8 @@ import traceback
 from datetime import datetime as dt
 import pymysql
 import sys
+import argparse
+import boto3
 
 sys.path.append('..')
 sys.path.append('/home/ec2-user/python/enzek-meterpoint-readings')
@@ -359,5 +361,97 @@ def compare_calculated_tables(stage=None):
     batch_logging_update(job_id, 'e')
 
 
+def compare_tables(table_comparison_config_name, output_to_s3=False):
+    job_id = get_jobID()
+    batch_logging_insert(job_id, 70, table_comparison_config_name, 'compare_tables.py')
+
+    exit_status = 0
+
+    try:
+        from conf.config import table_comparison_configs
+
+        table_comparison_config = table_comparison_configs[table_comparison_config_name]
+
+        old_env_name = table_comparison_config["old_env"]["name"]
+        new_env_name = table_comparison_config["new_env"]["name"]
+
+        tdc = TableDiffChecker()
+        tdc.set_environment_config(env_name=old_env_name, env_config=table_comparison_config["old_env"]["redshift_config"])
+        tdc.set_environment_config(env_name=new_env_name, env_config=table_comparison_config["new_env"]["redshift_config"])
+
+        results = {
+            "full_match": {
+
+            },
+            "schema_mismatch": {
+
+            },
+            "data_mismatch": {
+
+            },
+            "exec_failure": {
+
+            }
+        }
+        for table_name, key_cols in table_comparison_config["table_keys"].items():
+            res = tdc.compare_objects(comparison_type="table",
+                                      env_a_name=old_env_name,
+                                      env_b_name=new_env_name,
+                                      object_a_def=table_name,
+                                      key_cols=key_cols)
+            if not res["exec_success"]:
+                results["exec_failure"][table_name] = res
+                exit_status = 1
+            elif not res["schemas"]["full_match"]:
+                results["schema_mismatch"][table_name] = res
+                exit_status = 1
+            elif res["overall_match"]:
+                results["full_match"][table_name] = res
+            else:
+                results["data_mismatch"][table_name] = res
+                exit_status = 1
+
+        time = dt.now().strftime("%Y%m%d-%H%M%S")
+        fname = "tables_comparison_{name}_{datetime}.json".format(name=table_comparison_config_name, datetime=time)
+        with open(fname, 'w') as outfile:
+            json.dump(results, outfile, indent=4)
+
+        if output_to_s3:
+            from conf.config import s3_config
+            s3 = boto3.resource(
+                's3',
+                aws_access_key_id=s3_config["access_key"],
+                aws_secret_access_key=s3_config["secret_key"]
+            )
+            object = s3.Object(s3_config["bucket_name"], 'table_comparisons/{}'.format(fname))
+            object.put(Body=json.dumps(results))
+
+        if len(results["exec_failure"]) > 0:
+            raise RuntimeError("{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
+                num_exec_fail=len(results["exec_failure"])))
+    except Exception as e:
+        print("Error in table comparison script: " + str(e))
+        batch_logging_update(job_id, 'f', str(e))
+        raise e
+
+    batch_logging_update(job_id, 'e')
+
+    return exit_status
+    
+
 if __name__ == '__main__':
-    compare_calculated_tables()
+    parser = argparse.ArgumentParser(description='Database table comparison tool')
+    parser.add_argument('--table-comparison-config', type=str)
+    parser.add_argument('--output-to-s3', action="store_true")
+
+    args = parser.parse_args()
+
+    # If no arguments specified, just compare all calculated tables
+    # and store results locally.
+    if args.table_comparison_config is None:
+        compare_calculated_tables()
+    else:
+        print("Comparing tables using config: {}".format(args.table_comparison_config))
+        exit_status = compare_tables(args.table_comparison_config, output_to_s3=args.output_to_s3)
+        print("Exiting with status {}".format(exit_status))
+        sys.exit(exit_status)

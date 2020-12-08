@@ -18,17 +18,16 @@ args = {
 }
 
 dag = DAG(
-    dag_id='ensek_occupier_accounts_ref_only',
+    dag_id='go_cardless',
     default_args=args,
-    schedule_interval=None,
+    schedule_interval='30 05 * * *',
     tags=['cdw']
 )
 
-
-start_ensek_occupier_accounts_ref_jobs = BashOperator(
-    task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
+start_go_cardless_api_extracts = BashOperator(
+    task_id='start_go_cardless_api_extracts',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_go_cardless && python start_go_cardless_api_extracts.py',
     dag=dag,
 )
 
-start_ensek_occupier_accounts_ref_jobs
+start_go_cardless_api_extracts

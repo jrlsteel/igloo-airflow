@@ -3,6 +3,7 @@ import sys
 import timeit
 import subprocess
 from datetime import datetime
+import argparse
 
 sys.path.append('..')
 from common import utils as util
@@ -85,31 +86,52 @@ class Weather:
             sys.exit(1)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--download-hourly", help="Run the hourly weather forecast download step", action="store_true")
+    parser.add_argument("--store-hourly", help="Run the hourly weather forecast store step", action="store_true")
+    parser.add_argument("--download-daily", help="Run the daily weather forecast download step", action="store_true")
+    parser.add_argument("--store-daily", help="Run the daily weather forecast store step", action="store_true")
+    args = parser.parse_args()
+
+    if args.download_hourly is False and args.store_hourly is False and args.download_daily is False and args.store_daily is False:
+        print('No options specified, enabling all steps')
+        args.download_hourly = True
+        args.store_hourly = True
+        args.download_daily = True
+        args.store_daily = True
 
     all_jobid = util.get_jobID()
 
     util.batch_logging_insert(all_jobid, 109, 'all_weather_forecast_jobs', script_name)
 
-    hourly_weather = Weather(
-        all_jobid = all_jobid,
-        process_name = 'Hourly Weather',
-        process_job_script = 'processHourlyWeatherData.py',
-        store_job_script = 'storeHourlyWeatherData.py',
-        process_weather_job_num = 61,
-        store_weather_job_num = 61,
-    )
+    if args.download_hourly or args.store_hourly:
+        hourly_weather = Weather(
+            all_jobid = all_jobid,
+            process_name = 'Hourly Weather',
+            process_job_script = 'processHourlyWeatherData.py',
+            store_job_script = 'storeHourlyWeatherData.py',
+            process_weather_job_num = 61,
+            store_weather_job_num = 61,
+        )
 
-    hourly_weather.process()
+        if args.download_hourly:
+            hourly_weather.submit_process_weather_job()
+        if args.store_hourly:
+            hourly_weather.submit_process_weather_job()
 
-    daily_weather = Weather(
-        all_jobid = all_jobid,
-        process_name = 'Daily Weather',
-        process_job_script = 'processDailyWeatherData.py',
-        store_job_script = 'storeDailyWeatherData.py',
-        process_weather_job_num = 62,
-        store_weather_job_num = 62,
-    )
+    if args.download_daily or args.store_daily:
+        daily_weather = Weather(
+            all_jobid = all_jobid,
+            process_name = 'Daily Weather',
+            process_job_script = 'processDailyWeatherData.py',
+            store_job_script = 'storeDailyWeatherData.py',
+            process_weather_job_num = 62,
+            store_weather_job_num = 62,
+        )
 
-    daily_weather.process()
+        if args.download_hourly:
+            daily_weather.submit_process_weather_job()
+        if args.store_daily:
+            daily_weather.submit_process_weather_job()
 
     util.batch_logging_update(all_jobid, 'e')

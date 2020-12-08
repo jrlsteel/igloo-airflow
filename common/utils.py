@@ -9,6 +9,8 @@ import numpy as np
 import timeit
 import multiprocessing
 from time import sleep
+import csv
+import io
 import os
 
 sys.path.append('..')
@@ -24,9 +26,7 @@ def get_env():
 
 
 def get_master_source(job_name):
-    dir = get_dir()
-    master_source = dir.get("master_sources", {}).get(job_name, 'prod')  # default to prod
-    return master_source
+    return con.master_sources.get(job_name, 'prod')  # default to prod if job name isn't found
 
 
 def get_multiprocess(source):
@@ -218,7 +218,7 @@ def get_accountID_fromDB(get_max, filter='live'):
     return account_ids
 
 
-def get_ids_from_redshift(entity_type):
+def get_ids_from_redshift(entity_type, job_name='default'):
     if entity_type == 'mandate':
         sql = r'select * from public.vw_gc_updates_mandates'
     elif entity_type == 'subscription':
@@ -227,10 +227,14 @@ def get_ids_from_redshift(entity_type):
         sql = r'select * from public.vw_gc_updates_refunds'
     elif entity_type == 'payment':
         sql = r'select * from public.vw_gc_updates_payments'
+    elif entity_type == 'customer':
+        sql = r'select * from public.vw_gc_updates_customers'
     else:
         raise ValueError("Unsupported entity_type")
 
-    if get_env() == 'uat':
+    # if the current environment is not listed as the master source for this job, limit the ID list to 100 IDs
+    # if no job name is passed in to this method, get_master_source('default') will always return 'prod'
+    if get_env() != get_master_source(job_name):
         sql += ' limit 100'
 
     pr = db.get_redshift_connection()
@@ -241,10 +245,19 @@ def get_ids_from_redshift(entity_type):
 
 
 def split_list(list_to_split, num_parts):
-    IglooLogger.in_test_env(message="input: " + str(list_to_split), source_name="split_list method")
     split = [section.tolist() for section in np.array_split(list_to_split, num_parts)]
-    IglooLogger.in_test_env(message="output: " + str(split), source_name="split_list method")
     return split
+
+
+def list_to_csv_string(lst):
+    virtual_file = io.StringIO()
+    if not isinstance(lst[0], list):
+        lst = [lst]
+
+    writer = csv.writer(virtual_file, quoting=csv.QUOTE_NONE, escapechar='\\')
+    writer.writerows(lst)
+
+    return virtual_file.getvalue()
 
 
 def get_ensek_api_info(api, account_id):
@@ -278,10 +291,9 @@ def get_ensek_api_info1(api):
     return api_url, head
 
 
-def get_common_info(commonname, tablename):
+def get_common_info(section, subsection):
     dir = dirs3.common
-    column_list = dir[commonname][tablename]
-    return column_list
+    return dir[section][subsection]
 
 
 def get_smart_read_billing_api_info(api):
@@ -510,19 +522,21 @@ def run_api_extract_multithreaded(id_list, method, num_processes=2):
 
 
 class IglooLogger:
-    @staticmethod
-    def in_test_env(message, source_name=None, include_timestamp=True):
-        if get_env() == 'uat':
-            IglooLogger.in_prod_env(message, source_name=source_name, include_timestamp=include_timestamp)
+    def __init__(self, source=None, include_timestamp=True):
+        self.source = source
+        self.include_timestamp = include_timestamp
 
-    @staticmethod
-    def in_prod_env(message, source_name=None, include_timestamp=True):
-        if include_timestamp:
+    def in_test_env(self, message):
+        if get_env() == 'uat':
+            IglooLogger.in_prod_env(self, message)
+
+    def in_prod_env(self, message):
+        if self.include_timestamp:
             timestamp_string = datetime.datetime.now().strftime("%H:%M:%S - ")
         else:
             timestamp_string = ""
-        if source_name:
-            source_string = "from " + source_name + ": "
+        if self.source:
+            source_string = self.source + ": "
         else:
             source_string = ""
         print(timestamp_string + source_string + message)

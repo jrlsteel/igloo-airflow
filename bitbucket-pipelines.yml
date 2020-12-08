@@ -2,7 +2,7 @@ image: atlassian/default-image:2
 
 pipelines:
   branches:
-    feature/*:
+    '{feature/*,bugfix/*}':
       - step:
           name: Test
           image:
@@ -14,6 +14,24 @@ pipelines:
             - docker
           script:
             - make ci-test
+      - step:
+          trigger: manual
+          name: Build, package and push to S3
+          deployment: UAT
+          image:
+            name: 555393537168.dkr.ecr.eu-west-1.amazonaws.com/build-tools/aws-sam-cli:latest
+            aws:
+              access-key: $AWS_ACCESS_KEY_ID_UAT
+              secret-key: $AWS_SECRET_ACCESS_KEY_UAT
+          services:
+            - docker
+          script:
+            - export AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID_UAT
+            - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_UAT
+            - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_UAT
+            - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_UAT
+            - make -e ENVIRONMENT=uat -C cloudformation build deploy
+            - make -e ENVIRONMENT=uat build package deploy
 
     develop:
       - step:

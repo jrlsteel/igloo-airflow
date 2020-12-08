@@ -14,21 +14,20 @@ from airflow.operators.bash_operator import BashOperator
 
 args = {
     'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
+    'start_date': days_ago(2),
 }
 
 dag = DAG(
-    dag_id='ensek_occupier_accounts_ref_only',
+    dag_id='table_comparisons_calculated_tables_old_preprod_new_preprod',
     default_args=args,
-    schedule_interval=None,
+    schedule_interval='00 09 * * *',
     tags=['cdw']
 )
 
-
-start_ensek_occupier_accounts_ref_jobs = BashOperator(
-    task_id='start_ensek_occupier_accounts_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_ref_jobs.py',
+calculated_tables_old_preprod_new_preprod = BashOperator(
+    task_id='compare_tables',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config calculated_tables_old_preprod_new_preprod --output-to-s3',
     dag=dag,
 )
 
-start_ensek_occupier_accounts_ref_jobs
+calculated_tables_old_preprod_new_preprod
