@@ -417,6 +417,7 @@ preprod = {
     "glue_alp_job_name": "_process_ref_tables_preprod",
     "glue_customerDB_job_name": "_process_ref_customerdb_preprod",
     "glue_staging_job_name": "process_staging_files_preprod",
+    "glue_staging_smart_job_name": "process_staging_smart_files",
     "glue_tado_efficiency_job_name": "_process_ref_tables_preprod",
     "glue_daily_sales_job_name": "_process_ref_tables_preprod",
     "glue_internal_estimates_job_name": "_process_ref_tables_preprod",

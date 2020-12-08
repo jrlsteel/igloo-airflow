@@ -417,6 +417,7 @@ prod = {
     "glue_alp_job_name": "_process_ref_tables_prod",
     "glue_customerDB_job_name": "_process_ref_customerdb_prod",
     "glue_staging_job_name": "process_staging_files_prod",
+    "glue_staging_smart_job_name": "process_staging_smart_files",
     "glue_tado_efficiency_job_name": "_process_ref_tables_prod",
     "glue_internal_estimates_job_name": "_process_ref_tables_prod",
     "glue_annual_statements_job_name": "_process_ref_tables_prod",
