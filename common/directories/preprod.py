@@ -297,9 +297,19 @@ preprod = {
             "api_url": "https://9m73o40v3h.execute-api.eu-west-1.amazonaws.com/prod/Accounts/{0}/eac",
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         },
+        "smart_reads_billing": {
+            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging/api/v1/meter-reads",
+            "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
+            "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com"
+        },
     },
-
-    "s3_bucket": "igloo-data-warehouse-preprod",
+    # All bad practice here needs to be sorted
+    "s3_source_bucket": "igloo-data-warehouse-prod",
+    "s3_bucket": "igloo-data-warehouse-preprod-835569423516",
+    # All bad practice here needs to be sorted
+    "s3_temp_hh_uat_bucket": "igloo-data-warehouse-uat",
+    "s3_smart_source_bucket": "igloo-data-warehouse-smart-meter-data-prod-630944350233",
+    "s3_smart_bucket": "igloo-data-warehouse-smart-meter-data-preprod-835569423516",
 
     "s3_key": {
         "Accounts": "stage1/Accounts/",
@@ -342,7 +352,6 @@ preprod = {
         "AccountSettings": "stage1/AccountSettings/",
         "OccupierAccounts": "stage2/stage2_OccupierAccounts/"
     },
-
 
     "s3_d18_key": {
         "D18Raw": "stage1/D18/D18Raw/",
@@ -403,37 +412,37 @@ preprod = {
         "SFTP": "NOSI"
     },
 
-    "glue_ensek_job_name": "_process_ref_tables_preprod",
-    "glue_d18_job_name": "_process_ref_tables_preprod",
-    "glue_direct_debits_job_name": "_process_ref_tables_preprod",
-    "glue_registrations_meterpoints_status_job_name": "_process_ref_tables_preprod",
-    "glue_meterpoints_status_job_name": "_process_ref_tables_preprod",
-    "glue_zendesk_job_name": "_process_ref_tables_preprod",
-    "glue_historicalweather_jobname": "_process_ref_tables_preprod",
-    "glue_eac_aq_job_name": "_process_ref_tables_preprod",
-    "glue_igl_ind_eac_aq_job_name": "_process_ref_tables_preprod",
-    "glue_epc_job_name": "_process_ref_tables_preprod",
-    "glue_land_registry_job_name": "_process_ref_tables_preprod",
-    "glue_alp_job_name": "_process_ref_tables_preprod",
-    "glue_customerDB_job_name": "_process_ref_customerdb_preprod",
-    "glue_staging_job_name": "process_staging_files_preprod",
+    "glue_ensek_job_name": "_process_ref_tables",
+    "glue_d18_job_name": "_process_ref_tables",
+    "glue_direct_debits_job_name": "_process_ref_tables",
+    "glue_registrations_meterpoints_status_job_name": "_process_ref_tables",
+    "glue_meterpoints_status_job_name": "_process_ref_tables",
+    "glue_zendesk_job_name": "_process_ref_tables",
+    "glue_historicalweather_jobname": "_process_ref_tables",
+    "glue_eac_aq_job_name": "_process_ref_tables",
+    "glue_igl_ind_eac_aq_job_name": "_process_ref_tables",
+    "glue_epc_job_name": "_process_ref_tables",
+    "glue_land_registry_job_name": "_process_ref_tables",
+    "glue_alp_job_name": "_process_ref_tables",
+    "glue_customerDB_job_name": "_process_ref_customerdb",
+    "glue_staging_job_name": "process_staging_files",
     "glue_staging_smart_job_name": "process_staging_smart_files",
-    "glue_tado_efficiency_job_name": "_process_ref_tables_preprod",
-    "glue_daily_sales_job_name": "_process_ref_tables_preprod",
-    "glue_internal_estimates_job_name": "_process_ref_tables_preprod",
-    "glue_annual_statements_job_name": "_process_ref_tables_preprod",
-    "glue_tariff_history_job_name": "_process_ref_tables_preprod",
-    "glue_cons_accu_job_name": "_process_ref_tables_preprod",
-    "glue_internal_readings_nosi_job_name": "_process_ref_tables_preprod",
-    "glue_nrl_job_name": "_process_ref_tables_preprod",
-    "glue_estimated_advance_job_name": "_process_ref_tables_preprod",
-    "glue_smart_meter_eligibility_job_name": "_process_ref_tables_preprod",
-    "glue_occupier_accounts_job_name": "_process_ref_tables_preprod",
-    "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables_preprod",
-    "glue_meets_eligibility_job_name": "_process_ref_tables_preprod",
-    "glue_reporting_job_name": "_process_ref_tables_preprod",
+    "glue_tado_efficiency_job_name": "_process_ref_tables",
+    "glue_daily_sales_job_name": "_process_ref_tables",
+    "glue_internal_estimates_job_name": "_process_ref_tables",
+    "glue_annual_statements_job_name": "_process_ref_tables",
+    "glue_tariff_history_job_name": "_process_ref_tables",
+    "glue_cons_accu_job_name": "_process_ref_tables",
+    "glue_internal_readings_nosi_job_name": "_process_ref_tables",
+    "glue_nrl_job_name": "_process_ref_tables",
+    "glue_estimated_advance_job_name": "_process_ref_tables",
+    "glue_smart_meter_eligibility_job_name": "_process_ref_tables",
+    "glue_occupier_accounts_job_name": "_process_ref_tables",
+    "glue_igloo_calculated_tariffs_job_name": "_process_ref_tables",
+    "glue_meets_eligibility_job_name": "_process_ref_tables",
+    "glue_reporting_job_name": "_process_ref_tables",
 
-    "s3_finance_bucket": "igloo-data-warehouse-preprod-finance",
+    "s3_finance_bucket": "igloo-data-warehouse-finance-preprod-835569423516",
 
     "s3_finance_goCardless_key": {
         "Refunds": "/go-cardless-api-refunds/",
@@ -448,4 +457,13 @@ preprod = {
         "Payments-Files": "/go-cardless-api-payments-files/",
         "Refunds-Files": "/go-cardless-api-refunds-files/"
     },
+
+    "s3_finance_square_key": {
+        "Payments": "/square-api-payments/"
+    },
+
+
+    "master_sources": {
+        "go_cardless": "prod"
+    }
 }
