@@ -23,14 +23,8 @@ class SmartStagingAll:
 
     def submit_smart_all_staging_gluejob(self):
         try:
-<<<<<<< HEAD
-            util.batch_logging_insert(self.smart_all_staging_jobid, 601, 'smart_all_staging_glue_job',
-                                      'start_smart_all_staging_jobs.py')
-            jobName = self.dir['glue_staging_job_name']
-=======
             util.batch_logging_insert(self.smart_all_staging_jobid, 601, 'smart_all_staging_glue_job','start_smart_all_staging_jobs.py')
             jobName = self.dir['glue_staging_smart_job_name']
->>>>>>> f614c8c (DMRE-1632 Added new smart staging job)
             s3_bucket = self.dir['s3_bucket']
             environment = self.env
 
