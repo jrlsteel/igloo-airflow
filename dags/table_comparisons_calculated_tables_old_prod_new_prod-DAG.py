@@ -27,22 +27,6 @@ dag = DAG(
     concurrency=1
 )
 
-# "ref_calculated_aq"
-# "ref_calculated_daily_customer_file"
-# "ref_calculated_daily_sales_batch"
-# "ref_calculated_eac"
-# "ref_calculated_igl_ens_tariff_comparison"
-# "ref_calculated_igl_ind_aq"
-# "ref_calculated_igl_ind_eac"
-# "ref_calculated_metering_portfolio_elec_report"
-# "ref_calculated_metering_portfolio_gas_report"
-# "ref_calculated_metering_report"
-# "ref_calculated_sales_report"
-# "ref_calculated_tado_efficiency_average"
-# "ref_calculated_tado_efficiency_batch"
-# "ref_calculated_tado_fuel"
-# "ref_calculated_tariff_accounts"
-
 ref_calculated_aq = BashOperator(
     task_id='ref_calculated_aq',
     bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_calculated_aq --output-to-s3',
@@ -133,6 +117,19 @@ ref_calculated_tariff_accounts = BashOperator(
     dag=dag,
 )
 
+ref_smart_readings = BashOperator(
+    task_id='ref_smart_readings',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_smart_readings --output-to-s3',
+    dag=dag,
+)
+
+ref_smart_inventory = BashOperator(
+    task_id='ref_smart_inventory',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_smart_inventory --output-to-s3',
+    dag=dag,
+)
+
+
 ref_calculated_aq
 ref_calculated_daily_customer_file
 ref_calculated_daily_sales_batch
@@ -148,3 +145,5 @@ ref_calculated_tado_efficiency_average
 ref_calculated_tado_efficiency_batch
 ref_calculated_tado_fuel
 ref_calculated_tariff_accounts
+ref_smart_readings
+ref_smart_inventory
