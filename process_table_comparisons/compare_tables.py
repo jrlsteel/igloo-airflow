@@ -413,6 +413,8 @@ def compare_tables(table_comparison_config_name, output_to_s3=False):
 
         time = dt.now().strftime("%Y%m%d-%H%M%S")
         fname = "tables_comparison_{name}_{datetime}.json".format(name=table_comparison_config_name, datetime=time)
+        print('Comparison result: ')
+        print(json.dumps(results, indent=4))
         with open(fname, 'w') as outfile:
             json.dump(results, outfile, indent=4)
 
