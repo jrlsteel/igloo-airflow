@@ -119,13 +119,13 @@ ref_calculated_tariff_accounts = BashOperator(
 
 ref_smart_readings = BashOperator(
     task_id='ref_smart_readings',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_smart_readings --output-to-s3',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config old_prod_new_preprod_ref_smart_readings --output-to-s3',
     dag=dag,
 )
 
 ref_smart_inventory = BashOperator(
     task_id='ref_smart_inventory',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config ref_smart_inventory --output-to-s3',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_table_comparisons && python compare_tables.py --table-comparison-config old_prod_new_preprod_ref_smart_inventory --output-to-s3',
     dag=dag,
 )
 
