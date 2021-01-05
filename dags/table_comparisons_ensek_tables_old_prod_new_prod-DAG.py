@@ -21,7 +21,7 @@ args = {
 dag = DAG(
     dag_id='table_comparisons_ensek_tables_old_prod_new_prod',
     default_args=args,
-    schedule_interval='00 12 * * *',
+    schedule_interval='00 17 * * *',
     tags=['cdw'],
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.

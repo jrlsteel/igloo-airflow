@@ -21,7 +21,7 @@ args = {
 dag = DAG(
     dag_id='table_comparisons_other_tables_old_prod_new_prod',
     default_args=args,
-    schedule_interval='00 09 * * *',
+    schedule_interval='00 20 * * *',
     tags=['cdw'],
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.
@@ -34,19 +34,16 @@ task_ids = [
     'ref_cumulative_alp_cv',
     'ref_cumulative_ppc',
     'ref_d18_bpp',
-    'ef_d18_bpp_forecast',
+    'ref_d18_bpp_forecast',
     'ref_d18_igloo_bpp',
     'ref_d18_igloo_bpp_forecast',
     'ref_d18_igloo_ppc',
     'ref_d18_igloo_ppc_forecast',
     'ref_d18_ppc',
     'ref_d18_ppc_forecast',
-    'ref_daf',
-    'ref_epc_certifcates_all_igloo',
     'ref_epc_certificates_all',
     'ref_epc_recommendations_all',
     'ref_historical_weather',
-    'ref_igloo_daf_wcf',
     'ref_land_registry',
 ]
 

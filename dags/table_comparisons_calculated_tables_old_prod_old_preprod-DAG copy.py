@@ -20,7 +20,7 @@ args = {
 dag = DAG(
     dag_id='table_comparisons_calculated_tables_old_prod_old_preprod',
     default_args=args,
-    schedule_interval='00 09 * * *',
+    schedule_interval=None,
     tags=['cdw'],
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.
