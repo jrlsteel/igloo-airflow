@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_occupier_accounts_no_glue',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 process_ensek_occupier_accounts = BashOperator(

@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_occupier_accounts',
     default_args=args,
     schedule_interval='00 03 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 

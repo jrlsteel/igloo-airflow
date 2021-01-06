@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_smart_all',
     default_args=args,
     schedule_interval='00 10 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_smart_all_mirror_jobs = BashOperator(

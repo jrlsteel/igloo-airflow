@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_alp_calculated',
     default_args=args,
     schedule_interval='00 09 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 processALP_CV = BashOperator(

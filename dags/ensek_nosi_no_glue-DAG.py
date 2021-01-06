@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_nosi_no_glue',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 download_nosi = BashOperator(

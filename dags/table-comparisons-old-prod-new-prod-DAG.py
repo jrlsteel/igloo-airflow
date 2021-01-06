@@ -24,7 +24,8 @@ dag = DAG(
     dag_id='igloo_table_comparisons_old_prod_new_prod',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 ref_meterpoints_old_preprod_new_preprod = BashOperator(

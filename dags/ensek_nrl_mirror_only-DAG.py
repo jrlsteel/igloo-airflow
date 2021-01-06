@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_nrl_mirror_only',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 mirror_nrl = BashOperator(

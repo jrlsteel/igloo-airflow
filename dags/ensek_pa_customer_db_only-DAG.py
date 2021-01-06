@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_pa_customerdb_only',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 process_customerdb = BashOperator(
