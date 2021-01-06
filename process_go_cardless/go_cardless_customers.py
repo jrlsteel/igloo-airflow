@@ -43,13 +43,12 @@ class GoCardlessCustomers(object):
         try:
             return gc_customer_api.get(customer_id)
         except (
-            json.decoder.JSONDecodeError,
             gocardless_pro.errors.GoCardlessInternalError,
             gocardless_pro.errors.MalformedResponseError,
             gocardless_pro.errors.InvalidApiUsageError,
             AttributeError):
 
-            self.iglog.in_prod_env("error getting customer with id {customer_id}".format(customer_id))
+            self.iglog.in_prod_env("error getting customer with id {c_id}".format(c_id=customer_id))
             self.iglog.in_prod_env(traceback.format_exc())
 
     def store_customer(self, customer, thread_name=None):
