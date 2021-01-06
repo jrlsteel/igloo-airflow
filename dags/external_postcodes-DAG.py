@@ -25,7 +25,8 @@ dag = DAG(
     # schedule for this is not available. We will just download it once per month.
     # The exact schedule is somewhat arbitrary.
     schedule_interval='18 12 15 * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 postcodes_etl = BashOperator(

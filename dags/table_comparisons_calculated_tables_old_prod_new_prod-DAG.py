@@ -24,7 +24,8 @@ dag = DAG(
     tags=['cdw'],
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.
-    concurrency=1
+    concurrency=1,
+    catchup=False,
 )
 
 ref_calculated_aq = BashOperator(

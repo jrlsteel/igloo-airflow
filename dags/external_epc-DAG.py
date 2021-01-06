@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_epc',
     default_args=args,
     schedule_interval='45 09 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 

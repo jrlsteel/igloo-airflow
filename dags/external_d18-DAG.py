@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_d18',
     default_args=args,
     schedule_interval='30 06 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_d18_download_jobs = BashOperator(

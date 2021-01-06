@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_smart_all_staging',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_smart_all_staging_jobs = BashOperator(

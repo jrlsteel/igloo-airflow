@@ -25,7 +25,8 @@ dag = DAG(
     tags=['cdw'],
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.
-    concurrency=1
+    concurrency=1,
+    catchup=False,
 )
 
 task_ids = [
@@ -41,11 +42,9 @@ task_ids = [
     'ref_nrl',
     'ref_occupier_accounts',
     'ref_occupier_accounts_raw',
-    'ref_readings',
     'ref_readings_internal',
     'ref_readings_internal_nosi',
     'ref_readings_internal_nrl',
-    'ref_readings_internal_pa',
     'ref_readings_internal_valid',
     'ref_registers',
     'ref_registers_attributes',

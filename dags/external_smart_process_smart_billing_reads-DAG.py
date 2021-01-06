@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_smart_process_billing_reads',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_smart_processing_billing_reads_jobs = BashOperator(

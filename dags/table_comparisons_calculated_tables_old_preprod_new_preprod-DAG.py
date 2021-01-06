@@ -22,6 +22,7 @@ dag = DAG(
     default_args=args,
     schedule_interval=None,
     tags=['cdw'],
+    catchup=False,
     # We only want to run one at a time to conserve resource, but
     # we want all to run, even if any fail.
     concurrency=1

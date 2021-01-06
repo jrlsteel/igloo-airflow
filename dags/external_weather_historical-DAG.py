@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_weather_historical',
     default_args=args,
     schedule_interval='00 17 * * *',
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_weather_mirror_jobs = BashOperator(

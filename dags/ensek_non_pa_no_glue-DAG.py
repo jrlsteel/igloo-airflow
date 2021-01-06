@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_non_pa_no_glue',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 process_ensek_registration_meterpoint_status = BashOperator(

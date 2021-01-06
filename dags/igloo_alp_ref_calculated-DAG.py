@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='igloo_alp_ref_calculated',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 

@@ -21,7 +21,8 @@ dag = DAG(
     dag_id='ensek_pa_mirror_only',
     default_args=args,
     schedule_interval=None,
-    tags=['cdw']
+    tags=['cdw'],
+    catchup=False,
 )
 
 start_ensek_api_pa_mirror_only_jobs = BashOperator(
