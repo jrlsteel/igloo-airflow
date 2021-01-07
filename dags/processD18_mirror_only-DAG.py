@@ -18,7 +18,7 @@ args = {
 }
 
 dag = DAG(
-    dag_id='ensek_occupier_accounts_mirror_only',
+    dag_id='igloo_d18_mirror_only',
     default_args=args,
     schedule_interval=None,
     tags=['cdw'],

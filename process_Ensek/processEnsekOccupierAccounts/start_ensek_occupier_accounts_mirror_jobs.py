@@ -52,30 +52,25 @@ class StartOccupierAccountsJobs:
                 sys.exit(1)
 
 
+    def submit_occupier_accounts_extract_job(self):
+        """
+        Calls the Occupier Accounts process_ensek_occupier_accounts.py script to which processes Occupuier Acocunts
+        Allows the reduction in Range calls for most of the Ensek API requests.
+        :return: None
+        """
 
-    def submit_stage2_job(self):
+        print("{0}: >>>> Process Ensek Occupier Accounts   <<<<".format(datetime.now().strftime('%H:%M:%S')))
         try:
-            util.batch_logging_insert(self.occupier_accounts_staging_jobid, 51, 'Occupier Accounts Staging Processing',
-                                      'start_ensek_occupier_accounts_jobs.py')
-            jobName = self.dir['glue_staging_job_name']
-            s3_bucket = self.dir['s3_bucket']
-            environment = self.env
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='occu_acc')
-            staging_job_response = obj_stage.run_glue_job()
-            if staging_job_response:
-                util.batch_logging_update(self.occupier_accounts_staging_jobid, 'e')
-                print("{0}: Staging Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'),
-                                                                               self.process_name))
-                # return staging_job_response
-            else:
-                print("Error occurred in {0} Staging Job".format(self.process_name))
-                # return staging_job_response
-                raise Exception
+            util.batch_logging_insert(self.occupier_accounts_extract_jobid , 51, 'Occupier Accounts pyscript', 'start_ensek_occupier_accounts_jobs.py')
+            start = timeit.default_timer()
+            subprocess.run([self.pythonAlias, "process_ensek_occupier_accounts.py"], check=True)
+            print("{0}: Process Ensek Occupier  completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               float(timeit.default_timer() - start)))
+            util.batch_logging_update(self.occupier_accounts_extract_jobid, 'e')
         except Exception as e:
-            util.batch_logging_update(self.occupier_accounts_staging_jobid, 'f', str(e))
+            util.batch_logging_update(self.occupier_accounts_extract_jobid, 'f', str(e))
             util.batch_logging_update(self.occupier_accounts_job_id, 'f', str(e))
-            print("Error in Staging Job :- " + str(e))
+            print("Error in Process Occupier Accounts  :- " + str(e))
             sys.exit(1)
 
 
@@ -90,7 +85,7 @@ if __name__ == '__main__':
     if s.env in ['newprod','prod']:
         # run Occupier Accounts Jobs
         print("{0}: Occupier Accounts Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_stage2_job()
+        s.submit_occupier_accounts_extract_job()
 
     if s.env in ['newprod','preprod', 'uat', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
