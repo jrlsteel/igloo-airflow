@@ -85,17 +85,19 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.occupier_accounts_job_id, 103, 'all_occupier_accounts_job', 'start_ensek_occupier_accounts_mirror_jobs.py')
 
-    if s.env == 'prod':
+    print("Running Environment: {0}".format(s.env.upper()))
+
+    if s.env in ['newprod','prod']:
         # run Occupier Accounts Jobs
         print("{0}: Occupier Accounts Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_stage2_job()
 
-    elif s.env in ['preprod', 'uat', 'dev']:
+    if s.env in ['newprod','preprod', 'uat', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
         # run Occupier Accounts Jobs Jobs in UAT
-        print("{0}:  Occupier Accounts JobsJobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}:  Occupier Accounts Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
       
 
         print("Ensek Occupier Accounts Job Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))

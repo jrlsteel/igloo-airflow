@@ -71,6 +71,8 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 101, 'all_non_pa_jobs', 'start_ensek_api_jobs.py')
 
+    print("Running Environment: {0}".format(s.env.upper()))
+
     if s.env == 'prod':
         # run all ensek scripts
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
@@ -81,10 +83,11 @@ if __name__ == '__main__':
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
+        if s.env == 'newprod':
+            s.submit_all_ensek_scripts()
+
         # run NonPA Ensek Jobs in UAT PreProd Limit of 100 accounts
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
-        #This needs to be uncommented when we have access to internal apis at ensek
-        # s.submit_all_ensek_scripts()
 
         print("Ensek Account Status  Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/AccountStatus/"

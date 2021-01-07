@@ -70,6 +70,8 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 103, 'all_pa_jobs', 'start_ensek_api_pa_jobs.py')
 
+    print("Running Environment: {0}".format(s.env.upper()))
+    
     if s.env == 'prod':
         # run PA Ensek Jobs
         print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
@@ -79,9 +81,11 @@ if __name__ == '__main__':
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
+        if s.env == 'newprod':
+            s.submit_all_ensek_pa_scripts()
+
         # run PA Ensek Jobs in UAT PreProd Limit of 100 accounts
         print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-        #s.submit_all_ensek_pa_scripts()
 
         print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/MeterPoints/"
