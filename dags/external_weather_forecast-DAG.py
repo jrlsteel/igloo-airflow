@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 weather_forecast_daily_download = BashOperator(

@@ -27,6 +27,7 @@ dag = DAG(
     schedule_interval='18 12 15 * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 postcodes_etl = BashOperator(

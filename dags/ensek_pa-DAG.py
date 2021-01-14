@@ -20,9 +20,10 @@ args = {
 dag = DAG(
     dag_id='ensek_pa',
     default_args=args,
-    schedule_interval='45 03 * * *',
+    schedule_interval='00 01 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 process_customerdb = BashOperator(

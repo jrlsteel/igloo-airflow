@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_smart_processing_billing_reads_jobs = BashOperator(

@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 process_ensek_registration_meterpoint_status = BashOperator(

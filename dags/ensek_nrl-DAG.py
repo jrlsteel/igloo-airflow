@@ -20,9 +20,10 @@ args = {
 dag = DAG(
     dag_id='ensek_nrl',
     default_args=args,
-    schedule_interval='45 13 * * *',
+    schedule_interval='00 23 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 mirror_nrl = BashOperator(

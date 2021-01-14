@@ -20,9 +20,10 @@ args = {
 dag = DAG(
     dag_id='ensek_nosi',
     default_args=args,
-    schedule_interval='39 01 * * *',
+    schedule_interval='30 00 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 mirror_nosi = BashOperator(

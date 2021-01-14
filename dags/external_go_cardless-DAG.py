@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='30 05 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_go_cardless_api_extracts = BashOperator(
