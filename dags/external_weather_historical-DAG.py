@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='00 17 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_weather_mirror_jobs = BashOperator(

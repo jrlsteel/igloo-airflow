@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='00 13 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 

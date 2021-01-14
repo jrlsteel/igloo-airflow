@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='30 06 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_d18_download_jobs = BashOperator(

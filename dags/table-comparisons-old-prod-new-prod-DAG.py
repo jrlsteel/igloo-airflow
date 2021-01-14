@@ -26,6 +26,7 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 ref_meterpoints_old_preprod_new_preprod = BashOperator(

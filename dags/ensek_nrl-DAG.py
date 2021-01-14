@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='45 13 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 mirror_nrl = BashOperator(

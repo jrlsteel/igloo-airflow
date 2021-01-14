@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval=None,
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_epc_full_ref_jobs = BashOperator(

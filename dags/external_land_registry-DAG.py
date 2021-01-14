@@ -24,6 +24,7 @@ dag = DAG(
     schedule_interval='00 15 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 process_land_registry = BashOperator(

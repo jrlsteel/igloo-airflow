@@ -27,6 +27,7 @@ dag = DAG(
     # we want all to run, even if any fail.
     concurrency=1,
     catchup=False,
+    max_active_runs=1,
 )
 
 task_ids = [

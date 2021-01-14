@@ -23,6 +23,7 @@ dag = DAG(
     schedule_interval='00 10 * * *',
     tags=['cdw'],
     catchup=False,
+    max_active_runs=1,
 )
 
 start_smart_all_mirror_jobs = BashOperator(
