@@ -15,7 +15,8 @@ common = {
         "ref_meters": ["meterSerialNumber", "installedDate", "removedDate", "meterId", "meter_point_id", "account_id"],
         "ref_meters_attributes": ["metersAttributes", "attributeDescription", "metersAttributes_attributeName",
                                   "metersAttributes_attributeValue", "meter_id", "meter_point_id", "account_id"],
-        "ref_registers": ["registers_eacAq", "registers", "registerReference", "registers_sourceIdType",
+
+        "ref_registers": ["registers_eacAq", "registers_registerReference", "registers_sourceIdType",
                           "registers_tariffComponent", "registers_tpr", "registers_tprPeriodDescription", "meter_id",
                           "register_id", "meter_point_id", "account_id"],
         "ref_registers_attributes": ["registersAttributes_attributeDescription", "registersAttributes_attributeName",
