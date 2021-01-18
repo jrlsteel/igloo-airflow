@@ -81,15 +81,15 @@ if __name__ == '__main__':
         print("Ensek process d18 Job Mirror  D18 BPP job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                                s.process_name))
 
-        source_input = "s3://" + s3_source_bucket + "/stage1/D18//D18BPP/"
-        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18//D18BPP/"
+        source_input = "s3://" + s3_source_bucket + "/stage1/D18/D18BPP/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18/D18BPP/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         print("Ensek process d18 Job Mirror  D18 PPC job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                                s.process_name))
 
-        source_input = "s3://" + s3_source_bucket + "/stage1/D18//D18PPC/"
-        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18//D18PPC/"
+        source_input = "s3://" + s3_source_bucket + "/stage1/D18/D18PPC/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18/D18PPC/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
         
