@@ -141,7 +141,7 @@ def execute_query(sql, return_as='d'):
     env_conf = get_env()
 
     # Limit for UAT environments
-    if env_conf in ['prod', 'newprod']:
+    if env_conf == 'prod':
         sql = sql
     else:
         sql = sql + ' limit 10'
@@ -176,18 +176,18 @@ def get_accountID_fromDB(get_max, filter='live'):
 
     # Sunday chosen as the major reports are utilised on monday and should be near up to date as possible.
     if datetime.date.today().weekday() == 6:  # 6 == Sunday
-        if env_conf in ['prod', 'newprod']:
+        if env_conf == 'prod':
             config_sql = sql_group['weekly']
         else:
             config_sql = sql_group['weekly'] + ' limit 10'
     else:
-        if env_conf in ['prod', 'newprod']:
+        if env_conf == 'prod':
             config_sql = sql_group['daily']
         else:
             config_sql = sql_group['daily'] + ' limit 10'
 
     account_ids = []
-    if env_conf in ['prod', 'newprod']:
+    if env_conf == 'prod':
         rd_conn = db.get_redshift_connection_prod()
         # config_sql = con.test_config['account_ids_sql_prod']
         account_id_df = rd_conn.redshift_to_pandas(config_sql)
