@@ -52,30 +52,6 @@ class StartD18MirrorJobs:
             print("Error in process :- " + str(e))
             sys.exit(1)
 
-    def submit_stage2_job(self):
-        try:
-            util.batch_logging_insert(self.process_d18_staging_jobid, 51, 'process d18 Staging Processing',
-                                      'start_ensek_process_d18_jobs.py')
-            jobName = self.dir['glue_staging_job_name']
-            s3_bucket = self.dir['s3_bucket']
-            environment = self.env
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='proc_d18')
-            staging_job_response = obj_stage.run_glue_job()
-            if staging_job_response:
-                util.batch_logging_update(self.process_d18_staging_jobid, 'e')
-                print("{0}: Staging Job Completed successfully for {1}".format(datetime.now().strftime('%H:%M:%S'),
-                                                                               self.process_name))
-                # return staging_job_response
-            else:
-                print("Error occurred in {0} Staging Job".format(self.process_name))
-                # return staging_job_response
-                raise Exception
-        except Exception as e:
-            util.batch_logging_update(self.process_d18_staging_jobid, 'f', str(e))
-            util.batch_logging_update(self.process_d18_job_id, 'f', str(e))
-            print("Error in Staging Job :- " + str(e))
-            sys.exit(1)
 
 
 if __name__ == '__main__':
@@ -88,20 +64,35 @@ if __name__ == '__main__':
     if s.env == 'prod':
         # run process D18 Jobs
         print("{0}: process d18 Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
-        s.submit_stage2_job()
+
 
     elif s.env in ['newprod', 'preprod', 'uat', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
         # run process d18  Jobs Jobs in UAT
-        print("{0}:  process d18 JobsJobs running...".format(datetime.now().strftime('%H:%M:%S')))
 
-        print("Ensek process d18 Job Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
+        print("Ensek process d18 Job Mirror  D18 Raw job is running...".format(datetime.now().strftime('%H:%M:%S'),
                                                                              s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/D18/D18Raw/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/D18/D18Raw/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek process d18 Job Mirror  D18 BPP job is running...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               s.process_name))
+
+        source_input = "s3://" + s3_source_bucket + "/stage1/D18//D18BPP/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18//D18BPP/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        print("Ensek process d18 Job Mirror  D18 PPC job is running...".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               s.process_name))
+
+        source_input = "s3://" + s3_source_bucket + "/stage1/D18//D18PPC/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/D18//D18PPC/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        
 
     print("{0}: job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
 
