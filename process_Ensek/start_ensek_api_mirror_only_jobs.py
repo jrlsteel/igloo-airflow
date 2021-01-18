@@ -73,15 +73,18 @@ if __name__ == '__main__':
 
     print("Running Environment: {0}".format(s.env.upper()))
 
-    if s.env in ['prod', 'newprod']:
+    if s.env == 'prod':
         # run all ensek scripts
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_all_ensek_scripts()
 
-    elif s.env in ['preprod', 'uat']:
+    elif s.env in ['preprod', 'uat', 'newprod']:
 
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
+
+        if s.env == 'newprod':
+            s.submit_all_ensek_scripts()
 
         # run NonPA Ensek Jobs in UAT PreProd Limit of 100 accounts
         print("{0}: Ensek Scripts running...".format(datetime.now().strftime('%H:%M:%S')))

@@ -82,12 +82,12 @@ if __name__ == '__main__':
 
     print("Running Environment: {0}".format(s.env.upper()))
 
-    if s.env in ['prod','newprod']:
+    if s.env in ['newprod','prod']:
         # run Occupier Accounts Jobs
         print("{0}: Occupier Accounts Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_occupier_accounts_extract_job()
 
-    elif s.env in ['preprod', 'uat', 'dev']:
+    if s.env in ['newprod','preprod', 'uat', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 

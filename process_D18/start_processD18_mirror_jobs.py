@@ -90,7 +90,7 @@ if __name__ == '__main__':
         print("{0}: process d18 Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_stage2_job()
 
-    elif s.env in ['preprod', 'uat', 'dev']:
+    elif s.env in ['newprod', 'preprod', 'uat', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
