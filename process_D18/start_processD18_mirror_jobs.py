@@ -5,7 +5,7 @@ import subprocess
 
 sys.path.append('../..')
 # import  common.process_glue_job  as glue
-from common import process_glue_job as glue
+# from common import process_glue_job as glue
 from common import utils as util
 from common import Refresh_UAT as refresh
 from conf import config as con
