@@ -13,7 +13,7 @@ common = {
                                        "attributes_attributeValue", "attributes_effectiveFromDate",
                                        "attributes_effectiveToDate", "meter_point_id", "account_id"],
         "ref_meters": ["meterSerialNumber", "installedDate", "removedDate", "meterId", "meter_point_id", "account_id"],
-        "ref_meters_attributes": ["metersAttributes", "attributeDescription", "metersAttributes_attributeName",
+        "ref_meters_attributes": ["metersAttributes_attributeDescription", "metersAttributes_attributeName",
                                   "metersAttributes_attributeValue", "meter_id", "meter_point_id", "account_id"],
 
         "ref_registers": ["registers_eacAq", "registers_registerReference", "registers_sourceIdType",
