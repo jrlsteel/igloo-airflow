@@ -4,7 +4,7 @@ preprod = {
             "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}"
         },
         "meterpoints": {
-            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints"
+            "api_url": "https://api.igloo.ignition.ensek.co.uk/Accounts/{0}/MeterPoints?includeHistory=true"
         },
 
         "meterpoints_history": {
