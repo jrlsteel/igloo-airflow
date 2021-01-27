@@ -49,6 +49,41 @@ class StartReadingsNRLJobs:
             print("Error in process :- " + str(e))
             sys.exit(1)
 
+    def submit_download_nrl_job(self):
+
+        pythonAlias = util.get_pythonAlias()
+
+        print("{0}: >>>> Downloading NRL files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        try:
+            util.batch_logging_insert(self.nrl_download_jobid, 46, 'nrl_download_pyscript', 'start_nrl_jobs.py')
+            start = timeit.default_timer()
+            subprocess.run([pythonAlias, "download_nrl.py"], check=True)
+            util.batch_logging_update(self.nrl_download_jobid, 'e')
+            print("{0}: download_NRL completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                          float(timeit.default_timer() - start)))
+        except Exception as e:
+            util.batch_logging_update(self.nrl_download_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in download_NRL process :- " + str(e))
+            sys.exit(1)
+
+    def submit_process_nrl_job(self):
+
+        print("{0}: >>>> Process NRL files <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        try:
+            util.batch_logging_insert(self.nrl_jobid, 47, 'nrl_extract_pyscript', 'start_nrl_jobs.py')
+            start = timeit.default_timer()
+            subprocess.run([self.pythonAlias, "process_nrl.py"], check=True)
+            util.batch_logging_update(self.nrl_jobid, 'e')
+            print("{0}: Process NRL files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
+                                                                               float(timeit.default_timer() - start)))
+
+        except Exception as e:
+            util.batch_logging_update(self.nrl_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            print("Error in download_NRL process :- " + str(e))
+            sys.exit(1)
+
 
 if __name__ == '__main__':
 
@@ -59,8 +94,13 @@ if __name__ == '__main__':
     s3_destination_bucket = s.dir['s3_bucket']
     s3_source_bucket = s.dir['s3_source_bucket']
 
-    if s.env == 'prod':
+    if s.env == 'newprod':
+
         print("{0}: download_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_download_nrl_job()
+
+        print("{0}: process_NRL job is running...".format(datetime.now().strftime('%H:%M:%S')))
+        s.submit_process_nrl_job()
 
     else:
         # # run processing mirror job

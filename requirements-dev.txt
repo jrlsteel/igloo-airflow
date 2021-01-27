@@ -1,6 +1,6 @@
 -r requirements.txt
 moto
-pyarrow
+pyarrow==2.0.0
 freezegun==1.0.0
 pytest
 pytest-mock
