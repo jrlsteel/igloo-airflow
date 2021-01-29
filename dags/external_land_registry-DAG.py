@@ -41,7 +41,7 @@ start_land_registry_staging_jobs = BashOperator(
 
 start_land_registry_ref_jobs = BashOperator(
     task_id='start_land_registry_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_LandRegistry && python process_land_registry.py',
+    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_LandRegistry && python start_land_registry_ref_jobs.py',
     dag=dag,
 )
 
