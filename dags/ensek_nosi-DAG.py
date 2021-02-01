@@ -1,16 +1,18 @@
-from __future__ import print_function
-
-import time
-from builtins import range
-from pprint import pprint
-
+import sys
 from airflow.utils.dates import days_ago
-
 from airflow.models import DAG
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
+sys.path.append('/opt/airflow/enzek-meterpoint-readings')
+
+from conf import config
+from common import schedules
+
+dag_id = 'ensek_nosi'
+
+def get_schedule():
+    env = config.environment_config['environment']
+    return schedules.get_schedule(env, dag_id)
 
 args = {
     'owner': 'Airflow',
@@ -18,9 +20,9 @@ args = {
 }
 
 dag = DAG(
-    dag_id='ensek_nosi',
+    dag_id=dag_id,
     default_args=args,
-    schedule_interval='30 18 * * *',
+    schedule_interval=get_schedule(),
     tags=['cdw'],
     catchup=False,
     max_active_runs=1,

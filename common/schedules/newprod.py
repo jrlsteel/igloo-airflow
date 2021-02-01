@@ -1,0 +1,7 @@
+schedules = {
+    'ensek_non_pa_test': '30 02 * * *',
+    'ensek_nosi': '30 18 * * *',
+    'ensek_nrl': '45 17 * * *',
+    'ensek_occupier_accounts': '00 18 * * *',
+    'ensek_pa': '00 18 * * *',
+}
