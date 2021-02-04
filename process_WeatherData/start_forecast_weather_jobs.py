@@ -129,7 +129,7 @@ if __name__ == '__main__':
             store_weather_job_num = 62,
         )
 
-        if args.download_hourly:
+        if args.download_daily:
             daily_weather.submit_process_weather_job()
         if args.store_daily:
             daily_weather.submit_process_weather_job()

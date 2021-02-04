@@ -72,12 +72,12 @@ if __name__ == '__main__':
 
     print("Running Environment: {0}".format(s.env.upper()))
     
-    if s.env in ['prod', 'newprod']:
+    if s.env in ['newprod']:
         # run PA Ensek Jobs
         print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
         s.submit_all_ensek_pa_scripts()
 
-    elif s.env in ['preprod', 'uat']:
+    elif s.env in ['preprod', 'dev']:
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
