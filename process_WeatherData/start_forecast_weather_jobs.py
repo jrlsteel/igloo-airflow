@@ -117,7 +117,7 @@ if __name__ == '__main__':
         if args.download_hourly:
             hourly_weather.submit_process_weather_job()
         if args.store_hourly:
-            hourly_weather.submit_process_weather_job()
+            hourly_weather.submit_store_weather_job()
 
     if args.download_daily or args.store_daily:
         daily_weather = Weather(
@@ -129,9 +129,9 @@ if __name__ == '__main__':
             store_weather_job_num = 62,
         )
 
-        if args.download_hourly:
+        if args.download_daily:
             daily_weather.submit_process_weather_job()
         if args.store_daily:
-            daily_weather.submit_process_weather_job()
+            daily_weather.submit_store_weather_job()
 
     util.batch_logging_update(all_jobid, 'e')
