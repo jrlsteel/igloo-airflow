@@ -1,4 +1,7 @@
 common = {
+    "smart_mv_hh_elec_refresh" : {
+        "sql_query_smart_mv_hh_elec_refresh":"REFRESH MATERIALIZED VIEW mv_smart_stage2_smarthalfhourlyreads_elec",
+        },
     "ensek_column_order": {
         # Ensek PA
         "ref_readings_internal": ["accountId", "billable", "hasLiveCharge", "hasRegisterAdvance", "meterId",

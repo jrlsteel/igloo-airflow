@@ -131,6 +131,13 @@ def redshift_upsert(sql=None, df=None, crud_type=None):
     except Exception as e:
         return e
 
+def execute_sql(sql):
+
+    try:
+        pr = db.get_redshift_connection()
+        pr.exec_commit(sql)
+    finally:
+        pr.close_up_shop()
 
 def execute_query(sql, return_as='d'):
     '''
