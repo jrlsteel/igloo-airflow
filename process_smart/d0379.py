@@ -9,9 +9,13 @@ import time
 import traceback
 import logging
 import common.utils
+import boto3
+import os
+import smart_open
+from conf import config
 
-logger = logging.getLogger('igloo.etl.d0379')
-logger.setLevel('DEBUG')
+logger = logging.getLogger("igloo.etl.d0379")
+logger.setLevel("DEBUG")
 
 
 class InsufficientHHReadingsException(Exception):
@@ -36,6 +40,21 @@ class TooManyHHReadingsException(Exception):
         self.mpxn = mpxn
         self.num_readings = num_readings
         super().__init__("Too many readings for MPxN {}: {}".format(mpxn, num_readings))
+
+
+class NoD0379FileFound(Exception):
+    """
+    Raised when no files match a given prefix are found in S3
+    """
+
+    def __init__(self, s3_bucket, s3_prefix):
+        self.s3_bucket = s3_bucket
+        self.s3_prefix = s3_prefix
+        super().__init__(
+            "No D0379 files matching prefix {} found in S3 bucket {}".format(
+                s3_prefix, s3_bucket
+            )
+        )
 
 
 """
@@ -188,7 +207,9 @@ def generate_d0379(d0379_date):
 
         s3_destination_bucket = directory["s3_bucket"]
         s3_key_prefix = common.directories.common["d0379"]["s3_key_prefix"]
-        elective_hh_trial_account_ids = common.directories.common["d0379"]["elective_hh_trial_account_ids"]
+        elective_hh_trial_account_ids = common.directories.common["d0379"][
+            "elective_hh_trial_account_ids"
+        ]
 
         df = fetch_d0379_data(elective_hh_trial_account_ids, d0379_date)
 
@@ -209,5 +230,67 @@ def generate_d0379(d0379_date):
 
 
 # move file from s3 to sftp
-def s3_to_sftp():
-    pass
+def copy_d0379_to_sftp(d0379_date):
+    """
+    Copies all files in S3 that start with D0379_{d0379_date}_ to SFTP location
+    """
+
+    try:
+        directory = common.utils.get_dir()
+
+        s3_destination_bucket = directory["s3_bucket"]
+        s3_key_prefix = "{}/D0379_{}_".format(
+            common.directories.common["d0379"]["s3_key_prefix"],
+            d0379_date.strftime("%Y%m%d"),
+        )
+        sftp_host = config.d0379_sftp_server["sftp_host"]
+        sftp_username = config.d0379_sftp_server["sftp_username"]
+        sftp_password = config.d0379_sftp_server["sftp_password"]
+        sftp_prefix = config.d0379_sftp_server["sftp_prefix"]
+
+        aws_access_key_id = config.s3_config["access_key"]
+        aws_secret_access_key = config.s3_config["secret_key"]
+
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+        )
+
+        s3_response = s3_client.list_objects_v2(
+            Bucket=s3_destination_bucket, Prefix=s3_key_prefix
+        )
+
+        if s3_response["KeyCount"] > 0:
+            keys = [x["Key"] for x in s3_response["Contents"]]
+            logger.info(
+                "{} objects found in {} matching prefix {}".format(
+                    len(keys), s3_destination_bucket, s3_key_prefix
+                )
+            )
+
+            for key in keys:
+                d0379_object = s3_client.get_object(
+                    Bucket=s3_destination_bucket, Key=key
+                )
+
+                basename = os.path.basename(key)
+
+                sftp_uri = "sftp://{}:{}@{}{}".format(
+                    sftp_username,
+                    sftp_password,
+                    sftp_host,
+                    "{}/{}".format(sftp_prefix, basename),
+                )
+
+                logger.debug("SFTP URI: {}".format(sftp_uri.replace(sftp_password, '<redacted>')))
+
+                with smart_open.open(sftp_uri, "w") as fout:
+                    fout.write(d0379_object["Body"].read().decode("utf-8"))
+
+        else:
+            raise NoD0379FileFound(s3_destination_bucket, s3_key_prefix)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        #  TODO: log to sentry
+        raise e

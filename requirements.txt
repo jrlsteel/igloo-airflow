@@ -45,6 +45,7 @@ rsa==3.4.2
 s3transfer==0.3.3
 simplejson==3.17.0
 six==1.15.0
+smart-open==4.2.0
 square==0.0.3
 urllib3==1.25.9
 wincertstore==0.2

@@ -5,13 +5,23 @@ sys.path.append("..")
 import pandas as pd
 from freezegun import freeze_time
 import common.utils
-from .d0379 import dataframe_to_d0379, fetch_d0379_data, write_to_s3
-from moto import mock_s3_deprecated
+import smart_open
+from .d0379 import (
+    dataframe_to_d0379,
+    fetch_d0379_data,
+    write_to_s3,
+    copy_d0379_to_sftp,
+    NoD0379FileFound,
+)
+from moto import mock_s3_deprecated, mock_s3
+import boto3
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-import boto
 import pytest
 import datetime
+import os
+import unittest.mock
+import paramiko
 
 
 def test_fetch_d0379_data(mocker):
@@ -444,3 +454,70 @@ def test_write_to_s3_error_invalid_bucket():
     d0379_content = "test-content"
     with pytest.raises(Exception):
         write_to_s3(d0379_content, "invalid-s3-bucket", "d0379")
+
+
+@mock_s3
+def test_copy_d0379_to_sftp(mocker):
+    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn.create_bucket(
+        Bucket="igloo-data-warehouse-dev-555393537168",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
+    )
+
+    s3_client = boto3.client("s3")
+    d0379_file_path = os.path.join(
+        os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt"
+    )
+    s3_client.upload_file(
+        d0379_file_path,
+        "igloo-data-warehouse-dev-555393537168",
+        "flows/outbound/D0379-elective-hh-trial/D0379_20210219_0123456789.txt",
+    )
+
+    with unittest.mock.patch("smart_open.open", unittest.mock.mock_open()):
+        copy_d0379_to_sftp(datetime.date.fromisoformat("2021-02-19"))
+        smart_open.open.assert_called_once_with(
+            "sftp://elective_hh:password@127.0.0.1/home/elective_hh/HH/D0379/D0379_20210219_0123456789.txt",
+            "w",
+        )
+
+
+@mock_s3
+def test_copy_d0379_to_sftp_raises_exception_if_no_files_present(mocker):
+    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn.create_bucket(
+        Bucket="igloo-data-warehouse-dev-555393537168",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
+    )
+
+    with unittest.mock.patch("smart_open.open", unittest.mock.mock_open()):
+        with pytest.raises(NoD0379FileFound):
+            copy_d0379_to_sftp(datetime.date.fromisoformat("2021-02-19"))
+
+
+@mock_s3
+def test_copy_d0379_to_sftp_raises_exception_if_open_fails(mocker):
+    conn = boto3.resource("s3", region_name="eu-west-1")
+    conn.create_bucket(
+        Bucket="igloo-data-warehouse-dev-555393537168",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
+    )
+
+    s3_client = boto3.client("s3")
+    d0379_file_path = os.path.join(
+        os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt"
+    )
+    s3_client.upload_file(
+        d0379_file_path,
+        "igloo-data-warehouse-dev-555393537168",
+        "flows/outbound/D0379-elective-hh-trial/D0379_20210219_0123456789.txt",
+    )
+
+    def mock_open_raises_authentication_failed_exception(file, mode):
+        raise paramiko.ssh_exception.AuthenticationException()
+
+    with unittest.mock.patch(
+        "smart_open.open", mock_open_raises_authentication_failed_exception
+    ):
+        with pytest.raises(paramiko.ssh_exception.AuthenticationException):
+            copy_d0379_to_sftp(datetime.date.fromisoformat("2021-02-19"))
