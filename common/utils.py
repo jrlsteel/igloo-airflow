@@ -11,7 +11,6 @@ import multiprocessing
 from time import sleep
 import csv
 import io
-import os
 
 sys.path.append('..')
 
@@ -161,6 +160,25 @@ def execute_query(sql, return_as='d'):
     if return_as == 'l':
         df_list = df.values.tolist()
         return df_list
+
+    return df
+
+
+def execute_query_return_df(sql):
+    '''
+    :param sql: The query to execute
+    :return: pandas.DataFrame containing the results of the query, or None
+    '''
+    df = None
+
+    pr = None
+
+    try:
+        pr = db.get_redshift_connection()
+        df = pr.redshift_to_pandas(sql)
+    finally:
+        if pr is not None:
+            pr.close_up_shop()
 
     return df
 
