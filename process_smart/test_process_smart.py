@@ -11,7 +11,7 @@ import numpy as np
 import json
 from datetime import datetime
 
-from process_smart_reads_billing import SmartReadsBillings
+from process_smart.process_smart_reads_billing import SmartReadsBillings
 
 from freezegun import freeze_time
 

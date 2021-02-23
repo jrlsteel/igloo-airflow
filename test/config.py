@@ -150,3 +150,10 @@ igloo_finance_config = {
                         'secret_key': '',
                         'bucket_name': 'igloo-data-warehouse-uat-finance'
 }
+
+d0379_sftp_server = {
+  'sftp_host': '127.0.0.1',
+  'sftp_username': 'elective_hh',
+  'sftp_password': 'password',
+  'sftp_prefix': '/home/elective_hh/HH/D0379'
+}
