@@ -1,9 +1,9 @@
 import sys
 
 sys.path.append("..")
+
 import datetime
 from connections.connect_db import get_boto_S3_Connections
-
 import common.directories
 import time
 import traceback
@@ -13,6 +13,7 @@ import boto3
 import os
 import smart_open
 from conf import config
+import sentry_sdk
 
 logger = logging.getLogger("igloo.etl.d0379")
 logger.setLevel("DEBUG")
@@ -23,11 +24,14 @@ class InsufficientHHReadingsException(Exception):
     Raised when there are fewer than 48 half-hourly readings for a given MPxN
     """
 
-    def __init__(self, mpxn, num_readings):
+    def __init__(self, account_id, mpxn, num_readings):
+        self.account_id = account_id
         self.mpxn = mpxn
         self.num_readings = num_readings
         super().__init__(
-            "Insufficient readings for MPxN {}: {}".format(mpxn, num_readings)
+            "Account ID: {}, MPxN: {}, insufficient readings: {}".format(
+                account_id, mpxn, num_readings
+            )
         )
 
 
@@ -36,10 +40,31 @@ class TooManyHHReadingsException(Exception):
     Raised when there are more than 48 half-hourly readings for a given MPxN
     """
 
-    def __init__(self, mpxn, num_readings):
+    def __init__(self, account_id, mpxn, num_readings):
+        self.account_id = account_id
         self.mpxn = mpxn
         self.num_readings = num_readings
-        super().__init__("Too many readings for MPxN {}: {}".format(mpxn, num_readings))
+        super().__init__(
+            "Account ID: {}, MPxN: {}, too many readings: {}".format(
+                account_id, mpxn, num_readings
+            )
+        )
+
+
+class NoD0379FileFound(Exception):
+    """
+    Raised when no D0379 file matching prefix is found in bucket
+    """
+
+    def __init__(self, s3_bucket, s3_prefix):
+        self.account_id = account_id
+        self.mpxn = mpxn
+        self.num_readings = num_readings
+        super().__init__(
+            "Account ID: {}, MPxN: {}, too many readings: {}".format(
+                account_id, mpxn, num_readings
+            )
+        )
 
 
 class NoD0379FileFound(Exception):
@@ -67,10 +92,30 @@ The process will be the same in each environment, except that the d0379 file is 
 """
 
 
-def fetch_d0379_data(elective_hh_trial_account_ids, d0379_date):
+def fetch_d0379_accounts():
+    """
+    Fetches the set of accounts and meters (account_id + mpxn) that should be included
+    in the D0379 file.
+    """
+
+    d0379_accounts_sql_query = common.directories.common["d0379"][
+        "elective_hh_trial_participants_sql"
+    ]
+
+    logger.info("Exeuting SQL: {}".format(d0379_accounts_sql_query))
+
+    d0379_accounts_df = common.utils.execute_query_return_df(d0379_accounts_sql_query)
+
+    logger.debug("D0379 account data dtypes:\n{}".format(d0379_accounts_df.dtypes))
+
+    return d0379_accounts_df.to_dict("records")
+
+
+def fetch_d0379_data(d0379_accounts, d0379_date):
     """
     Executes a query to retrieve D0379 data for a given date.
 
+    :param d0379_accounts: list of objects with account id and mpxn
     :param d0379_date: The date for which D0379 data should be retrieved, as a datetime.date
     :returns: pandas.DataFrame containing the D0379 data
     """
@@ -91,18 +136,21 @@ def fetch_d0379_data(elective_hh_trial_account_ids, d0379_date):
         tzinfo=datetime.timezone.utc,
     )
 
+    account_ids = [x["account_id"] for x in d0379_accounts]
+
     sql_query = common.directories.common["d0379"]["sql_query"].format(
-        elective_hh_trial_account_ids=",".join(
-            [str(x) for x in elective_hh_trial_account_ids]
-        ),
+        account_ids=",".join([str(x) for x in account_ids]),
         from_datetime=from_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         to_datetime=to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
     )
 
-    logger.info("Exeuting SQL: {}".format(sql_query))
+    logger.info("Executing SQL: {}".format(sql_query))
 
     df = common.utils.execute_query_return_df(sql_query)
-    return df
+
+    logger.debug("D0379 data dtypes:\n{}".format(df.dtypes))
+
+    return df.astype({ "account_id": "int64", "mpxn": "int64" })
 
 
 def write_to_s3(d0379_text, s3_bucket, s3_key):
@@ -116,7 +164,7 @@ def write_to_s3(d0379_text, s3_bucket, s3_key):
         raise e
 
 
-def dataframe_to_d0379(d0379_date, df, fileid):
+def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
     """
     Format dataframe as a D0379 file.
 
@@ -150,8 +198,9 @@ def dataframe_to_d0379(d0379_date, df, fileid):
     lines = []
     lines.append(header)
 
-    unique_mpxns = df["mpxn"].unique()
-    for mpxn in unique_mpxns:
+    for d0379_account in d0379_accounts:
+        account_id = d0379_account["account_id"]
+        mpxn = d0379_account["mpxn"]
         #  We only include the MPxN in the D0379 file if we have the complete
         #  set of 48 half-hourly readings.
         #  Note that this is likely to change, as we may need to interpolate or
@@ -161,16 +210,27 @@ def dataframe_to_d0379(d0379_date, df, fileid):
             hh_readings = df.loc[df["mpxn"] == mpxn].sort_values(by=["hhdate"])
 
             if len(hh_readings) > 48:
-                raise TooManyHHReadingsException(mpxn, len(hh_readings))
+                raise TooManyHHReadingsException(account_id, mpxn, len(hh_readings))
             if len(hh_readings) < 48:
-                raise InsufficientHHReadingsException(mpxn, len(hh_readings))
+                raise InsufficientHHReadingsException(
+                    account_id, mpxn, len(hh_readings)
+                )
 
-            logger.info("MPxN: {}, num HH readings: {}".format(mpxn, len(hh_readings)))
+            logger.info(
+                "Account ID: {}, MPxN: {}, num HH readings: {}".format(
+                    account_id, mpxn, len(hh_readings)
+                )
+            )
 
-            lines.append(
+            # Build up the lines for this record, then add them to the master 
+            # `lines` list at the end. This was, if we encounter an exception
+            # during processing, we will not add an incomplete record to the
+            # D0379 file.
+            record_lines = []
+            record_lines.append(
                 "25B|{0}|{1}|{2}|".format(mpxn, measurement_quantity_id, supplier_id)
             )
-            lines.append("26B|{0}|".format(d0379_date.strftime("%Y%m%d")))
+            record_lines.append("26B|{0}|".format(d0379_date.strftime("%Y%m%d")))
 
             for row in hh_readings.itertuples():
                 # The Smart Metered Period Consumption needs to be inserted
@@ -178,15 +238,20 @@ def dataframe_to_d0379(d0379_date, df, fileid):
                 # the CDW are in Wh, hence the conversion here.
                 smart_metered_period_consumption = row.primaryvalue / 1000
 
-                lines.append(
+                record_lines.append(
                     "66L|{0}|{1:.3f}|".format(
                         row.measurement_class,
                         smart_metered_period_consumption,
                     )
                 )
-        except (TooManyHHReadingsException, InsufficientHHReadingsException):
+            
+            lines.extend(record_lines)
+        except (TooManyHHReadingsException, InsufficientHHReadingsException) as e:
+            # We do not want to abandon processing if there are too many / too few 
+            # HH readings for a single account, but we want to report the exception
+            # to Sentry for visibility.
             logger.error(traceback.format_exc())
-            #  TODO: log to sentry
+            sentry_sdk.capture_exception(e)
 
     lines.append(footer)
 
@@ -207,11 +272,9 @@ def generate_d0379(d0379_date):
 
         s3_destination_bucket = directory["s3_bucket"]
         s3_key_prefix = common.directories.common["d0379"]["s3_key_prefix"]
-        elective_hh_trial_account_ids = common.directories.common["d0379"][
-            "elective_hh_trial_account_ids"
-        ]
+        d0379_accounts = fetch_d0379_accounts()
 
-        df = fetch_d0379_data(elective_hh_trial_account_ids, d0379_date)
+        df = fetch_d0379_data(d0379_accounts, d0379_date)
 
         fileid = int(time.time())
 
@@ -221,11 +284,10 @@ def generate_d0379(d0379_date):
             fileid,
         )
 
-        d0379_text = dataframe_to_d0379(d0379_date, df, fileid)
+        d0379_text = dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid)
         write_to_s3(d0379_text, s3_destination_bucket, s3_key)
     except Exception as e:
         logger.error(traceback.format_exc())
-        #  TODO: log to sentry
         raise e
 
 
@@ -283,7 +345,9 @@ def copy_d0379_to_sftp(d0379_date):
                     "{}/{}".format(sftp_prefix, basename),
                 )
 
-                logger.debug("SFTP URI: {}".format(sftp_uri.replace(sftp_password, '<redacted>')))
+                logger.debug(
+                    "SFTP URI: {}".format(sftp_uri.replace(sftp_password, "<redacted>"))
+                )
 
                 with smart_open.open(sftp_uri, "w") as fout:
                     fout.write(d0379_object["Body"].read().decode("utf-8"))
@@ -292,5 +356,4 @@ def copy_d0379_to_sftp(d0379_date):
             raise NoD0379FileFound(s3_destination_bucket, s3_key_prefix)
     except Exception as e:
         logger.error(traceback.format_exc())
-        #  TODO: log to sentry
         raise e

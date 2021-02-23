@@ -4,6 +4,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import sys
 import datetime
+import sentry_sdk
 
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
@@ -58,17 +59,27 @@ def generate_d0379_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
     """
-    print("D0379 execution_date={}".format(execution_date))
-    d0379_date = datetime.date.fromisoformat(execution_date)
-    generate_d0379(d0379_date)
+    try:
+        print("D0379 execution_date={}".format(execution_date))
+        d0379_date = datetime.date.fromisoformat(execution_date)
+        generate_d0379(d0379_date)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
 
 def copy_d0379_to_sftp_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
     """
-    print("copy_d0379_to_sftp execution_date={}".format(execution_date))
-    d0379_date = datetime.date.fromisoformat(execution_date)
-    copy_d0379_to_sftp(d0379_date)
+    try:
+        print("copy_d0379_to_sftp execution_date={}".format(execution_date))
+        d0379_date = datetime.date.fromisoformat(execution_date)
+        copy_d0379_to_sftp(d0379_date)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
 
 generate_d0379_task = PythonOperator(
     task_id="generate_d0379",

@@ -3,34 +3,13 @@ common = {
         "sql_query_smart_mv_hh_elec_refresh": "REFRESH MATERIALIZED VIEW mv_smart_stage2_smarthalfhourlyreads_elec",
     },
     "d0379": {
-        "elective_hh_trial_account_ids": [
-            4601,
-            13435,
-            53238,
-            45431,
-            41653,
-            166804,
-            190409,
-            55455,
-            76056,
-            114983,
-            123989,
-            1835,
-            167692,
-            199180,
-            121074,
-            210251,
-            4646,
-            127729,
-            133302,
-            132237,
-            159031,
-            147091,
-            200955,
-            192751,
-            211886,
-            199361,
-        ],
+        "elective_hh_trial_participants_sql": """
+select
+    account_id,
+    meterpointnumber as mpxn
+from vw_elective_hh_customers
+order by account_id, mpxn;
+""",
         "s3_key_prefix": "flows/outbound/D0379-elective-hh-trial",
         "sql_query": """
 select
@@ -41,7 +20,7 @@ select
     cast(hhdate as timestamp) as hhdate
 from vw_etl_d0379_hh_elec_settlement
 where
-    account_id in ({elective_hh_trial_account_ids}) and
+    account_id in ({account_ids}) and
     cast(hhdate as timestamp) >= '{from_datetime}' and
     cast(hhdate as timestamp) <= '{to_datetime}'
 order by account_id, mpxn, hhdate;

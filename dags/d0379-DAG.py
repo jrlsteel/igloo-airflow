@@ -6,6 +6,7 @@ from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
+import sentry_sdk
 
 args = {
     "owner": "Airflow",
@@ -24,17 +25,27 @@ def generate_d0379_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
     """
-    print("D0379 execution_date={}".format(execution_date))
-    d0379_date = datetime.date.today() - datetime.timedelta(days=1)
-    generate_d0379(d0379_date)
+    try:
+        print("D0379 execution_date={}".format(execution_date))
+        d0379_date = datetime.date.today() - datetime.timedelta(days=1)
+        generate_d0379(d0379_date)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
 
 def copy_d0379_to_sftp_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
     """
-    print("copy_d0379_to_sftp execution_date={}".format(execution_date))
-    d0379_date = datetime.date.today() - datetime.timedelta(days=1)
-    copy_d0379_to_sftp(d0379_date)
+    try:
+        print("copy_d0379_to_sftp execution_date={}".format(execution_date))
+        d0379_date = datetime.date.today() - datetime.timedelta(days=1)
+        copy_d0379_to_sftp(d0379_date)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
 
 generate_d0379_task = PythonOperator(
     task_id="generate_d0379",
