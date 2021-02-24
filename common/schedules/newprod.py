@@ -4,4 +4,5 @@ schedules = {
     'ensek_nrl': '45 17 * * *',
     'ensek_occupier_accounts': '00 18 * * *',
     'ensek_pa': '00 18 * * *',
+    'weather_forecasts': '00 12 * * *',
 }
