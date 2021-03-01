@@ -467,6 +467,6 @@ dev = {
 
 
     "master_sources": {
-        "go_cardless": "prod"
+        "go_cardless": "newprod"
     }
 }
