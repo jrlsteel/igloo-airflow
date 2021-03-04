@@ -15,6 +15,7 @@ import smart_open
 from conf import config
 import sentry_sdk
 
+
 logger = logging.getLogger("igloo.etl.d0379")
 logger.setLevel("DEBUG")
 
@@ -150,7 +151,7 @@ def fetch_d0379_data(d0379_accounts, d0379_date):
 
     logger.debug("D0379 data dtypes:\n{}".format(df.dtypes))
 
-    return df.astype({ "account_id": "int64", "mpxn": "int64" })
+    return df.astype({"account_id": "int64", "mpxn": "int64"})
 
 
 def write_to_s3(d0379_text, s3_bucket, s3_key):
@@ -182,16 +183,18 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
     # https://dtc.mrasco.com/DataItem.aspx?ItemCounter=84
     supplier_id = "PION"
 
+    # Number of Accounts (distinct mpxns) included in the file (integer, max 10 characters)
+    flow_count = 0
+
+    # Number of lines in the files excluding the header and footer (integer, max 8 characters)
+    total_group_count = 0
+
     now = datetime.datetime.now(datetime.timezone.utc)
     d0379_file_creation_timestamp = now.strftime("%Y%m%d%H%M%S")
 
     header = "ZHV|{0}|D0379001|X|{1}|C|UDMS|{2}||||OPER|".format(
         fileid,
         supplier_id,
-        d0379_file_creation_timestamp,
-    )
-    footer = "ZPT|{0}|49||1|{1}|".format(
-        fileid,
         d0379_file_creation_timestamp,
     )
 
@@ -222,10 +225,10 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
                 )
             )
 
-            # Build up the lines for this record, then add them to the master 
+            # Build up the lines for this record, then add them to the master
             # `lines` list at the end. This was, if we encounter an exception
-            # during processing, we will not add an incomplete record to the
-            # D0379 file.
+            #  during processing, we will not add an incomplete record to the
+            #  D0379 file.
             record_lines = []
             record_lines.append(
                 "25B|{0}|{1}|{2}|".format(mpxn, measurement_quantity_id, supplier_id)
@@ -244,14 +247,27 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
                         smart_metered_period_consumption,
                     )
                 )
-            
+
+            flow_count += 1
+
             lines.extend(record_lines)
+
         except (TooManyHHReadingsException, InsufficientHHReadingsException) as e:
-            # We do not want to abandon processing if there are too many / too few 
-            # HH readings for a single account, but we want to report the exception
+            # We do not want to abandon processing if there are too many / too few
+            #  HH readings for a single account, but we want to report the exception
             # to Sentry for visibility.
             logger.error(traceback.format_exc())
             sentry_sdk.capture_exception(e)
+
+    # -1 is to remove the header from the group count as it should not be included
+    total_group_count = len(lines) - 1
+
+    footer = "ZPT|{0}|{1}||{2}|{3}|".format(
+        fileid,
+        total_group_count,
+        flow_count,
+        d0379_file_creation_timestamp,
+    )
 
     lines.append(footer)
 

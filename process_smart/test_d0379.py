@@ -62,7 +62,7 @@ def test_fetch_d0379_data(mocker):
         "mpxn",
         "measurement_class",
         "primaryvalue",
-        "hhdate"
+        "hhdate",
     ]
 
     sample_data = [
@@ -75,7 +75,7 @@ def test_fetch_d0379_data(mocker):
             "1234567891234",
             "A",
             123,
-            "2018-04-03 00:30:00"
+            "2018-04-03 00:30:00",
         ],
     ]
 
@@ -90,7 +90,7 @@ def test_fetch_d0379_data(mocker):
         ],
         datetime.date.fromisoformat("2018-04-03"),
     )
-    assert(df.to_dict('records') == [
+    assert df.to_dict("records") == [
         {
             "account_id": 1831,
             "mpxn": 1234567891234,
@@ -98,7 +98,7 @@ def test_fetch_d0379_data(mocker):
             "primaryvalue": 123,
             "hhdate": "2018-04-03 00:30:00",
         }
-    ])
+    ]
 
     common.utils.execute_query_return_df.assert_called_once_with(
         """
@@ -140,7 +140,7 @@ def test_dataframe_to_d0379_skips_mpxns_with_fewer_than_48_hh_readings(mocker):
 
     df = pd.DataFrame(d0379_data, columns=d0379_data_columns)
 
-    mocker.patch('sentry_sdk.capture_exception')
+    mocker.patch("sentry_sdk.capture_exception")
 
     d0379_text = dataframe_to_d0379(d0379_accounts, d0379_date, df, "0123456789")
 
@@ -149,7 +149,7 @@ def test_dataframe_to_d0379_skips_mpxns_with_fewer_than_48_hh_readings(mocker):
     assert (
         d0379_text.split("\n")
         == """ZHV|0123456789|D0379001|X|PION|C|UDMS|20201128113000||||OPER|
-ZPT|0123456789|49||1|20201128113000|""".split(
+ZPT|0123456789|0||0|20201128113000|""".split(
             "\n"
         )
     )
@@ -378,7 +378,7 @@ def test_dataframe_to_d0379_handles_multiple_mpxns():
 66L|A|0.485|
 66L|A|0.093|
 66L|A|20.419|
-ZPT|0123456789|49||1|20201128113000|""".split(
+ZPT|0123456789|100||2|20201128113000|""".split(
             "\n"
         )
     )
@@ -509,7 +509,7 @@ def test_dataframe_to_d0379_sorts_hh_periods():
 66L|A|0.485|
 66L|A|0.481|
 66L|A|0.491|
-ZPT|0123456789|49||1|20201128113000|""".split(
+ZPT|0123456789|50||1|20201128113000|""".split(
             "\n"
         )
     )
