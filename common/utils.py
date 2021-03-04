@@ -33,18 +33,20 @@ def get_multiprocess(source):
     return env_total_processes
 
 
-def get_dir():
+def get_dir(env_conf=None):
     dir = ''
-    env_conf = get_env()
+    if env_conf == None:
+        env_conf = get_env()
+
     if env_conf == 'dev':
         dir = dirs3.dev
-    if env_conf == 'uat':
+    elif env_conf == 'uat':
         dir = dirs3.uat
-    if env_conf == 'prod':
+    elif env_conf == 'prod':
         dir = dirs3.prod
-    if env_conf == 'preprod':
+    elif env_conf == 'preprod':
         dir = dirs3.preprod
-    if env_conf == 'newprod':
+    elif env_conf == 'newprod':
         dir = dirs3.newprod
 
     return dir
@@ -552,7 +554,7 @@ class IglooLogger:
         self.include_timestamp = include_timestamp
 
     def in_test_env(self, message):
-        if get_env() == 'uat':
+        if get_env() != 'newprod':
             IglooLogger.in_prod_env(self, message)
 
     def in_prod_env(self, message):

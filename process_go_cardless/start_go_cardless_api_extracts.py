@@ -6,7 +6,8 @@ sys.path.append('..')
 from common import process_glue_job as glue
 from common import utils as util
 from common import Refresh_UAT as refresh
-
+from conf import config
+import traceback
 
 class GoCardlessAPIExtracts:
     def __init__(self, logger):
@@ -47,6 +48,7 @@ class GoCardlessAPIExtracts:
             self.iglog.in_prod_env("Process Go-Cardless {0} API extract completed in {1:.2f} seconds".format(
                 job_name, float(timeit.default_timer() - start)))
         except Exception as e:
+            self.iglog.in_prod_env(traceback.format_exc())
             # log job failure
             util.batch_logging_update(self.job_ids[job_name], 'f', str(e))
             self.iglog.in_prod_env("Error in Process Go-Cardless {0} API extract :- ".format(job_name) + str(e))
@@ -73,6 +75,7 @@ class GoCardlessAPIExtracts:
                 self.iglog.in_prod_env("Error occurred in Staging Job")
                 raise Exception
         except Exception as e:
+            self.iglog.in_prod_env(traceback.format_exc())
             util.batch_logging_update(self.job_ids["staging"], 'f', str(e))
             util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             self.iglog.in_prod_env("Error in Staging Job :- " + str(e))
@@ -96,6 +99,7 @@ class GoCardlessAPIExtracts:
                 self.iglog.in_prod_env("Error occurred in Ref Glue Job")
                 raise Exception
         except Exception as e:
+            self.iglog.in_prod_env(traceback.format_exc())
             util.batch_logging_update(self.job_ids["ref"], 'f', str(e))
             util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             self.iglog.in_prod_env("Error in Ref Glue Job :- " + str(e))
@@ -113,12 +117,18 @@ class GoCardlessAPIExtracts:
                                       self.env, 'start_go_cardless_api_extracts.py')
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
-            r.process_sync()
+            r.process_sync(
+                env={
+                    "AWS_ACCESS_KEY_ID": config.s3_config["access_key"],
+                    "AWS_SECRET_ACCESS_KEY": config.s3_config["secret_key"],
+                }
+            )
 
             util.batch_logging_update(self.job_ids["mirror"], 'e')
             self.iglog.in_prod_env("GoCardless_extract_mirror-{src}-{env} files completed in {time:.2f} seconds".format(
                 src=source_input, env=self.env, time=float(timeit.default_timer() - start)))
         except Exception as e:
+            self.iglog.in_prod_env(traceback.format_exc())
             util.batch_logging_update(self.job_ids["mirror"], 'f', str(e))
             util.batch_logging_update(self.job_ids["all"], 'f', str(e))
             self.iglog.in_prod_env("Error in process :- " + str(e))
@@ -136,7 +146,8 @@ class GoCardlessAPIExtracts:
         ]
 
         destination_bucket = "s3://{0}".format(self.dir["s3_finance_bucket"])
-        source_bucket = destination_bucket.replace(self.env, source_env)
+        source_dir = util.get_dir(source_env)
+        source_bucket = "s3://{}".format(source_dir["s3_finance_bucket"])
 
         for folder in folder_list:
             source_path = source_bucket + folder

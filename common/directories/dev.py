@@ -298,9 +298,9 @@ dev = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f"
         },
         "smart_reads_billing": {
-            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging/api/v1/meter-reads",
-            "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
-            "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com"
+            "api_url": "https://vpce-05192ff7be6fd8ae8-izusx1w8.execute-api.eu-west-1.vpce.amazonaws.com/uat/api/v1/meter-reads",
+            "api_key": "nNUEXIkGdx4R13FHUi7Iw8tDIUuu3hbW7UBJrrz1",
+            "host": "43syav1qg0.execute-api.eu-west-1.amazonaws.com"
         },
     },
     # All bad practice here needs to be sorted
@@ -467,6 +467,6 @@ dev = {
 
 
     "master_sources": {
-        "go_cardless": "prod"
+        "go_cardless": "newprod"
     }
 }
