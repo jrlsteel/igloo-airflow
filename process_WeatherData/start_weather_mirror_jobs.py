@@ -49,27 +49,83 @@ class Weather:
                 util.batch_logging_update(self.all_jobid, 'f', str(e))
                 print("Error in process :- " + str(e))
                 sys.exit(1)
+                
+    def submit_process_weather_job(self):
+        """
+        Calls the processHistoricalWeatherData.py script which processes the weather data from Weatherbit.io for the past 1 year
+        :return: None
+        """
 
+        print(
+            "{0}: >>>> Process {1}<<<<".format(
+                datetime.now().strftime("%H:%M:%S"), self.process_name
+            )
+        )
+        try:
+            util.batch_logging_insert(
+                self.weather_jobid,
+                21,
+                "weather_extract_pyscript",
+                "start_weather_jobs.py",
+            )
+            start = timeit.default_timer()
+            subprocess.run(
+                [self.pythonAlias, "processHistoricalWeatherData.py"], check=True
+            )
+            util.batch_logging_update(self.weather_jobid, "e")
+            print(
+                "{0}: Processing of {2} Data completed in {1:.2f} seconds".format(
+                    datetime.now().strftime("%H:%M:%S"),
+                    float(timeit.default_timer() - start),
+                    self.process_name,
+                )
+            )
+        except Exception as e:
+            util.batch_logging_update(self.weather_jobid, "f", str(e))
+            util.batch_logging_update(self.all_jobid, "f", str(e))
+            print("Error in process :- " + str(e))
+            sys.exit(1)
 
 if __name__ == '__main__':
 
     s = Weather()
 
     util.batch_logging_insert(s.all_jobid, 107, 'all_weather_jobs', 'start_weather_jobs.py')
-    s3_destination_bucket = s.dir['s3_bucket']
-    s3_source_bucket = s.dir['s3_source_bucket']
 
-    if s.env == 'prod':
+    master_source = util.get_master_source("weather_historical")
+    current_env = util.get_env()
+    print(
+        "Current environment: {0}, Master_Source: {1}".format(
+            current_env, master_source
+        )
+    )
+
+    if (
+        master_source == current_env
+    ):  # current environment is master source, run the data extract script
         # run processing weather python script
-        print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        #s.submit_process_weather_job()
-
+        print(
+            "{0}: {1} job is running...".format(
+                datetime.now().strftime("%H:%M:%S"), s.process_name
+            )
+        )
+        s.submit_process_weather_job()
     else:
         # # run processing mirror job
-        print("Weather Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        source_input = "s3://" + s3_source_bucket + "/stage1/HistoricalWeather/"
-        destination_input = "s3://" + s3_destination_bucket + "/stage1/HistoricalWeather/"
-        s.submit_process_s3_mirror_job(source_input, destination_input)
+        print(
+            "Weather Mirror job is running...".format(
+                datetime.now().strftime("%H:%M:%S"), s.process_name
+            )
+        )
+        dest_dir = util.get_dir()
+        dest_prefix = dest_dir["s3_weather_key"]["HistoricalWeather"]
+        destination = "s3://{}/{}".format(dest_dir["s3_bucket"], dest_prefix)
+
+        source_dir = util.get_dir(master_source)
+        source_prefix = source_dir["s3_weather_key"]["HistoricalWeather"]
+        source = "s3://{}/{}".format(source_dir["s3_bucket"], source_prefix)
+
+        s.submit_process_s3_mirror_job(source, destination)
 
     print("{0}: All {1} completed successfully".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
 

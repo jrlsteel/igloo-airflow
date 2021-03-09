@@ -116,17 +116,26 @@ if __name__ == '__main__':
 
     util.batch_logging_insert(s.all_jobid, 107, 'all_weather_jobs', 'start_weather_jobs.py')
 
-    if s.env == 'prod':
+    master_source = util.get_master_source("weather_historical")
+    current_env = util.get_env()
+    print("Current environment: {0}, Master_Source: {1}".format(current_env, master_source))
+    
+    if master_source == current_env:  # current environment is master source, run the data extract script
         # run processing weather python script
         print("{0}: {1} job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
         s.submit_process_weather_job()
-
     else:
         # # run processing mirror job
         print("Weather Mirror job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
-        source_input = "s3://igloo-data-warehouse-prod/stage1/HistoricalWeather/"
-        destination_input = "s3://igloo-data-warehouse-" + s.env + "/stage1/HistoricalWeather/"
-        s.submit_process_s3_mirror_job(source_input, destination_input)
+        dest_dir = util.get_dir()
+        dest_prefix = dest_dir["s3_weather_key"]["HistoricalWeather"]
+        destination = "s3://{}/{}".format(dest_dir["s3_bucket"], dest_prefix)
+
+        source_dir = util.get_dir(master_source)
+        source_prefix = source_dir["s3_weather_key"]["HistoricalWeather"]
+        source = "s3://{}/{}".format(source_dir["s3_bucket"], source_prefix)
+
+        s.submit_process_s3_mirror_job(source, destination)
 
 
     # run staging glue job
