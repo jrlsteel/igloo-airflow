@@ -376,11 +376,11 @@ prod = {
         "forecast_weather": {
             "hourly": {
                 "stage1": "stage1/HourlyForecast/forecast_issued={0}/",
-                "stage2": "stage2/stage2_WeatherForecast48hr/forecast_issued={0}/"
+                "stage2": "stage2/stage2_HourlyForecast/forecast_issued={0}/"
             },
             "daily": {
                 "stage1": "stage1/DailyForecast/forecast_issued={0}/",
-                "stage2": "stage2/stage2_WeatherForecast16day/forecast_issued={0}/"
+                "stage2": "stage2/stage2_DailyForecast/forecast_issued={0}/"
             }
         }
     },

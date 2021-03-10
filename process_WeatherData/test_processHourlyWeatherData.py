@@ -143,7 +143,7 @@ class TestProcessHourlyWeatherData(unittest.TestCase):
         bucket = s3.create_bucket(bucket_name)
         s3_key = boto.s3.key.Key(bucket)
 
-        hw = ForecastWeather(duration=48, forecast_resolution='hourly')
+        hw = ForecastWeather(duration=120, forecast_resolution='hourly')
         hw.get_weather_postcode = MagicMock(return_value=postcodes)
         hw.get_api_response = MagicMock(return_value=api_returned_data_hourly_json)
 
