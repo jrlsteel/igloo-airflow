@@ -567,4 +567,3 @@ class IglooLogger:
         else:
             source_string = ""
         print(timestamp_string + source_string + message)
-

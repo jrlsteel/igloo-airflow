@@ -121,8 +121,8 @@ land_registry_postcodes = {
 }
 
 weather_postcodes = {
-    "daily": """select * from vw_etl_weather_postcodes_daily order by postcode""",
-    "weekly": """select * from vw_etl_weather_postcodes_daily order by postcode""",
+    "daily": """select * from vw_etl_weather_postcode_sectors""",
+    "weekly": """select * from vw_etl_weather_postcode_sectors""",
 
 }
 
