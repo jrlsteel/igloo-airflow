@@ -21,16 +21,19 @@ from connections.connect_db import get_boto_S3_Connections as s3_con
 from connections import connect_db as db
 from common import api_filters as apif
 
+logger = util.IglooLogger()
 
 class HistoricalWeather:
     max_calls = con.api_config['max_api_calls']
     rate = con.api_config['allowed_period_in_secs']
+    end_date_offset_days = con.weather_historical["end_date_offset_days"]
+    start_date_offset_days = con.weather_historical["start_date_offset_days"]
 
     def __init__(self):
 
         self.day_of_week = datetime.today().isoweekday()
-        self.end_date = datetime.today().date() + timedelta(days=(7-self.day_of_week))
-        self.start_date = (datetime.today().date() + timedelta(days=(7-self.day_of_week))) - timedelta(days=35)
+        self.end_date = datetime.today().date() + timedelta(days=(7-self.day_of_week)) + timedelta(days=self.end_date_offset_days)
+        self.start_date = (datetime.today().date() + timedelta(days=(7-self.day_of_week))) + timedelta(days=self.start_date_offset_days)
         self.api_url, self.key = util.get_weather_url_token('historical_weather')
         self.num_days_per_api_calls = 7
         self.sql = apif.weather_postcodes['daily']
@@ -109,23 +112,21 @@ class HistoricalWeather:
             employee_writer.writerow([error_msg, error_code])
 
     def processData(self, postcodes, k, _dir_s3):
+        logger.in_prod_env("Fetching data for {} postcodes, start_date={}, end_data={}".format(len(postcodes), self.start_date, self.end_date))
 
         for postcode in postcodes:
-            # postcodes[:2]:
-            t = con.api_config['total_no_of_calls']
-            print('postcode:' + str(postcode))
-            msg_ac = 'ac:' + str(postcode)
-            #self.log_error(msg_ac, '')
+            
             _start_date = self.start_date
             while _start_date < self.end_date:
+
                 # Logic to fetch date for only 7 days for each call
                 _end_date = _start_date + timedelta(days=7)
                 if _end_date > self.end_date:
                     _end_date = self.end_date
 
                 api_url1 = self.api_url.format(postcode, _start_date, _end_date, self.key)
-                # print(api_url1)
-
+                logger.in_test_env("GET {}".format(api_url1.replace(self.key, 'x')))
+                
                 api_response = self.get_api_response(api_url1)
 
                 if api_response:

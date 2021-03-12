@@ -157,3 +157,8 @@ d0379_sftp_server = {
   'sftp_password': 'password',
   'sftp_prefix': '/home/elective_hh/HH/D0379'
 }
+
+weather_historical = {
+    "end_date_offset_days": 0,
+    "start_date_offset_days": -7,
+}
