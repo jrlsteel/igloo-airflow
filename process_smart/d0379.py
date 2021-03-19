@@ -236,6 +236,11 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
             record_lines.append("26B|{0}|".format(d0379_date.strftime("%Y%m%d")))
 
             for row in hh_readings.itertuples():
+                # The Actual/Estimated indicator is always set to 'A' as we
+                # do not currently generated estimates, the values are always
+                # based on reads received from the meter.
+                actual_estimated_indicator = "A"
+                
                 # The Smart Metered Period Consumption needs to be inserted
                 # into the D0379 as kWh, however the values we get back from
                 # the CDW are in Wh, hence the conversion here.
@@ -243,7 +248,7 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
 
                 record_lines.append(
                     "66L|{0}|{1:.3f}|".format(
-                        row.measurement_class,
+                        actual_estimated_indicator,
                         smart_metered_period_consumption,
                     )
                 )
