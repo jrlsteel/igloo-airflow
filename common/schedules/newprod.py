@@ -1,5 +1,5 @@
 schedules = {
-    'ensek_non_pa_test': '30 02 * * *',
+    'ensek_non_pa_test': '00 01 * * *',
     'ensek_nosi': '30 18 * * *',
     'ensek_nrl': '45 17 * * *',
     'ensek_occupier_accounts': '00 18 * * *',
