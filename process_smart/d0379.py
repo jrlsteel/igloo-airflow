@@ -99,7 +99,7 @@ def fetch_d0379_accounts():
     in the D0379 file.
     """
 
-    d0379_accounts_sql_query = common.directories.common["d0379"][
+    d0379_accounts_sql_query = common.directories.common["elective_hh"][
         "elective_hh_trial_participants_sql"
     ]
 
@@ -139,7 +139,7 @@ def fetch_d0379_data(d0379_accounts, d0379_date):
 
     account_ids = [x["account_id"] for x in d0379_accounts]
 
-    sql_query = common.directories.common["d0379"]["sql_query"].format(
+    sql_query = common.directories.common["elective_hh"]["sql_query"].format(
         account_ids=",".join([str(x) for x in account_ids]),
         from_datetime=from_datetime.strftime("%Y-%m-%d %H:%M:%S"),
         to_datetime=to_datetime.strftime("%Y-%m-%d %H:%M:%S"),
@@ -292,7 +292,7 @@ def generate_d0379(d0379_date):
         directory = common.utils.get_dir()
 
         s3_destination_bucket = directory["s3_bucket"]
-        s3_key_prefix = common.directories.common["d0379"]["s3_key_prefix"]
+        s3_key_prefix = common.directories.common["elective_hh"]["d0379_s3_key_prefix"]
         d0379_accounts = fetch_d0379_accounts()
 
         df = fetch_d0379_data(d0379_accounts, d0379_date)
@@ -323,13 +323,13 @@ def copy_d0379_to_sftp(d0379_date):
 
         s3_destination_bucket = directory["s3_bucket"]
         s3_key_prefix = "{}/D0379_{}_".format(
-            common.directories.common["d0379"]["s3_key_prefix"],
+            common.directories.common["elective_hh"]["d0379_s3_key_prefix"],
             d0379_date.strftime("%Y%m%d"),
         )
-        sftp_host = config.d0379_sftp_server["sftp_host"]
-        sftp_username = config.d0379_sftp_server["sftp_username"]
-        sftp_password = config.d0379_sftp_server["sftp_password"]
-        sftp_prefix = config.d0379_sftp_server["sftp_prefix"]
+        sftp_host = config.elective_hh_sftp_server["sftp_host"]
+        sftp_username = config.elective_hh_sftp_server["sftp_username"]
+        sftp_password = config.elective_hh_sftp_server["sftp_password"]
+        sftp_prefix = config.elective_hh_sftp_server["sftp_prefix"]
 
         aws_access_key_id = config.s3_config["access_key"]
         aws_secret_access_key = config.s3_config["secret_key"]
