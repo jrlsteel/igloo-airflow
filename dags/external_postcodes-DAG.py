@@ -11,10 +11,14 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
+sys.path.append("/opt/airflow/enzek-meterpoint-readings")
+
+from common.slack_utils import alert_slack
 
 args = {
     'owner': 'Airflow',
-    'start_date': days_ago(2),
+    'start_date': days_ago(2), # don't know what this is doing
+    'on_failure_callback': alert_slack
 }
 
 
