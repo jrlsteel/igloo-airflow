@@ -1,6 +1,7 @@
 import gocardless_pro
 import pandas as pd
 import json
+import csv
 from multiprocessing import freeze_support
 from datetime import datetime
 import math
@@ -110,7 +111,7 @@ class GoCardlessEventProcessor:
         # write events retrieved during this execution out to S3 in a single file
         iglog.in_test_env("Writing to S3")
         column_list = util.get_common_info('go_cardless_column_order', 'events')
-        df_string = df_event.to_csv(index=False, columns=column_list)
+        df_string = df_event.to_csv(index=False, columns=column_list, quoting=csv.QUOTE_NONNUMERIC)
         s3_conn = self.s3_conn
         file_name = 'go_cardless_events_{start}_{end}.csv'.format(start=start_date, end=end_date)
         folder = 'timestamp={year}-Q{quarter}/'.format(year=math.ceil(datetime.today().year),
