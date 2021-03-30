@@ -13,10 +13,12 @@ import sys
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
 
+from common.slack_utils import alert_slack
 
 args = {
-    "owner": "Airflow",
-    "start_date": days_ago(2),  #  don't know what this is doing
+    'owner': 'Airflow',
+    'start_date': days_ago(2), # don't know what this is doing
+    'on_failure_callback': alert_slack
 }
 
 dag = DAG(

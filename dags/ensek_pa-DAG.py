@@ -7,6 +7,7 @@ sys.path.append('/opt/airflow/enzek-meterpoint-readings')
 
 from conf import config
 from common import schedules
+from common.slack_utils import alert_slack
 
 dag_id = 'ensek_pa'
 
@@ -17,6 +18,7 @@ def get_schedule():
 args = {
     'owner': 'Airflow',
     'start_date': days_ago(2), # don't know what this is doing
+    'on_failure_callback': alert_slack
 }
 
 dag = DAG(

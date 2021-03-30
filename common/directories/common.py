@@ -2,7 +2,7 @@ common = {
     "smart_mv_hh_elec_refresh": {
         "sql_query_smart_mv_hh_elec_refresh": "REFRESH MATERIALIZED VIEW mv_smart_stage2_smarthalfhourlyreads_elec",
     },
-    "d0379": {
+    "elective_hh": {
         "elective_hh_trial_participants_sql": """
 select
     account_id,
@@ -10,7 +10,8 @@ select
 from vw_elective_hh_customers
 order by account_id, mpxn;
 """,
-        "s3_key_prefix": "flows/outbound/D0379-elective-hh-trial",
+        "d0379_s3_key_prefix": "flows/outbound/D0379-elective-hh-trial",
+        "d0380_s3_key_prefix": "flows/inbound/D0380-elective-hh-trial",
         "sql_query": """
 select
     account_id,

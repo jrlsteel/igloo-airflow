@@ -147,6 +147,63 @@ Resources:
     Type: AWS::IAM::AccessKey
     Properties:
       UserName: !Ref S3SyncUser
+  
+  GlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${StackName}-GlueRole
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: !Sub ${StackName}-CDWS3BucketsFullAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${BucketName}/*
+                    - { BucketName: !ImportValue CoreIglooDataWarehouseS3Bucket}
+                    
+  WeatherForecastDailyStage2Crawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Configuration: "{\"Version\":1,\"Grouping\":{\"TableGroupingPolicy\":\"CombineCompatibleSchemas\"}}"
+      DatabaseName: data-catalogue-s3-stage2
+      Name: data-crawler-weather-forecast-daily-stage2
+      Role: !GetAtt GlueRole.Arn
+      SchemaChangePolicy:
+        DeleteBehavior: DEPRECATE_IN_DATABASE
+        UpdateBehavior: UPDATE_IN_DATABASE
+      Targets:
+        S3Targets:
+          - Path: !Sub
+            - s3://${BucketName}/stage2/stage2_DailyForecast/
+            - { BucketName: !ImportValue CoreIglooDataWarehouseS3Bucket }
+
+  WeatherForecastHourlyStage2Crawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Configuration: "{\"Version\":1,\"Grouping\":{\"TableGroupingPolicy\":\"CombineCompatibleSchemas\"}}"
+      DatabaseName: data-catalogue-s3-stage2
+      Name: data-crawler-weather-forecast-hourly-stage2
+      Role: !GetAtt GlueRole.Arn
+      SchemaChangePolicy:
+        DeleteBehavior: DEPRECATE_IN_DATABASE
+        UpdateBehavior: UPDATE_IN_DATABASE
+      Targets:
+        S3Targets:
+          - Path: !Sub
+            - s3://${BucketName}/stage2/stage2_HourlyForecast/
+            - { BucketName: !ImportValue CoreIglooDataWarehouseS3Bucket }
+                  
 
 Outputs:
   S3SyncUserAccessKey:
@@ -156,3 +213,5 @@ Outputs:
   S3SyncUserSecretAccessKey:
     Condition: UATOrStagingEnvironment
     Value: !GetAtt S3SyncUserAccessKey.SecretAccessKey
+
+  
