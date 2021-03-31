@@ -1,33 +1,41 @@
 import sys
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-
-import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
+
+sys.path.append("/opt/airflow/enzek-meterpoint-readings")
+
+from conf import config
+from common import schedules
 from process_smart.d0380_sftp_to_s3 import copy_all_from_d0380
 from common.slack_utils import alert_slack
 import sentry_sdk
 
+dag_id = "igloo_smart_d0380"
+
+
+def get_schedule():
+    env = config.environment_config["environment"]
+    return schedules.get_schedule(env, dag_id)
+
+
 args = {
     "owner": "Airflow",
     "start_date": days_ago(2),
-    "on_failure_callback": alert_slack
+    "on_failure_callback": alert_slack,
 }
 
 
 dag = DAG(
-    dag_id="igloo_smart_d0380",
+    dag_id=dag_id,
     default_args=args,
-    schedule_interval=None,
+    schedule_interval=get_schedule(),
     tags=["cdw"],
     catchup=False,
 )
 
+
 def copy_all_from_d0380_wrapper():
-    """
-    :param: execution_date a string in the form 'YYYY-MM-DD'
-    """
     try:
         copy_all_from_d0380()
     except Exception as e:
