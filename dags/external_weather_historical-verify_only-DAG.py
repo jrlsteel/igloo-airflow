@@ -27,16 +27,17 @@ args = {
 }
 
 dag = DAG(
-    dag_id='igloo_weather_historical',
+    dag_id='igloo_weather_historical_verify_only',
     default_args=args,
-    schedule_interval='00 17 * * *',
+    schedule_interval=None,
     tags=['cdw'],
     catchup=False,
     max_active_runs=1,
 )
 
 
-def fn_weather_historical_daily_verify():
+def verify_postcode_data_exists_for_weather_station_postcodes():
+    #Checks there is postcode data for weather station postcodes in redshift table ref_historical_weather
     try:
         gsp_weather_station_postcodes = [
             'IP7 7RE',
@@ -79,29 +80,11 @@ def fn_weather_historical_daily_verify():
         sentry_sdk.flush(5)
         raise e
 
-start_weather_mirror_jobs = BashOperator(
-    task_id='start_weather_processing_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_mirror_jobs.py',
-    dag=dag,
-)
-
-start_weather_staging_jobs = BashOperator(
-    task_id='start_weather_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_staging_jobs.py',
-    dag=dag,
-)
-
-start_weather_ref_jobs = BashOperator(
-    task_id='start_weather_ref_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_ref_jobs.py',
-    dag=dag,
-)
-
 weather_historical_daily_verify = PythonOperator(
     task_id="weather_historical_daily_verify_task",
-    python_callable=fn_weather_historical_daily_verify,
+    python_callable=verify_postcode_data_exists_for_weather_station_postcodes,
     dag=dag,
 )
 
-start_weather_mirror_jobs >> start_weather_staging_jobs >> start_weather_ref_jobs >> weather_historical_daily_verify
+weather_historical_daily_verify
 
