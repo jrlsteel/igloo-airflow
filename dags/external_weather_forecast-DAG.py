@@ -182,8 +182,8 @@ weather_forecast_hourly_verify = PythonOperator(
     dag=dag,
 )
 
-weather_forecast_daily_download >> weather_forecast_daily_store >> crawler_weather_forcecast_daily_task >> weather_forecast_daily_verify
-weather_forecast_hourly_download >> weather_forecast_hourly_store >> crawler_weather_forcecast_hourly_task >> weather_forecast_hourly_verify
+weather_forecast_daily_download >> crawler_weather_forcecast_daily_task >> weather_forecast_daily_store >>  weather_forecast_daily_verify
+weather_forecast_hourly_download >> crawler_weather_forcecast_hourly_task >> weather_forecast_hourly_store >>  weather_forecast_hourly_verify
 
 #  To avoid overloading the weatherbit.io API, we make sure that the download
 #  steps run sequentially.
