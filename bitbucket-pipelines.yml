@@ -1,19 +1,25 @@
 image: atlassian/default-image:2
 
+definitions:
+  steps:
+    - step: &tests
+        name: Test
+        image:
+          name: 555393537168.dkr.ecr.eu-west-1.amazonaws.com/build-tools/aws-sam-cli:latest
+          aws:
+            access-key: $AWS_ACCESS_KEY_ID_UAT
+            secret-key: $AWS_SECRET_ACCESS_KEY_UAT
+        services:
+          - docker
+        script:
+          - make ci-test
+        artifacts:
+          - coverage.xml
+
 pipelines:
   branches:
     '{feature/*,bugfix/*}':
-      - step:
-          name: Test
-          image:
-            name: 555393537168.dkr.ecr.eu-west-1.amazonaws.com/build-tools/aws-sam-cli:latest
-            aws:
-              access-key: $AWS_ACCESS_KEY_ID_UAT
-              secret-key: $AWS_SECRET_ACCESS_KEY_UAT
-          services:
-            - docker
-          script:
-            - make ci-test
+      - step: *tests
       - step:
           trigger: manual
           name: Build, package and push to S3
@@ -34,17 +40,7 @@ pipelines:
             - make -e ENVIRONMENT=uat build package deploy
 
     develop:
-      - step:
-          name: Test
-          image:
-            name: 555393537168.dkr.ecr.eu-west-1.amazonaws.com/build-tools/aws-sam-cli:latest
-            aws:
-              access-key: $AWS_ACCESS_KEY_ID_UAT
-              secret-key: $AWS_SECRET_ACCESS_KEY_UAT
-          services:
-            - docker
-          script:
-            - make ci-test
+      - step: *tests
       - step:
           name: Build, package and push to S3
           deployment: UAT
