@@ -12,19 +12,47 @@ Password: /T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX (this was provided by Ed
 def alert_slack(context):
     slack_webhook_token = BaseHook.get_connection(SLACK_CONN_ID).password
 
-    slack_msg = """
-            :red_circle: Task Failed. 
-            *Task*: {task}  
-            *Dag*: {dag} 
-            *Execution Time*: {exec_date}  
-            *Log Url*: {log_url} 
-            """.format(
-            task=context.get('task_instance').task_id,
-            dag=context.get('task_instance').dag_id,
-            ti=context.get('task_instance'),
-            exec_date=context.get('execution_date'),
-            log_url=context.get('task_instance').log_url,
-        )
+    task_instance = context.get('task_instance')
+
+    if hasattr(task_instance.task, 'doc_md'):
+        task_doc = task_instance.task.doc_md
+    elif hasattr(task_instance.task, 'doc'):
+        task_doc = task_instance.task.doc
+    else:
+        task_doc = None
+
+    if task_doc is not None:
+        slack_msg = """
+:red_circle: Task Failed. 
+*Task*: {task}  
+*Dag*: {dag} 
+*Task Instance*: {ti}
+*Execution Time*: {exec_date}  
+*Log Url*: {log_url}
+{task_doc}
+""".format(
+                task=context.get('task_instance').task_id,
+                dag=context.get('task_instance').dag_id,
+                ti=context.get('task_instance'),
+                exec_date=context.get('execution_date'),
+                log_url=context.get('task_instance').log_url,
+                task_doc=task_doc
+            )
+    else:
+        slack_msg = """
+:red_circle: Task Failed. 
+*Task*: {task}  
+*Dag*: {dag} 
+*Task Instance*: {ti}
+*Execution Time*: {exec_date}  
+*Log Url*: {log_url}
+""".format(
+                task=context.get('task_instance').task_id,
+                dag=context.get('task_instance').dag_id,
+                ti=context.get('task_instance'),
+                exec_date=context.get('execution_date'),
+                log_url=context.get('task_instance').log_url,
+            )
 
     failed_alert = SlackWebhookOperator(
         task_id='slack_test',
