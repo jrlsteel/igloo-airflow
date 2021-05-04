@@ -38,12 +38,12 @@ dag = DAG(
 
 directory = util.get_dir()
 s3_key = directory["s3_key"]
-s3_bucket = directory['s3_bucket']
+s3_bucket = directory["s3_bucket"]
 environment = util.get_env()
 staging_job_name = directory["glue_staging_meterpoints_job_name"]
 ref_job_name = directory["glue_ref_meterpoints_job_name"]
-staging_process_name = 'meterpoints'
-ref_process_name = 'ensek_meterpoints'
+staging_process_name = "meterpoints"
+ref_process_name = "ensek_meterpoints"
 
 date_today_string = str(datetime.date.today())
 
@@ -51,15 +51,24 @@ date_today_string = str(datetime.date.today())
 def process_glue_job(job_name, process_name):
     # job_id = util.get_jobID()
     try:
-        print('job_name-- ',job_name)
-        print('s3_bucket-- ',s3_bucket)
-        print('environment-- ',environment)
-        print('process_name-- ',process_name)
+        print("job_name-- ", job_name)
+        print("s3_bucket-- ", s3_bucket)
+        print("environment-- ", environment)
+        print("process_name-- ", process_name)
         # util.batch_logging_insert(job_id, 9, 'ensek_pa_staging_gluejob', 'start_ensek_api_pa_jobs.py')
-        obj_stage = glue_job(job_name=job_name, s3_bucket=s3_bucket, environment=environment, processJob=process_name)
+        obj_stage = glue_job(
+            job_name=job_name,
+            s3_bucket=s3_bucket,
+            environment=environment,
+            processJob=process_name,
+        )
         job_response = obj_stage.run_glue_job()
         if job_response:
-            print("{0}: Staging Job Completed successfully".format(datetime.datetime.now().strftime('%H:%M:%S')))
+            print(
+                "{0}: Staging Job Completed successfully".format(
+                    datetime.datetime.now().strftime("%H:%M:%S")
+                )
+            )
             # util.batch_logging_update(job_id, 'e')
             # return staging_job_response
         else:
@@ -70,8 +79,6 @@ def process_glue_job(job_name, process_name):
         print("Error in Staging Job :- " + str(e))
         # util.batch_logging_update(job_id, 'f', str(e))
         sys.exit(1)
-
-
 
 
 def sentry_wrapper(python_task_variable):
@@ -89,13 +96,15 @@ def sentry_wrapper(python_task_variable):
 def dummy_python_task():
     print("I am a dummy python operator for airflow.")
 
+
 # DAG Tasks
 
 api_extract_meterpoints = BashOperator(
-    task_id = 'api_extract_meterpoints_bash',
-    bash_command = 'cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py',
+    task_id="api_extract_meterpoints_bash",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py",
     dag=dag,
-    doc_md = """# Purpose
+)
+api_extract_meterpoints.doc_md = """# Purpose
     
     Extracts meterpoint information from account Ensek for each Account ID
     
@@ -107,7 +116,6 @@ api_extract_meterpoints = BashOperator(
     
     This step has a long run time, and rerunning it would likely impact other batch processes and Ensek response times.
     """
-)
 
 
 api_extract_verify_meterpoints = PythonOperator(
@@ -120,7 +128,8 @@ api_extract_verify_meterpoints = PythonOperator(
         "s3_prefix": s3_key["MeterPoints"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_meterpoints.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -130,8 +139,8 @@ api_extract_verify_meterpoints = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["MeterPoints"])
-
+    """.format(
+    s3_key["MeterPoints"]
 )
 
 
@@ -145,7 +154,8 @@ api_extract_verify_meterpoints_attributes = PythonOperator(
         "s3_prefix": s3_key["MeterPointsAttributes"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_meterpoints.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -155,7 +165,8 @@ api_extract_verify_meterpoints_attributes = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["MeterPointsAttributes"])
+    """.format(
+    s3_key["MeterPointsAttributes"]
 )
 
 
@@ -169,7 +180,8 @@ api_extract_verify_meters = PythonOperator(
         "s3_prefix": s3_key["Meters"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_meters.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -179,7 +191,8 @@ api_extract_verify_meters = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["Meters"])
+    """.format(
+    s3_key["Meters"]
 )
 
 
@@ -193,7 +206,8 @@ api_extract_verify_meters_attributes = PythonOperator(
         "s3_prefix": s3_key["MetersAttributes"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_meters_attributes.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -203,7 +217,8 @@ api_extract_verify_meters_attributes = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["MetersAttributes"])
+    """.format(
+    s3_key["MetersAttributes"]
 )
 
 
@@ -217,7 +232,8 @@ api_extract_verify_registers = PythonOperator(
         "s3_prefix": s3_key["Registers"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_registers.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -227,7 +243,8 @@ api_extract_verify_registers = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["Registers"])
+    """.format(
+    s3_key["Registers"]
 )
 
 
@@ -241,7 +258,8 @@ api_extract_verify_register_attributes = PythonOperator(
         "s3_prefix": s3_key["RegistersAttributes"],
     },
     dag=dag,
-    doc_md="""# Purpose
+)
+api_extract_verify_register_attributes.doc_md = """# Purpose
     Verification: There are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts
 
     # Suggest action on failure
@@ -251,16 +269,18 @@ api_extract_verify_register_attributes = PythonOperator(
     # Justification
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
-    """.format(s3_key["RegistersAttributes"])
+    """.format(
+    s3_key["RegistersAttributes"]
 )
 
 
 staging_meterpoints = PythonOperator(
     task_id="staging_meterpoints",
     python_callable=process_glue_job,
-    op_args=[ staging_job_name, staging_process_name ],
+    op_args=[staging_job_name, staging_process_name],
     dag=dag,
-    doc_md="""# Purpose
+)
+staging_meterpoints.doc_md = """# Purpose
     Runs glue job on the stage 1 meterpoints files which reduces them to 17 parquet files and writes them to stage 2
 
     # Suggest action on failure
@@ -271,15 +291,15 @@ staging_meterpoints = PythonOperator(
 
     Given this task is long running, rerunning it would impact other batch processes significantly.
     """
-)
 
 
 staging_verify_meterpoints = PythonOperator(
-    task_id="staging_verify_meterpoints",   
+    task_id="staging_verify_meterpoints",
     python_callable=verify_seventeen_new_files_in_s3,
     op_kwargs={"s3_prefix": "stage2/stage2_meterpoints"},
     dag=dag,
-    doc_md="""# Purpose
+)
+staging_verify_meterpoints.doc_md = """# Purpose
     Verification: There are sufficient new files in the staging directory.
 
     # Suggest action on failure
@@ -290,7 +310,6 @@ staging_verify_meterpoints = PythonOperator(
 
     As the step simply counts files in a directory there will be no change given it runs after extractions. 
     """
-)
 
 
 ref_tables_meterpoints = PythonOperator(
@@ -298,7 +317,8 @@ ref_tables_meterpoints = PythonOperator(
     python_callable=process_glue_job,
     op_args=[ref_job_name, ref_process_name],
     dag=dag,
-    doc_md="""# Purpose
+)
+ref_tables_meterpoints.doc_md = """# Purpose
     This step takes stage 2 data and inserts it into relavent redshift reference tables.
 
     # Suggest action on failure
@@ -309,7 +329,6 @@ ref_tables_meterpoints = PythonOperator(
 
     Given this task is long running, rerunning it would impact other batch processes significantly.
     """
-)
 
 
 ref_tables_verify_meterpoints = PythonOperator(
@@ -322,9 +341,20 @@ ref_tables_verify_meterpoints = PythonOperator(
         "ref_meters_attributes": "ref_meters_attributes",
         "ref_registers": "ref_registers",
         "ref_registers_attributes": "ref_registers_attributes",
-},
+    },
     dag=dag,
 )
+ref_tables_verify_meterpoints.doc_md = """# Purpose
+    Verification: There are sufficient new files in the staging directory.
+
+    # Suggest action on failure
+
+    No action 
+
+    # Justification
+
+    As the step simply counts files in a directory there will be no change given it runs after extractions. 
+    """
 
 # Dependencies
 
