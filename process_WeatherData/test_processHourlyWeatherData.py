@@ -1,3 +1,4 @@
+import os
 import sys
 import io
 import json
@@ -12,8 +13,9 @@ sys.path.append('..')
 from process_forecast_weather_data import ForecastWeather
 import process_forecast_weather_data as weather_module
 
-api_returned_data_hourly_json = open('fixtures/api_returned_data_hourly.json', 'r').read()
-api_returned_data_daily_json = open('fixtures/api_returned_data_daily.json', 'r').read()
+dirname = os.path.dirname(__file__)
+api_returned_data_hourly_json = open(os.path.join(dirname, "fixtures/api_returned_data_hourly.json"), 'r').read()
+api_returned_data_daily_json = open(os.path.join(dirname, "fixtures/api_returned_data_daily.json"), 'r').read()
 
 api_returned_data_hourly = json.loads(api_returned_data_hourly_json)
 api_returned_data_daily = json.loads(api_returned_data_daily_json)

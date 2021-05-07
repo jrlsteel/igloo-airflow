@@ -1,0 +1,56 @@
+[run]
+source =                         
+    process_LandRegistry                  
+    process_NRL
+    __init__.py                     
+    process_Nosi                      
+    process_WeatherData
+    bitbucket-pipelines.yml         
+    process_aurora
+    cloudformation                  
+    process_calculated_steps
+    common                          
+    process_data_gate
+    conf                            
+    process_eac_aq
+    connections                     
+    process_go_cardless
+    process_mirror
+    dags                            
+    process_postcodes
+    process_reports
+    process_smart
+    process_square
+    process_table_comparisons
+    process_ALP                     
+    process_D18                     
+    process_EPC                     
+    process_Ensek                   
+    process_EstimatedAdvance        
+    process_Igloo                   
+    process_IglooZendesk
+    process_tado
+    process_verification
+    utils            
+
+[report]
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
+    if self\.debug
+
+    # Don't complain if tests don't hit defensive assertion code:
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run:
+    if 0:
+    if __name__ == .__main__.:
+
+    # Don't worry about logging in prod
+    iglog.in_prod_env
+show_missing = true
+precision = 2

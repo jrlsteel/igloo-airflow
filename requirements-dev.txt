@@ -5,3 +5,4 @@ freezegun==1.0.0
 pytest
 pytest-mock
 requests-mock
+coverage==5.4
