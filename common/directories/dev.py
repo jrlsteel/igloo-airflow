@@ -415,6 +415,9 @@ dev = {
         "SFTP": "NOSI"
     },
 
+    # Glue Jobs 
+    "glue_staging_meterpoints_job_name": "process_staging_ensek_meterpoints_files",
+    "glue_ref_meterpoints_job_name": "_process_meterpoint_ref_tables",
     "glue_ensek_job_name": "_process_ref_tables",
     "glue_d18_job_name": "_process_ref_tables",
     "glue_direct_debits_job_name": "_process_ref_tables",
@@ -429,8 +432,6 @@ dev = {
     "glue_alp_job_name": "_process_ref_tables",
     "glue_customerDB_job_name": "_process_ref_customerdb",
     "glue_staging_job_name": "process_staging_files",
-    "glue_staging_meterpoints_job_name": "process_staging_ensek_meterpoints_files",
-    "glue_ref_meterpoints_job_name": "_process_meterpoint_ref_tables",
     "glue_staging_smart_job_name": "process_staging_smart_files",
     "glue_tado_efficiency_job_name": "_process_ref_tables",
     "glue_daily_sales_job_name": "_process_ref_tables",

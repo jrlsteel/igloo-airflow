@@ -404,6 +404,9 @@ prod = {
         "SFTP": "NOSI"
     },
 
+    # Glue Jobs
+    "glue_staging_meterpoints_job_name": "process_staging_ensek_meterpoints_files",
+    "glue_ref_meterpoints_job_name": "_process_meterpoint_ref_tables",
     "glue_ensek_job_name": "_process_ref_tables_prod",
     "glue_d18_job_name": "_process_ref_tables_prod",
     "glue_direct_debits_job_name": "_process_ref_tables_prod",
