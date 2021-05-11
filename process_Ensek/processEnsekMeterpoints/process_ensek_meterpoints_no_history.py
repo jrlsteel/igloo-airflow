@@ -15,6 +15,9 @@ import pandas
 import sys
 import os
 
+
+
+sys.path.append('..')
 sys.path.append('../..')
 
 from common import utils as util
