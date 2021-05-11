@@ -78,6 +78,7 @@ if __name__ == '__main__':
         s.submit_all_ensek_pa_scripts()
 
     elif s.env in ['preprod', 'dev']:
+        s.submit_all_ensek_pa_scripts()
         s3_destination_bucket = s.dir['s3_bucket']
         s3_source_bucket = s.dir['s3_source_bucket']
 
