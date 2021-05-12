@@ -1,0 +1,636 @@
+[
+    {
+        "associationStartDate": "2020-12-09T00:00:00",
+        "associationEndDate": "",
+        "supplyStartDate": "2020-12-30T00:00:00",
+        "supplyEndDate": "",
+        "isSmart": false,
+        "isSmartCommunicating": false,
+        "externalReference": "",
+        "id": 326218,
+        "meterPointNumber": 2000022892662,
+        "meterPointType": "E",
+        "meters": [
+            {
+                "meterId": 309928,
+                "meterSerialNumber": "19L3578888",
+                "installedDate": "2019-09-12T00:00:00",
+                "removedDate": "",
+                "registers": [
+                    {
+                        "id": 331651,
+                        "registerReference": "1",
+                        "tariffComponent": "",
+                        "attributes": [
+                            {
+                                "attributeName": "Measurement_Quantity_ID",
+                                "attributeValue": "AI",
+                                "attributeDescription": "Measurement  Quantity ID"
+                            },
+                            {
+                                "attributeName": "Multiplier",
+                                "attributeValue": "1",
+                                "attributeDescription": "Multiplier"
+                            },
+                            {
+                                "attributeName": "No_Of_Digits",
+                                "attributeValue": "5",
+                                "attributeDescription": "No  Of  Digits"
+                            },
+                            {
+                                "attributeName": "Type",
+                                "attributeValue": "C",
+                                "attributeDescription": "Type"
+                            }
+                        ],
+                        "tpr": "",
+                        "tprPeriodDescription": "HHDAY",
+                        "eacAq": 10497.1,
+                        "sourceIdType": "D0019"
+                    }
+                ],
+                "attributes": [
+                    {
+                        "attributeName": "Manufacturers_Make_Type",
+                        "attributeValue": "Landis+ Gyr E470",
+                        "attributeDescription": "Manufacturers  Make  Type"
+                    },
+                    {
+                        "attributeName": "METER_LOCATION",
+                        "attributeValue": "E",
+                        "attributeDescription": "Meter Location"
+                    },
+                    {
+                        "attributeName": "MeterType",
+                        "attributeValue": "S2ADE",
+                        "attributeDescription": "Meter Type"
+                    }
+                ]
+            }
+        ],
+        "attributes": [
+            {
+                "attributeName": "DA",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2021-03-05T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "DA"
+            },
+            {
+                "attributeName": "DA",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "DA"
+            },
+            {
+                "attributeName": "DC",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2021-03-05T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "DC"
+            },
+            {
+                "attributeName": "DC",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "DC"
+            },
+            {
+                "attributeName": "Distributor",
+                "attributeValue": "SOUT",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Distributor"
+            },
+            {
+                "attributeName": "EnergisationStatus",
+                "attributeValue": "E",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Energisation Status"
+            },
+            {
+                "attributeName": "Green Deal",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Green  Deal"
+            },
+            {
+                "attributeName": "greenDealActive",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "green Deal Active"
+            },
+            {
+                "attributeName": "GSP",
+                "attributeValue": "_H",
+                "effectiveFromDate": "1996-04-01T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "GSP"
+            },
+            {
+                "attributeName": "isCOT",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "is COT"
+            },
+            {
+                "attributeName": "isPrepay",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "is Prepay"
+            },
+            {
+                "attributeName": "LLF Indicator",
+                "attributeValue": "A",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "LLF  Indicator"
+            },
+            {
+                "attributeName": "LLFC",
+                "attributeValue": "100",
+                "effectiveFromDate": "1998-07-13T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "LLFC"
+            },
+            {
+                "attributeName": "Measurement Class",
+                "attributeValue": "F",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Measurement  Class"
+            },
+            {
+                "attributeName": "Metering Type",
+                "attributeValue": "NHH",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Metering  Type"
+            },
+            {
+                "attributeName": "MeterMakeAndModel",
+                "attributeValue": "Landis+ Gyr E470",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Meter Make And Model"
+            },
+            {
+                "attributeName": "MeterType",
+                "attributeValue": "S2ADE",
+                "effectiveFromDate": "2019-09-12T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Meter Type"
+            },
+            {
+                "attributeName": "MOP",
+                "attributeValue": "EMSL",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "MOP"
+            },
+            {
+                "attributeName": "MTC",
+                "attributeValue": "801",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "MTC"
+            },
+            {
+                "attributeName": "MTC Related",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "MTC  Related"
+            },
+            {
+                "attributeName": "No_Of_Digits",
+                "attributeValue": "5",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "No  Of  Digits"
+            },
+            {
+                "attributeName": "OLD_DA",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "Old Da"
+            },
+            {
+                "attributeName": "OLD_DC",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "2021-03-04T00:00:00",
+                "attributeDescription": "Old Dc"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER",
+                "attributeValue": "TULP",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER_DA",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier Da"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER_DC",
+                "attributeValue": "UDMS",
+                "effectiveFromDate": "2018-10-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier Dc"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER_MOP",
+                "attributeValue": "EMSL",
+                "effectiveFromDate": "2019-02-27T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier Mop"
+            },
+            {
+                "attributeName": "Payment_Type",
+                "attributeValue": "Credit",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Payment  Type"
+            },
+            {
+                "attributeName": "Profile Class",
+                "attributeValue": "1",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Profile  Class"
+            },
+            {
+                "attributeName": "ReadCycle",
+                "attributeValue": "N",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "Read Cycle"
+            },
+            {
+                "attributeName": "Registration_Transaction_Number",
+                "attributeValue": "15838710",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Registration  Transaction  Number"
+            },
+            {
+                "attributeName": "SSC",
+                "attributeValue": "0393",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "SSC"
+            },
+            {
+                "attributeName": "SUPPLIER",
+                "attributeValue": "PION",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "SUPPLIER"
+            },
+            {
+                "attributeName": "Supply_Status",
+                "attributeValue": "LIVE",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Supply  Status"
+            }
+        ]
+    },
+    {
+        "associationStartDate": "2020-12-09T00:00:00",
+        "associationEndDate": "",
+        "supplyStartDate": "2020-12-30T00:00:00",
+        "supplyEndDate": "",
+        "isSmart": false,
+        "isSmartCommunicating": false,
+        "externalReference": "",
+        "id": 326219,
+        "meterPointNumber": 3930574909,
+        "meterPointType": "G",
+        "meters": [
+            {
+                "meterId": 312908,
+                "meterSerialNumber": "E6S15524731961",
+                "installedDate": "2019-09-12T00:00:00",
+                "removedDate": "",
+                "registers": [
+                    {
+                        "id": 334873,
+                        "registerReference": "G",
+                        "tariffComponent": "",
+                        "attributes": [
+                            {
+                                "attributeName": "Multiplier",
+                                "attributeValue": "1",
+                                "attributeDescription": "Multiplier"
+                            },
+                            {
+                                "attributeName": "No_Of_Digits",
+                                "attributeValue": "5",
+                                "attributeDescription": "No  Of  Digits"
+                            },
+                            {
+                                "attributeName": "Units_Of_Measure",
+                                "attributeValue": "SCFH",
+                                "attributeDescription": "Units  Of  Measure"
+                            }
+                        ],
+                        "tpr": "",
+                        "tprPeriodDescription": "GAS",
+                        "eacAq": 13029.0,
+                        "sourceIdType": ""
+                    }
+                ],
+                "attributes": [
+                    {
+                        "attributeName": "Amr_Indicator",
+                        "attributeValue": "N",
+                        "attributeDescription": "Amr  Indicator"
+                    },
+                    {
+                        "attributeName": "Bypass_Fitted_Indicator",
+                        "attributeValue": "N",
+                        "attributeDescription": "Bypass  Fitted  Indicator"
+                    },
+                    {
+                        "attributeName": "Collar_Fitted_Indicator",
+                        "attributeValue": "N",
+                        "attributeDescription": "Collar  Fitted  Indicator"
+                    },
+                    {
+                        "attributeName": "Conversion_Factor",
+                        "attributeValue": "1.02264",
+                        "attributeDescription": "Conversion  Factor"
+                    },
+                    {
+                        "attributeName": "Gas_Act_Owner",
+                        "attributeValue": "S",
+                        "attributeDescription": "Gas  Act  Owner"
+                    },
+                    {
+                        "attributeName": "Imperial_Indicator",
+                        "attributeValue": "N",
+                        "attributeDescription": "Imperial  Indicator"
+                    },
+                    {
+                        "attributeName": "Inspection_Date",
+                        "attributeValue": "7/29/2016 12:00:00 AM",
+                        "attributeDescription": "Inspection  Date"
+                    },
+                    {
+                        "attributeName": "Manufacture_Code",
+                        "attributeValue": "LPG",
+                        "attributeDescription": "Manufacture  Code"
+                    },
+                    {
+                        "attributeName": "Meter_Link_Code",
+                        "attributeValue": "F",
+                        "attributeDescription": "Meter  Link  Code"
+                    },
+                    {
+                        "attributeName": "METER_LOCATION",
+                        "attributeValue": "0",
+                        "attributeDescription": "Meter Location"
+                    },
+                    {
+                        "attributeName": "Meter_Location_Description",
+                        "attributeValue": "GARAGE",
+                        "attributeDescription": "Meter  Location  Description"
+                    },
+                    {
+                        "attributeName": "Meter_Manufacturer_Code",
+                        "attributeValue": "LPG",
+                        "attributeDescription": "Meter  Manufacturer  Code"
+                    },
+                    {
+                        "attributeName": "Meter_Mechanism_Code",
+                        "attributeValue": "S2",
+                        "attributeDescription": "Meter  Mechanism  Code"
+                    },
+                    {
+                        "attributeName": "Meter_Status",
+                        "attributeValue": "LI",
+                        "attributeDescription": "Meter  Status"
+                    },
+                    {
+                        "attributeName": "MeterType",
+                        "attributeValue": "U",
+                        "attributeDescription": "Meter Type"
+                    },
+                    {
+                        "attributeName": "Model_Code",
+                        "attributeValue": "E6VG470",
+                        "attributeDescription": "Model  Code"
+                    },
+                    {
+                        "attributeName": "Payment_Type",
+                        "attributeValue": "Credit",
+                        "attributeDescription": "Payment  Type"
+                    },
+                    {
+                        "attributeName": "Year_Of_Manufacture",
+                        "attributeValue": "2019",
+                        "attributeDescription": "Year  Of  Manufacture"
+                    }
+                ]
+            }
+        ],
+        "attributes": [
+            {
+                "attributeName": "CLIENT_UNIQUE_REFERENCE",
+                "attributeValue": "235876839",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Client Unique Reference"
+            },
+            {
+                "attributeName": "Confirmation_Reference",
+                "attributeValue": "235876839",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Confirmation  Reference"
+            },
+            {
+                "attributeName": "COS_METER_TYPE",
+                "attributeValue": "U",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Cos Meter Type"
+            },
+            {
+                "attributeName": "Gas_Act_Owner",
+                "attributeValue": "S",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Act  Owner"
+            },
+            {
+                "attributeName": "Gas_Imperial_Meter_Indicator",
+                "attributeValue": "N",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Imperial  Meter  Indicator"
+            },
+            {
+                "attributeName": "Gas_Meter_Location_Code",
+                "attributeValue": "0",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Location  Code"
+            },
+            {
+                "attributeName": "Gas_Meter_Manufactured_Year",
+                "attributeValue": "2019",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Manufactured  Year"
+            },
+            {
+                "attributeName": "Gas_Meter_Manufacturer_Code",
+                "attributeValue": "LPG",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Manufacturer  Code"
+            },
+            {
+                "attributeName": "Gas_Meter_Mechanism",
+                "attributeValue": "S2",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Mechanism"
+            },
+            {
+                "attributeName": "Gas_Meter_Model",
+                "attributeValue": "E6VG470",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Model"
+            },
+            {
+                "attributeName": "Gas_Meter_Status",
+                "attributeValue": "LI",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  Meter  Status"
+            },
+            {
+                "attributeName": "Gas_No_Of_Digits",
+                "attributeValue": "5",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Gas  No  Of  Digits"
+            },
+            {
+                "attributeName": "IGT Indicator",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "IGT  Indicator"
+            },
+            {
+                "attributeName": "isPrepay",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "is Prepay"
+            },
+            {
+                "attributeName": "Large Site Indicator",
+                "attributeValue": "False",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Large  Site  Indicator"
+            },
+            {
+                "attributeName": "LDZ",
+                "attributeValue": "SO",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "LDZ"
+            },
+            {
+                "attributeName": "MAM",
+                "attributeValue": "MUT",
+                "effectiveFromDate": "2020-12-30T00:00:00",
+                "effectiveToDate": "",
+                "attributeDescription": "MAM"
+            },
+            {
+                "attributeName": "Meter Designation",
+                "attributeValue": "",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Meter  Designation"
+            },
+            {
+                "attributeName": "Meter Status",
+                "attributeValue": "",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Meter  Status"
+            },
+            {
+                "attributeName": "Meter_Round_The_Clock_Count",
+                "attributeValue": "0",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Meter  Round  The  Clock  Count"
+            },
+            {
+                "attributeName": "NOMINATION_SHIPPER_REF",
+                "attributeValue": "IGL-326219",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Nomination Shipper Ref"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER",
+                "attributeValue": "TUP",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier"
+            },
+            {
+                "attributeName": "OLD_SUPPLIER_MAM",
+                "attributeValue": "MUT",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Old Supplier Mam"
+            },
+            {
+                "attributeName": "SUPPLY_POINT_CATEGORY",
+                "attributeValue": "NDMA",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Supply Point Category"
+            },
+            {
+                "attributeName": "Supply_Status",
+                "attributeValue": "LIVE",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Supply  Status"
+            },
+            {
+                "attributeName": "Transporter",
+                "attributeValue": "Southern Gas Networks Ltd",
+                "effectiveFromDate": "",
+                "effectiveToDate": "",
+                "attributeDescription": "Transporter"
+            }
+        ]
+    }
+]
