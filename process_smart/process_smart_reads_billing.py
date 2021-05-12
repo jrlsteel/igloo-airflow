@@ -104,6 +104,9 @@ class SmartReadsBillings:
             body = json.dumps({
                 "meterReadingDateTime": df["meterreadingdatetime"].to_pydatetime().replace(tzinfo=datetime.timezone.utc).isoformat(),
                 "accountId": df["accountid"],
+                "uuid": df["uuid"],
+                "userId": df["user_id"],
+                "zendeskId": df["zendesk_id"],
                 "meterType": df["metertype"],
                 "meterPointNumber": df["meterpointnumber"],
                 "meter": df["meter"],

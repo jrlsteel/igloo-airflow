@@ -19,12 +19,12 @@ from freezegun import freeze_time
 
 # These are the columns that appear in vw_etl_smart_billing_reads_elec and vw_etl_smart_billing_reads_gas.
 elec_data_columns = ['manualmeterreadingid', 'accountid', 'meterreadingdatetime', 'metertype',
-                     'meterpointnumber', 'meter', 'register', 'reading', 'source', 'createdby', 'next_bill_date']
+                     'meterpointnumber', 'meter', 'register', 'reading', 'source', 'createdby', 'next_bill_date', 'user_id', 'zendesk_id', 'uuid']
 
 # Create some simple sample data - simulate a single row in the elec view.
 elec_data = [
     ['30-EB-5A-FF-FF-0C-54-AB', 1831, datetime.strptime('2020-10-11 00:00:00.000000', '%Y-%m-%d %H:%M:%S.%f'), 'Electricity',
-        2102, 115976, 125544, 8006.472, 'SMART', None, datetime.strptime('2020-10-17 00:00:00.000000', '%Y-%m-%d %H:%M:%S.%f')],
+        2102, 115976, 125544, 8006.472, 'SMART', None, datetime.strptime('2020-10-17 00:00:00.000000', '%Y-%m-%d %H:%M:%S.%f'), 1831, 361889743409, 'xxxx-xxxx-xxxx-xxxx'],
 ]
 
 
@@ -66,6 +66,9 @@ class TestSmartReadsBillings(unittest.TestCase):
         self.assertEqual(kargs[0], 'https://example.org')
         self.assertDictEqual(json.loads(kargs[1]), {
             'accountId': 1831,
+            'uuid': 'xxxx-xxxx-xxxx-xxxx',
+            'userId': 1831,
+            'zendeskId': 361889743409,
             'createdBy': None,
             'dateCreated': '2018-04-03T11:30:00.123456+00:00',
             'meter': 115976,
