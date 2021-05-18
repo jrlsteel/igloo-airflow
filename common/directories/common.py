@@ -456,6 +456,9 @@ order by account_id, mpxn, hhdate;
             "creditor_bank_account",
         ],
     },
+    "s3_keys":{
+        "internal_readings_stage2":"stage2/stage2_readingsinternal"
+    },
     "postcodes": {
         #  The API from which we download the postcode data.
         "api_url": "https://opendata.camden.gov.uk/api/views/tr8t-gqz7/rows.csv?accessType=DOWNLOAD",
