@@ -15,15 +15,15 @@ import logging
 import statistics
 from collections import defaultdict
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 import sys
 import os
 
 
-
-sys.path.append('..')
-sys.path.append('../..')
+sys.path.append("..")
+sys.path.append("../..")
 
 from common import utils as util
 from conf import config as con
@@ -36,10 +36,10 @@ iglog = util.IglooLogger()
 
 test_metric = []
 
+
 class MeterPoints:
     max_calls = con.api_config["max_api_calls"]
     rate = con.api_config["allowed_period_in_secs"]
-
 
     def __init__(self, process_num):
         self.pnum = process_num
@@ -64,8 +64,8 @@ class MeterPoints:
                 response = requests.get(api_url, headers=head)
                 total_api_time += time.time() - api_call_start
                 if response.status_code == 200:
-                    method_time = time.time() - start_time 
-                    response = json.loads(response.content.decode('utf-8'))
+                    method_time = time.time() - start_time
+                    response = json.loads(response.content.decode("utf-8"))
                     metrics[0]["api_method_time"].append(method_time)
                     test_metric.append(method_time)
                     return response
@@ -83,7 +83,8 @@ class MeterPoints:
                             metrics[0]["connection_error_counter"].value += 1
                             if metrics[0]["connection_error_counter"].value % 100 == 0:
                                 iglog.in_prod_env(
-                                    "Connection errors: {}".format(str(metrics[0]["connection_error_counter"])
+                                    "Connection errors: {}".format(
+                                        str(metrics[0]["connection_error_counter"])
                                     )
                                 )
                         break
@@ -94,7 +95,9 @@ class MeterPoints:
                         with metrics[0]["number_of_retries_total"].get_lock():
                             metrics[0]["number_of_retries_total"].value += 1
                             if attempt_num > 0:
-                                metrics[0]["retries_per_account"][account_id] = attempt_num
+                                metrics[0]["retries_per_account"][
+                                    account_id
+                                ] = attempt_num
                     except:
                         pass
                     time.sleep(retry_in_secs)
@@ -320,7 +323,7 @@ class MeterPoints:
         current_account = ""
         for account_id in account_ids:
             current_account = account_id
-            with metrics[0]["account_id_counter"].get_lock(): 
+            with metrics[0]["account_id_counter"].get_lock():
                 metrics[0]["account_id_counter"].value += 1
                 if metrics[0]["account_id_counter"].value % 1000 == 0:
                     iglog.in_prod_env(
@@ -344,13 +347,6 @@ class MeterPoints:
             else:
                 metrics[0]["accounts_with_no_data"].append(account_id)
         iglog.in_prod_env("Last account ID processed: {}".format(current_account))
-
-    # is this still used, if so what for?
-    def callApisNoProcessing(self, account_ids, metrics):
-        api_url_mp, head_mp = util.get_ensek_api_info1("meterpoints")
-
-        for account_id in account_ids:
-            self.get_api_response(api_url_mp, head_mp, account_id, metrics)
 
 
 def process_api_extract_meterpoints():
@@ -381,46 +377,6 @@ def process_api_extract_meterpoints():
     # p = MeterPoints()
     # p.processAccounts(account_ids, s3, dir_s3)
 
-    # Test for batch problems...
-    weekday = datetime.date.today().weekday()
-    if (
-        weekday == 4 or weekday == 5
-    ):  # Friday or Saturday - this runs in the evening so these are the weekend runs
-        print("Starting no-processing api call run-through")
-        n_processes = 12
-        k = int(len(account_ids) / n_processes)
-
-        print(len(account_ids))
-        print(k)
-        processes = []
-        lv = 0
-
-        start = timeit.default_timer()
-        for i in range(n_processes + 1):
-            p1 = MeterPoints(i)
-            print(i)
-            uv = i * k
-            if i == n_processes:
-                # print(d18_keys_s3[l:])
-                t = multiprocessing.Process(
-                    target=p1.callApisNoProcessing, args=([account_ids[lv:]])
-                )
-            else:
-                # print(d18_keys_s3[l:u])
-                t = multiprocessing.Process(
-                    target=p1.callApisNoProcessing, args=([account_ids[lv:uv]])
-                )
-            lv = uv
-
-            processes.append(t)
-
-        for p in processes:
-            p.start()
-            sleep(2)
-
-        for process in processes:
-            process.join()
-
     ####### Multiprocessing Starts #########
     env = util.get_env()
     total_processes = util.get_multiprocess("total_ensek_processes")
@@ -439,23 +395,22 @@ def process_api_extract_meterpoints():
     # Raw Metrics
     with Manager() as manager:
 
-
         # metrics = manager.dict()
         metrics = {
-        "api_error_codes": manager.list(),
-        "connection_error_counter": Value('i', 0),
-        "number_of_retries_total": Value('i', 0),
-        "retries_per_account": manager.dict(),
-        "api_method_time": manager.list(),
-        "no_meterpoints_data": manager.list(),
-        "no_meters_data": manager.list(),
-        "no_meterpoints_attributes_data": manager.list(),
-        "no_registers_data": manager.list(),
-        "no_registers_attributes_data": manager.list(),
-        "no_meters_attributes_data": manager.list(),
-        "account_id_counter": Value('i', 0),
-        "accounts_with_no_data": manager.list(),
-        "each_account_meterpoints": manager.list(),
+            "api_error_codes": manager.list(),
+            "connection_error_counter": Value("i", 0),
+            "number_of_retries_total": Value("i", 0),
+            "retries_per_account": manager.dict(),
+            "api_method_time": manager.list(),
+            "no_meterpoints_data": manager.list(),
+            "no_meters_data": manager.list(),
+            "no_meterpoints_attributes_data": manager.list(),
+            "no_registers_data": manager.list(),
+            "no_registers_attributes_data": manager.list(),
+            "no_meters_attributes_data": manager.list(),
+            "account_id_counter": Value("i", 0),
+            "accounts_with_no_data": manager.list(),
+            "each_account_meterpoints": manager.list(),
         }
 
         try:
@@ -472,7 +427,12 @@ def process_api_extract_meterpoints():
                     # print(d18_keys_s3[l:u])
                     t = multiprocessing.Process(
                         target=p1.processAccounts,
-                        args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3, [metrics]),
+                        args=(
+                            account_ids[lv:uv],
+                            s3_con(bucket_name),
+                            dir_s3,
+                            [metrics],
+                        ),
                     )
                 lv = uv
 
@@ -484,39 +444,53 @@ def process_api_extract_meterpoints():
 
             for process in processes:
                 process.join()
-    
+
         finally:
             start_metrics = timeit.default_timer()
-        ####### Multiprocessing Ends #########
+            ####### Multiprocessing Ends #########
             if metrics["api_method_time"] != []:
                 metrics["max_api_process_time"] = max(metrics["api_method_time"])
                 metrics["min_api_process_time"] = min(metrics["api_method_time"])
-                metrics["median_api_process_time"] = statistics.median(metrics["api_method_time"])
-                metrics["average_api_process_time"] = statistics.mean(metrics["api_method_time"])
+                metrics["median_api_process_time"] = statistics.median(
+                    metrics["api_method_time"]
+                )
+                metrics["average_api_process_time"] = statistics.mean(
+                    metrics["api_method_time"]
+                )
             else:
                 metrics["max_api_process_time"] = "No api times processed"
                 metrics["min_api_process_time"] = "No api times processed"
                 metrics["median_api_process_time"] = "No api times processed"
                 metrics["average_api_process_time"] = "No api times processed"
 
-
-            metrics["connection_error_counter"] = metrics["connection_error_counter"].value
-            metrics["number_of_retries_total"] = metrics["number_of_retries_total"].value
+            metrics["connection_error_counter"] = metrics[
+                "connection_error_counter"
+            ].value
+            metrics["number_of_retries_total"] = metrics[
+                "number_of_retries_total"
+            ].value
             metrics["account_id_counter"] = metrics["account_id_counter"].value
-            
-
 
             iglog.in_prod_env(
-                "Process completed in " + str(timeit.default_timer() - start) + " seconds\n"
+                "Process completed in "
+                + str(timeit.default_timer() - start)
+                + " seconds\n"
             )
             iglog.in_prod_env(
-                "Metrics completed in " + str(timeit.default_timer() - start_metrics) + " seconds\n"
+                "Metrics completed in "
+                + str(timeit.default_timer() - start_metrics)
+                + " seconds\n"
             )
             iglog.in_prod_env("METRICS FROM CURRENT RUN...\n")
             for metric_name, metric_data in metrics.items():
-                if metric_name in ["api_method_time","each_account_meterpoints", ]:
+                if metric_name in [
+                    "api_method_time",
+                    "each_account_meterpoints",
+                ]:
                     continue
-                iglog.in_prod_env(str(metric_name).upper() + "\n" + str(metric_data) + "\n")
+                iglog.in_prod_env(
+                    str(metric_name).upper() + "\n" + str(metric_data) + "\n"
+                )
 
 
 if __name__ == "__main__":
