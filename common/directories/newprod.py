@@ -413,6 +413,8 @@ newprod = {
     },
 
     # Glue Jobs
+    "glue_staging_internalreadings_job_name":"process_staging_ensek_internal_readings_files",
+    "glue_ref_internalreadings_job_name":"_process_ensek_internal_readings_ref_tables",
     "glue_staging_meterpoints_job_name": "process_staging_ensek_meterpoints_files",
     "glue_ref_meterpoints_job_name": "_process_meterpoint_ref_tables",
     "glue_ensek_job_name": "_process_ref_tables",
