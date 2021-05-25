@@ -107,6 +107,33 @@ class ProcessGlueJob:
             raise
 
 
+def process_glue_job_await_completion(job_name, process_name):
+    try:
+        print("job_name-- ", job_name)
+        print("s3_bucket-- ", s3_bucket)
+        print("environment-- ", environment)
+        print("process_name-- ", process_name)
+        obj_stage = ProcessGlueJob(
+            job_name=job_name,
+            s3_bucket=s3_bucket,
+            environment=environment,
+            processJob=process_name,
+        )
+        job_response = obj_stage.run_glue_job()
+        if job_response:
+            print(
+                "{0}: Staging Job Completed successfully".format(
+                    datetime.datetime.now().strftime("%H:%M:%S")
+                )
+            )
+        else:
+            print("Error occurred in Staging Job")
+            raise Exception
+    except Exception as e:
+        print("Error in Staging Job :- " + str(e))
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+
 if __name__ == '__main__':
     s = ProcessGlueJob('process_ref_d18')
     job_gluejob_response = s.run_glue_job()
