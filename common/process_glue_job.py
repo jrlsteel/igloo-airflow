@@ -1,6 +1,8 @@
 import boto3
 from time import sleep
 import sys
+import common
+import datetime
 
 sys.path.append('..')
 from connections import connect_db as db
@@ -108,6 +110,10 @@ class ProcessGlueJob:
 
 
 def process_glue_job_await_completion(job_name, process_name):
+    directory = common.utils.get_dir()
+    s3_bucket = directory["s3_bucket"]
+    environment = common.utils.get_env()
+    
     try:
         print("job_name-- ", job_name)
         print("s3_bucket-- ", s3_bucket)
