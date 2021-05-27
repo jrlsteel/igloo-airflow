@@ -50,8 +50,6 @@ directory = common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
 environment = common.utils.get_env()
-staging_job_name = directory["glue_staging_internalreadings_job_name"]
-ref_job_name = directory["glue_ref_internalreadings_job_name"]
 
 date_today_string = str(datetime.date.today())
 
@@ -211,10 +209,10 @@ api_extract_verify_register_attributes.doc = api_verification_report_string.form
 staging_meterpoints = PythonOperator(
     task_id="staging_meterpoints",
     python_callable=process_glue_job_await_completion,
-    op_args=[staging_job_name, common.directories.common["meterpoints"]["glue_job_name_staging"]],
+    op_args=[directory["glue_staging_meterpoints_job_name"], common.directories.common["meterpoints"]["glue_job_name_staging"]],
     dag=dag,
 )
-staging_meterpoints.doc = staging_report_string
+staging_meterpoints.doc = staging_report_string.format("Meterpoints")
 
 
 staging_verify_meterpoints = PythonOperator(
@@ -229,7 +227,7 @@ staging_verify_meterpoints.doc = staging_verify_report_string
 ref_tables_meterpoints = PythonOperator(
     task_id="ref_tables_meterpoints",
     python_callable=process_glue_job_await_completion,
-    op_args=[ref_job_name, common.directories.common["meterpoints"]["glue_job_name_ref"]],
+    op_args=[directory["glue_ref_meterpoints_job_name"], common.directories.common["meterpoints"]["glue_job_name_ref"]],
     dag=dag,
 )
 ref_tables_meterpoints.doc = ref_report_string
@@ -279,7 +277,7 @@ api_extract_verify_internalreadings.doc = api_verification_report_string.format(
 staging_internalreadings = PythonOperator(
     task_id="staging_internalreadings",
     python_callable=process_glue_job_await_completion,
-    op_args=[staging_job_name, common.directories.common["internalreadings"]["glue_job_name_staging"]],
+    op_args=[directory["glue_staging_internalreadings_job_name"], common.directories.common["internalreadings"]["glue_job_name_staging"]],
     dag=dag,
 )
 staging_internalreadings.doc = staging_report_string.format("Internal Readings")
@@ -297,7 +295,7 @@ staging_verify_internalreadings.doc = staging_verify_report_string
 ref_tables_internalreadings = PythonOperator(
     task_id="ref_tables_internalreadings",
     python_callable=process_glue_job_await_completion,
-    op_args=[ref_job_name, common.directories.common["internalreadings"]["glue_job_name_ref"]],
+    op_args=[directory["glue_ref_internalreadings_job_name"], common.directories.common["internalreadings"]["glue_job_name_ref"]],
     dag=dag,
 )
 ref_tables_internalreadings.doc = ref_report_string
