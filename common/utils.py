@@ -152,7 +152,7 @@ def execute_query(sql, return_as='d'):
     if env_conf in ['prod', 'newprod']:
         sql = sql
     else:
-        sql = sql + ' limit 10'
+        sql = sql + ' limit 24'
 
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
@@ -206,12 +206,12 @@ def get_accountID_fromDB(get_max, filter='live'):
         if env_conf in ['prod', 'newprod']:
             config_sql = sql_group['weekly']
         else:
-            config_sql = sql_group['weekly'] + ' limit 10'
+            config_sql = sql_group['weekly'] + ' limit 24'
     else:
         if env_conf in ['prod', 'newprod']:
             config_sql = sql_group['daily']
         else:
-            config_sql = sql_group['daily'] + ' limit 10'
+            config_sql = sql_group['daily'] + ' limit 24'
 
     account_ids = []
     if env_conf in ['prod', 'newprod']:
@@ -262,7 +262,7 @@ def get_ids_from_redshift(entity_type, job_name='default'):
     # if the current environment is not listed as the master source for this job, limit the ID list to 100 IDs
     # if no job name is passed in to this method, get_master_source('default') will always return 'prod'
     if get_env() != get_master_source(job_name):
-        sql += ' limit 100'
+        sql += ' limit 240'
 
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
