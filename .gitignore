@@ -281,3 +281,5 @@ dmypy.json
 
 conf/
 
+# VSCode settings
+.vscode
