@@ -1,4 +1,12 @@
 common = {
+    "internalreadings":{
+        "glue_job_name_staging":"ensek-readings-internal",
+        "glue_job_name_ref": "ensek_ref_readings",
+    },
+    "meterpoints":{
+        "glue_job_name_staging":"meterpoints",
+        "glue_job_name_ref": "ensek_meterpoints",
+    },
     "smart_mv_hh_elec_refresh": {
         "sql_query_smart_mv_hh_elec_refresh": "REFRESH MATERIALIZED VIEW mv_smart_stage2_smarthalfhourlyreads_elec",
     },
