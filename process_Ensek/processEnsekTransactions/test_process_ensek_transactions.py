@@ -9,7 +9,6 @@ from process_ensek_transactions import AccountTransactions
 
 from connections.connect_db import get_boto_S3_Connections as s3_con
 
-
 @mock_s3_deprecated
 def test_extract_account_transactions_json():
     s3_bucket_name = 'simulated-bucket'
@@ -69,9 +68,9 @@ def test_extract_account_transactions_json():
             "AccountTransactions": "stage1/AccountTransactions/",
         },
     }
-
+    metrics = {}
     account_transactions.extract_account_transactions_json(
-        data, account_id, k, dir_s3)
+        data, account_id, k, dir_s3, metrics)
 
     expected_s3_key = 'stage1/AccountTransactions/account_transactions_{}.csv'.format(
         account_id)
