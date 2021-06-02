@@ -2,7 +2,7 @@ import timeit
 
 import requests
 import json
-from pandas.io.json import json_normalize
+import pandas
 from ratelimit import limits, sleep_and_retry
 import time
 from requests import ConnectionError
@@ -15,15 +15,14 @@ import os
 
 sys.path.append('..')
 
-from common import utils as util
-from conf import config as con
+from common import utils
+from conf import config
 from connections.connect_db import get_boto_S3_Connections as s3_con
 
 
-
 class TariffHistory(object):
-    max_calls = con.api_config['max_api_calls']
-    rate = con.api_config['allowed_period_in_secs']
+    max_calls = config.api_config['max_api_calls']
+    rate = config.api_config['allowed_period_in_secs']
 
     def __init__(self):
         pass
@@ -35,8 +34,8 @@ class TariffHistory(object):
              get the response for the respective url that is passed as part of this function
         '''
         start_time = time.time()
-        timeout = con.api_config['connection_timeout']
-        retry_in_secs = con.api_config['retry_in_secs']
+        timeout = config.api_config['connection_timeout']
+        retry_in_secs = config.api_config['retry_in_secs']
         i = 0
         while True:
             try:
@@ -69,12 +68,12 @@ class TariffHistory(object):
         # global k,
         meta_tariff_history = ['tariffName', 'startDate', 'endDate', 'discounts', 'tariffType', 'exitFees', 'account_id']
 
-        df_tariff_history = json_normalize(data)
+        df_tariff_history = pandas.json_normalize(data)
         df_tariff_history['account_id'] = account_id
         df_tariff_history1 = df_tariff_history[meta_tariff_history]
 
         filename_tariff_history = 'df_tariff_history_' + str(account_id) + '.csv'
-        column_list = util.get_common_info('ensek_column_order', 'tariff_history')
+        column_list = utils.get_common_info('ensek_column_order', 'tariff_history')
         df_tariff_history_string = df_tariff_history1.to_csv(None, columns=column_list, index=False)
         # k.key = 'ensek-meterpoints/TariffHistory/' + filename_tariff_history
         k.key = dir_s3['s3_key']['TariffHistory'] + filename_tariff_history
@@ -84,12 +83,12 @@ class TariffHistory(object):
         if ('Electricity' in df_tariff_history.columns and not df_tariff_history['Electricity'].isnull) or not ('Electricity' in df_tariff_history.columns):
             # UnitRates
             meta_elec_unitrates = ['tariffName', 'startDate', 'endDate']
-            df_elec_unit_rates = json_normalize(data, record_path=[['Electricity', 'unitRates']], meta=meta_elec_unitrates)
+            df_elec_unit_rates = pandas.json_normalize(data, record_path=[['Electricity', 'unitRates']], meta=meta_elec_unitrates)
 
             if not df_elec_unit_rates.empty:
                 df_elec_unit_rates['account_id'] = account_id
                 filename_elec_unit_rates = 'th_elec_unitrates_' + str(account_id) + '.csv'
-                column_list = util.get_common_info('ensek_column_order', 'tariff_history_elec_unit_rates')
+                column_list = utils.get_common_info('ensek_column_order', 'tariff_history_elec_unit_rates')
                 df_elec_unit_rates_string = df_elec_unit_rates.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryElecUnitRates/' + filename_elec_unit_rates
                 k.key = dir_s3['s3_key']['TariffHistoryElecUnitRates'] + filename_elec_unit_rates
@@ -98,13 +97,13 @@ class TariffHistory(object):
 
             #  StandingCharge
             meta_elec_standing_charge = ['tariffName', 'startDate', 'endDate']
-            df_elec_standing_charge = json_normalize(data, record_path=[['Electricity', 'standingChargeRates']], meta=meta_elec_standing_charge)
+            df_elec_standing_charge = pandas.json_normalize(data, record_path=[['Electricity', 'standingChargeRates']], meta=meta_elec_standing_charge)
 
             if not df_elec_standing_charge.empty:
                 df_elec_standing_charge['account_id'] = account_id
 
                 filename_elec_standing_charge = 'th_elec_standingcharge_' + str(account_id) + '.csv'
-                column_list = util.get_common_info('ensek_column_order', 'tariff_history_elec_standing_charge')
+                column_list = utils.get_common_info('ensek_column_order', 'tariff_history_elec_standing_charge')
                 df_elec_standing_charge_string = df_elec_standing_charge.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryElecStandCharge/' + filename_elec_standing_charge
                 k.key = dir_s3['s3_key']['TariffHistoryElecStandCharge'] + filename_elec_standing_charge
@@ -115,13 +114,13 @@ class TariffHistory(object):
         if ('Gas' in df_tariff_history.columns and not df_tariff_history['Gas'].isnull) or not ('Gas' in df_tariff_history.columns):
             # UnitRates
             meta_gas_unitrates = ['tariffName', 'startDate', 'endDate']
-            df_gas_unit_rates = json_normalize(data, record_path=[['Gas', 'unitRates']], meta=meta_gas_unitrates)
+            df_gas_unit_rates = pandas.json_normalize(data, record_path=[['Gas', 'unitRates']], meta=meta_gas_unitrates)
 
             if not df_gas_unit_rates.empty:
                 df_gas_unit_rates['account_id'] = account_id
 
                 filename_gas_unit_rates = 'th_gas_unitrates_' + str(account_id) + '.csv'
-                column_list = util.get_common_info('ensek_column_order', 'tariff_history_gas_unit_rates')
+                column_list = utils.get_common_info('ensek_column_order', 'tariff_history_gas_unit_rates')
                 df_gas_unit_rates_string = df_gas_unit_rates.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryGasUnitRates/' + filename_gas_unit_rates
                 k.key = dir_s3['s3_key']['TariffHistoryGasUnitRates'] + filename_gas_unit_rates
@@ -130,13 +129,13 @@ class TariffHistory(object):
 
             # StandingCharge
             meta_gas_standing_charge = ['tariffName', 'startDate', 'endDate']
-            df_elec_standing_charge = json_normalize(data, record_path=[['Gas', 'standingChargeRates']], meta=meta_gas_standing_charge)
+            df_elec_standing_charge = pandas.json_normalize(data, record_path=[['Gas', 'standingChargeRates']], meta=meta_gas_standing_charge)
 
             if not df_elec_standing_charge.empty:
                 df_elec_standing_charge['account_id'] = account_id
 
                 filename_gas_standing_charge = 'th_gas_standingcharge_' + str(account_id) + '.csv'
-                column_list = util.get_common_info('ensek_column_order', 'tariff_history_gas_standing_charge')
+                column_list = utils.get_common_info('ensek_column_order', 'tariff_history_gas_standing_charge')
                 df_gas_standing_charge_string = df_elec_standing_charge.to_csv(None, columns=column_list, index=False)
                 # k.key = 'ensek-meterpoints/TariffHistoryGasStandCharge/' + filename_gas_standing_charge
                 k.key = dir_s3['s3_key']['TariffHistoryGasStandCharge'] + filename_gas_standing_charge
@@ -144,6 +143,7 @@ class TariffHistory(object):
                 # print(df_gas_standing_charge_string)
 
     def format_json_response(self, data):
+        print(f'data: {data}')
         data_str = json.dumps(data, indent=4).replace('null', '""')
         data_json = json.loads(data_str)
         return data_json
@@ -156,16 +156,17 @@ class TariffHistory(object):
             employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
-    def processAccounts(self, account_ids, k, dir_s3):
-        api_url, head = util.get_ensek_api_info1('tariff_history')
+    def process_accounts(self, account_ids, k, dir_s3):
+        api_url, head = utils.get_ensek_api_info1('tariff_history')
         for account_id in account_ids:
-            t = con.api_config['total_no_of_calls']
+            t = config.api_config['total_no_of_calls']
             # Get Account Staus
             print('ac: ' + str(account_id))
             msg_ac = 'ac:' + str(account_id)
             #self.log_error(msg_ac, '')
             api_url1 = api_url.format(account_id)
             th_response = self.get_api_response(api_url1, head)
+            print(f'th_response: {th_response}')
             if th_response:
                 formatted_tariff_history = self.format_json_response(th_response)
                 # print(json.dumps(formatted_tariff_history))
@@ -176,34 +177,34 @@ class TariffHistory(object):
                 #self.log_error(msg_ac, '')
 
 
-if __name__ == "__main__":
+def process_ensek_tariffs_history():
     freeze_support()
 
-    dir_s3 = util.get_dir()
+    dir_s3 = utils.get_dir()
     bucket_name = dir_s3['s3_bucket']
 
     s3 = s3_con(bucket_name)
 
     account_ids = []
     '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
+    if config.test_config['enable_manual'] == 'Y':
+        account_ids = config.test_config['account_ids']
 
-    if con.test_config['enable_file'] == 'Y':
-        account_ids = util.get_Users_from_s3(s3)
+    if config.test_config['enable_file'] == 'Y':
+        account_ids = utils.get_Users_from_s3(s3)
 
-    if con.test_config['enable_db'] == 'Y':
-        account_ids = util.get_accountID_fromDB(False, filter='tariff-diffs')
+    if config.test_config['enable_db'] == 'Y':
+        account_ids = utils.get_accountID_fromDB(False, filter='tariff-diffs')
 
-    if con.test_config['enable_db_max'] == 'Y':
-        account_ids = util.get_accountID_fromDB(True, filter='tariff-diffs')
+    if config.test_config['enable_db_max'] == 'Y':
+        account_ids = utils.get_accountID_fromDB(True, filter='tariff-diffs')
 
     # Enable to test without multiprocessing.
-    # p.processAccounts(account_ids, s3, dir_s3)
+    # p.process_accounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
-    env = util.get_env()
-    total_processes = util.get_multiprocess('total_ensek_processes')
+    env = utils.get_env()
+    total_processes = utils.get_multiprocess('total_ensek_processes')
 
     if env == 'uat':
         n = total_processes  # number of process to run in parallel
@@ -225,10 +226,10 @@ if __name__ == "__main__":
         uv = i * k
         if i == n:
             # print(d18_keys_s3[l:])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
+            t = multiprocessing.Process(target=p1.process_accounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
         else:
             # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
+            t = multiprocessing.Process(target=p1.process_accounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
         processes.append(t)
@@ -243,3 +244,6 @@ if __name__ == "__main__":
 
     print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
 
+
+if __name__ == "__main__":
+    process_ensek_tariffs_history()
