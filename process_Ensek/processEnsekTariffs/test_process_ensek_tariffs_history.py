@@ -692,7 +692,7 @@ def test_process_ensek_tariffs_history_30_accounts(
     process_ensek_tariffs_history()
 
     assert mock_get_accountID_fromDB.call_count == 1
-    assert mock_multiprocessing_process.call_count == 7
+    assert mock_multiprocessing_process.call_count == 6
 
     # multiprocessing.Process is passed two kwargs, 'target' and 'args'.
     # 'args' is itself a tuple of args that will be passed to 'target'.
@@ -705,43 +705,42 @@ def test_process_ensek_tariffs_history_30_accounts(
     #                   kwargs passed in----------------\    \     \
     #                   call number ------------------\  \    \     \
     #                                                  \  \    \     \
-    assert mock_multiprocessing_process.call_args_list[0][1]["args"][0] == []
-    assert mock_multiprocessing_process.call_args_list[1][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[0][1]["args"][0] == [
         1,
         2,
         3,
         4,
         5,
     ]
-    assert mock_multiprocessing_process.call_args_list[2][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[1][1]["args"][0] == [
         6,
         7,
         8,
         9,
         10,
     ]
-    assert mock_multiprocessing_process.call_args_list[3][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[2][1]["args"][0] == [
         11,
         12,
         13,
         14,
         15,
     ]
-    assert mock_multiprocessing_process.call_args_list[4][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[3][1]["args"][0] == [
         16,
         17,
         18,
         19,
         20,
     ]
-    assert mock_multiprocessing_process.call_args_list[5][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[4][1]["args"][0] == [
         21,
         22,
         23,
         24,
         25,
     ]
-    assert mock_multiprocessing_process.call_args_list[6][1]["args"][0] == [
+    assert mock_multiprocessing_process.call_args_list[5][1]["args"][0] == [
         26,
         27,
         28,

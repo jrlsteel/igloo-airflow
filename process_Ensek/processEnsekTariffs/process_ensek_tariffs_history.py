@@ -203,32 +203,20 @@ def process_ensek_tariffs_history():
     # p.process_accounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
-    env = utils.get_env()
     total_processes = utils.get_multiprocess('total_ensek_processes')
 
-    if env == 'uat':
-        n = total_processes  # number of process to run in parallel
-    else:
-        n = total_processes
-
-    k = int(len(account_ids) / n)  # get equal no of files for each process
-
-    print(len(account_ids))
-    print(k)
+    k = int(len(account_ids) / total_processes)  # get equal no of files for each process
 
     processes = []
     lv = 0
     start = timeit.default_timer()
 
-    for i in range(n + 1):
+    for i in range(1, total_processes + 1):
         p1 = TariffHistory()
-        print(i)
         uv = i * k
-        if i == n:
-            # print(d18_keys_s3[l:])
+        if i == total_processes:
             t = multiprocessing.Process(target=p1.process_accounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
         else:
-            # print(d18_keys_s3[l:u])
             t = multiprocessing.Process(target=p1.process_accounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
         lv = uv
 
