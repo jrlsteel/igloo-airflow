@@ -1,0 +1,65 @@
+{
+    "id":1865,
+    "siteAddress":{
+        "uprn":"53960405",
+        "additionalInformation":"None",
+        "subBuildingNameNumber":"None",
+        "buildingNameNumber":"7",
+        "dependentThoroughfare":"None",
+        "thoroughfare":"Chelscombe Close",
+        "doubleDependentLocality":"None",
+        "dependentLocality":"Lansdown",
+        "locality":"Bath",
+        "county":"None",
+        "postcode":"ba1 9dl",
+        "displayName":"7 Chelscombe Close,\nLansdown,\nBath,\nBA1 9DL"
+    },
+    "primaryContact":{
+        "id":1808,
+        "person":{
+            "id":10990,
+            "title":"Mr",
+            "firstName":"Matt",
+            "lastName":"Snelus",
+            "contacts":[
+                {
+                    "uprn":"53960405",
+                    "addressLine1":"7",
+                    "addressLine2":"Chelscombe Close",
+                    "addressLine3":"Lansdown",
+                    "town":"None",
+                    "county":"None",
+                    "postcode":"ba1 9dl",
+                    "id":3598,
+                    "type":"Address",
+                    "marketingEnabled":true,
+                    "thirdPartyMarketingEnabled":false,
+                    "displayName":"7  Chelscombe Close,\nLansdown,\nBath,\nBA1 9DL"
+                },
+                {
+                    "address":"msnelus@movoda.co.uk",
+                    "id":3599,
+                    "type":"Email",
+                    "marketingEnabled":true,
+                    "thirdPartyMarketingEnabled":false,
+                    "displayName":"msnelus@movoda.co.uk"
+                },
+                {
+                    "number":"07725042231",
+                    "PhoneNumberType":"Phone",
+                    "id":3600,
+                    "type":"PhoneNumber",
+                    "marketingEnabled":true,
+                    "thirdPartyMarketingEnabled":false,
+                    "displayName":"07725042231"
+                }
+            ],
+            "displayName":"Mr Matt Snelus",
+            "isBroker":false
+        },
+        "tags":"None",
+        "isPrimaryContact":false
+    },
+    "externalReference":"d011d281-6a8a-4945-9d3a-f7e66381a7dd",
+    "accountType":"Customer"
+}
