@@ -2,8 +2,15 @@ from datetime import datetime, timedelta
 from lxml import etree
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
-from moto import mock_s3_deprecated
+from moto import mock_s3, mock_s3_deprecated
 import csv
+import json
+import os
+import responses
+import requests
+import pytest
+import unittest
+from multiprocessing import Manager, Value
 
 from process_ensek_internal_estimates import InternalEstimates
 
@@ -224,3 +231,12 @@ def test_extract_internal_data_response_gas():
         ['2019-10-22T00:00:00', '9999-12-31T23:59:59.9999999', '17088.0', 'True', '7613419305', 'G', '078247', '100001'],
         []  # FIXME: no idea why there's an empty list at the end.
     ])
+
+@mock_s3
+@unittest.mock.patch("common.utils.get_accountID_fromDB")
+# @unittest.mock.patch("multiprocessing.Process")
+def test_mp(mock_get_accountID_from_DB):
+    with Manager() as manager:
+        metrics = {
+            "api_error_codes": manager.list(),
+        }
