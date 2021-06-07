@@ -1,0 +1,173 @@
+[
+    {
+        "tariffName": "Igloo Pioneer",
+        "startDate": "2017-10-23T00:00:00",
+        "endDate": "2018-04-15T00:00:00",
+        "Electricity": {
+            "unitRates": [
+                {
+                    "name": "Any Time",
+                    "rate": 11.34400,
+                    "registers": [
+                        4578
+                    ],
+                    "chargeableComponentUID": "ANYTIME"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 20.00000,
+                    "registers": "",
+                    "chargeableComponentUID": "ELECTRICITYSTANDINGCHARGE"
+                }
+            ]
+        },
+        "Gas": {
+            "unitRates": [
+                {
+                    "name": "Gas Consumption",
+                    "rate": 2.47600,
+                    "registers": [
+                        5027
+                    ],
+                    "chargeableComponentUID": "GAS"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 20.00000,
+                    "registers": "",
+                    "chargeableComponentUID": "GASSTANDINGCHARGE"
+                }
+            ]
+        },
+        "discounts": [],
+        "tariffType": "Variable",
+        "exitFees": "",
+        "attributes": {
+            "IsStandardVariableRate": "true"
+        },
+        "productId": 15,
+        "productVersionId": 25
+    },
+    {
+        "tariffName": "Igloo Pioneer",
+        "startDate": "2018-04-16T00:00:00",
+        "endDate": "2018-08-31T00:00:00",
+        "Electricity": {
+            "unitRates": [
+                {
+                    "name": "Any Time",
+                    "rate": 11.70667,
+                    "registers": [
+                        4578
+                    ],
+                    "chargeableComponentUID": "ANYTIME"
+                },
+                {
+                    "name": "Day Consumption",
+                    "rate": 11.70667,
+                    "registers": [],
+                    "chargeableComponentUID": "DAY"
+                },
+                {
+                    "name": "Night Consumption",
+                    "rate": 11.70667,
+                    "registers": [],
+                    "chargeableComponentUID": "NIGHT"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 20.00000,
+                    "registers": "",
+                    "chargeableComponentUID": "ELECTRICITYSTANDINGCHARGE"
+                }
+            ]
+        },
+        "Gas": {
+            "unitRates": [
+                {
+                    "name": "Gas Consumption",
+                    "rate": 2.60952,
+                    "registers": [
+                        5027
+                    ],
+                    "chargeableComponentUID": "GAS"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 20.00000,
+                    "registers": "",
+                    "chargeableComponentUID": "GASSTANDINGCHARGE"
+                }
+            ]
+        },
+        "discounts": [],
+        "tariffType": "Variable",
+        "exitFees": "",
+        "attributes": {
+            "IsStandardVariableRate": "true"
+        },
+        "productId": 15,
+        "productVersionId": 28
+    },
+    {
+        "tariffName": "Igloo Pioneer",
+        "startDate": "2018-09-01T00:00:00",
+        "endDate": "2018-10-14T00:00:00",
+        "Electricity": {
+            "unitRates": [
+                {
+                    "name": "Any Time",
+                    "rate": 12.70190,
+                    "registers": [
+                        4578
+                    ],
+                    "chargeableComponentUID": "ANYTIME"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 23.33333,
+                    "registers": "",
+                    "chargeableComponentUID": "ELECTRICITYSTANDINGCHARGE"
+                }
+            ]
+        },
+        "Gas": {
+            "unitRates": [
+                {
+                    "name": "Gas Consumption",
+                    "rate": 2.60952,
+                    "registers": [
+                        5027
+                    ],
+                    "chargeableComponentUID": "GAS"
+                }
+            ],
+            "standingChargeRates": [
+                {
+                    "name": "Standing Charge",
+                    "rate": 23.33333,
+                    "registers": "",
+                    "chargeableComponentUID": "GASSTANDINGCHARGE"
+                }
+            ]
+        },
+        "discounts": [],
+        "tariffType": "Variable",
+        "exitFees": "",
+        "attributes": {
+            "IsStandardVariableRate": "true"
+        },
+        "productId": 15,
+        "productVersionId": 36
+    }
+]

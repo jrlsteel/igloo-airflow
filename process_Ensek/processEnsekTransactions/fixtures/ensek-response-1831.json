@@ -1,0 +1,44 @@
+[
+    {
+        "id": 10648,
+        "amount": -77.35,
+        "currentBalance": -77.35,
+        "creationDetail": {
+            "createdDate": "2017-05-09T16:05:56.49",
+            "createdBy": null
+        },
+        "transactionType": "PAYMENT",
+        "transactionTypeFriendlyName": "Payment",
+        "statementId": 10325,
+        "method": "Direct Debit",
+        "sourceDate": "2017-04-24T00:00:00",
+        "actions": [
+            "DeleteStatement",
+            "RegenerateStatement"
+        ],
+        "isCancelled": false,
+        "billId": null,
+        "BillAccountId": null
+    },
+    {
+        "id": 10658,
+        "amount": -77.35,
+        "currentBalance": -154.7,
+        "creationDetail": {
+            "createdDate": "2017-05-25T10:12:36.043",
+            "createdBy": null
+        },
+        "transactionType": "PAYMENT",
+        "transactionTypeFriendlyName": "Payment",
+        "statementId": 10325,
+        "method": "Direct Debit",
+        "sourceDate": "2017-05-24T00:00:00",
+        "actions": [
+            "DeleteStatement",
+            "RegenerateStatement"
+        ],
+        "isCancelled": false,
+        "billId": null,
+        "BillAccountId": null
+    }
+]

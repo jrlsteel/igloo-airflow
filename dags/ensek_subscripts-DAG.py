@@ -7,7 +7,6 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 from common.slack_utils import alert_slack
-import process_Ensek
 
 
 
@@ -31,5 +30,11 @@ dag = DAG(
 process_ensek_transactions = BashOperator(
     task_id="process_ensek_transactions",
     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekTransactions && python process_ensek_transactions.py",
+    dag=dag,
+)
+
+process_ensek_accounts = BashOperator(
+    task_id="process_ensek_accounts",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekAccounts && python process_ensek_accounts.py",
     dag=dag,
 )
