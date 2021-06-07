@@ -121,10 +121,9 @@ class AccountTransactions:
 
 
     def processAccounts(self, account_ids, k, dir_s3, metrics):
-        api_url, head = common.utils.get_ensek_api_info1('account_transactions')
+        api_url_template, head = common.utils.get_ensek_api_info1('account_transactions')
 
         for account_id in account_ids:
-            current_account = account_id
             with metrics[0]["account_id_counter"].get_lock():
                 metrics[0]["account_id_counter"].value += 1
                 if metrics[0]["account_id_counter"].value % 1000 == 0:
@@ -134,7 +133,7 @@ class AccountTransactions:
                         )
                     )
             # Get Accounts Transactions
-            api_url = api_url.format(account_id)
+            api_url = api_url_template.format(account_id)
             api_response_at = self.get_api_response(api_url, head, account_id, metrics)
 
             if api_response_at:
@@ -154,7 +153,7 @@ def main():
     account_ids = []
     '''Enable this to test for 1 account id'''
     if config.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
+        account_ids = config.test_config['account_ids']
 
     if config.test_config['enable_file'] == 'Y':
         account_ids = common.utils.get_Users_from_s3(s3)
@@ -170,7 +169,6 @@ def main():
     # p.processAccounts(account_ids, s3, dir_s3)
 
     ####### Multiprocessing Starts #########
-    env = common.utils.get_env()
     total_processes = common.utils.get_multiprocess('total_ensek_processes')
 
     accounts_per_process = int(len(account_ids) / total_processes)

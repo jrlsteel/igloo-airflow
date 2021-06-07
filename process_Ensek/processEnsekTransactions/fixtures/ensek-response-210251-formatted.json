@@ -1,0 +1,66 @@
+[
+    {
+        "id": 5810973,
+        "amount": -219.73,
+        "currentBalance": -219.73,
+        "creationDetail": {
+            "createdDate": "2021-01-05T20:18:05.15",
+            "createdBy": ""
+        },
+        "transactionType": "PAYMENT",
+        "transactionTypeFriendlyName": "Payment",
+        "statementId": 2346274,
+        "method": "Direct Debit",
+        "sourceDate": "2021-01-04T00:00:00",
+        "actions": [
+            "DeleteStatement",
+            "RegenerateStatement"
+        ],
+        "isCancelled": false,
+        "billId": "",
+        "BillAccountId": ""
+    },
+    {
+        "id": 6035871,
+        "amount": 186.19,
+        "currentBalance": -33.54,
+        "creationDetail": {
+            "createdDate": "2021-01-23T13:17:08.193",
+            "createdBy": ""
+        },
+        "transactionType": "BILL",
+        "transactionTypeFriendlyName": "Bill",
+        "statementId": 2346274,
+        "method": "",
+        "sourceDate": "",
+        "actions": [
+            "DeleteStatement",
+            "RegenerateStatement",
+            "CancelBill"
+        ],
+        "isCancelled": false,
+        "billId": 2213933,
+        "BillAccountId": 210251
+    },
+    {
+        "id": 6035872,
+        "amount": -0.33,
+        "currentBalance": -33.87,
+        "creationDetail": {
+            "createdDate": "2021-01-23T13:17:08.3",
+            "createdBy": ""
+        },
+        "transactionType": "INTEREST",
+        "transactionTypeFriendlyName": "Interest on balance",
+        "statementId": 2346274,
+        "method": "",
+        "sourceDate": "",
+        "actions": [
+            "DeleteStatement",
+            "RegenerateStatement"
+        ],
+        "isCancelled": false,
+        "billId": "",
+        "BillAccountId": ""
+    }
+]
