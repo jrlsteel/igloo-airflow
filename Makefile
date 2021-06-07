@@ -46,7 +46,7 @@ conf/config.py:
 
 test: conf/config.py
 	rm -rf .coverage coverage.xml htmlcov
-	coverage run -m pytest --ignore=archive
+	coverage run -m pytest --ignore=archive --ignore=dags
 	coverage xml
 
 ci-test: install-test-deps test
