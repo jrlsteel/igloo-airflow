@@ -239,7 +239,7 @@ def process_ensek_tariffs_history():
         finally:
             start_metrics = timeit.default_timer()
 
-            if metrics["api_method_time"] != []:
+            if len(metrics["api_method_time"]) > 0:
                 metrics["max_api_process_time"] = max(metrics["api_method_time"])
                 metrics["min_api_process_time"] = min(metrics["api_method_time"])
                 metrics["median_api_process_time"] = statistics.median(
