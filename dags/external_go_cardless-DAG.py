@@ -1,23 +1,18 @@
-from __future__ import print_function
-
-import time
 import sys
-from builtins import range
-from pprint import pprint
+
+sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.utils.dates import days_ago
 
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
 
 from process_verification.verification_template import (
     verify_number_of_rows_in_table,
+    verify_table_column_value_greater_than,
 )
-
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from common.slack_utils import alert_slack
 
@@ -100,6 +95,23 @@ verify_refund_updates_table_empty.doc = """*Purpose*: Verify all refunds have be
     """
 
 
+verify_events_table_has_events_in_last_24hrs = PythonOperator(
+    task_id="verify_events_table_has_events_in_last_24hrs",
+    python_callable=verify_table_column_value_greater_than,
+    op_kwargs={
+        "table_name": "aws_fin_stage1_extracts.fin_go_cardless_api_events",
+        "column_name": "max(created_at)",
+        "comparison_value": (days_ago(1).strftime('%Y-%m-%dT%H:%M:%S.%f'))[:-3] + 'Z',
+    },
+    dag=dag,
+)
+verify_events_table_has_events_in_last_24hrs.doc = """*Purpose*: Verify that we have an entry in the events table with a created_at greater than the timestamp 24 hours ago.
+    *Suggest action on failure*: Investigate why we have not received an event in the last 24 hours
+    *Justification*: We would expect to receive at least one event within the last 24 hours from GoCardless if the DAG is successful
+    """
+
+
+start_go_cardless_api_extracts >> verify_events_table_has_events_in_last_24hrs
 start_go_cardless_api_extracts >> verify_mandate_updates_table_empty
 start_go_cardless_api_extracts >> verify_subscription_updates_table_empty
 start_go_cardless_api_extracts >> verify_payment_updates_table_empty

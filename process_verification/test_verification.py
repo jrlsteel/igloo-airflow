@@ -8,6 +8,7 @@ from process_verification.verification_template import (
     fetch_number_of_files_in_s3,
     verify_values_within_given_percent,
     verify_number_of_rows_in_table,
+    verify_table_column_value_greater_than
 )
 from moto import mock_s3_deprecated, mock_s3
 import boto3
@@ -45,4 +46,15 @@ class MyTestCase(unittest.TestCase):
     def test_verify_number_of_rows_in_table_returns_true_when_correct(self, mock_table_count):
         assert verify_number_of_rows_in_table('my_table', 0) is True
 
+    @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
+    def test_table_column_greater_than_function_returns_true_when_greater_than(self, mock_table_value):
+        self.assertRaises(RuntimeError, verify_table_column_value_greater_than, 'my_table', 'my_column', '2021-06-05T02:00:29.962Z')
+
+    @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
+    def test_table_column_greater_than_function_returns_false_when_less_than(self, mock_table_value):
+        assert verify_table_column_value_greater_than('my_table', 'my_column', '2021-06-03T02:00:29.962Z') is True
+
+    @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
+    def test_table_column_greater_than_function_returns_false_when_equal_to(self, mock_table_value):
+        self.assertRaises(RuntimeError, verify_table_column_value_greater_than, 'my_table', 'my_column', '2021-06-04T02:00:29.962Z')
 
