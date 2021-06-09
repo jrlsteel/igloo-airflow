@@ -179,6 +179,30 @@ def ref_verification_step(**kwargs):
         iglog.in_prod_env(traceback.format_exc())
         raise e
 
+
+def verify_number_of_rows_in_table(table_name: str, expected_count: int):
+    """
+    Verifcation step, which will create and format a SQL Expression to select a count from a given table
+    This count will be compared against the provided count for that table
+
+    Expected Args = table_name=string, count=int
+    """
+    try:
+        count = get_table_count(table_name)
+        iglog.in_prod_env("table: {} : count: {}".format(table_name, count))
+        if not count == expected_count:
+            error = "Failed to verify count for {} - count was {}, we expected {}".format(table_name, str(count), str(expected_count))
+            iglog.in_prod_env(
+                error
+            )
+            raise RuntimeError(error)
+        else:
+            iglog.in_prod_env("Successfully verified count of {} was {}".format(table_name, str(expected_count)))
+            return True
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
 # Unused but potentially useful for directories with a few pages of data
 def iterate_through_multiple_pages_of_s3(s3_prefix):
     try:
