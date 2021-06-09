@@ -6,3 +6,5 @@ pytest
 pytest-mock
 requests-mock
 coverage==5.4
+black
+pylint
