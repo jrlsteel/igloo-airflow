@@ -17,27 +17,26 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='ensek_nrl_staging_only',
+    dag_id="ensek_nrl_staging_only",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 
 start_ensek_readings_nrl_staging_jobs = BashOperator(
-    task_id='start_ensek_readings_nrl_staging_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_nrl_staging_only_jobs.py',
+    task_id="start_ensek_readings_nrl_staging_jobs",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_NRL && python start_nrl_staging_only_jobs.py",
     dag=dag,
 )
-
 
 
 start_ensek_readings_nrl_staging_jobs

@@ -3,7 +3,7 @@ from datetime import datetime
 import timeit
 import subprocess
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import process_glue_job as glue
 from common import utils as util
@@ -27,17 +27,15 @@ class ALP:
         self.alp_ref_jobid = util.get_jobID()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     s = ALP()
 
-    util.batch_logging_insert(s.all_jobid, 105, 'all_alp_jobs', 'start_alp_jobs.py')
-
+    util.batch_logging_insert(s.all_jobid, 105, "all_alp_jobs", "start_alp_jobs.py")
 
     # run consumption accuracy job
-    print("{0}: All Calcs..".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: All Calcs..".format(datetime.now().strftime("%H:%M:%S")))
     sj_obj = sj.CalcSteps()
     sj_obj.startCalcJobs()
 
-    util.batch_logging_update(s.all_jobid, 'e')
-
+    util.batch_logging_update(s.all_jobid, "e")

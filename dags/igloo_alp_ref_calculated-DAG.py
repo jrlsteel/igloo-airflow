@@ -17,28 +17,25 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='igloo_alp_ref_calculated',
+    dag_id="igloo_alp_ref_calculated",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 
 start_alp_historical_calc_jobs = BashOperator(
-    task_id='start_alp_historical_calc_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_calc_jobs.py',
+    task_id="start_alp_historical_calc_jobs",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_calc_jobs.py",
     dag=dag,
 )
 
 start_alp_historical_calc_jobs
-
-
-

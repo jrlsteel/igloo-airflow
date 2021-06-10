@@ -2,29 +2,31 @@ import timeit
 import multiprocessing
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from connections import connect_db as db
 
 
-class Processs3():
+class Processs3:
     def __init__(self):
-        self.bucket_name = 'igloo-data-warehouse-prod'
+        self.bucket_name = "igloo-data-warehouse-prod"
         self.s3 = db.get_S3_Connections_client()
-        self.stage1_name = 'stage1'
-        self.stage2_name = 'stage2'
+        self.stage1_name = "stage1"
+        self.stage2_name = "stage2"
 
     def createfolders(self):
 
         # self.s3.put_object(Bucket=self.bucket_name, Key=self.stage1_name + '/', Body='')
-        self.s3.put_object(Bucket=self.bucket_name, Key=self.stage2_name + '/', Body='')
+        self.s3.put_object(Bucket=self.bucket_name, Key=self.stage2_name + "/", Body="")
         # # stage 1 buckets
         # for filenames in self.stage1_files['ensek_files']:
         #     self.s3.put_object(Bucket=self.bucket_name, Key=self.stage1_name + '/' + filenames + '/', Body='')
 
         # stage 2 buckets
-        for filenames in self.stage1_files['ensek_files']:
-            self.s3.put_object(Bucket=self.bucket_name, Key=self.stage2_name + '/' + 'stage_' + filenames + '/', Body='')
+        for filenames in self.stage1_files["ensek_files"]:
+            self.s3.put_object(
+                Bucket=self.bucket_name, Key=self.stage2_name + "/" + "stage_" + filenames + "/", Body=""
+            )
 
     def get_keys_from_s3(self, filename, s31):
         """
@@ -32,32 +34,26 @@ class Processs3():
         :param s3: holds the s3 connection
         :return: list of d18 filenames
         """
-        bucket_name = 'igloo-uat-bucket'
-        prefix = 'ensek-meterpoints/' + filename
-        if filename == 'MeterPointsAttributes':
-            prefix = 'ensek-meterpoints/' + 'Attributes'
+        bucket_name = "igloo-uat-bucket"
+        prefix = "ensek-meterpoints/" + filename
+        if filename == "MeterPointsAttributes":
+            prefix = "ensek-meterpoints/" + "Attributes"
 
-        suffix = '.csv'
+        suffix = ".csv"
         d18_keys = []
-        print('Reading Keys')
+        print("Reading Keys")
         more_objects = True
         found_token = False
         while more_objects:
             if found_token:
-                response = s31.list_objects_v2(
-                    Bucket=bucket_name,
-                    Prefix=prefix,
-                    ContinuationToken=found_token)
+                response = s31.list_objects_v2(Bucket=bucket_name, Prefix=prefix, ContinuationToken=found_token)
             else:
-                response = s31.list_objects_v2(
-                    Bucket=bucket_name,
-                    Prefix=prefix
-                    )
+                response = s31.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
 
             # use copy_object or copy_from
             for obj in response["Contents"]:
-                if obj['Key'].endswith(suffix):
-                    d18_keys.append(obj['Key'])
+                if obj["Key"].endswith(suffix):
+                    d18_keys.append(obj["Key"])
 
                 # Now check there is more objects to list
             if "NextContinuationToken" in response:
@@ -74,23 +70,20 @@ class Processs3():
         # for filename in self.stage1_files['ensek_files']:
         #     keys = self.get_keys_from_s3(filename, s31)
         # print(type(keys))
-        print('copying data')
+        print("copying data")
         for key in keys:
-            copy_source = {
-                'Bucket': 'igloo-uat-bucket',
-                'Key': key
-            }
-            key1 = self.stage1_name + '/' + filename + '/' + key.split('/')[-1]
+            copy_source = {"Bucket": "igloo-uat-bucket", "Key": key}
+            key1 = self.stage1_name + "/" + filename + "/" + key.split("/")[-1]
             s31.copy(copy_source, self.bucket_name, key1)
             # print(key1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     stage1_files = {
-        'ensek_files': [
+        "ensek_files": [
             # 'MeterPoints',
             # 'MeterPointsAttributes',
-            'Meters',
+            "Meters",
             # 'MetersAttributes',
             # 'Registers',
             # 'RegistersAttributes',
@@ -107,24 +100,19 @@ if __name__ == '__main__':
             # 'TariffHistoryGasStandCharge',
             # 'TariffHistoryGasUnitRates',
         ],
-        'd18_files': [
-            'D18/D18BPP',
-            'D18/D18PPC'
-        ]
+        "d18_files": ["D18/D18BPP", "D18/D18PPC"],
     }
-
 
     # p.createfolders()
 
-    for filename in stage1_files['ensek_files']:
-        print('processing ' + filename)
+    for filename in stage1_files["ensek_files"]:
+        print("processing " + filename)
         s31 = db.get_S3_Connections_client()
         p = Processs3()
         keys = p.get_keys_from_s3(filename, s31)
         # print(type(keys))
         print(len(keys))
         # p.copydata(keys, s31)
-
 
         # start Multiprocessing
         n = 10  # number of process to run in parallel
@@ -157,4 +145,4 @@ if __name__ == '__main__':
         ####### multiprocessing Ends #########
         print("Copied " + filename)
 
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    print("Process completed in " + str(timeit.default_timer() - start) + " seconds")

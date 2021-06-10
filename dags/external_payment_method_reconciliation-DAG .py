@@ -21,19 +21,20 @@ import sentry_sdk
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2),
-    'on_failure_callback': alert_slack,
+    "owner": "Airflow",
+    "start_date": days_ago(2),
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='payment_method_reconciliation',
+    dag_id="payment_method_reconciliation",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
+
 
 def validate_payment_methods_wrapper(execution_date):
     """
@@ -43,13 +44,8 @@ def validate_payment_methods_wrapper(execution_date):
         print("validate_payment_methods  execution_date={}".format(execution_date))
         directory = util.get_dir()
         finance_bucket = directory["s3_finance_bucket"]
-        api_key = directory['apis']['token']
-        ensek_config = {
-            "ensek_api": {
-                "base_url": "https://api.igloo.ignition.ensek.co.uk",
-                "api_key": api_key
-            }
-        }
+        api_key = directory["apis"]["token"]
+        ensek_config = {"ensek_api": {"base_url": "https://api.igloo.ignition.ensek.co.uk", "api_key": api_key}}
 
         instance = PaymentMethodValidator(
             config=config,
@@ -62,6 +58,7 @@ def validate_payment_methods_wrapper(execution_date):
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)
         raise e
+
 
 validate_payment_methods_task = PythonOperator(
     task_id="validate_payment_methods",

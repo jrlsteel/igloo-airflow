@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
@@ -9,11 +10,7 @@ from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 import sentry_sdk
 from common.slack_utils import alert_slack
 
-args = {
-    "owner": "Airflow",
-    "start_date": days_ago(2),
-    'on_failure_callback': alert_slack
-}
+args = {"owner": "Airflow", "start_date": days_ago(2), "on_failure_callback": alert_slack}
 
 dag = DAG(
     dag_id="igloo_smart_d0379",
@@ -22,6 +19,7 @@ dag = DAG(
     tags=["cdw"],
     catchup=False,
 )
+
 
 def generate_d0379_wrapper(execution_date):
     """
@@ -36,6 +34,7 @@ def generate_d0379_wrapper(execution_date):
         sentry_sdk.flush(5)
         raise e
 
+
 def copy_d0379_to_sftp_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
@@ -48,6 +47,7 @@ def copy_d0379_to_sftp_wrapper(execution_date):
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)
         raise e
+
 
 generate_d0379_task = PythonOperator(
     task_id="generate_d0379",

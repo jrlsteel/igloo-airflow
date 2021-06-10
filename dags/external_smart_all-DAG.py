@@ -13,9 +13,9 @@ from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
@@ -57,6 +57,7 @@ smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
     python_callable=refresh_mv_hh_elec_reads,
 )
 
+
 def generate_d0379_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
@@ -70,6 +71,7 @@ def generate_d0379_wrapper(execution_date):
         sentry_sdk.flush(5)
         raise e
 
+
 def copy_d0379_to_sftp_wrapper(execution_date):
     """
     :param: execution_date a string in the form 'YYYY-MM-DD'
@@ -82,6 +84,7 @@ def copy_d0379_to_sftp_wrapper(execution_date):
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)
         raise e
+
 
 generate_d0379_task = PythonOperator(
     task_id="generate_d0379",

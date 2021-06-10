@@ -48,19 +48,15 @@ class InternalReadings:
         while True:
             try:
                 response = session.post(api_url, headers=head, params={"page": 1})
-                
+
                 if response.status_code == 200:
                     response_json = json.loads(response.content.decode("utf-8"))
                     total_pages = response_json["totalPages"]
                     response_items.extend(response_json["items"])
                     for page in range(2, total_pages + 1):
-                        response_next_page = session.post(
-                            api_url, headers=head, params={"page": page}
-                        )
-                        response_next_page_json = json.loads(
-                            response_next_page.content.decode("utf-8")
-                        )["items"]
-                        response_items.extend(response_next_page_json)  
+                        response_next_page = session.post(api_url, headers=head, params={"page": page})
+                        response_next_page_json = json.loads(response_next_page.content.decode("utf-8"))["items"]
+                        response_items.extend(response_next_page_json)
                 else:
                     metrics[0]["api_error_codes"].append(response.status_code)
                 break
@@ -74,9 +70,7 @@ class InternalReadings:
                             metrics[0]["connection_error_counter"].value += 1
                             if metrics[0]["connection_error_counter"].value % 100 == 0:
                                 iglog.in_prod_env(
-                                    "Connection errors: {}".format(
-                                        str(metrics[0]["connection_error_counter"])
-                                    )
+                                    "Connection errors: {}".format(str(metrics[0]["connection_error_counter"]))
                                 )
                         break
                     except:
@@ -86,9 +80,7 @@ class InternalReadings:
                         with metrics[0]["number_of_retries_total"].get_lock():
                             metrics[0]["number_of_retries_total"].value += 1
                             if attempt_num > 0:
-                                metrics[0]["retries_per_account"][
-                                    account_id
-                                ] = attempt_num
+                                metrics[0]["retries_per_account"][account_id] = attempt_num
                     except:
                         pass
                     time.sleep(retry_in_secs)
@@ -98,20 +90,14 @@ class InternalReadings:
         return response_items
 
     def extract_internal_data_response(self, data, account_id, k, dir_s3, metrics):
-        """ Processing meter points data"""
-        column_list = util.get_common_info(
-            "ensek_column_order", "ref_readings_internal"
-        )
+        """Processing meter points data"""
+        column_list = util.get_common_info("ensek_column_order", "ref_readings_internal")
         df_internal_readings = pandas.json_normalize(data)
         if df_internal_readings.empty:
             metrics[0]["no_internal_readings_data"].append(account_id)
         else:
-            df_internal_readings_string = df_internal_readings.to_csv(
-                None, columns=column_list, index=False
-            )
-            file_name_internal_readings = (
-                "internal_readings_" + str(account_id) + ".csv"
-            )
+            df_internal_readings_string = df_internal_readings.to_csv(None, columns=column_list, index=False)
+            file_name_internal_readings = "internal_readings_" + str(account_id) + ".csv"
             k.key = dir_s3["s3_key"]["ReadingsInternal"] + file_name_internal_readings
             k.set_contents_from_string(df_internal_readings_string)
 
@@ -130,22 +116,15 @@ class InternalReadings:
             with metrics[0]["account_id_counter"].get_lock():
                 metrics[0]["account_id_counter"].value += 1
                 if metrics[0]["account_id_counter"].value % 1000 == 0:
-                    iglog.in_prod_env(
-                        "Account IDs processesed: {}".format(
-                            str(metrics[0]["account_id_counter"].value)
-                        )
-                    )
+                    iglog.in_prod_env("Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
             api_url1 = api_url.format(account_id)
             internal_data_response = self.get_api_response(api_url1, head, account_id, metrics)
             if internal_data_response:
-                formatted_internal_data = self.format_json_response(
-                    internal_data_response
-                )
-                self.extract_internal_data_response(
-                    formatted_internal_data, account_id, k, dir_s3, metrics
-                )
+                formatted_internal_data = self.format_json_response(internal_data_response)
+                self.extract_internal_data_response(formatted_internal_data, account_id, k, dir_s3, metrics)
             else:
                 metrics[0]["accounts_with_no_data"].append(account_id)
+
 
 def main():
     freeze_support()
@@ -182,14 +161,10 @@ def main():
     else:
         n = 12
 
-    iglog.in_prod_env(
-        "Number of account IDs to be processed -  {}".format(len(account_ids))
-    )
+    iglog.in_prod_env("Number of account IDs to be processed -  {}".format(len(account_ids)))
     iglog.in_prod_env("Number of threads for process -  {}".format(n))
     iglog.in_prod_env(
-        "Number of account IDs to be processed per thread -  {}".format(
-            "{:.2f}".format(len(account_ids) / n)
-        )
+        "Number of account IDs to be processed per thread -  {}".format("{:.2f}".format(len(account_ids) / n))
     )
 
     k = int(len(account_ids) / n)  # get equal no of files for each process
@@ -250,45 +225,27 @@ def main():
             if len(metrics["api_method_time"]) != 0:
                 metrics["max_api_process_time"] = max(metrics["api_method_time"])
                 metrics["min_api_process_time"] = min(metrics["api_method_time"])
-                metrics["median_api_process_time"] = statistics.median(
-                    metrics["api_method_time"]
-                )
-                metrics["average_api_process_time"] = statistics.mean(
-                    metrics["api_method_time"]
-                )
+                metrics["median_api_process_time"] = statistics.median(metrics["api_method_time"])
+                metrics["average_api_process_time"] = statistics.mean(metrics["api_method_time"])
             else:
                 metrics["max_api_process_time"] = "No api times processed"
                 metrics["min_api_process_time"] = "No api times processed"
                 metrics["median_api_process_time"] = "No api times processed"
                 metrics["average_api_process_time"] = "No api times processed"
 
-            metrics["connection_error_counter"] = metrics[
-                "connection_error_counter"
-            ].value
-            metrics["number_of_retries_total"] = metrics[
-                "number_of_retries_total"
-            ].value
+            metrics["connection_error_counter"] = metrics["connection_error_counter"].value
+            metrics["number_of_retries_total"] = metrics["number_of_retries_total"].value
             metrics["account_id_counter"] = metrics["account_id_counter"].value
 
-            iglog.in_prod_env(
-                "Process completed in "
-                + str(timeit.default_timer() - start)
-                + " seconds\n"
-            )
-            iglog.in_prod_env(
-                "Metrics completed in "
-                + str(timeit.default_timer() - start_metrics)
-                + " seconds\n"
-            )
+            iglog.in_prod_env("Process completed in " + str(timeit.default_timer() - start) + " seconds\n")
+            iglog.in_prod_env("Metrics completed in " + str(timeit.default_timer() - start_metrics) + " seconds\n")
             iglog.in_prod_env("METRICS FROM CURRENT RUN...\n")
             for metric_name, metric_data in metrics.items():
                 if metric_name in [
                     "api_method_time",
                 ]:
                     continue
-                iglog.in_prod_env(
-                    str(metric_name).upper() + "\n" + str(metric_data) + "\n"
-                )
+                iglog.in_prod_env(str(metric_name).upper() + "\n" + str(metric_data) + "\n")
             etl_metrics.publish_metrics(metrics)
 
 

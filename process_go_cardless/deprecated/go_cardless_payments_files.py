@@ -19,15 +19,14 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                               environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 Events = client.events
 Refunds = client.refunds
 Mandates = client.mandates
@@ -36,31 +35,28 @@ Payments = client.payments
 
 
 class GoCardlessPayments(object):
-
     def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.EventsFileDirectory = self.dir['s3_finance_goCardless_key']['Events']
-        self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
-        self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
-        self.PaymentsFileDirectory = self.dir['s3_finance_goCardless_key']['Payments-Files']
-        self.RefundsFileDirectory = self.dir['s3_finance_goCardless_key']['Refunds-Files']
+        self.EventsFileDirectory = self.dir["s3_finance_goCardless_key"]["Events"]
+        self.MandatesFileDirectory = self.dir["s3_finance_goCardless_key"]["Mandates-Files"]
+        self.SubscriptionsFileDirectory = self.dir["s3_finance_goCardless_key"]["Subscriptions-Files"]
+        self.PaymentsFileDirectory = self.dir["s3_finance_goCardless_key"]["Payments-Files"]
+        self.RefundsFileDirectory = self.dir["s3_finance_goCardless_key"]["Refunds-Files"]
         self.Events = Events
         self.Mandates = Mandates
         self.Subscriptions = Subscriptions
         self.Payments = Payments
         self.Refunds = Refunds
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
         if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays = -1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+            _execStartDate = self.get_date(self.toDay, _addDays=-1)
+        self.execStartDate = datetime.strptime(_execStartDate, "%Y-%m-%d")
         if _execEndDate is None:
             _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
-
-
+        self.execEndDate = datetime.strptime(_execEndDate, "%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -71,11 +67,11 @@ class GoCardlessPayments(object):
 
     def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -95,17 +91,17 @@ class GoCardlessPayments(object):
         PaymentsfileDirectory = self.PaymentsFileDirectory
         s3 = self.s3
         if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+            _StartDate = "{:%Y-%m-%d}".format(self.execStartDate)
         if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+            _EndDate = "{:%Y-%m-%d}".format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, "%Y-%m-%d")
         Events = self.Events
         Payments = self.Payments
-        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
+        filenameEvents = "go_cardless_events_" + _StartDate + "_" + _EndDate + ".csv"
+        qtr = math.ceil(startdatetime.month / 3.0)
         yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Payments.......')
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
+        print("Listing Payments.......")
         # Loop through a page
         q = Queue()
         q_payment = Queue()
@@ -113,19 +109,19 @@ class GoCardlessPayments(object):
         StartDate = _StartDate + "T00:00:00.000Z"
         EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
-        print('.....listing payments')
+        print(".....listing payments")
         try:
             for payment in client.payments.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
                 EnsekAccountId = None
                 StatementId = None
                 if self.is_json(payment.id):
-                    '''
+                    """
                     if payment.metadata:
                         if 'AccountId' in payment.metadata:
                             EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
                         if 'StatementId' in payment.metadata:
                             StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
-                    '''
+                    """
                     id_js = json.loads(payment.id.decode("utf-8"))
                     amount_js = json.loads(payment.amount.decode("utf-8"))
                     amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
@@ -140,17 +136,29 @@ class GoCardlessPayments(object):
                     subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
                     EnsekID_js = EnsekAccountId
                     EnsekStatementId_js = StatementId
-                    listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js,
-                               description_js,
-                               reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
-                               EnsekStatementId_js]
+                    listRow = [
+                        id_js,
+                        amount_js,
+                        amount_refunded_js,
+                        charge_date_js,
+                        created_at_js,
+                        currency_js,
+                        description_js,
+                        reference_js,
+                        status_js,
+                        payout_js,
+                        mandate_js,
+                        subscription_js,
+                        EnsekID_js,
+                        EnsekStatementId_js,
+                    ]
                     ##q.put(listRow)
                 else:
                     if payment.metadata:
-                        if 'AccountId' in payment.metadata:
-                            EnsekAccountId = payment.metadata['AccountId']
-                        if 'StatementId' in payment.metadata:
-                            StatementId = payment.metadata['StatementId']
+                        if "AccountId" in payment.metadata:
+                            EnsekAccountId = payment.metadata["AccountId"]
+                        if "StatementId" in payment.metadata:
+                            StatementId = payment.metadata["StatementId"]
                     print(payment.id)
                     id = payment.id
                     amount = payment.amount
@@ -166,22 +174,54 @@ class GoCardlessPayments(object):
                     subscription = payment.links.subscription
                     EnsekID = EnsekAccountId
                     EnsekStatementId = StatementId
-                    payment_listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
-                                       reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                    payment_listRow = [
+                        id,
+                        amount,
+                        amount_refunded,
+                        charge_date,
+                        created_at,
+                        currency,
+                        description,
+                        reference,
+                        status,
+                        payout,
+                        mandate,
+                        subscription,
+                        EnsekID,
+                        EnsekStatementId,
+                    ]
                     q_payment.put(payment_listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         # Empty queue
         while not q_payment.empty():
             payment_datalist.append(q_payment.get())
 
-        df = pd.DataFrame(payment_datalist, columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
-                                                     'currency', 'description', 'reference', 'status', 'payout',
-                                                     'mandate',
-                                                     'subscription', 'EnsekID', 'StatementId'])
+        df = pd.DataFrame(
+            payment_datalist,
+            columns=[
+                "id",
+                "amount",
+                "amount_refunded",
+                "charge_date",
+                "created_at",
+                "currency",
+                "description",
+                "reference",
+                "status",
+                "payout",
+                "mandate",
+                "subscription",
+                "EnsekID",
+                "StatementId",
+            ],
+        )
 
         return df
 
@@ -189,36 +229,61 @@ class GoCardlessPayments(object):
         PaymentsfileDirectory = self.PaymentsFileDirectory
         s3 = self.s3
 
-        for row in df.itertuples(index=True, name='Pandas'):
+        for row in df.itertuples(index=True, name="Pandas"):
             id = row.id
-            r_1 = [row.id, row.amount, row.amount_refunded, row.charge_date, row.created_at, row.currency,
-                   row.description, row.reference, row.status, row.payout, row.mandate,
-                   row.subscription, row.EnsekID, row.StatementId]
+            r_1 = [
+                row.id,
+                row.amount,
+                row.amount_refunded,
+                row.charge_date,
+                row.created_at,
+                row.currency,
+                row.description,
+                row.reference,
+                row.status,
+                row.payout,
+                row.mandate,
+                row.subscription,
+                row.EnsekID,
+                row.StatementId,
+            ]
 
             print(r_1)
-            df_1 = pd.DataFrame([r_1],
-                                columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
-                                         'currency', 'description', 'reference', 'status', 'payout', 'mandate',
-                                         'subscription', 'EnsekID', 'StatementId'])
+            df_1 = pd.DataFrame(
+                [r_1],
+                columns=[
+                    "id",
+                    "amount",
+                    "amount_refunded",
+                    "charge_date",
+                    "created_at",
+                    "currency",
+                    "description",
+                    "reference",
+                    "status",
+                    "payout",
+                    "mandate",
+                    "subscription",
+                    "EnsekID",
+                    "StatementId",
+                ],
+            )
 
-            filename = 'go_cardless_Payments_' + id + '.csv'
+            filename = "go_cardless_Payments_" + id + ".csv"
             df_string = df_1.to_csv(None, index=False)
             s3.key = PaymentsfileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
-
-
     def WriteToS3(self, df):
-        s3=self.s3
-        pdf =  df
+        s3 = self.s3
+        pdf = df
 
-        filename = 'go_cardless_Payments_Merged.csv'
+        filename = "go_cardless_Payments_Merged.csv"
         df_string = pdf.to_csv(None, index=False)
         s3.key = "/go-cardless-api-paymentsMerged-files/go_cardless_Payments_Merged.csv"
         print(s3.key)
         s3.set_contents_from_string(df_string)
-
 
     def runDailyFiles(self):
         for single_date in self.daterange():
@@ -228,12 +293,9 @@ class GoCardlessPayments(object):
             ### Execute Job ###
             self.process_Payments(start, end)
 
-
-
-
     def Multiprocess_Event(self, df, method):
         env = util.get_env()
-        if env == 'uat':
+        if env == "uat":
             n = 12  # number of process to run in parallel
         else:
             n = 12
@@ -251,9 +313,9 @@ class GoCardlessPayments(object):
             print(i)
             uv = i * k
             if i == n:
-                t = multiprocessing.Process(target= method, args=(df[lv:],))
+                t = multiprocessing.Process(target=method, args=(df[lv:],))
             else:
-                t = multiprocessing.Process(target= method, args=(df[lv:uv],))
+                t = multiprocessing.Process(target=method, args=(df[lv:uv],))
             lv = uv
 
             processes.append(t)
@@ -266,8 +328,7 @@ class GoCardlessPayments(object):
             process.join()
         ####### Multiprocessing Ends #########
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
-
+        print("Process completed in " + str(timeit.default_timer() - start) + " seconds")
 
 
 if __name__ == "__main__":
@@ -276,23 +337,10 @@ if __name__ == "__main__":
     ### StartDate & EndDate in YYYY-MM-DD format ###
     ### When StartDate & EndDate is not provided it defaults to SysDate and Sysdate + 1 respectively ###
     ### 2019-05-29 2019-05-30 ###
-    p = GoCardlessPayments('2017-03-01', '2020-06-17')
+    p = GoCardlessPayments("2017-03-01", "2020-06-17")
     ##p = GoCardlessPayments()
-
 
     ### PAYMENTS ###
     df_payments = p.process_Payments()
     AllPay = p.WriteToS3(df_payments)
     ##pPayments = p.Multiprocess_Event(df=df_payments, method=p.writeCSVs_Payments)
-
-
-
-
-
-
-
-
-
-
-
-

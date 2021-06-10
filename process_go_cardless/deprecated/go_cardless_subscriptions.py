@@ -16,34 +16,32 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                               environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 subscriptions = client.subscriptions
 
 
 class GoCardlessSubscriptions(object):
-
     def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions']
+        self.fileDirectory = self.dir["s3_finance_goCardless_key"]["Subscriptions"]
         self.subscriptions = subscriptions
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays=-1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+        self.execStartDate = datetime.strptime(_execStartDate, "%Y-%m-%d")
         if _execEndDate is None:
             _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+        self.execEndDate = datetime.strptime(_execEndDate, "%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -54,11 +52,11 @@ class GoCardlessSubscriptions(object):
 
     def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -77,16 +75,16 @@ class GoCardlessSubscriptions(object):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+            _StartDate = "{:%Y-%m-%d}".format(self.execStartDate)
         if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+            _EndDate = "{:%Y-%m-%d}".format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, "%Y-%m-%d")
         subscriptions = self.subscriptions
-        filename = 'go_cardless_subscriptions_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
+        filename = "go_cardless_subscriptions_" + _StartDate + "_" + _EndDate + ".csv"
+        qtr = math.ceil(startdatetime.month / 3.0)
         yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Subscriptions.......')
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
+        print("Listing Subscriptions.......")
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -95,8 +93,7 @@ class GoCardlessSubscriptions(object):
         StartDate = _StartDate + "T00:00:00.000Z"
         EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
-        for subscription in subscriptions.all(
-                params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
+        for subscription in subscriptions.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
             test = []
             charge_date = None
             amount_subscription = None
@@ -104,8 +101,8 @@ class GoCardlessSubscriptions(object):
             id = subscription.id
             upcoming_payments = subscription.upcoming_payments
             if len(upcoming_payments) > 0:
-                charge_date = upcoming_payments[0]['charge_date']
-                amount_subscription = upcoming_payments[0]['amount']
+                charge_date = upcoming_payments[0]["charge_date"]
+                amount_subscription = upcoming_payments[0]["amount"]
             created_at = subscription.created_at
             amount = subscription.amount
             currency = subscription.currency
@@ -125,19 +122,56 @@ class GoCardlessSubscriptions(object):
             if subscription.links.mandate:
                 mandate = subscription.links.mandate
 
-            listRow = [id, created_at, amount, currency, status, name, start_date,
-                       end_date, interval, interval_unit, day_of_month, month,
-                       count_no, payment_reference, app_fee, retry_if_possible, mandate, charge_date,
-                       amount_subscription]
+            listRow = [
+                id,
+                created_at,
+                amount,
+                currency,
+                status,
+                name,
+                start_date,
+                end_date,
+                interval,
+                interval_unit,
+                day_of_month,
+                month,
+                count_no,
+                payment_reference,
+                app_fee,
+                retry_if_possible,
+                mandate,
+                charge_date,
+                amount_subscription,
+            ]
             q.put(listRow)
 
         while not q.empty():
             datalist.append(q.get())
 
-        df = pd.DataFrame(datalist, columns=['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date',
-                                             'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
-                                             'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
-                                             'charge_date', 'amount_subscription'])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "id",
+                "created_at",
+                "amount",
+                "currency",
+                "status",
+                "name",
+                "start_date",
+                "end_date",
+                "interval",
+                "interval_unit",
+                "day_of_month",
+                "month",
+                "count_no",
+                "payment_reference",
+                "app_fee",
+                "retry_if_possible",
+                "mandate",
+                "charge_date",
+                "amount_subscription",
+            ],
+        )
 
         print(df.head(5))
 
@@ -173,9 +207,3 @@ if __name__ == "__main__":
     p1 = p.process_Subscriptions()
     ### Extract return single Daily Files from Date Range Provided ###
     ## p2 = p.runDailyFiles()
-
-
-
-
-
-

@@ -21,19 +21,20 @@ import sentry_sdk
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2),  #  don't know what this is doing
-    'on_failure_callback': alert_slack,
+    "owner": "Airflow",
+    "start_date": days_ago(2),  #  don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='go_cardless_report',
+    dag_id="go_cardless_report",
     default_args=args,
-    schedule_interval='00 08 * * *',
-    tags=['cdw'],
+    schedule_interval="00 08 * * *",
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
+
 
 def download_go_cardless_report_wrapper(execution_date):
     """
@@ -49,6 +50,7 @@ def download_go_cardless_report_wrapper(execution_date):
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)
         raise e
+
 
 download_go_cardless_report_task = PythonOperator(
     task_id="download_go_cardless_report",

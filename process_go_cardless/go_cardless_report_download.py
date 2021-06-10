@@ -49,9 +49,7 @@ class GoCardlessReport:
         self.s3 = None
 
         datepart = datetime.today().strftime("%y%m%d")
-        self.todays_filename = "{}{}.csv".format(
-            self.go_cardless_filename_prefix, datepart
-        )
+        self.todays_filename = "{}{}.csv".format(self.go_cardless_filename_prefix, datepart)
 
     def connect_s3(self):
 
@@ -90,11 +88,7 @@ class GoCardlessReport:
 
     def filter_latest_gocardless_report(self, file_list):
 
-        go_cardless_reports = [
-            file
-            for file in file_list
-            if file.startswith(self.go_cardless_filename_prefix)
-        ]
+        go_cardless_reports = [file for file in file_list if file.startswith(self.go_cardless_filename_prefix)]
 
         if go_cardless_reports == []:
             raise Exception("No go-cardless reports found")
@@ -114,9 +108,7 @@ class GoCardlessReport:
         if not self.s3:
             self.connect_s3()
 
-        list_objects_response = self.s3.list_objects_v2(
-            Bucket=self.s3_destination_bucket, Prefix=self.s3_key_prefix
-        )
+        list_objects_response = self.s3.list_objects_v2(Bucket=self.s3_destination_bucket, Prefix=self.s3_key_prefix)
 
         existing_objects = list_objects_response.get("Contents", [])
         existing_keys = [existing_object["Key"] for existing_object in existing_objects]

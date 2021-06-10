@@ -16,34 +16,32 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                                       environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 payouts = client.payouts
 
 
 class GoCardlessPayouts(object):
-
-    def __init__(self, _execStartDate = None, _execEndDate = None):
+    def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Payouts']
+        self.fileDirectory = self.dir["s3_finance_goCardless_key"]["Payouts"]
         self.payouts = payouts
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
         if _execStartDate is None:
-            _execStartDate = self.get_date(self.toDay, _addDays = -1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+            _execStartDate = self.get_date(self.toDay, _addDays=-1)
+        self.execStartDate = datetime.strptime(_execStartDate, "%Y-%m-%d")
         if _execEndDate is None:
             _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+        self.execEndDate = datetime.strptime(_execEndDate, "%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -52,14 +50,13 @@ class GoCardlessPayouts(object):
             return False
         return True
 
-
-    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
+    def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -74,20 +71,20 @@ class GoCardlessPayouts(object):
             yield seq_date.strftime(dateFormat)
         return seq_date
 
-    def process_Payouts(self, _StartDate = None, _EndDate = None):
+    def process_Payouts(self, _StartDate=None, _EndDate=None):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+            _StartDate = "{:%Y-%m-%d}".format(self.execStartDate)
         if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+            _EndDate = "{:%Y-%m-%d}".format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, "%Y-%m-%d")
         payouts = self.payouts
-        filename = 'go_cardless_payouts_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
+        filename = "go_cardless_payouts_" + _StartDate + "_" + _EndDate + ".csv"
+        qtr = math.ceil(startdatetime.month / 3.0)
         yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing payouts.......')
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
+        print("Listing payouts.......")
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -98,7 +95,7 @@ class GoCardlessPayouts(object):
         print(_StartDate, _EndDate)
 
         # Loop through a page of Payouts, printing each Payout's amount
-        print('.....listing payouts')
+        print(".....listing payouts")
         for payout in client.payouts.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
             payout_id = payout.id
             amount = payout.amount
@@ -111,15 +108,37 @@ class GoCardlessPayouts(object):
             creditor = payout.links.creditor
             creditor_bank_account = payout.links.creditor_bank_account
 
-            listRow = [payout_id, amount, arrival_date, created_at, deducted_fees, payout_type,
-                       reference, status, creditor, creditor_bank_account]
+            listRow = [
+                payout_id,
+                amount,
+                arrival_date,
+                created_at,
+                deducted_fees,
+                payout_type,
+                reference,
+                status,
+                creditor,
+                creditor_bank_account,
+            ]
             q.put(listRow)
 
         while not q.empty():
             datalist.append(q.get())
-        df = pd.DataFrame(datalist, columns=['payout_id', 'amount', 'arrival_date', 'created_at', 'deducted_fees',
-                                             'payout_type', 'reference', 'status', 'creditor', 'creditor_bank_account'
-                                             ])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "payout_id",
+                "amount",
+                "arrival_date",
+                "created_at",
+                "deducted_fees",
+                "payout_type",
+                "reference",
+                "status",
+                "creditor",
+                "creditor_bank_account",
+            ],
+        )
 
         print(df.head(5))
 
@@ -144,6 +163,7 @@ class GoCardlessPayouts(object):
             ### Execute Job ###
             self.process_Payouts(start, end)
 
+
 if __name__ == "__main__":
     freeze_support()
     s3 = db.get_finance_s3_connections_client()
@@ -156,6 +176,3 @@ if __name__ == "__main__":
     p1 = p.process_Payouts()
     ### Extract return single Daily Files from Date Range Provided ###
     ## p2 = p.runDailyFiles()
-
-
-

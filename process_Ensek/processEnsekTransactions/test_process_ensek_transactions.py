@@ -17,39 +17,23 @@ from multiprocessing import Manager, Value
 
 fixtures = {
     "ensek-response-1831": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "ensek-response-1831.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "ensek-response-1831.json"))
     ),
     "ensek-response-210251": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "ensek-response-210251.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "ensek-response-210251.json"))
     ),
     "ensek-response-1831-formatted": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "ensek-response-1831-formatted.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "ensek-response-1831-formatted.json"))
     ),
     "ensek-response-210251-formatted": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "ensek-response-210251-formatted.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "ensek-response-210251-formatted.json"))
     ),
 }
 
 
 @mock_s3_deprecated
 def test_extract_account_transactions_json():
-    s3_bucket_name = 'simulated-bucket'
+    s3_bucket_name = "simulated-bucket"
 
     s3_connection = S3Connection()
     s3_bucket = s3_connection.create_bucket(s3_bucket_name)
@@ -68,34 +52,28 @@ def test_extract_account_transactions_json():
             "id": 10648,
             "amount": -77.35,
             "currentBalance": -77.35,
-            "creationDetail": {
-                "createdDate": "2017-05-09T16:05:56.49",
-                "createdBy": None
-            },
+            "creationDetail": {"createdDate": "2017-05-09T16:05:56.49", "createdBy": None},
             "transactionType": "PAYMENT",
             "transactionTypeFriendlyName": "Payment",
             "statementId": None,
             "method": "Direct Debit",
             "sourceDate": "2017-04-24T00:00:00",
             "actions": [],
-            "isCancelled": False
+            "isCancelled": False,
         },
         {
             "id": 10658,
             "amount": -77.35,
             "currentBalance": -154.70,
-            "creationDetail": {
-                "createdDate": "2017-05-25T10:12:36.043",
-                "createdBy": None
-            },
+            "creationDetail": {"createdDate": "2017-05-25T10:12:36.043", "createdBy": None},
             "transactionType": "PAYMENT",
             "transactionTypeFriendlyName": "Payment",
             "statementId": None,
             "method": "Direct Debit",
             "sourceDate": "2017-05-24T00:00:00",
             "actions": [],
-            "isCancelled": False
-        }
+            "isCancelled": False,
+        },
     ]
 
     account_id = 1831
@@ -107,29 +85,69 @@ def test_extract_account_transactions_json():
         },
     }
     metrics = {}
-    account_transactions.extract_account_transactions_json(
-        data, account_id, k, dir_s3, [metrics])
+    account_transactions.extract_account_transactions_json(data, account_id, k, dir_s3, [metrics])
 
-    expected_s3_key = 'stage1/AccountTransactions/account_transactions_{}.csv'.format(
-        account_id)
+    expected_s3_key = "stage1/AccountTransactions/account_transactions_{}.csv".format(account_id)
 
     # Verify that the file created in S3 has the correct contents
     k = Key(s3_bucket)
     k.key = expected_s3_key
-    csv_lines = k.get_contents_as_string(encoding='utf-8')
+    csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
     # column headers are correct.
-    reader = csv.reader(csv_lines.split('\n'), delimiter=',')
+    reader = csv.reader(csv_lines.split("\n"), delimiter=",")
 
     column_headers = next(reader)
 
-    assert(column_headers == ['actions', 'amount', 'creationDetail_createdBy', 'creationDetail_createdDate', 'currentBalance', 'id', 'isCancelled', 'method', 'sourceDate', 'statementId', 'transactionType', 'transactionTypeFriendlyName', 'account_id'])
-    assert(list(reader) == [
-        ['[]', '-77.35', '', '2017-05-09T16:05:56.49', '-77.35', '10648', 'False', 'Direct Debit', '2017-04-24T00:00:00', '', 'PAYMENT', 'Payment', '1831'],
-        ['[]', '-77.35', '', '2017-05-25T10:12:36.043', '-154.7', '10658', 'False', 'Direct Debit', '2017-05-24T00:00:00', '', 'PAYMENT', 'Payment', '1831'],
-        []  # FIXME: no idea why there's an empty list at the end.
-    ])
+    assert column_headers == [
+        "actions",
+        "amount",
+        "creationDetail_createdBy",
+        "creationDetail_createdDate",
+        "currentBalance",
+        "id",
+        "isCancelled",
+        "method",
+        "sourceDate",
+        "statementId",
+        "transactionType",
+        "transactionTypeFriendlyName",
+        "account_id",
+    ]
+    assert list(reader) == [
+        [
+            "[]",
+            "-77.35",
+            "",
+            "2017-05-09T16:05:56.49",
+            "-77.35",
+            "10648",
+            "False",
+            "Direct Debit",
+            "2017-04-24T00:00:00",
+            "",
+            "PAYMENT",
+            "Payment",
+            "1831",
+        ],
+        [
+            "[]",
+            "-77.35",
+            "",
+            "2017-05-25T10:12:36.043",
+            "-154.7",
+            "10658",
+            "False",
+            "Direct Debit",
+            "2017-05-24T00:00:00",
+            "",
+            "PAYMENT",
+            "Payment",
+            "1831",
+        ],
+        [],  # FIXME: no idea why there's an empty list at the end.
+    ]
 
 
 @responses.activate
@@ -161,11 +179,17 @@ def test_process_accounts_2_accounts(mock_extract_account_transactions_json, moc
 
     # Assert
     assert mock_get_api_response.call_count == 2
-    assert mock_get_api_response.call_args_list[0][0][0] == 'https://api.igloo.ignition.ensek.co.uk/Accounts/1831/Transactions'
-    assert mock_get_api_response.call_args_list[1][0][0] == 'https://api.igloo.ignition.ensek.co.uk/Accounts/210251/Transactions'
+    assert (
+        mock_get_api_response.call_args_list[0][0][0]
+        == "https://api.igloo.ignition.ensek.co.uk/Accounts/1831/Transactions"
+    )
+    assert (
+        mock_get_api_response.call_args_list[1][0][0]
+        == "https://api.igloo.ignition.ensek.co.uk/Accounts/210251/Transactions"
+    )
 
     assert mock_extract_account_transactions_json.call_count == 2
-    assert mock_extract_account_transactions_json.call_args_list[0][0][0] == fixtures['ensek-response-1831-formatted']
+    assert mock_extract_account_transactions_json.call_args_list[0][0][0] == fixtures["ensek-response-1831-formatted"]
     assert mock_extract_account_transactions_json.call_args_list[0][0][1] == 1831
-    assert mock_extract_account_transactions_json.call_args_list[1][0][0] == fixtures['ensek-response-210251-formatted']
+    assert mock_extract_account_transactions_json.call_args_list[1][0][0] == fixtures["ensek-response-210251-formatted"]
     assert mock_extract_account_transactions_json.call_args_list[1][0][1] == 210251

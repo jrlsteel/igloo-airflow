@@ -17,28 +17,25 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='igloo_smart_process_billing_reads',
+    dag_id="igloo_smart_process_billing_reads",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 start_smart_processing_billing_reads_jobs = BashOperator(
-    task_id='start_smart_processing_billing_reads_jobs',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_smart_reads_billing.py',
+    task_id="start_smart_processing_billing_reads_jobs",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_smart_reads_billing.py",
     dag=dag,
 )
 
 
-
 start_smart_processing_billing_reads_jobs
-
-

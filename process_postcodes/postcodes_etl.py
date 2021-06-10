@@ -28,7 +28,7 @@ from common.utils import IglooLogger
 class PostcodesETLPipeline(ETLPipeline):
     def __init__(self, source, destination):
         super().__init__("postcodes")
-        
+
         self.source = source
         self.destination = destination
 
@@ -48,7 +48,7 @@ class PostcodesETLPipeline(ETLPipeline):
             status_forcelist=[429, 500, 502, 503, 504],
             method_whitelist=["HEAD", "GET", "OPTIONS"],
             # Use an exponential backoff
-            backoff_factor=1
+            backoff_factor=1,
         )
         adapter = TimeoutHTTPAdapter(max_retries=retry_strategy)
 
@@ -72,7 +72,7 @@ class PostcodesETLPipeline(ETLPipeline):
                         total_chunks += 1
                 self.logger.in_prod_env("Total chunks: {}".format(total_chunks))
                 self.logger.in_prod_env("Total bytes: {}".format(total_bytes))
-        
+
                 # We need to rewind to the start of the file so that we can read it in.
                 fp.seek(0)
 
@@ -100,7 +100,9 @@ class PostcodesETLPipeline(ETLPipeline):
 
         Writes the data out to S3.
         """
-        self.logger.in_prod_env("Storing data in S3: s3://{}/{}".format(self.destination["s3_bucket"], self.destination["s3_key"]))
+        self.logger.in_prod_env(
+            "Storing data in S3: s3://{}/{}".format(self.destination["s3_bucket"], self.destination["s3_key"])
+        )
 
         def progress_cb(bytes_sent, total_bytes):
             self.logger.in_test_env("Uploaded {} of {} bytes".format(bytes_sent, total_bytes))
@@ -116,16 +118,15 @@ class PostcodesETLPipeline(ETLPipeline):
         """
         start_time = timeit.default_timer()
         df = self.extract()
-        self.logger.in_prod_env('Completed extract step in {} seconds'.format(timeit.default_timer() - start_time))
+        self.logger.in_prod_env("Completed extract step in {} seconds".format(timeit.default_timer() - start_time))
 
         start_time = timeit.default_timer()
         df = self.transform(df)
-        self.logger.in_prod_env('Completed transform step in {} seconds'.format(timeit.default_timer() - start_time))
+        self.logger.in_prod_env("Completed transform step in {} seconds".format(timeit.default_timer() - start_time))
 
         start_time = timeit.default_timer()
         self.load(df)
-        self.logger.in_prod_env('Completed load step in {} seconds'.format(timeit.default_timer() - start_time))
-
+        self.logger.in_prod_env("Completed load step in {} seconds".format(timeit.default_timer() - start_time))
 
     def log_error(self, error_msg, error_code=""):
         self.logger.in_prod_env(error_msg)
@@ -133,7 +134,7 @@ class PostcodesETLPipeline(ETLPipeline):
         os.makedirs(os.path.dirname(logfile), exist_ok=True)
 
         with open(logfile, mode="a") as errorlog:
-            csv_writer = csv.writer(errorlog, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
+            csv_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([error_msg, error_code])
 
 
@@ -146,15 +147,13 @@ if __name__ == "__main__":
     logger.in_prod_env("Starting postcodes ETL")
 
     p = PostcodesETLPipeline(
-        source={
-            "url": utils.get_common_info("postcodes", "api_url")
-        },
+        source={"url": utils.get_common_info("postcodes", "api_url")},
         destination={
             "s3_bucket": utils.get_dir()["s3_bucket"],
             "s3_key": utils.get_common_info("postcodes", "s3_key"),
             "extract_dtypes": utils.get_common_info("postcodes", "extract_dtypes"),
-            "transform_dtypes": utils.get_common_info("postcodes", "transform_dtypes")
-        }
+            "transform_dtypes": utils.get_common_info("postcodes", "transform_dtypes"),
+        },
     )
 
     try:

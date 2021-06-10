@@ -62,11 +62,7 @@ def process_glue_job(job_name, process_name):
         )
         job_response = obj_stage.run_glue_job()
         if job_response:
-            print(
-                "{0}: Staging Job Completed successfully".format(
-                    datetime.datetime.now().strftime("%H:%M:%S")
-                )
-            )
+            print("{0}: Staging Job Completed successfully".format(datetime.datetime.now().strftime("%H:%M:%S")))
         else:
             print("Error occurred in Staging Job")
             raise Exception

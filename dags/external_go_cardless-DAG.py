@@ -17,23 +17,23 @@ from process_verification.verification_template import (
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='go_cardless',
+    dag_id="go_cardless",
     default_args=args,
-    schedule_interval='00 02 * * *',
-    tags=['cdw'],
+    schedule_interval="00 02 * * *",
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 start_go_cardless_api_extracts = BashOperator(
-    task_id='start_go_cardless_api_extracts',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_go_cardless && python start_go_cardless_api_extracts.py',
+    task_id="start_go_cardless_api_extracts",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_go_cardless && python start_go_cardless_api_extracts.py",
     dag=dag,
 )
 
@@ -101,7 +101,7 @@ verify_events_table_has_events_in_last_24hrs = PythonOperator(
     op_kwargs={
         "table_name": "aws_fin_stage1_extracts.fin_go_cardless_api_events",
         "column_name": "max(created_at)",
-        "comparison_value": (days_ago(1).strftime('%Y-%m-%dT%H:%M:%S.%f'))[:-3] + 'Z',
+        "comparison_value": (days_ago(1).strftime("%Y-%m-%dT%H:%M:%S.%f"))[:-3] + "Z",
     },
     dag=dag,
 )

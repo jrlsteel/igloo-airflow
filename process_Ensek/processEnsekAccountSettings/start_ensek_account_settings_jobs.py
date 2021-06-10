@@ -3,7 +3,7 @@ from datetime import datetime
 import timeit
 import subprocess
 
-sys.path.append('../..')
+sys.path.append("../..")
 from common import process_glue_job as glue
 from common import utils as util
 
@@ -20,27 +20,33 @@ class AccountSettingsJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process Ensek Account   <<<<".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}: >>>> Process Ensek Account   <<<<".format(datetime.now().strftime("%H:%M:%S")))
         try:
             start = timeit.default_timer()
             subprocess.run([self.pythonAlias, "process_ensek_account_settings.py"], check=True)
-            print("{0}: Process Ensek Account completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'),
-                                                                               float(timeit.default_timer() - start)))
+            print(
+                "{0}: Process Ensek Account completed in {1:.2f} seconds".format(
+                    datetime.now().strftime("%H:%M:%S"), float(timeit.default_timer() - start)
+                )
+            )
         except Exception as e:
             print("Error in Process Ensek Account  :- " + str(e))
             sys.exit(1)
 
     def submit_account_settings_extract_staging_gluejob(self):
         try:
-            jobName = self.dir['glue_staging_job_name']
-            s3_bucket = self.dir['s3_bucket']
+            jobName = self.dir["glue_staging_job_name"]
+            s3_bucket = self.dir["s3_bucket"]
             environment = self.env
 
-            obj_stage = glue.ProcessGlueJob(job_name=jobName, s3_bucket=s3_bucket, environment=environment,
-                                            processJob='ensek-account-settings')
+            obj_stage = glue.ProcessGlueJob(
+                job_name=jobName, s3_bucket=s3_bucket, environment=environment, processJob="ensek-account-settings"
+            )
             job_response = obj_stage.run_glue_job()
             if job_response:
-                print("{0}: Staging Ensek Account Job Completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print(
+                    "{0}: Staging Ensek Account Job Completed successfully".format(datetime.now().strftime("%H:%M:%S"))
+                )
                 # return staging_job_response
             else:
                 print("Error occurred in Ensek Account Staging Job")
@@ -49,6 +55,7 @@ class AccountSettingsJobs:
         except Exception as e:
             print("Error in Ensek Account Staging Job :- " + str(e))
             sys.exit(1)
+
     """"
     def submit_account_settings_extract_reference_gluejob(self):
         try:
@@ -72,16 +79,16 @@ class AccountSettingsJobs:
     """
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     s = AccountSettingsJobs()
 
-    #Ensek Meterpoints Extract
-    print("{0}:  Ensek Account Status Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    # Ensek Meterpoints Extract
+    print("{0}:  Ensek Account Status Jobs running...".format(datetime.now().strftime("%H:%M:%S")))
     s.submit_account_settings_extract_job()
 
     # #Ensek Meterpoints Staging Jobs
-    print("{0}:  Ensek Account Status Staging Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}:  Ensek Account Status Staging Jobs running...".format(datetime.now().strftime("%H:%M:%S")))
     s.submit_account_settings_extract_staging_gluejob()
 
     """
@@ -90,8 +97,4 @@ if __name__ == '__main__':
     s.submit_account_settings_extract_reference_gluejob()
     """
 
-
-
-    print("{0}: All Registrations Account Status completed successfully".format(datetime.now().strftime('%H:%M:%S')))
-
-
+    print("{0}: All Registrations Account Status completed successfully".format(datetime.now().strftime("%H:%M:%S")))

@@ -146,9 +146,7 @@ class TestValidatePaymentMethods(unittest.TestCase):
 
         print("status is", status)
 
-        self.assertEqual(
-            status, {"payment_method": "DD", "status_code": 200, "response": ""}
-        )
+        self.assertEqual(status, {"payment_method": "DD", "status_code": 200, "response": ""})
 
     @mock.patch("requests.get", side_effect=mocked_requests_get)
     def test_get_ensek_status_for_porb_account(self, mock_requests):
@@ -157,9 +155,7 @@ class TestValidatePaymentMethods(unittest.TestCase):
 
         print("status is", status)
 
-        self.assertEqual(
-            status, {"payment_method": "PORB", "status_code": 200, "response": ""}
-        )
+        self.assertEqual(status, {"payment_method": "PORB", "status_code": 200, "response": ""})
 
     @patch.object(PaymentMethodValidator, "get_accounts", mock_get_accounts)
     @mock.patch("requests.get", side_effect=mocked_requests_get)

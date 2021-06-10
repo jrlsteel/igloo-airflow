@@ -1,7 +1,7 @@
 import sys
 import pandas_redshift as pr
 
-sys.path.append('..')
+sys.path.append("..")
 from utils.conf1 import config as con
 
 
@@ -18,26 +18,29 @@ class CopyRedshiftdata:
 
     def __init__(self):
 
-        self._copy_from_env = 'uat'
-        self._copy_to_env = 'preprod'
+        self._copy_from_env = "uat"
+        self._copy_to_env = "preprod"
         self.overwrite = True
-        self._copy_tables = [
-                             {'copy_from': 'temp_test',
-                              'copy_to': 'temp_test'}
-                             ]
+        self._copy_tables = [{"copy_from": "temp_test", "copy_to": "temp_test"}]
 
     def get_connection(self, env):
         try:
-            print('Connecting')
-            pr.connect_to_redshift(host=env['redshift_config']['host'], port=env['redshift_config']['port'],
-                                   user=env['redshift_config']['user'], password=env['redshift_config']['pwd'],
-                                   dbname=env['redshift_config']['db'])
-            print("Connected to Redshift : " + str(env['redshift_config']['db']))
+            print("Connecting")
+            pr.connect_to_redshift(
+                host=env["redshift_config"]["host"],
+                port=env["redshift_config"]["port"],
+                user=env["redshift_config"]["user"],
+                password=env["redshift_config"]["pwd"],
+                dbname=env["redshift_config"]["db"],
+            )
+            print("Connected to Redshift : " + str(env["redshift_config"]["db"]))
 
-            pr.connect_to_s3(aws_access_key_id=env['s3_config']['access_key'],
-                             aws_secret_access_key=env['s3_config']['secret_key'],
-                             bucket=env['s3_config']['bucket_name'],
-                             subdirectory='aws-glue-tempdir/')
+            pr.connect_to_s3(
+                aws_access_key_id=env["s3_config"]["access_key"],
+                aws_secret_access_key=env["s3_config"]["secret_key"],
+                bucket=env["s3_config"]["bucket_name"],
+                subdirectory="aws-glue-tempdir/",
+            )
         except Exception as e:
             raise e
 
@@ -46,16 +49,16 @@ class CopyRedshiftdata:
 
     def get_env(self, env):
 
-        if env == 'prod':
+        if env == "prod":
             env = con.prod
 
-        if env == 'preprod':
+        if env == "preprod":
             env = con.preprod
 
-        if env == 'uat':
+        if env == "uat":
             env = con.uat
 
-        if env == 'dev':
+        if env == "dev":
             env = con.dev
 
         return env
@@ -70,10 +73,10 @@ class CopyRedshiftdata:
 
                     _env_from = self.get_env(self._copy_from_env)
                     self.get_connection(_env_from)
-                    copy_from_sql = "select * from {0}".format(table['copy_from'])
-                    print('Copying data from : ' + table['copy_from'])
+                    copy_from_sql = "select * from {0}".format(table["copy_from"])
+                    print("Copying data from : " + table["copy_from"])
                     df_copy_from = pr.redshift_to_pandas(copy_from_sql)
-                    print('Data loaded')
+                    print("Data loaded")
                     # print(df_copy_from.to_csv(None, index=False))
                     self.close_connection()
 
@@ -83,17 +86,17 @@ class CopyRedshiftdata:
                         _env_to = self.get_env(self._copy_to_env)
                         self.get_connection(_env_to)
                         if self.overwrite:
-                            print('Deleting existing data from : '+ table['copy_to'])
-                            delete_sql = "delete from {0}".format(table['copy_to'])
+                            print("Deleting existing data from : " + table["copy_to"])
+                            delete_sql = "delete from {0}".format(table["copy_to"])
                             pr.exec_commit(delete_sql)
 
-                        print('Inserting data into : ' + table['copy_to'])
-                        pr.pandas_to_redshift(df_copy_from, table['copy_to'], append=True, index=False)
+                        print("Inserting data into : " + table["copy_to"])
+                        pr.pandas_to_redshift(df_copy_from, table["copy_to"], append=True, index=False)
                         self.close_connection()
-                        print('Total records copied :' + str(df_copy_from.count()))
+                        print("Total records copied :" + str(df_copy_from.count()))
 
         except Exception as e:
-            print('Error:' + str(e))
+            print("Error:" + str(e))
 
 
 if __name__ == "__main__":

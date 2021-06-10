@@ -71,9 +71,7 @@ class TestGoCardlessCustomers(unittest.TestCase):
         self.bucket.delete()
 
     @patch.object(GoCardlessReport, "download_file", mock_download_file)
-    @patch.object(
-        GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_in_date
-    )
+    @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_in_date)
     def test_normal_run(self):
 
         # create an existing file in the s3 bucket
@@ -90,21 +88,15 @@ class TestGoCardlessCustomers(unittest.TestCase):
         objects = self.bucket.objects.filter(Prefix=self.instance.s3_key_prefix)
         keys = [object.key for object in objects]
 
-        self.assertEqual(
-            keys, ["go-cardless-id-mandate-lookup/Go_Cardless_Report_210304.csv"]
-        )
+        self.assertEqual(keys, ["go-cardless-id-mandate-lookup/Go_Cardless_Report_210304.csv"])
 
-    @patch.object(
-        GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_out_of_date
-    )
+    @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_out_of_date)
     def test_file_out_of_date(self):
         with self.assertRaises(Exception) as context:
             self.instance.process()
         self.assertTrue("File is out-of-date" in str(context.exception))
 
-    @patch.object(
-        GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_no_files
-    )
+    @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_no_files)
     def test_no_files(self):
 
         with self.assertRaises(Exception) as context:

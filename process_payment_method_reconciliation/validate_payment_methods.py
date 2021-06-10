@@ -25,6 +25,7 @@ from connections import connect_db as db
 logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")
 
+
 class PaymentMethodValidator:
     def __init__(self, config, ensek_config, bucket_name, sample_size=None):
 
@@ -41,7 +42,7 @@ class PaymentMethodValidator:
 
     def connect_s3(self):
 
-        logger.info('connecting to s3')
+        logger.info("connecting to s3")
 
         self.s3 = boto3.client(
             "s3",
@@ -65,19 +66,16 @@ class PaymentMethodValidator:
             order by contract_id
         """
 
-        logger.info('running sql: %s', accounts_sql)
+        logger.info("running sql: %s", accounts_sql)
 
         connection = db.get_redshift_connection()
         accounts_df = connection.redshift_to_pandas(accounts_sql)
         db.close_redshift_connection()
-        account_statuses = accounts_df.to_dict('records')
+        account_statuses = accounts_df.to_dict("records")
 
         if self.sample_size:
-            logger.info('running with sample size of %i', self.sample_size)
-            account_statuses = random.sample(
-                account_statuses,
-                self.sample_size
-                )
+            logger.info("running with sample size of %i", self.sample_size)
+            account_statuses = random.sample(account_statuses, self.sample_size)
 
         return account_statuses
 
@@ -94,9 +92,7 @@ class PaymentMethodValidator:
         if not self.s3:
             self.connect_s3()
 
-        filename = 'ensek-payment-method-reconciliation-{}.csv'.format(
-            time.time()
-        )
+        filename = "ensek-payment-method-reconciliation-{}.csv".format(time.time())
 
         self.s3.put_object(
             Bucket=self.s3_destination_bucket,
@@ -104,23 +100,23 @@ class PaymentMethodValidator:
             Body=csv_string.encode(),
         )
 
-        logger.info('object %s stored in s3', filename)
+        logger.info("object %s stored in s3", filename)
 
     def process(self):
 
         accounts = self.get_accounts()
 
         for count, account in enumerate(accounts):
-            account_id = account['contract_id']
+            account_id = account["contract_id"]
 
             if count % 100 == 0:
-                logger.info('currently processing account %i', account_id)
+                logger.info("currently processing account %i", account_id)
 
             ensek_status = self.get_ensek_status(account_id)
 
             retry = 0
-            while ensek_status['status_code'] == 429 and retry < 10:
-                logger.info('received a rate limit response')
+            while ensek_status["status_code"] == 429 and retry < 10:
+                logger.info("received a rate limit response")
                 time.sleep(60)
                 ensek_status = self.get_ensek_status(account_id)
                 retry += 1
@@ -128,107 +124,90 @@ class PaymentMethodValidator:
             if retry == 10:
                 break
 
-            change = ''
-            if account['payment_method'] != ensek_status['payment_method']:
+            change = ""
+            if account["payment_method"] != ensek_status["payment_method"]:
                 change = "{}>{}".format(
-                    account['payment_method'],
-                    ensek_status['payment_method'],
+                    account["payment_method"],
+                    ensek_status["payment_method"],
                 )
 
-            account['ensek_method'] = ensek_status['payment_method']
-            account['status_code'] = ensek_status['status_code']
-            account['response'] = ensek_status['response']
-            account['change'] = change
+            account["ensek_method"] = ensek_status["payment_method"]
+            account["status_code"] = ensek_status["status_code"]
+            account["response"] = ensek_status["response"]
+            account["change"] = change
 
-        logger.info('finished calling ENSEK API')
+        logger.info("finished calling ENSEK API")
 
         self.store_report(accounts)
 
-        logger.info('finished')
+        logger.info("finished")
 
     def get_ensek_status(self, account_id):
         """
         Calls ENSEK API and determines from the response whether
         the payment method is DD or PORB
         """
-        ensek_api_config = self.ensek_config['ensek_api']
+        ensek_api_config = self.ensek_config["ensek_api"]
 
-        api_url = '{base_url}/Accounts/{account_id}/DirectDebits/HealthCheck'.format(
-            account_id=account_id,
-            base_url=ensek_api_config['base_url']
+        api_url = "{base_url}/Accounts/{account_id}/DirectDebits/HealthCheck".format(
+            account_id=account_id, base_url=ensek_api_config["base_url"]
         )
 
         headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization':'Bearer {}'.format(
-                ensek_api_config['api_key']
-            ),
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer {}".format(ensek_api_config["api_key"]),
         }
 
         try:
-            response = requests.get(
-                api_url,
-                headers=headers,
-                timeout=10
-            )
+            response = requests.get(api_url, headers=headers, timeout=10)
         except Exception as e:
             # Log the exception and treat it as a rate limit
             traceback.print_exc()
             return {
-                'payment_method': '',
-                'status_code': 429,
-                'response': {'error': 'exception raise during API call'},
+                "payment_method": "",
+                "status_code": 429,
+                "response": {"error": "exception raise during API call"},
             }
 
         ensek_data = response.json()
         status_code = response.status_code
 
         try:
-            direct_debit_status = ensek_data['DirectDebitStatus']
+            direct_debit_status = ensek_data["DirectDebitStatus"]
         except KeyError:
             return {
-                'payment_method': 'PORB',
-                'status_code': status_code,
-                'response': json.dumps(ensek_data),
+                "payment_method": "PORB",
+                "status_code": status_code,
+                "response": json.dumps(ensek_data),
             }
 
-        active_dd = direct_debit_status == 'Authorised'
+        active_dd = direct_debit_status == "Authorised"
         subscription_statuses = [
-            subscription['directDebitIsActive']
-            for subscription
-            in ensek_data['SubscriptionDetails']
+            subscription["directDebitIsActive"] for subscription in ensek_data["SubscriptionDetails"]
         ]
         active_subscription = any(subscription_statuses)
 
-        ensek_payment_method = 'DD' if active_dd and active_subscription else 'PORB'
+        ensek_payment_method = "DD" if active_dd and active_subscription else "PORB"
 
         return {
-            'payment_method': ensek_payment_method,
-            'status_code': status_code,
-            'response': '',
+            "payment_method": ensek_payment_method,
+            "status_code": status_code,
+            "response": "",
         }
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     from conf import config
     from common import utils as util
 
     directory = util.get_dir()
     finance_bucket = directory["s3_finance_bucket"]
-    api_key = directory['apis']['token']
+    api_key = directory["apis"]["token"]
 
-    ensek_config = {
-        "ensek_api": {
-            "base_url": "https://api.igloo.ignition.ensek.co.uk",
-            "api_key": api_key
-        }
-    }
+    ensek_config = {"ensek_api": {"base_url": "https://api.igloo.ignition.ensek.co.uk", "api_key": api_key}}
 
-    validator = PaymentMethodValidator(
-        config=config,
-        ensek_config=ensek_config,
-        bucket_name=finance_bucket
-    )
+    validator = PaymentMethodValidator(config=config, ensek_config=ensek_config, bucket_name=finance_bucket)
 
     validator.process()

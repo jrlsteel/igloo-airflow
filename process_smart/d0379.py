@@ -29,11 +29,7 @@ class InsufficientHHReadingsException(Exception):
         self.account_id = account_id
         self.mpxn = mpxn
         self.num_readings = num_readings
-        super().__init__(
-            "Account ID: {}, MPxN: {}, insufficient readings: {}".format(
-                account_id, mpxn, num_readings
-            )
-        )
+        super().__init__("Account ID: {}, MPxN: {}, insufficient readings: {}".format(account_id, mpxn, num_readings))
 
 
 class TooManyHHReadingsException(Exception):
@@ -45,11 +41,7 @@ class TooManyHHReadingsException(Exception):
         self.account_id = account_id
         self.mpxn = mpxn
         self.num_readings = num_readings
-        super().__init__(
-            "Account ID: {}, MPxN: {}, too many readings: {}".format(
-                account_id, mpxn, num_readings
-            )
-        )
+        super().__init__("Account ID: {}, MPxN: {}, too many readings: {}".format(account_id, mpxn, num_readings))
 
 
 class NoD0379FileFound(Exception):
@@ -61,11 +53,7 @@ class NoD0379FileFound(Exception):
         self.account_id = account_id
         self.mpxn = mpxn
         self.num_readings = num_readings
-        super().__init__(
-            "Account ID: {}, MPxN: {}, too many readings: {}".format(
-                account_id, mpxn, num_readings
-            )
-        )
+        super().__init__("Account ID: {}, MPxN: {}, too many readings: {}".format(account_id, mpxn, num_readings))
 
 
 class NoD0379FileFound(Exception):
@@ -76,11 +64,7 @@ class NoD0379FileFound(Exception):
     def __init__(self, s3_bucket, s3_prefix):
         self.s3_bucket = s3_bucket
         self.s3_prefix = s3_prefix
-        super().__init__(
-            "No D0379 files matching prefix {} found in S3 bucket {}".format(
-                s3_prefix, s3_bucket
-            )
-        )
+        super().__init__("No D0379 files matching prefix {} found in S3 bucket {}".format(s3_prefix, s3_bucket))
 
 
 """
@@ -99,9 +83,7 @@ def fetch_d0379_accounts():
     in the D0379 file.
     """
 
-    d0379_accounts_sql_query = common.directories.common["elective_hh"][
-        "elective_hh_trial_participants_sql"
-    ]
+    d0379_accounts_sql_query = common.directories.common["elective_hh"]["elective_hh_trial_participants_sql"]
 
     logger.info("Exeuting SQL: {}".format(d0379_accounts_sql_query))
 
@@ -215,32 +197,24 @@ def dataframe_to_d0379(d0379_accounts, d0379_date, df, fileid):
             if len(hh_readings) > 48:
                 raise TooManyHHReadingsException(account_id, mpxn, len(hh_readings))
             if len(hh_readings) < 48:
-                raise InsufficientHHReadingsException(
-                    account_id, mpxn, len(hh_readings)
-                )
+                raise InsufficientHHReadingsException(account_id, mpxn, len(hh_readings))
 
-            logger.info(
-                "Account ID: {}, MPxN: {}, num HH readings: {}".format(
-                    account_id, mpxn, len(hh_readings)
-                )
-            )
+            logger.info("Account ID: {}, MPxN: {}, num HH readings: {}".format(account_id, mpxn, len(hh_readings)))
 
             # Build up the lines for this record, then add them to the master
             # `lines` list at the end. This was, if we encounter an exception
             #  during processing, we will not add an incomplete record to the
             #  D0379 file.
             record_lines = []
-            record_lines.append(
-                "25B|{0}|{1}|{2}|".format(mpxn, measurement_quantity_id, supplier_id)
-            )
+            record_lines.append("25B|{0}|{1}|{2}|".format(mpxn, measurement_quantity_id, supplier_id))
             record_lines.append("26B|{0}|".format(d0379_date.strftime("%Y%m%d")))
 
             for row in hh_readings.itertuples():
                 # The Actual/Estimated indicator is always set to 'A' as we
                 # do not currently generated estimates, the values are always
-                # based on reads received from the meter.
+                # based on reads received from the meter.
                 actual_estimated_indicator = "A"
-                
+
                 # The Smart Metered Period Consumption needs to be inserted
                 # into the D0379 as kWh, however the values we get back from
                 # the CDW are in Wh, hence the conversion here.
@@ -340,22 +314,16 @@ def copy_d0379_to_sftp(d0379_date):
             aws_secret_access_key=aws_secret_access_key,
         )
 
-        s3_response = s3_client.list_objects_v2(
-            Bucket=s3_destination_bucket, Prefix=s3_key_prefix
-        )
+        s3_response = s3_client.list_objects_v2(Bucket=s3_destination_bucket, Prefix=s3_key_prefix)
 
         if s3_response["KeyCount"] > 0:
             keys = [x["Key"] for x in s3_response["Contents"]]
             logger.info(
-                "{} objects found in {} matching prefix {}".format(
-                    len(keys), s3_destination_bucket, s3_key_prefix
-                )
+                "{} objects found in {} matching prefix {}".format(len(keys), s3_destination_bucket, s3_key_prefix)
             )
 
             for key in keys:
-                d0379_object = s3_client.get_object(
-                    Bucket=s3_destination_bucket, Key=key
-                )
+                d0379_object = s3_client.get_object(Bucket=s3_destination_bucket, Key=key)
 
                 basename = os.path.basename(key)
 
@@ -366,9 +334,7 @@ def copy_d0379_to_sftp(d0379_date):
                     "{}/{}".format(sftp_prefix, basename),
                 )
 
-                logger.debug(
-                    "SFTP URI: {}".format(sftp_uri.replace(sftp_password, "<redacted>"))
-                )
+                logger.debug("SFTP URI: {}".format(sftp_uri.replace(sftp_password, "<redacted>")))
 
                 with smart_open.open(sftp_uri, "w") as fout:
                     fout.write(d0379_object["Body"].read().decode("utf-8"))

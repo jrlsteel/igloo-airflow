@@ -7,13 +7,18 @@ import boto
 from boto.s3.key import Key
 import psycopg2
 
-sys.path.append('..')
+sys.path.append("..")
 from conf import config as con
 
 
 def get_rds_connection():
-    conn = psql.connect(host=con.rds_config['host'], port=con.rds_config['port'], user=con.rds_config['user'],
-                        passwd=con.rds_config['pwd'], db=con.rds_config['db'])
+    conn = psql.connect(
+        host=con.rds_config["host"],
+        port=con.rds_config["port"],
+        user=con.rds_config["user"],
+        passwd=con.rds_config["pwd"],
+        db=con.rds_config["db"],
+    )
 
     return conn
 
@@ -25,15 +30,21 @@ def close_rds_connection(cursor, connection):
 
 def get_redshift_connection():
     try:
-        pr.connect_to_redshift(host=con.redshift_config['host'], port=con.redshift_config['port'],
-                               user=con.redshift_config['user'], password=con.redshift_config['pwd'],
-                               dbname=con.redshift_config['db'])
+        pr.connect_to_redshift(
+            host=con.redshift_config["host"],
+            port=con.redshift_config["port"],
+            user=con.redshift_config["user"],
+            password=con.redshift_config["pwd"],
+            dbname=con.redshift_config["db"],
+        )
         print("Connected to Redshift")
 
-        pr.connect_to_s3(aws_access_key_id=con.s3_config['access_key'],
-                         aws_secret_access_key=con.s3_config['secret_key'],
-                         bucket=con.s3_config['bucket_name'],
-                         subdirectory='aws-glue-tempdir/')
+        pr.connect_to_s3(
+            aws_access_key_id=con.s3_config["access_key"],
+            aws_secret_access_key=con.s3_config["secret_key"],
+            bucket=con.s3_config["bucket_name"],
+            subdirectory="aws-glue-tempdir/",
+        )
         return pr
 
     except ConnectionError as e:
@@ -42,9 +53,13 @@ def get_redshift_connection():
 
 def get_redshift_connection_prod():
     try:
-        pr.connect_to_redshift(host=con.redshift_config_prod['host'], port=con.redshift_config_prod['port'],
-                               user=con.redshift_config_prod['user'], password=con.redshift_config_prod['pwd'],
-                               dbname=con.redshift_config_prod['db'])
+        pr.connect_to_redshift(
+            host=con.redshift_config_prod["host"],
+            port=con.redshift_config_prod["port"],
+            user=con.redshift_config_prod["user"],
+            password=con.redshift_config_prod["pwd"],
+            dbname=con.redshift_config_prod["db"],
+        )
         print("Connected to Redshift")
         return pr
 
@@ -58,22 +73,22 @@ def close_redshift_connection():
 
 
 def get_S3_Connections_resources():
-    access_key = con.s3_config['access_key']
-    secret_key = con.s3_config['secret_key']
+    access_key = con.s3_config["access_key"]
+    secret_key = con.s3_config["secret_key"]
     # print(access_key)
     # print(secret_key)
 
-    s3 = boto3.resource('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    s3 = boto3.resource("s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
 
 
 def get_S3_Connections_client():
-    access_key = con.s3_config['access_key']
-    secret_key = con.s3_config['secret_key']
+    access_key = con.s3_config["access_key"]
+    secret_key = con.s3_config["secret_key"]
     # print(access_key)
     # print(secret_key)
 
-    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    s3 = boto3.client("s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
 
 
@@ -84,8 +99,9 @@ def get_ensek_sftp_connection():
         cnopts.hostkeys = None
 
         # print(ensek_sftp)
-        sftp = pysftp.Connection(host=ensek_sftp['host'], username=ensek_sftp['username'],
-                                 password=ensek_sftp['password'], cnopts=cnopts)
+        sftp = pysftp.Connection(
+            host=ensek_sftp["host"], username=ensek_sftp["username"], password=ensek_sftp["password"], cnopts=cnopts
+        )
 
         return sftp
     except Exception as e:
@@ -94,10 +110,12 @@ def get_ensek_sftp_connection():
 
 def get_glue_connection():
     try:
-        glue_client = boto3.client(service_name='glue',
-                                   region_name='eu-west-1',
-                                   aws_access_key_id=con.s3_config['access_key'],
-                                   aws_secret_access_key=con.s3_config['secret_key'])
+        glue_client = boto3.client(
+            service_name="glue",
+            region_name="eu-west-1",
+            aws_access_key_id=con.s3_config["access_key"],
+            aws_secret_access_key=con.s3_config["secret_key"],
+        )
         return glue_client
 
     except Exception as e:
@@ -106,8 +124,8 @@ def get_glue_connection():
 
 def get_boto_S3_Connections(bucket_name):
     # global k
-    access_key = con.s3_config['access_key']
-    secret_key = con.s3_config['secret_key']
+    access_key = con.s3_config["access_key"]
+    secret_key = con.s3_config["secret_key"]
     # print(access_key)
     # print(secret_key)
 
@@ -118,9 +136,9 @@ def get_boto_S3_Connections(bucket_name):
 
 
 def get_finance_s3_connections(bucket_name):
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
-    bucket = con.igloo_finance_config['bucket_name']
+    access_key = con.igloo_finance_config["access_key"]
+    secret_key = con.igloo_finance_config["secret_key"]
+    bucket = con.igloo_finance_config["bucket_name"]
 
     s3 = boto.connect_s3(aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     bucket = s3.get_bucket(bucket)
@@ -129,21 +147,19 @@ def get_finance_s3_connections(bucket_name):
 
 
 def get_finance_s3_connections_resources():
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
+    access_key = con.igloo_finance_config["access_key"]
+    secret_key = con.igloo_finance_config["secret_key"]
 
-    s3 = boto3.resource('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    s3 = boto3.resource("s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
 
 
 def get_finance_s3_connections_client():
-    access_key = con.igloo_finance_config['access_key']
-    secret_key = con.igloo_finance_config['secret_key']
+    access_key = con.igloo_finance_config["access_key"]
+    secret_key = con.igloo_finance_config["secret_key"]
 
-    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+    s3 = boto3.client("s3", aws_access_key_id=access_key, aws_secret_access_key=secret_key)
     return s3
-
-
 
 
 if __name__ == "__main__":

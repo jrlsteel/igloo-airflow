@@ -15,7 +15,7 @@ xml_response_string = b'<?xml version="1.0" encoding="utf-8"?><soap:Envelope xml
 
 @mock_s3_deprecated
 def test_extract_cv_data():
-    s3_bucket_name = 'simulated-bucket'
+    s3_bucket_name = "simulated-bucket"
 
     s3_connection = S3Connection()
     s3_bucket = s3_connection.create_bucket(s3_bucket_name)
@@ -23,32 +23,26 @@ def test_extract_cv_data():
     alp_historical_cv = ALPHistoricalCV()
 
     data_cv = alp_historical_cv.format_xml_response(xml_response_string)
-    cv_folder = 'Calorific Value, Campbeltown'
+    cv_folder = "Calorific Value, Campbeltown"
 
     k = s3_con(s3_bucket_name)
-    dir_s3 = {
-        's3_alp_cv': {
-            'AlpCV': 'stage1/ALP/AlpCV/'
-        }
-    }
+    dir_s3 = {"s3_alp_cv": {"AlpCV": "stage1/ALP/AlpCV/"}}
 
     start_date = datetime.today().date() - timedelta(days=1)
     end_date = datetime.today().date()
 
-    alp_historical_cv.extract_cv_data(
-        data_cv, cv_folder, k, dir_s3, start_date, end_date)
+    alp_historical_cv.extract_cv_data(data_cv, cv_folder, k, dir_s3, start_date, end_date)
 
-    expected_s3_key = 'stage1/ALP/AlpCV/alp_cv_historical_{}_{}.csv'.format(
-        cv_folder, str(start_date))
+    expected_s3_key = "stage1/ALP/AlpCV/alp_cv_historical_{}_{}.csv".format(cv_folder, str(start_date))
 
     # Verify that the file created in S3 has the correct contents
     k = Key(s3_bucket)
     k.key = expected_s3_key
-    csv_lines = k.get_contents_as_string(encoding='utf-8')
+    csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
     # column headers are correct.
-    reader = csv.reader(csv_lines.split('\n'), delimiter=',')
+    reader = csv.reader(csv_lines.split("\n"), delimiter=",")
 
     column_headers = next(reader)
-    assert(column_headers == ['name', 'applicable_at', 'applicable_for', 'value'])
+    assert column_headers == ["name", "applicable_at", "applicable_for", "value"]

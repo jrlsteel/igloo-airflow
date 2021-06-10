@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 
@@ -16,30 +16,57 @@ from process_smart.process_smart_reads_billing import SmartReadsBillings
 from freezegun import freeze_time
 
 
+# These are the columns that appear in vw_etl_smart_billing_reads_elec and vw_etl_smart_billing_reads_gas.
+elec_data_columns = [
+    "manualmeterreadingid",
+    "accountid",
+    "meterreadingdatetime",
+    "metertype",
+    "meterpointnumber",
+    "meter",
+    "register",
+    "reading",
+    "source",
+    "createdby",
+    "next_bill_date",
+    "user_id",
+    "zendesk_id",
+    "uuid",
+]
 
-# These are the columns that appear in vw_etl_smart_billing_reads_elec and vw_etl_smart_billing_reads_gas.
-elec_data_columns = ['manualmeterreadingid', 'accountid', 'meterreadingdatetime', 'metertype',
-                     'meterpointnumber', 'meter', 'register', 'reading', 'source', 'createdby', 'next_bill_date', 'user_id', 'zendesk_id', 'uuid']
-
-# Create some simple sample data - simulate a single row in the elec view.
+# Create some simple sample data - simulate a single row in the elec view.
 elec_data = [
-    ['30-EB-5A-FF-FF-0C-54-AB', 1831, datetime.strptime('2020-10-11 00:00:00.000000', '%Y-%m-%d %H:%M:%S.%f'), 'Electricity',
-        2102, 115976, 125544, 8006.472, 'SMART', None, datetime.strptime('2020-10-17 00:00:00.000000', '%Y-%m-%d %H:%M:%S.%f'), 1831, 361889743409, 'xxxx-xxxx-xxxx-xxxx'],
+    [
+        "30-EB-5A-FF-FF-0C-54-AB",
+        1831,
+        datetime.strptime("2020-10-11 00:00:00.000000", "%Y-%m-%d %H:%M:%S.%f"),
+        "Electricity",
+        2102,
+        115976,
+        125544,
+        8006.472,
+        "SMART",
+        None,
+        datetime.strptime("2020-10-17 00:00:00.000000", "%Y-%m-%d %H:%M:%S.%f"),
+        1831,
+        361889743409,
+        "xxxx-xxxx-xxxx-xxxx",
+    ],
 ]
 
 
 # Create some mocks for util functions that the SmartReadsBillings class depends on
 def mock_util_get_api_info(api=None, auth_type=None, token_required=False, header_type=None):
-    return '', '', ''
+    return "", "", ""
 
 
 def mock_util_get_smart_read_billing_api_info(api):
-    return 'https://example.org', {}
+    return "https://example.org", {}
 
 
 class TestSmartReadsBillings(unittest.TestCase):
 
-    # Patch in our mocks for the util functions
+    # Patch in our mocks for the util functions
     @patch("common.utils.get_api_info", mock_util_get_api_info)
     @patch("common.utils.get_smart_read_billing_api_info", mock_util_get_smart_read_billing_api_info)
 
@@ -63,23 +90,26 @@ class TestSmartReadsBillings(unittest.TestCase):
 
         kargs = srb.post_api_response.call_args[0]
 
-        self.assertEqual(kargs[0], 'https://example.org')
-        self.assertDictEqual(json.loads(kargs[1]), {
-            'accountId': 1831,
-            'uuid': 'xxxx-xxxx-xxxx-xxxx',
-            'userId': 1831,
-            'zendeskId': 361889743409,
-            'createdBy': None,
-            'dateCreated': '2018-04-03T11:30:00.123456+00:00',
-            'meter': 115976,
-            'meterPointNumber': 2102,
-            'meterReadingDateTime': '2020-10-11T00:00:00+00:00',
-            'meterType': 'Electricity',
-            'reading': 8006.472,
-            'register': 125544,
-            'source': 'SMART'
-        })
+        self.assertEqual(kargs[0], "https://example.org")
+        self.assertDictEqual(
+            json.loads(kargs[1]),
+            {
+                "accountId": 1831,
+                "uuid": "xxxx-xxxx-xxxx-xxxx",
+                "userId": 1831,
+                "zendeskId": 361889743409,
+                "createdBy": None,
+                "dateCreated": "2018-04-03T11:30:00.123456+00:00",
+                "meter": 115976,
+                "meterPointNumber": 2102,
+                "meterReadingDateTime": "2020-10-11T00:00:00+00:00",
+                "meterType": "Electricity",
+                "reading": 8006.472,
+                "register": 125544,
+                "source": "SMART",
+            },
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
