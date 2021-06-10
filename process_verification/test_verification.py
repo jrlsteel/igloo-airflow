@@ -39,7 +39,7 @@ class MyTestCase(unittest.TestCase):
         assert count == 1
 
     @patch("process_verification.verification_template.get_table_count", return_value=10)
-    def test_verify_number_of_rows_in_table_returns_false_when_incorrect(self, mock_table_count):
+    def test_verify_number_of_rows_in_table_throws_exception_when_incorrect(self, mock_table_count):
         self.assertRaises(RuntimeError, verify_number_of_rows_in_table, "my_table", 0)
 
     @patch("process_verification.verification_template.get_table_count", return_value=0)
@@ -47,17 +47,17 @@ class MyTestCase(unittest.TestCase):
         assert verify_number_of_rows_in_table("my_table", 0) is True
 
     @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
-    def test_table_column_greater_than_function_returns_true_when_greater_than(self, mock_table_value):
+    def test_table_column_greater_than_function_throws_exception_when_greater_than(self, mock_table_value):
         self.assertRaises(
             RuntimeError, verify_table_column_value_greater_than, "my_table", "my_column", "2021-06-05T02:00:29.962Z"
         )
 
     @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
-    def test_table_column_greater_than_function_returns_false_when_less_than(self, mock_table_value):
+    def test_table_column_greater_than_function_returns_true_when_less_than(self, mock_table_value):
         assert verify_table_column_value_greater_than("my_table", "my_column", "2021-06-03T02:00:29.962Z") is True
 
     @patch("process_verification.verification_template.get_table_column_value", return_value="2021-06-04T02:00:29.962Z")
-    def test_table_column_greater_than_function_returns_false_when_equal_to(self, mock_table_value):
+    def test_table_column_greater_than_function_throws_exception_when_equal_to(self, mock_table_value):
         self.assertRaises(
             RuntimeError, verify_table_column_value_greater_than, "my_table", "my_column", "2021-06-04T02:00:29.962Z"
         )
