@@ -6,6 +6,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from conf import config as con
 
+import boto3
+from common.secrets_manager import get_secret
+
+client = boto3.client("secretsmanager")
+
 
 def get_count(table_name, schema):
     # sql to count
@@ -21,12 +26,13 @@ def get_count(table_name, schema):
 
 
 def get_redshift_connection():
+    redshift_config = get_secret(client, con.redshift_config["secret_id"])
     try:
         pr.connect_to_redshift(
-            host=con.redshift_config["host"],
-            port=con.redshift_config["port"],
-            user=con.redshift_config["user"],
-            password=con.redshift_config["pwd"],
+            host=redshift_config["host"],
+            port=redshift_config["port"],
+            user=redshift_config["username"],
+            password=redshift_config["password"],
             dbname=con.redshift_config["db"],
         )
         print("Connected to Redshift")

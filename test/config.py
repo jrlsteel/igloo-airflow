@@ -20,14 +20,7 @@ s3_config = {
     "secret_key": "",
     "bucket_name": "igloo-data-warehouse-preprod-835569423516",
 }
-rds_config = {
-    "host": "prod-rds-instance-aurora-cluster.cluster-crg2xtjrpp81.eu-west-1.rds.amazonaws.com",
-    #'host': 'localhost' ,
-    "user": "igloo_readonly",
-    "db": "igloo",
-    "pwd": "",
-    "port": 3306,
-}
+rds_config = {"secret_id": "prod/rds/igloo-cdw/igloo_readonly", "db": "igloo"}
 redshift_ssh_config = {
     #'host': 'igloowarehouse.cqnmyrrkwt1y.eu-west-1.redshift.amazonaws.com',
     #'host': 'igloowarehouse-dev.cli0yzw5ugsq.eu-west-1.redshift.amazonaws.com',
@@ -38,16 +31,7 @@ redshift_ssh_config = {
     "pwd": "",
     "port": 54394,
 }
-redshift_config = {
-    # 'host': 'igloowarehouse.cqnmyrrkwt1y.eu-west-1.redshift.amazonaws.com',
-    # 'host': 'igloowarehouse-dev.cli0yzw5ugsq.eu-west-1.redshift.amazonaws.com',
-    #'host': ' igloowarehouse-staging.c68wasqrd8cc.eu-west-1.redshift.amazonaws.com',
-    "host": "localhost",
-    "user": "igloo",
-    "db": "igloosense-preprod",
-    "pwd": "",
-    "port": 54394,
-}
+redshift_config = {"secret_id": "redshift/igloowarehouse-dev/igloo", "db": "igloosense-preprod"}
 redshift_config_prod = {
     #'host': 'igloowarehouse.cqnmyrrkwt1y.eu-west-1.redshift.amazonaws.com',
     #'host': 'igloowarehouse-dev.cli0yzw5ugsq.eu-west-1.redshift.amazonaws.com',
@@ -111,9 +95,9 @@ test_config = {
     "weather_energy_sql": "SELECT left(postcode, len(postcode) - 3) as postcode FROM ref_cdb_addresses group by left(postcode, len(postcode) - 3) order by left(postcode, len(postcode) - 3)",
     "land_registry_address_sql": "SELECT id, sub_building_name_number, building_name_number, thoroughfare, county, postcode, uprn FROM ref_cdb_addresses ",
 }
-internalapi_config = {"username": "sakthi.murugan@igloo.energy", "password": "", "grant_type": "password"}
+internalapi_config = {"secret_id": "internal-api", "grant_type": "password"}
 environment_config = {"environment": "dev"}
-ensek_sftp_config = {"host": "52.214.39.234", "username": "MattClemow", "password": ""}
+ensek_sftp_config = {"secret_id": "ensek/sftp"}
 igloo_epc_full = {"token": "token=95c4b4cc65cb41eb545d5fa1cd74fbb6c411b5d1&email=jonathan.steel%40igloo.energy"}
 Enseks3_ensek_outbound = {
     "access_key": "AKIAX4YVAEELGUTQX55Y",

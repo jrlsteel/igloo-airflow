@@ -18,6 +18,11 @@ from conf import config as con
 from common import directories as dirs3
 from common import api_filters as apif
 
+import boto3
+from common.secrets_manager import get_secret
+
+client = boto3.client("secretsmanager")
+
 
 def get_env():
     env_conf = con.environment_config["environment"]
@@ -121,18 +126,14 @@ def redshift_upsert(sql=None, df=None, crud_type=None):
     """
     :param sql: the sql to run
     """
-    try:
-        table_name = "dwh_job_logs"
-        pr = db.get_redshift_connection()
-        if crud_type == "i":
-            pr.pandas_to_redshift(df, table_name, index=None, append=True)
+    table_name = "dwh_job_logs"
+    pr = db.get_redshift_connection()
+    if crud_type == "i":
+        pr.pandas_to_redshift(df, table_name, index=None, append=True)
 
-        if crud_type in ("u", "d"):
-            pr.exec_commit(sql)
-        pr.close_up_shop()
-
-    except Exception as e:
-        return e
+    if crud_type in ("u", "d"):
+        pr.exec_commit(sql)
+    pr.close_up_shop()
 
 
 def execute_sql(sql):
@@ -417,10 +418,11 @@ def get_api_info(api=None, auth_type=None, token_required=False, header_type=Non
 
 
 def get_auth_code():
+    internalapi_config = get_secret(con.internalapi_config["secret_id"])
     oauth_url = "https://igloo.ignition.ensek.co.uk/api/Token"
     data = {
-        "username": con.internalapi_config["username"],
-        "password": con.internalapi_config["password"],
+        "username": internalapi_config["username"],
+        "password": internalapi_config["password"],
         "grant_type": con.internalapi_config["grant_type"],
     }
 

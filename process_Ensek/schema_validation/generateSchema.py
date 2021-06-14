@@ -11,6 +11,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from conf import config as con
 from common import directories as dir
 
+import boto3
+from common.secrets_manager import get_secret
+
+client = boto3.client("secretsmanager")
+
 
 def get_meter_point_api_info(account_id, api):
     global env
@@ -34,10 +39,11 @@ def get_meter_point_api_info(account_id, api):
 
 
 def get_auth_code():
+    internalapi_config = get_secret(con.internalapi_config["secret_id"])
     oauth_url = "https://igloo.ignition.ensek.co.uk/api/Token"
     data = {
-        "username": con.internalapi_config["username"],
-        "password": con.internalapi_config["password"],
+        "username": internalapi_config["username"],
+        "password": internalapi_config["password"],
         "grant_type": con.internalapi_config["grant_type"],
     }
 
@@ -89,11 +95,12 @@ def get_api_response_pages(api_url, head):
 
 
 def get_accountID_fromDB():
+    rds_config = get_secret(client, con.rds_config["secret_id"])
     conn = pymysql.connect(
-        host=con.rds_config["host"],
-        port=con.rds_config["port"],
-        user=con.rds_config["user"],
-        passwd=con.rds_config["pwd"],
+        host=rds_config["host"],
+        port=rds_config["port"],
+        user=rds_config["username"],
+        passwd=rds_config["password"],
         db=con.rds_config["db"],
     )
 

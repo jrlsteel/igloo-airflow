@@ -5,17 +5,21 @@ import pymysql as psql
 import pysftp
 import boto
 from boto.s3.key import Key
+from common.secrets_manager import get_secret
 
 # sys.path.append('../..')
 from process_Ensek.processEnsekPriorityServiceRegister.conf import config as con
 
+client = boto3.client("secretsmanager")
+
 
 def get_rds_connection():
+    rds_config = get_secret(client, con.rds_config["secret_id"])
     conn = psql.connect(
-        host=con.rds_config["host"],
-        port=con.rds_config["port"],
-        user=con.rds_config["user"],
-        passwd=con.rds_config["pwd"],
+        host=rds_config["host"],
+        port=rds_config["port"],
+        user=rds_config["username"],
+        passwd=rds_config["password"],
         db=con.rds_config["db"],
     )
 
@@ -28,12 +32,13 @@ def close_rds_connection(cursor, connection):
 
 
 def get_redshift_connection():
+    redshift_config = get_secret(client, con.redshift_config["secret_id"])
     try:
         pr.connect_to_redshift(
-            host=con.redshift_config["host"],
-            port=con.redshift_config["port"],
-            user=con.redshift_config["user"],
-            password=con.redshift_config["pwd"],
+            host=redshift_config["host"],
+            port=redshift_config["port"],
+            user=redshift_config["username"],
+            password=redshift_config["password"],
             dbname=con.redshift_config["db"],
         )
         print("Connected to Redshift")
@@ -92,14 +97,17 @@ def get_S3_Connections_client():
 
 
 def get_ensek_sftp_connection():
+    ensek_sftp_config = get_secret(client, con.ensek_sftp_config["secret_id"])
     try:
-        ensek_sftp = con.ensek_sftp_config
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None
 
         # print(ensek_sftp)
         sftp = pysftp.Connection(
-            host=ensek_sftp["host"], username=ensek_sftp["username"], password=ensek_sftp["password"], cnopts=cnopts
+            host=ensek_sftp_config["host"],
+            username=ensek_sftp_config["username"],
+            password=ensek_sftp_config["password"],
+            cnopts=cnopts,
         )
 
         return sftp

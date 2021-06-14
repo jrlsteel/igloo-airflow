@@ -12,6 +12,10 @@ import config_test
 bucket_name = "test-bucket"
 
 
+def mock_get_secret(*args, **kwargs):
+    return {"host": "0.0.0.0", "username": "test-user", "password": ""}
+
+
 def mock_get_sftp_connection(*args, **kwargs):
     return "connected"
 
@@ -47,16 +51,14 @@ def mock_download_file(*args, **kwargs):
 @mock_s3
 @freeze_time("2021-03-04T12:18:00.123456+01:00")
 @patch.object(GoCardlessReport, "get_sftp_connection", mock_get_sftp_connection)
+@patch("common.secrets_manager.get_secret", mock_get_secret)
 class TestGoCardlessCustomers(unittest.TestCase):
     def setUp(self):
-
         self.s3 = boto3.resource(
             "s3",
             aws_access_key_id="xxxx",
             aws_secret_access_key="xxxx",
         )
-
-        self.instance = GoCardlessReport(config_test, bucket_name)
 
         self.bucket = self.s3.Bucket(bucket_name)
         self.bucket.create(
@@ -73,7 +75,7 @@ class TestGoCardlessCustomers(unittest.TestCase):
     @patch.object(GoCardlessReport, "download_file", mock_download_file)
     @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_in_date)
     def test_normal_run(self):
-
+        self.instance = GoCardlessReport(config_test, bucket_name)
         # create an existing file in the s3 bucket
         file_contents = "test file"
         file_bytes = file_contents.encode()
@@ -92,13 +94,14 @@ class TestGoCardlessCustomers(unittest.TestCase):
 
     @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_out_of_date)
     def test_file_out_of_date(self):
+        self.instance = GoCardlessReport(config_test, bucket_name)
         with self.assertRaises(Exception) as context:
             self.instance.process()
         self.assertTrue("File is out-of-date" in str(context.exception))
 
     @patch.object(GoCardlessReport, "list_files_on_sftp", mock_list_files_on_sftp_no_files)
     def test_no_files(self):
-
+        self.instance = GoCardlessReport(config_test, bucket_name)
         with self.assertRaises(Exception) as context:
             self.instance.process()
         self.assertTrue("No go-cardless reports found" in str(context.exception))
