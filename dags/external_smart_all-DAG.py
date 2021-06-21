@@ -9,8 +9,8 @@ import sentry_sdk
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
 from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
-
 from common.slack_utils import alert_slack
+import common
 
 args = {
     "owner": "Airflow",
@@ -100,6 +100,35 @@ copy_d0379_to_sftp_task = PythonOperator(
     dag=dag,
 )
 
-start_smart_all_mirror_jobs >> start_smart_all_staging_jobs >> start_smart_all_ref_jobs
+
+def sql_wrapper(sql):
+    """
+    :param: SQL expression to execute
+    Executes SQL expression and will pass any errors to Sentry
+    """
+    try:
+        print("Running SQL --- \n   {}".format(sql))
+        response = common.utils.execute_sql(sql)
+        return response
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
+
+
+refresh_smart_daily_usmart_table = PythonOperator(
+    task_id="refresh_smart_daily_usmart_table",
+    python_callable=sql_wrapper,
+    op_args=["REFRESH MATERIALIZED VIEW mv_readings_smart_daily_usmart"],
+    dag=dag,
+)
+
+
+(
+    start_smart_all_mirror_jobs
+    >> start_smart_all_staging_jobs
+    >> start_smart_all_ref_jobs
+    >> refresh_smart_daily_usmart_table
+)
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task

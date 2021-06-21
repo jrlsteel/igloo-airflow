@@ -265,7 +265,7 @@ def get_ids_from_redshift(entity_type, job_name="default"):
     # if the current environment is not listed as the master source for this job, limit the ID list to 100 IDs
     # if no job name is passed in to this method, get_master_source('default') will always return 'prod'
     if get_env() != get_master_source(job_name):
-        sql += " limit 240"
+        sql += " limit 100"
 
     pr = db.get_redshift_connection()
     df = pr.redshift_to_pandas(sql)
