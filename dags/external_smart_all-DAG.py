@@ -124,6 +124,17 @@ refresh_smart_daily_usmart_table = PythonOperator(
 )
 
 
+populate_ref_readings_smartdaily_uSmart_raw = PythonOperator(
+    task_id="populate_ref_readings_smartdaily_uSmart_raw",
+    python_callable=sql_wrapper,
+    op_args=[
+        """ TRUNCATE ref_readings_smartdaily_uSmart_raw;
+            INSERT INTO ref_readings_smartdaily_uSmart_raw (SELECT cast(mpxn as bigint), deviceid, type, total_consumption, register_num, register_value, timestamp, getdate() FROM mv_readings_smart_daily_uSmart);"""
+    ],
+    dag=dag,
+)
+
+
 (
     start_smart_all_mirror_jobs
     >> start_smart_all_staging_jobs
@@ -132,3 +143,4 @@ refresh_smart_daily_usmart_table = PythonOperator(
 )
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
+start_smart_all_staging_jobs >> populate_ref_readings_smartdaily_uSmart_raw
