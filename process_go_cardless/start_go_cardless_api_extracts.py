@@ -4,6 +4,7 @@ import subprocess
 
 sys.path.append("..")
 from common import process_glue_job as glue
+from common import process_glue_crawler
 from common import utils as util
 from common import Refresh_UAT as refresh
 from conf import config
@@ -210,6 +211,10 @@ if __name__ == "__main__":
         # Go Cardless Mirror Jobs
         iglog.in_prod_env("Go Cardless Mirror Jobs running")
         s.submit_all_mirror_jobs(master_source)
+
+        # run the crawler to pick up any new partitions
+        iglog.in_prod_env("Running the events crawler")
+        process_glue_crawler.run_glue_crawler("data-crawler-fin-gc-events-stage1")
 
     # Go Cardless Staging Jobs
     iglog.in_prod_env("Go Cardlesss Staging Jobs running")
