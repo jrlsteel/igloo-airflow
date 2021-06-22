@@ -448,7 +448,7 @@ def process_api_extract_meterpoints():
         finally:
             start_metrics = timeit.default_timer()
             ####### Multiprocessing Ends #########
-            if metrics["api_method_time"] != []:
+            if len(metrics["api_method_time"]) > 0:
                 metrics["max_api_process_time"] = max(metrics["api_method_time"])
                 metrics["min_api_process_time"] = min(metrics["api_method_time"])
                 metrics["median_api_process_time"] = statistics.median(

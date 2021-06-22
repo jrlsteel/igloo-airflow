@@ -54,6 +54,8 @@ fixtures = {
 
 @mock_s3_deprecated
 def test_extract_tariff_history_json_elec_only():
+    # Arrange
+
     s3_bucket_name = "simulated-bucket"
 
     s3_connection = S3Connection()
@@ -76,7 +78,11 @@ def test_extract_tariff_history_json_elec_only():
 
     account_id = 1831
 
+    # Act
+
     tariff_history.extract_tariff_history_json(data, account_id, k, dir_s3)
+
+    # Assert
 
     # Verify that the files created in S3 have the correct contents
     k = Key(s3_bucket)
@@ -207,6 +213,8 @@ def test_extract_tariff_history_json_elec_only():
 
 @mock_s3_deprecated
 def test_extract_tariff_history_json_dual_fuel():
+    # Arrange
+
     s3_bucket_name = "simulated-bucket"
 
     s3_connection = S3Connection()
@@ -229,7 +237,11 @@ def test_extract_tariff_history_json_dual_fuel():
 
     account_id = 3453
 
+    # Act
+
     tariff_history.extract_tariff_history_json(data, account_id, k, dir_s3)
+
+    # Assert
 
     # Verify that the files created in S3 have the correct contents
     k = Key(s3_bucket)
@@ -536,12 +548,16 @@ def test_extract_tariff_history_json_dual_fuel():
     ],
 )
 def test_get_api_response_successful(ensek_response, expected):
+    # Arrange
+
     url = "https://api.igloo.ignition.ensek.co.uk/Accounts/123456/TariffsWithHistory"
     headers = {}
     account_id = 123456
 
     responses.add(responses.GET, url, json=ensek_response)
 
+    # Act
+
     with Manager() as manager:
         metrics = {
             "api_error_codes": manager.list(),
@@ -556,17 +572,23 @@ def test_get_api_response_successful(ensek_response, expected):
 
         tariff_history = TariffHistory()
         response = tariff_history.get_api_response(url, headers, account_id, metrics)
+
+    # Assert
 
     assert response == expected
 
 
 @responses.activate
 def test_get_api_response_bad_request():
+    # Arrange
+
     url = "https://api.igloo.ignition.ensek.co.uk/Accounts/123456/TariffsWithHistory"
     headers = {}
     account_id = 123456
 
     responses.add(responses.GET, url, status=400)
+
+    # Act
 
     with Manager() as manager:
         metrics = {
@@ -582,6 +604,8 @@ def test_get_api_response_bad_request():
 
         tariff_history = TariffHistory()
         response = tariff_history.get_api_response(url, headers, account_id, metrics)
+
+    # Assert
 
     assert response is None
 
@@ -594,12 +618,16 @@ def test_get_api_response_bad_request():
     ],
 )
 def test_get_api_response_one_connection_failure(ensek_response, expected):
+    # Arrange
+
     url = "https://api.igloo.ignition.ensek.co.uk/Accounts/123456/TariffsWithHistory"
     headers = {}
     account_id = 123456
 
     responses.add(responses.GET, url, body=requests.ConnectionError())
     responses.add(responses.GET, url, json=ensek_response)
+
+    # Act
 
     with Manager() as manager:
         metrics = {
@@ -616,11 +644,15 @@ def test_get_api_response_one_connection_failure(ensek_response, expected):
         tariff_history = TariffHistory()
         response = tariff_history.get_api_response(url, headers, account_id, metrics)
 
+    # Assert
+
     assert response == expected
 
 
 @responses.activate
 def test_get_api_response_max_connection_failures():
+    # Arrange
+
     url = "https://api.igloo.ignition.ensek.co.uk/Accounts/123456/TariffsWithHistory"
     headers = {}
     account_id = 123456
@@ -631,6 +663,8 @@ def test_get_api_response_max_connection_failures():
     responses.add(responses.GET, url, body=requests.ConnectionError())
     responses.add(responses.GET, url, body=requests.ConnectionError())
 
+    # Act
+
     with Manager() as manager:
         metrics = {
             "api_error_codes": manager.list(),
@@ -646,10 +680,16 @@ def test_get_api_response_max_connection_failures():
         tariff_history = TariffHistory()
         response = tariff_history.get_api_response(url, headers, account_id, metrics)
 
+    # Assert
+
     assert response is None
 
 
 def test_process_accounts_0_accounts():
+    # Arrange
+
+    # Act
+
     with Manager() as manager:
         metrics = {
             "api_error_codes": manager.list(),
@@ -664,6 +704,9 @@ def test_process_accounts_0_accounts():
         tariff_history = TariffHistory()
         tariff_history.process_accounts([], None, None, metrics)
 
+        # Assert
+
+        assert metrics["account_id_counter"].value == 0
 
 @unittest.mock.patch("process_ensek_tariffs_history.TariffHistory.get_api_response")
 @unittest.mock.patch(
@@ -672,7 +715,11 @@ def test_process_accounts_0_accounts():
 def test_process_accounts_1_account(
     mock_extract_tariff_history_json, mock_get_api_response
 ):
+    # Arrange
+
     mock_get_api_response.side_effect = [fixtures["tariff-history-elec-only"]]
+
+    # Act
 
     with Manager() as manager:
         metrics = {
@@ -688,6 +735,8 @@ def test_process_accounts_1_account(
         tariff_history = TariffHistory()
         tariff_history.process_accounts([1831], None, None, metrics)
 
+    # Assert
+
     mock_extract_tariff_history_json.assert_called_once_with(
         fixtures["tariff-history-elec-only-formatted-for-stage1"], 1831, None, None
     )
@@ -700,6 +749,8 @@ def test_process_accounts_1_account(
 def test_process_accounts_10_accounts(
     mock_extract_tariff_history_json, mock_get_api_response
 ):
+    # Arrange
+
     mock_get_api_response.side_effect = [
         fixtures["tariff-history-elec-only"],
         fixtures["tariff-history-dual-fuel"],
@@ -746,6 +797,8 @@ def test_process_accounts_10_accounts(
         ),
     ]
 
+    # Act
+
     with Manager() as manager:
         metrics = {
             "api_error_codes": manager.list(),
@@ -763,6 +816,8 @@ def test_process_accounts_10_accounts(
             [1831, 1832, 1833, 1834, 1835, 1836, 1837, 1838, 1839, 1840], None, None, metrics
         )
 
+    # Assert
+
     mock_extract_tariff_history_json.assert_has_calls(
         expected_extract_tariff_history_json_calls
     )
@@ -776,12 +831,18 @@ def test_process_accounts_10_accounts(
 def skip_test_process_ensek_tariffs_history_30_accounts(
     mock_multiprocessing_process, mock_get_accountID_fromDB
 ):
+    # Arrange
+
     s3_connection = S3Connection()
     s3_connection.create_bucket("igloo-data-warehouse-dev-555393537168")
 
     mock_get_accountID_fromDB.return_value = list(range(1, 31))
 
+    # Act
+
     process_ensek_tariffs_history()
+
+    # Assert
 
     assert mock_get_accountID_fromDB.call_count == 1
     assert mock_multiprocessing_process.call_count == 6
@@ -839,14 +900,3 @@ def skip_test_process_ensek_tariffs_history_30_accounts(
         29,
         30,
     ]
-
-
-@mock_s3
-@unittest.mock.patch("common.utils.get_accountID_fromDB")
-# @unittest.mock.patch("multiprocessing.Process")
-def test_mp(mock_get_accountID_from_DB):
-    with Manager() as manager:
-        metrics = {
-            "api_error_codes": manager.list(),
-        }
-
