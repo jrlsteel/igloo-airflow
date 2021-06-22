@@ -147,8 +147,24 @@ def get_table_count(table_name):
         sql = """select count(1) as Count from {}""".format(table_name)
         dataframe = pr.redshift_to_pandas(sql)
         count = dataframe.iloc[0]["count"]
-        iglog.in_prod_env('Table count for: ' + str(table_name) + "is: " + str(count))
+        iglog.in_prod_env('Table count for: ' + str(table_name) + ' is: ' + str(count))
         return count
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
+
+def get_table_column_value(table_name: str, column_name: str):
+    """
+    Returns the value of a given column in a specified table
+    """
+    try:
+        get_redshift_connection()
+        sql = """select {} as Value from {}""".format(column_name, table_name)
+        dataframe = pr.redshift_to_pandas(sql)
+        val = dataframe.iloc[0]["value"]
+        iglog.in_prod_env('Value for column: ' + str(column_name) + ' in table: ' + str(table_name) + ' is: ' + str(val))
+        return val
     except Exception as e:
         iglog.in_prod_env(traceback.format_exc())
         raise e
@@ -175,6 +191,55 @@ def ref_verification_step(**kwargs):
                 iglog.in_prod_env("Successfully verified: {}".format(arg))
                 verified = True
         return verified
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
+
+def verify_number_of_rows_in_table(table_name: str, expected_count: int):
+    """
+    Verifcation step, which will create and format a SQL Expression to select a count from a given table
+    This count will be compared against the provided count for that table
+
+    Expected Args = table_name=string, count=int
+    """
+    try:
+        count = get_table_count(table_name)
+        iglog.in_prod_env("table: {} : count: {}".format(table_name, count))
+        if not count == expected_count:
+            error = "Failed to verify count for {} - count was {}, we expected {}".format(table_name, str(count), str(expected_count))
+            iglog.in_prod_env(
+                error
+            )
+            raise RuntimeError(error)
+        else:
+            iglog.in_prod_env("Successfully verified count of {} was {}".format(table_name, str(expected_count)))
+            return True
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
+
+def verify_table_column_value_greater_than(table_name: str, column_name: str, comparison_value):
+    """
+    Verifcation step, which will create and format a SQL Expression to select a given column from a given table
+    This value will be compared against the provided comparison_value. If the table value is greater than
+    the comparison value, the verifier will return 'True'.
+
+    Expected Args = table_name=string, column_name=string, comparison_value
+    """
+    try:
+        table_value = get_table_column_value(table_name, column_name)
+        iglog.in_prod_env("table: {} column: {} value: {}".format(table_name, column_name, table_value))
+        if table_value <= comparison_value:
+            error = "Failed to verify value for column {} ({}) was greater than provided value {}".format(column_name, str(table_value), str(comparison_value))
+            iglog.in_prod_env(
+                error
+            )
+            raise RuntimeError(error)
+        else:
+            iglog.in_prod_env("Successfully verified column {} value {} was greater than {}".format(column_name, str(table_value), str(comparison_value)))
+            return True
     except Exception as e:
         iglog.in_prod_env(traceback.format_exc())
         raise e
