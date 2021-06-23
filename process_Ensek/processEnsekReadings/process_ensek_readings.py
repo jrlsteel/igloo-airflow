@@ -13,7 +13,7 @@ from multiprocessing import freeze_support
 import sys
 import os
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
@@ -21,8 +21,8 @@ from connections.connect_db import get_boto_S3_Connections as s3_con
 
 
 class MeterPoints:
-    max_calls = con.api_config['max_api_calls']
-    rate = con.api_config['allowed_period_in_secs']
+    max_calls = con.api_config["max_api_calls"]
+    rate = con.api_config["allowed_period_in_secs"]
 
     def __init__(self):
         pass
@@ -30,37 +30,36 @@ class MeterPoints:
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
     def get_api_response(self, api_url, head):
-        '''
-            get the response for the respective url that is passed as part of this function
-       '''
+        """
+        get the response for the respective url that is passed as part of this function
+        """
         start_time = time.time()
-        timeout = con.api_config['connection_timeout']
-        retry_in_secs = con.api_config['retry_in_secs']
+        timeout = con.api_config["connection_timeout"]
+        retry_in_secs = con.api_config["retry_in_secs"]
         i = 0
         while True:
             try:
                 response = requests.get(api_url, headers=head)
                 if response.status_code == 200:
-                    response = json.loads(response.content.decode('utf-8'))
+                    response = json.loads(response.content.decode("utf-8"))
                     return response
                 else:
-                    print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    print("Problem Grabbing Data: ", response.status_code)
+                    self.log_error("Response Error: Problem grabbing data", response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
-                    print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
+                    self.log_error("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
 
                     break
                 else:
-                    print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
+                    self.log_error("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
-
 
     # def extract_meter_point_json(self, data, account_id, k, dir_s3):
     #     '''
@@ -191,71 +190,67 @@ class MeterPoints:
     #
     #     return meter_point_ids
 
-
-    ''' Processing meter readings data'''
-
+    """ Processing meter readings data"""
 
     def extract_meter_readings_json(self, data, account_id, meter_point_id, k, _dir_s3):
         # global k
-        meta_readings = ['id', 'readingType', 'meterPointId', 'dateTime', 'createdDate', 'meterReadingSource']
-        df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
-        df_meter_readings['account_id'] = account_id
-        df_meter_readings['meter_point_id'] = meter_point_id
-        filename_readings = 'mp_readings_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
-        df_meter_readings['readings_filename'] = filename_readings
+        meta_readings = ["id", "readingType", "meterPointId", "dateTime", "createdDate", "meterReadingSource"]
+        df_meter_readings = json_normalize(data, record_path=["readings"], meta=meta_readings, record_prefix="reading_")
+        df_meter_readings["account_id"] = account_id
+        df_meter_readings["meter_point_id"] = meter_point_id
+        filename_readings = "mp_readings_" + str(account_id) + "_" + str(meter_point_id) + ".csv"
+        df_meter_readings["readings_filename"] = filename_readings
         # df_meter_readings.to_csv('meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '_' + '.csv')
 
         df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
         # k.key = 'ensek-meterpoints/Readings/' + filename_readings
-        k.key = _dir_s3['s3_key']['Readings'] + filename_readings
+        k.key = _dir_s3["s3_key"]["Readings"] + filename_readings
         k.set_contents_from_string(df_meter_readings_string)
         # print(df_meter_readings_string)
         # print(filename_readings)
 
-
-    ''' Processing meter readings data billeable'''
-
+    """ Processing meter readings data billeable"""
 
     def extract_meter_readings_billeable_json(self, data, account_id, meter_point_id, k, _dir_s3):
         # global k
-        meta_readings = ['id', 'readingType', 'meterPointId', 'dateTime', 'createdDate', 'meterReadingSource']
-        df_meter_readings = json_normalize(data, record_path=['readings'], meta=meta_readings, record_prefix='reading_')
-        df_meter_readings['account_id'] = account_id
-        df_meter_readings['meter_point_id'] = meter_point_id
+        meta_readings = ["id", "readingType", "meterPointId", "dateTime", "createdDate", "meterReadingSource"]
+        df_meter_readings = json_normalize(data, record_path=["readings"], meta=meta_readings, record_prefix="reading_")
+        df_meter_readings["account_id"] = account_id
+        df_meter_readings["meter_point_id"] = meter_point_id
         # df_meter_readings.to_csv('meter_point_readings_' + str(account_id) + '_' + str(meter_point_id) + '_' + '.csv')
-        filename_readings = 'mp_readings_billeable_' + str(account_id) + '_' + str(meter_point_id) + '.csv'
+        filename_readings = "mp_readings_billeable_" + str(account_id) + "_" + str(meter_point_id) + ".csv"
         df_meter_readings_string = df_meter_readings.to_csv(None, index=False)
         # k.key = 'ensek-meterpoints/ReadingsBilleable/' + filename_readings
-        k.key = _dir_s3['s3_key']['ReadingsBilleable'] + filename_readings
+        k.key = _dir_s3["s3_key"]["ReadingsBilleable"] + filename_readings
         k.set_contents_from_string(df_meter_readings_string)
         # print(df_meter_readings_string)
         # print(filename_readings)
 
-    '''Format Json to handle null values'''
+    """Format Json to handle null values"""
 
     def format_json_response(self, data):
-        data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_str = json.dumps(data, indent=4).replace("null", '""')
         data_json = json.loads(data_str)
         return data_json
 
-    def log_error(self, error_msg, error_code=''):
-        logs_dir_path = sys.path[0] + '/logs/'
+    def log_error(self, error_msg, error_code=""):
+        logs_dir_path = sys.path[0] + "/logs/"
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(sys.path[0] + '/logs/' + 'meterpoint_logs_' + time.strftime('%d%m%Y') + '.csv', mode='a') as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(sys.path[0] + "/logs/" + "meterpoint_logs_" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
+            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
     def processAccounts(self, account_ids, S3, dir_s3):
-        api_url_mp, head_mp = util.get_ensek_api_info1('meterpoints')
-        api_url_mpr, head_mpr = util.get_ensek_api_info1('meterpoints_readings')
-        api_url_mprb, head_mprb = util.get_ensek_api_info1('meterpoints_readings_billeable')
+        api_url_mp, head_mp = util.get_ensek_api_info1("meterpoints")
+        api_url_mpr, head_mpr = util.get_ensek_api_info1("meterpoints_readings")
+        api_url_mprb, head_mprb = util.get_ensek_api_info1("meterpoints_readings_billeable")
 
         for account_id in account_ids:
-            t = con.api_config['total_no_of_calls']
-            print('ac:' + str(account_id))
-            msg_ac = 'ac:' + str(account_id)
-            self.log_error(msg_ac, '')
+            t = con.api_config["total_no_of_calls"]
+            print("ac:" + str(account_id))
+            msg_ac = "ac:" + str(account_id)
+            self.log_error(msg_ac, "")
             # api_url_mp1 = api_url_mp.format(account_id)
             # meter_info_response = self.get_api_response(api_url_mp1, head_mp)
             # # print(type(meter_info_response))
@@ -280,17 +275,19 @@ class MeterPoints:
                 formatted_meter_reading = self.format_json_response(meter_reading_response)
                 self.extract_meter_readings_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
             else:
-                print('mp:' + str(each_meter_point) + ' has no data')
-                msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
-                self.log_error(msg_mp, '')
+                print("mp:" + str(each_meter_point) + " has no data")
+                msg_mp = "mp:" + str(each_meter_point) + " has no data"
+                self.log_error(msg_mp, "")
 
             if meter_reading_billeable_response:
                 formatted_meter_reading = self.format_json_response(meter_reading_billeable_response)
-                self.extract_meter_readings_billeable_json(formatted_meter_reading, account_id, each_meter_point, S3, dir_s3)
+                self.extract_meter_readings_billeable_json(
+                    formatted_meter_reading, account_id, each_meter_point, S3, dir_s3
+                )
             else:
-                print('mp:' + str(each_meter_point) + ' has no data')
-                msg_mp = 'mp:' + str(each_meter_point) + ' has no data'
-                self.log_error(msg_mp, '')
+                print("mp:" + str(each_meter_point) + " has no data")
+                msg_mp = "mp:" + str(each_meter_point) + " has no data"
+                self.log_error(msg_mp, "")
             # else:
             #     print('ac:' + str(account_id) + ' has no data')
             #     msg_ac = 'ac:' + str(account_id) + ' has no data'
@@ -301,22 +298,22 @@ if __name__ == "__main__":
     freeze_support()
 
     dir_s3 = util.get_dir()
-    bucket_name = dir_s3['s3_bucket']
+    bucket_name = dir_s3["s3_bucket"]
 
     s3 = s3_con(bucket_name)
 
     account_ids = []
-    '''Enable this to test for 1 account id'''
-    if con.test_config['enable_manual'] == 'Y':
-        account_ids = con.test_config['account_ids']
+    """Enable this to test for 1 account id"""
+    if con.test_config["enable_manual"] == "Y":
+        account_ids = con.test_config["account_ids"]
 
-    if con.test_config['enable_file'] == 'Y':
+    if con.test_config["enable_file"] == "Y":
         account_ids = util.get_Users_from_s3(s3)
 
-    if con.test_config['enable_db'] == 'Y':
+    if con.test_config["enable_db"] == "Y":
         account_ids = util.get_accountID_fromDB(False)
 
-    if con.test_config['enable_db_max'] == 'Y':
+    if con.test_config["enable_db_max"] == "Y":
         account_ids = util.get_accountID_fromDB(True)
 
     # Enable to test without multiprocessing.
@@ -325,9 +322,9 @@ if __name__ == "__main__":
 
     ####### Multiprocessing Starts #########
     env = util.get_env()
-    total_processes = util.get_multiprocess('total_ensek_processes')
+    total_processes = util.get_multiprocess("total_ensek_processes")
 
-    if env == 'uat':
+    if env == "uat":
         n = total_processes  # number of process to run in parallel
     else:
         n = total_processes
@@ -350,7 +347,9 @@ if __name__ == "__main__":
             t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:], s3_con(bucket_name), dir_s3))
         else:
             # print(d18_keys_s3[l:u])
-            t = multiprocessing.Process(target=p1.processAccounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3))
+            t = multiprocessing.Process(
+                target=p1.processAccounts, args=(account_ids[lv:uv], s3_con(bucket_name), dir_s3)
+            )
         lv = uv
 
         processes.append(t)
@@ -363,4 +362,4 @@ if __name__ == "__main__":
         process.join()
     ####### Multiprocessing Ends #########
 
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    print("Process completed in " + str(timeit.default_timer() - start) + " seconds")

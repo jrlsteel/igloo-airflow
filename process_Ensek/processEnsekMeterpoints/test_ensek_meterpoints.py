@@ -78,9 +78,7 @@ def test_extract_data():
     meterpoints = MeterPoints(0)
 
     # Get the test data
-    data_file = open(
-        os.path.join(os.path.dirname(__file__), "fixtures", "json_extract.json")
-    )
+    data_file = open(os.path.join(os.path.dirname(__file__), "fixtures", "json_extract.json"))
     json_string = data_file.read().replace("\n", "")
     data_file.close()
     data_json = json.loads(json_string)
@@ -97,22 +95,14 @@ def test_extract_data():
     }
     account_id = "test_id"
 
-    meterpoints.extract_meter_point_json(
-        data_json, account_id, bucket_name, dir_s3, metrics
-    )
+    meterpoints.extract_meter_point_json(data_json, account_id, bucket_name, dir_s3, metrics)
 
     expected_meterpoints = "stage1/MeterPoints/meter_points_{}.csv".format(account_id)
-    expected_meterpointattributes = "stage1/MeterPoints/meter_points_{}.csv".format(
-        account_id
-    )
+    expected_meterpointattributes = "stage1/MeterPoints/meter_points_{}.csv".format(account_id)
     expected_meters = "stage1/Meters/meters_{}.csv".format(account_id)
-    expected_metersattributers = (
-        "stage1/MetersAttributes/metersAttributes_{}.csv".format(account_id)
-    )
+    expected_metersattributers = "stage1/MetersAttributes/metersAttributes_{}.csv".format(account_id)
     expected_registers = "stage1/Registers/registers_{}.csv".format(account_id)
-    expected_registersattributes = (
-        "stage1/RegistersAttributes/registersAttributes_{}.csv".format(account_id)
-    )
+    expected_registersattributes = "stage1/RegistersAttributes/registersAttributes_{}.csv".format(account_id)
 
     # Verify that the files created in S3 have the correct contents
     k = Key(s3_bucket)
@@ -133,17 +123,11 @@ def test_extract_data():
     # column headers are correct.
 
     meterpoints_reader = csv.reader(csv_lines_meterpoints.split("\n"), delimiter=",")
-    meterpoint_attributes_reader = csv.reader(
-        csv_lines_meterpointsattributes.split("\n"), delimiter=","
-    )
+    meterpoint_attributes_reader = csv.reader(csv_lines_meterpointsattributes.split("\n"), delimiter=",")
     meters_reader = csv.reader(csv_lines_meters.split("\n"), delimiter=",")
-    meters_attributes_reader = csv.reader(
-        csv_lines_metersattributes.split("\n"), delimiter=","
-    )
+    meters_attributes_reader = csv.reader(csv_lines_metersattributes.split("\n"), delimiter=",")
     registers_reader = csv.reader(csv_lines_registers.split("\n"), delimiter=",")
-    registers_attributes_reader = csv.reader(
-        csv_lines_registerattributes.split("\n"), delimiter=","
-    )
+    registers_attributes_reader = csv.reader(csv_lines_registerattributes.split("\n"), delimiter=",")
 
     meterpoints_column_headers = [
         "associationStartDate",
@@ -214,20 +198,14 @@ def test_extract_data():
     registers_column_headers_s3 = next(registers_reader)
     registers_attributes_column_headers_s3 = next(registers_attributes_reader)
 
-    assert (
-        meterpoints_column_headers == meterpoints_column_headers_s3
-    ), "failed meterpoints"
+    assert meterpoints_column_headers == meterpoints_column_headers_s3, "failed meterpoints"
     assert (
         meterpoint_attributes_column_headers == meterpoint_attributes_column_headers_s3
     ), "failed meterpoints attributes"
     assert meters_column_headers == meters_column_headers_s3, "failed meters"
-    assert (
-        meters_attributes_column_headers == meters_attributes_column_headers_s3
-    ), "failed meters attributes"
+    assert meters_attributes_column_headers == meters_attributes_column_headers_s3, "failed meters attributes"
     assert registers_column_headers == registers_column_headers_s3, "failed registers"
-    assert (
-        registers_attributes_column_headers == registers_attributes_column_headers_s3
-    ), "not good"
+    assert registers_attributes_column_headers == registers_attributes_column_headers_s3, "not good"
 
     assert list(meterpoints_reader) == [
         [

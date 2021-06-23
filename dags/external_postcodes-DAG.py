@@ -17,27 +17,27 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 
 dag = DAG(
-    dag_id='postcodes_etl',
+    dag_id="postcodes_etl",
     default_args=args,
     # The Postcode data is updated approximately once per quarter, although an exact
     # schedule for this is not available. We will just download it once per month.
     # The exact schedule is somewhat arbitrary.
-    schedule_interval='18 12 15 * *',
-    tags=['cdw'],
+    schedule_interval="18 12 15 * *",
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 postcodes_etl = BashOperator(
-    task_id='postcodes_etl',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_postcodes && python postcodes_etl.py',
+    task_id="postcodes_etl",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_postcodes && python postcodes_etl.py",
     dag=dag,
 )
 

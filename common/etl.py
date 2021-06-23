@@ -4,7 +4,7 @@ import os
 from requests.adapters import HTTPAdapter
 from .utils import IglooLogger
 
-DEFAULT_HTTP_TIMEOUT = 5 # seconds
+DEFAULT_HTTP_TIMEOUT = 5  # seconds
 
 
 class ETLPipelineWrapperRuntimeException(Exception):
@@ -20,23 +20,25 @@ class ETLPipelineWrapper:
         self.job_name = job_name
         self.all_jobs_id = get_jobID()
         self.logger = IglooLogger(source=job_name)
-    
+
     def run_all(self):
         pass
 
     def run(self):
         try:
-            batch_logging_insert(self.all_jobs_id, self.job_id, 'all_{}_jobs'.format(self.job_name), os.path.basename(__file__))
+            batch_logging_insert(
+                self.all_jobs_id, self.job_id, "all_{}_jobs".format(self.job_name), os.path.basename(__file__)
+            )
 
-            self.logger.in_prod_env('All {} jobs running...'.format(self.job_name))
+            self.logger.in_prod_env("All {} jobs running...".format(self.job_name))
 
             self.run_all()
 
-            self.logger.in_prod_env('All {} Jobs completed successfully'.format(self.job_name))
+            self.logger.in_prod_env("All {} Jobs completed successfully".format(self.job_name))
 
-            batch_logging_update(self.all_jobs_id, 'e')
+            batch_logging_update(self.all_jobs_id, "e")
         except Exception as e:
-            batch_logging_update(self.all_jobs_id, 'f', str(e))
+            batch_logging_update(self.all_jobs_id, "f", str(e))
             raise ETLPipelineWrapperRuntimeException() from e
 
 
@@ -54,6 +56,7 @@ class TimeoutHTTPAdapter(HTTPAdapter):
     HTTP adapter for use with requests that implements a configurable
     timeout on HTTP connections.
     """
+
     def __init__(self, *args, **kwargs):
         self.timeout = DEFAULT_HTTP_TIMEOUT
         if "timeout" in kwargs:

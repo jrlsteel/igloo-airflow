@@ -1,10 +1,10 @@
 common = {
-    "internalreadings":{
-        "glue_job_name_staging":"ensek-readings-internal",
+    "internalreadings": {
+        "glue_job_name_staging": "ensek-readings-internal",
         "glue_job_name_ref": "ensek_ref_readings",
     },
-    "meterpoints":{
-        "glue_job_name_staging":"meterpoints",
+    "meterpoints": {
+        "glue_job_name_staging": "meterpoints",
         "glue_job_name_ref": "ensek_meterpoints",
     },
     "smart_mv_hh_elec_refresh": {
@@ -464,9 +464,7 @@ order by account_id, mpxn, hhdate;
             "creditor_bank_account",
         ],
     },
-    "s3_keys":{
-        "internal_readings_stage2":"stage2/stage2_readingsinternal"
-    },
+    "s3_keys": {"internal_readings_stage2": "stage2/stage2_readingsinternal"},
     "postcodes": {
         #  The API from which we download the postcode data.
         "api_url": "https://opendata.camden.gov.uk/api/views/tr8t-gqz7/rows.csv?accessType=DOWNLOAD",

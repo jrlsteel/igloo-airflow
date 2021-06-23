@@ -17,23 +17,23 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 from common.slack_utils import alert_slack
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='igloo_d18_mirror_only',
+    dag_id="igloo_d18_mirror_only",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 start_d18_mirror_only_jobs = BashOperator(
-    task_id='start_processD18_mirror_jobs.py',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_processD18_mirror_jobs.py',
+    task_id="start_processD18_mirror_jobs.py",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_D18 && python start_processD18_mirror_jobs.py",
     dag=dag,
 )
 

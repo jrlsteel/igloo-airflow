@@ -18,11 +18,7 @@ from connections.connect_db import get_boto_S3_Connections as s3_con
 
 fixtures = {
     "tariff-history-elec-only": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "tariff-history-elec-only.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "tariff-history-elec-only.json"))
     ),
     "tariff-history-elec-only-formatted-for-stage1": json.load(
         open(
@@ -34,11 +30,7 @@ fixtures = {
         )
     ),
     "tariff-history-dual-fuel": json.load(
-        open(
-            os.path.join(
-                os.path.dirname(__file__), "fixtures", "tariff-history-dual-fuel.json"
-            )
-        )
+        open(os.path.join(os.path.dirname(__file__), "fixtures", "tariff-history-dual-fuel.json"))
     ),
     "tariff-history-dual-fuel-formatted-for-stage1": json.load(
         open(
@@ -119,9 +111,7 @@ def test_extract_tariff_history_json_elec_only():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryElecStandCharge/th_elec_standingcharge_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryElecStandCharge/th_elec_standingcharge_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -165,9 +155,7 @@ def test_extract_tariff_history_json_elec_only():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryElecUnitRates/th_elec_unitrates_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryElecUnitRates/th_elec_unitrates_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -295,9 +283,7 @@ def test_extract_tariff_history_json_dual_fuel():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryElecStandCharge/th_elec_standingcharge_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryElecStandCharge/th_elec_standingcharge_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -351,9 +337,7 @@ def test_extract_tariff_history_json_dual_fuel():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryElecUnitRates/th_elec_unitrates_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryElecUnitRates/th_elec_unitrates_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -427,9 +411,7 @@ def test_extract_tariff_history_json_dual_fuel():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryGasStandCharge/th_gas_standingcharge_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryGasStandCharge/th_gas_standingcharge_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -483,9 +465,7 @@ def test_extract_tariff_history_json_dual_fuel():
     ]
 
     k = Key(s3_bucket)
-    k.key = "stage1/TariffHistoryGasUnitRates/th_gas_unitrates_{}.csv".format(
-        account_id
-    )
+    k.key = "stage1/TariffHistoryGasUnitRates/th_gas_unitrates_{}.csv".format(account_id)
     csv_lines = k.get_contents_as_string(encoding="utf-8")
 
     # Construct a CSV reader to parse the file data for us, and verify that the
@@ -708,13 +688,10 @@ def test_process_accounts_0_accounts():
 
         assert metrics["account_id_counter"].value == 0
 
+
 @unittest.mock.patch("process_ensek_tariffs_history.TariffHistory.get_api_response")
-@unittest.mock.patch(
-    "process_ensek_tariffs_history.TariffHistory.extract_tariff_history_json"
-)
-def test_process_accounts_1_account(
-    mock_extract_tariff_history_json, mock_get_api_response
-):
+@unittest.mock.patch("process_ensek_tariffs_history.TariffHistory.extract_tariff_history_json")
+def test_process_accounts_1_account(mock_extract_tariff_history_json, mock_get_api_response):
     # Arrange
 
     mock_get_api_response.side_effect = [fixtures["tariff-history-elec-only"]]
@@ -743,12 +720,8 @@ def test_process_accounts_1_account(
 
 
 @unittest.mock.patch("process_ensek_tariffs_history.TariffHistory.get_api_response")
-@unittest.mock.patch(
-    "process_ensek_tariffs_history.TariffHistory.extract_tariff_history_json"
-)
-def test_process_accounts_10_accounts(
-    mock_extract_tariff_history_json, mock_get_api_response
-):
+@unittest.mock.patch("process_ensek_tariffs_history.TariffHistory.extract_tariff_history_json")
+def test_process_accounts_10_accounts(mock_extract_tariff_history_json, mock_get_api_response):
     # Arrange
 
     mock_get_api_response.side_effect = [
@@ -765,36 +738,16 @@ def test_process_accounts_10_accounts(
     ]
 
     expected_extract_tariff_history_json_calls = [
-        unittest.mock.call(
-            fixtures["tariff-history-elec-only-formatted-for-stage1"], 1831, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1832, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-elec-only-formatted-for-stage1"], 1833, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1834, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-elec-only-formatted-for-stage1"], 1835, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1836, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-elec-only-formatted-for-stage1"], 1837, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1838, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-elec-only-formatted-for-stage1"], 1839, None, None
-        ),
-        unittest.mock.call(
-            fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1840, None, None
-        ),
+        unittest.mock.call(fixtures["tariff-history-elec-only-formatted-for-stage1"], 1831, None, None),
+        unittest.mock.call(fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1832, None, None),
+        unittest.mock.call(fixtures["tariff-history-elec-only-formatted-for-stage1"], 1833, None, None),
+        unittest.mock.call(fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1834, None, None),
+        unittest.mock.call(fixtures["tariff-history-elec-only-formatted-for-stage1"], 1835, None, None),
+        unittest.mock.call(fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1836, None, None),
+        unittest.mock.call(fixtures["tariff-history-elec-only-formatted-for-stage1"], 1837, None, None),
+        unittest.mock.call(fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1838, None, None),
+        unittest.mock.call(fixtures["tariff-history-elec-only-formatted-for-stage1"], 1839, None, None),
+        unittest.mock.call(fixtures["tariff-history-dual-fuel-formatted-for-stage1"], 1840, None, None),
     ]
 
     # Act
@@ -818,9 +771,7 @@ def test_process_accounts_10_accounts(
 
     # Assert
 
-    mock_extract_tariff_history_json.assert_has_calls(
-        expected_extract_tariff_history_json_calls
-    )
+    mock_extract_tariff_history_json.assert_has_calls(expected_extract_tariff_history_json_calls)
 
 
 # Skipping this test for now as mock_s3_depracted seems to break when combined
@@ -828,9 +779,7 @@ def test_process_accounts_10_accounts(
 @mock_s3_deprecated
 @unittest.mock.patch("common.utils.get_accountID_fromDB")
 @unittest.mock.patch("multiprocessing.Process")
-def skip_test_process_ensek_tariffs_history_30_accounts(
-    mock_multiprocessing_process, mock_get_accountID_fromDB
-):
+def skip_test_process_ensek_tariffs_history_30_accounts(mock_multiprocessing_process, mock_get_accountID_fromDB):
     # Arrange
 
     s3_connection = S3Connection()

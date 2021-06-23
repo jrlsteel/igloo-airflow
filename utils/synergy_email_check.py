@@ -2,7 +2,7 @@ import sys
 import pandas_redshift as pr
 import pandas as pd
 
-sys.path.append('..')
+sys.path.append("..")
 from utils.conf1 import config as con
 
 
@@ -26,15 +26,21 @@ class SynergyEmailCheck:
 
     def get_connection(self, env):
         try:
-            pr.connect_to_redshift(host=env['redshift_config']['host'], port=env['redshift_config']['port'],
-                                   user=env['redshift_config']['user'], password=env['redshift_config']['pwd'],
-                                   dbname=env['redshift_config']['db'])
-            print("Connected to Redshift : " + str(env['redshift_config']['db']))
+            pr.connect_to_redshift(
+                host=env["redshift_config"]["host"],
+                port=env["redshift_config"]["port"],
+                user=env["redshift_config"]["user"],
+                password=env["redshift_config"]["pwd"],
+                dbname=env["redshift_config"]["db"],
+            )
+            print("Connected to Redshift : " + str(env["redshift_config"]["db"]))
 
-            pr.connect_to_s3(aws_access_key_id=env['s3_config']['access_key'],
-                             aws_secret_access_key=env['s3_config']['secret_key'],
-                             bucket=env['s3_config']['bucket_name'],
-                             subdirectory='aws-glue-tempdir/')
+            pr.connect_to_s3(
+                aws_access_key_id=env["s3_config"]["access_key"],
+                aws_secret_access_key=env["s3_config"]["secret_key"],
+                bucket=env["s3_config"]["bucket_name"],
+                subdirectory="aws-glue-tempdir/",
+            )
         except Exception as e:
             raise e
 
@@ -43,13 +49,13 @@ class SynergyEmailCheck:
 
     def get_env(self, env):
 
-        if env == 'prod':
+        if env == "prod":
             env = con.prod
 
-        if env == 'uat':
+        if env == "uat":
             env = con.uat
 
-        if env == 'dev':
+        if env == "dev":
             env = con.dev
 
         return env
@@ -66,27 +72,27 @@ class SynergyEmailCheck:
             self.get_connection(con.prod)
             df_ieh = pr.redshift_to_pandas(self.email_hash_sql)
             self.close_connection()
-            print(df_ieh['hash'].size)
+            print(df_ieh["hash"].size)
 
             print("comparing")
             # find matches
-            matches = pd.merge(left=df_seh, right=df_ieh, right_on='hash', left_on=df_seh.columns[0], how='inner')
+            matches = pd.merge(left=df_seh, right=df_ieh, right_on="hash", left_on=df_seh.columns[0], how="inner")
 
             print("writing matches")
-            outfilename = filename.split('.')[0] + '_igloo_matches.csv'
-            matched_hashes = matches['hash']
+            outfilename = filename.split(".")[0] + "_igloo_matches.csv"
+            matched_hashes = matches["hash"]
             matched_hashes.to_csv(outfilename, header=True, index=False)
 
-            outfilename = filename.split('.')[0] + '_igloo_matches_full.csv'
+            outfilename = filename.split(".")[0] + "_igloo_matches_full.csv"
             matches.to_csv(outfilename, header=True, index=False)
 
             return matches
         except Exception as e:
-            print('Error:' + str(e))
+            print("Error:" + str(e))
 
 
 if __name__ == "__main__":
-    fn = 'Sha 1 Hash.csv'
+    fn = "Sha 1 Hash.csv"
     p = SynergyEmailCheck()
     matches = p.get_email_hash_matches(fn)
     print(matches)

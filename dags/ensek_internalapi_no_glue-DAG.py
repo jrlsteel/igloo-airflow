@@ -18,31 +18,30 @@ from common.slack_utils import alert_slack
 
 
 args = {
-    'owner': 'Airflow',
-    'start_date': days_ago(2), # don't know what this is doing
-    'on_failure_callback': alert_slack
+    "owner": "Airflow",
+    "start_date": days_ago(2),  # don't know what this is doing
+    "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id='ensek_internal_apis_no_glue',
+    dag_id="ensek_internal_apis_no_glue",
     default_args=args,
     schedule_interval=None,
-    tags=['cdw'],
+    tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
 
 
-
 process_ensek_internal_estimates = BashOperator(
-    task_id='process_ensek_internal_estimates',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py',
+    task_id="process_ensek_internal_estimates",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py",
     dag=dag,
 )
 
 process_ensek_internal_readings = BashOperator(
-    task_id='process_ensek_internal_readings',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py',
+    task_id="process_ensek_internal_readings",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py",
     dag=dag,
 )
 

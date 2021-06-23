@@ -16,34 +16,32 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                               environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 payments = client.payments
 
 
 class GoCardlessPayments(object):
-
     def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Payments']
+        self.fileDirectory = self.dir["s3_finance_goCardless_key"]["Payments"]
         self.payments = payments
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays=-1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+        self.execStartDate = datetime.strptime(_execStartDate, "%Y-%m-%d")
         if _execEndDate is None:
             _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+        self.execEndDate = datetime.strptime(_execEndDate, "%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -54,11 +52,11 @@ class GoCardlessPayments(object):
 
     def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -77,15 +75,15 @@ class GoCardlessPayments(object):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+            _StartDate = "{:%Y-%m-%d}".format(self.execStartDate)
         if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+            _EndDate = "{:%Y-%m-%d}".format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, "%Y-%m-%d")
         payments = self.payments
-        filename = 'go_cardless_payments_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
+        filename = "go_cardless_payments_" + _StartDate + "_" + _EndDate + ".csv"
+        qtr = math.ceil(startdatetime.month / 3.0)
         yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -95,19 +93,19 @@ class GoCardlessPayments(object):
         EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
 
-        print('.....listing payments')
+        print(".....listing payments")
         try:
             for payment in client.payments.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
                 EnsekAccountId = None
                 StatementId = None
                 if self.is_json(payment.id):
-                    '''
+                    """
                     if payment.metadata:
                         if 'AccountId' in payment.metadata:
                             EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
                         if 'StatementId' in payment.metadata:
                             StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
-                    '''
+                    """
                     id_js = json.loads(payment.id.decode("utf-8"))
                     amount_js = json.loads(payment.amount.decode("utf-8"))
                     amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
@@ -122,17 +120,29 @@ class GoCardlessPayments(object):
                     subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
                     EnsekID_js = EnsekAccountId
                     EnsekStatementId_js = StatementId
-                    listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js,
-                               description_js,
-                               reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
-                               EnsekStatementId_js]
+                    listRow = [
+                        id_js,
+                        amount_js,
+                        amount_refunded_js,
+                        charge_date_js,
+                        created_at_js,
+                        currency_js,
+                        description_js,
+                        reference_js,
+                        status_js,
+                        payout_js,
+                        mandate_js,
+                        subscription_js,
+                        EnsekID_js,
+                        EnsekStatementId_js,
+                    ]
                     q.put(listRow)
                 else:
                     if payment.metadata:
-                        if 'AccountId' in payment.metadata:
-                            EnsekAccountId = payment.metadata['AccountId']
-                        if 'StatementId' in payment.metadata:
-                            StatementId = payment.metadata['StatementId']
+                        if "AccountId" in payment.metadata:
+                            EnsekAccountId = payment.metadata["AccountId"]
+                        if "StatementId" in payment.metadata:
+                            StatementId = payment.metadata["StatementId"]
                     ## print(payment.id)
                     id = payment.id
                     amount = payment.amount
@@ -148,21 +158,54 @@ class GoCardlessPayments(object):
                     subscription = payment.links.subscription
                     EnsekID = EnsekAccountId
                     EnsekStatementId = StatementId
-                    listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
-                               reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                    listRow = [
+                        id,
+                        amount,
+                        amount_refunded,
+                        charge_date,
+                        created_at,
+                        currency,
+                        description,
+                        reference,
+                        status,
+                        payout,
+                        mandate,
+                        subscription,
+                        EnsekID,
+                        EnsekStatementId,
+                    ]
                     q.put(listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         # Empty queue
         while not q.empty():
             datalist.append(q.get())
 
-        df = pd.DataFrame(datalist, columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
-                                             'currency', 'description', 'reference', 'status', 'payout', 'mandate',
-                                             'subscription', 'EnsekID', 'StatementId'])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "id",
+                "amount",
+                "amount_refunded",
+                "charge_date",
+                "created_at",
+                "currency",
+                "description",
+                "reference",
+                "status",
+                "payout",
+                "mandate",
+                "subscription",
+                "EnsekID",
+                "StatementId",
+            ],
+        )
 
         print(df.head(5))
 
@@ -198,10 +241,3 @@ if __name__ == "__main__":
     p1 = p.process_Payments()
     ### Extract return single Daily Files from Date Range Provided ###
     ## p2 = p.runDailyFiles()
-
-
-
-
-
-
-

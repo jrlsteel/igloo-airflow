@@ -8,8 +8,8 @@ import sys
 import argparse
 import boto3
 
-sys.path.append('..')
-sys.path.append('/home/ec2-user/python/enzek-meterpoint-readings')
+sys.path.append("..")
+sys.path.append("/home/ec2-user/python/enzek-meterpoint-readings")
 from common.utils import batch_logging_insert, batch_logging_update, get_jobID
 
 
@@ -33,24 +33,25 @@ class TableDiffChecker:
             "env_a": env_a_name,
             "env_b": env_b_name,
             "exec_success": True,
-            "overall_match": True
+            "overall_match": True,
         }
 
         try:
             # expand object definitions into queries based on defined comparison type
-            if comparison_type == 'table':
+            if comparison_type == "table":
                 query_a = "select * from {0}".format(object_a_def)
                 query_b = "select * from {0}".format(object_b_def)
                 comparison_log["table_a"] = object_a_def
                 comparison_log["table_b"] = object_b_def
-            elif comparison_type == 'query':
+            elif comparison_type == "query":
                 query_a = object_a_def
                 query_b = object_b_def
                 comparison_log["query_a"] = object_a_def
                 comparison_log["query_b"] = object_b_def
             else:
                 raise TypeError(
-                    "Comparison type '{0}' is unsupported. Supported types: 'table', 'query'".format(comparison_type))
+                    "Comparison type '{0}' is unsupported. Supported types: 'table', 'query'".format(comparison_type)
+                )
 
             # load relevant environments
             env_a = self.env_configs[env_a_name]
@@ -84,15 +85,13 @@ class TableDiffChecker:
                 df_a_filtered = self.filter_data_frame_to_key_set(df_a, common_keys)
                 df_b_filtered = self.filter_data_frame_to_key_set(df_b, common_keys)
                 # get list of common-named columns (including those with differing data types) & remove etlchange
-                shared_cols = list(comparison_log["schemas"]["common_fields"].keys()) + \
-                              list(comparison_log["schemas"]["type_mismatches"].keys())
-                if 'etlchange' in shared_cols:
-                    shared_cols.remove('etlchange')
+                shared_cols = list(comparison_log["schemas"]["common_fields"].keys()) + list(
+                    comparison_log["schemas"]["type_mismatches"].keys()
+                )
+                if "etlchange" in shared_cols:
+                    shared_cols.remove("etlchange")
                 comparison_log["common_keys_and_fields"] = self.compare_common_column_contents(
-                    df_a=df_a_filtered,
-                    df_b=df_b_filtered,
-                    key_cols=key_cols,
-                    common_cols=shared_cols
+                    df_a=df_a_filtered, df_b=df_b_filtered, key_cols=key_cols, common_cols=shared_cols
                 )
                 comparison_log["overall_match"] &= comparison_log["common_keys_and_fields"]["full_match"]
 
@@ -105,10 +104,7 @@ class TableDiffChecker:
 
     @staticmethod
     def compare_common_column_contents(df_a, df_b, key_cols, common_cols):
-        result_counts = {
-            "full_match": True,
-            "differing_cols": 0
-        }
+        result_counts = {"full_match": True, "differing_cols": 0}
         for comparison_col in common_cols:
             # find equivalence between dataframes
             cols = key_cols.copy()
@@ -118,7 +114,7 @@ class TableDiffChecker:
             # report). The merge method below can work directly on full tables but runs out of memory on the large ones
             df_a_slice = df_a[cols]
             df_b_slice = df_b[cols]
-            tagged_rows = df_a_slice.merge(df_b_slice, on=cols, how='outer', indicator=True)
+            tagged_rows = df_a_slice.merge(df_b_slice, on=cols, how="outer", indicator=True)
 
             # there will be the same number of right_only and left_only tags, no need to log both
             differing_values = sum(tagged_rows["_merge"] == "left_only")
@@ -127,7 +123,7 @@ class TableDiffChecker:
                 "nulls_a": len(df_a.index) - int(df_a[comparison_col].count()),
                 "nulls_b": len(df_b.index) - int(df_b[comparison_col].count()),
                 "common_values": sum(tagged_rows["_merge"] == "both"),
-                "differing_values": differing_values
+                "differing_values": differing_values,
             }
             if differing_values > 0:
                 result_counts["full_match"] = False
@@ -157,7 +153,7 @@ class TableDiffChecker:
 
         # compare single-use keys from both tables
         field_names = list(key_set_a.columns)
-        tagged_rows = key_set_a.merge(key_set_b, on=field_names, how='outer', indicator=True)
+        tagged_rows = key_set_a.merge(key_set_b, on=field_names, how="outer", indicator=True)
         common_keys = tagged_rows[tagged_rows["_merge"] == "both"][field_names]
         num_unique_a = sum(tagged_rows["_merge"] == "left_only")
 
@@ -165,7 +161,7 @@ class TableDiffChecker:
 
         key_counts_match = True
         for metric in key_res_a.keys():
-            key_counts_match &= (key_res_a[metric] == key_res_b[metric])
+            key_counts_match &= key_res_a[metric] == key_res_b[metric]
         single_use_match = num_unique_a == 0 and num_unique_b == 0
         key_set_res = {
             "full_match": single_use_match and key_counts_match,
@@ -176,7 +172,7 @@ class TableDiffChecker:
             "table_b": key_res_b,
             "unique_to_a": num_unique_a,
             "common_keys": sum(tagged_rows["_merge"] == "both"),
-            "unique_to_b": num_unique_b
+            "unique_to_b": num_unique_b,
         }
 
         return key_set_res, common_keys
@@ -189,18 +185,16 @@ class TableDiffChecker:
         # convert the resulting multiindex series to a dataframe,
         # use the series index names as column names,
         # remove the count column (named 0)
-        single_use_rows = unique_row_counts[unique_row_counts == 1] \
-            .to_frame() \
-            .reset_index() \
-            .drop(columns=[0])
+        single_use_rows = unique_row_counts[unique_row_counts == 1].to_frame().reset_index().drop(columns=[0])
 
         slice_counts_res = {
             "total_rows": len(df.index),
             "num_key_sets": len(unique_row_counts.index),
-            "num_single_use_key_sets": len(single_use_rows.index)
+            "num_single_use_key_sets": len(single_use_rows.index),
         }
-        slice_counts_res["num_duplicated_key_sets"] = slice_counts_res["num_key_sets"] - \
-                                                      slice_counts_res["num_single_use_key_sets"]
+        slice_counts_res["num_duplicated_key_sets"] = (
+            slice_counts_res["num_key_sets"] - slice_counts_res["num_single_use_key_sets"]
+        )
 
         return slice_counts_res, single_use_rows
 
@@ -215,7 +209,7 @@ class TableDiffChecker:
             "common_fields": {},
             "type_mismatches": {},
             "unique_to_a": {},
-            "unique_to_b": {}
+            "unique_to_b": {},
         }
 
         # compare field names and data types
@@ -225,7 +219,7 @@ class TableDiffChecker:
                 if dtype != schemas_res["schema_b"][field]:
                     schemas_res["type_mismatches"][field] = {
                         "dtype_a": dtype,
-                        "dtype_b": schemas_res["schema_b"][field]
+                        "dtype_b": schemas_res["schema_b"][field],
                     }
                     schemas_res["type_match"] = False
                     schemas_res["full_match"] = False
@@ -252,17 +246,17 @@ class TableDiffChecker:
         return {
             "full_match": len(df_a.index) == len(df_b.index),
             "row_count_a": len(df_a.index),
-            "row_count_b": len(df_b.index)
+            "row_count_b": len(df_b.index),
         }
 
     @staticmethod
     def load_table(env, query):
-        if env['database_type'] == "redshift":
+        if env["database_type"] == "redshift":
             # connect to redshift
             print("connecting to redshift")
-            pr.connect_to_redshift(host=env['host'], port=env['port'],
-                                   user=env['user'], password=env['pwd'],
-                                   dbname=env['db'])
+            pr.connect_to_redshift(
+                host=env["host"], port=env["port"], user=env["user"], password=env["pwd"], dbname=env["db"]
+            )
             print("connected to redshift")
 
             # read from redshift
@@ -273,15 +267,12 @@ class TableDiffChecker:
             # close redshift connection
             pr.close_up_shop()
 
-        elif env['database_type'] == 'rds':
+        elif env["database_type"] == "rds":
             # connect rds
             print("connecting to RDS")
-            conn = pymysql.connect(env['host'],
-                                   user=env['user'],
-                                   passwd=env['pwd'],
-                                   db=env['db'],
-                                   port=env['port'],
-                                   charset='utf8')
+            conn = pymysql.connect(
+                env["host"], user=env["user"], passwd=env["pwd"], db=env["db"], port=env["port"], charset="utf8"
+            )
             print("connected to RDS")
 
             # read rds
@@ -292,8 +283,11 @@ class TableDiffChecker:
             # close connection
             conn.close()
         else:
-            raise TypeError("Database type '{0}' is not supported. Valid types are 'redshift' and 'rds'".format(
-                env['database_type']))
+            raise TypeError(
+                "Database type '{0}' is not supported. Valid types are 'redshift' and 'rds'".format(
+                    env["database_type"]
+                )
+            )
 
         return data_df
 
@@ -301,13 +295,15 @@ class TableDiffChecker:
 # compares the calculated tables between old & new environments
 def compare_calculated_tables(stage=None):
     job_id = get_jobID()
-    batch_logging_insert(job_id, 70, 'calculated_table_comparisons', 'compare_tables.py')
+    batch_logging_insert(job_id, 70, "calculated_table_comparisons", "compare_tables.py")
 
     try:
         from process_table_comparisons.table_definitions import calculated_table_keys
         from conf.config import redshift_comparison_configs
+
         if stage is None:
             from conf.config import environment_config as current_environment
+
             stage = current_environment["environment"]
         old_env_name = "old_" + stage
         new_env_name = "new_" + stage
@@ -316,26 +312,15 @@ def compare_calculated_tables(stage=None):
         tdc.set_environment_config(env_name=old_env_name, env_config=redshift_comparison_configs["old_env"])
         tdc.set_environment_config(env_name=new_env_name, env_config=redshift_comparison_configs["new_env"])
 
-        results = {
-            "full_match": {
-
-            },
-            "schema_mismatch": {
-
-            },
-            "data_mismatch": {
-
-            },
-            "exec_failure": {
-
-            }
-        }
+        results = {"full_match": {}, "schema_mismatch": {}, "data_mismatch": {}, "exec_failure": {}}
         for table_name, key_cols in calculated_table_keys.items():
-            res = tdc.compare_objects(comparison_type="table",
-                                      env_a_name=old_env_name,
-                                      env_b_name=new_env_name,
-                                      object_a_def=table_name,
-                                      key_cols=key_cols)
+            res = tdc.compare_objects(
+                comparison_type="table",
+                env_a_name=old_env_name,
+                env_b_name=new_env_name,
+                object_a_def=table_name,
+                key_cols=key_cols,
+            )
             if not res["exec_success"]:
                 results["exec_failure"][table_name] = res
             elif not res["schemas"]["full_match"]:
@@ -347,23 +332,26 @@ def compare_calculated_tables(stage=None):
 
         time = dt.now().strftime("%Y%m%d-%H%M%S")
         fname = "calculated_tables_comparison_{stage}_{datetime}.json".format(stage=stage, datetime=time)
-        with open(fname, 'w') as outfile:
+        with open(fname, "w") as outfile:
             json.dump(results, outfile, indent=4)
 
         if len(results["exec_failure"]) > 0:
-            raise RuntimeError("{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
-                num_exec_fail=len(results["exec_failure"])))
+            raise RuntimeError(
+                "{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
+                    num_exec_fail=len(results["exec_failure"])
+                )
+            )
     except Exception as e:
         print("Error in calculated table comparison script: " + str(e))
-        batch_logging_update(job_id, 'f', str(e))
+        batch_logging_update(job_id, "f", str(e))
         raise e
 
-    batch_logging_update(job_id, 'e')
+    batch_logging_update(job_id, "e")
 
 
 def compare_tables(table_comparison_config_name, output_to_s3=False):
     job_id = get_jobID()
-    batch_logging_insert(job_id, 70, table_comparison_config_name, 'compare_tables.py')
+    batch_logging_insert(job_id, 70, table_comparison_config_name, "compare_tables.py")
 
     exit_status = 0
 
@@ -376,29 +364,22 @@ def compare_tables(table_comparison_config_name, output_to_s3=False):
         new_env_name = table_comparison_config["new_env"]["name"]
 
         tdc = TableDiffChecker()
-        tdc.set_environment_config(env_name=old_env_name, env_config=table_comparison_config["old_env"]["redshift_config"])
-        tdc.set_environment_config(env_name=new_env_name, env_config=table_comparison_config["new_env"]["redshift_config"])
+        tdc.set_environment_config(
+            env_name=old_env_name, env_config=table_comparison_config["old_env"]["redshift_config"]
+        )
+        tdc.set_environment_config(
+            env_name=new_env_name, env_config=table_comparison_config["new_env"]["redshift_config"]
+        )
 
-        results = {
-            "full_match": {
-
-            },
-            "schema_mismatch": {
-
-            },
-            "data_mismatch": {
-
-            },
-            "exec_failure": {
-
-            }
-        }
+        results = {"full_match": {}, "schema_mismatch": {}, "data_mismatch": {}, "exec_failure": {}}
         for table_name, key_cols in table_comparison_config["table_keys"].items():
-            res = tdc.compare_objects(comparison_type="table",
-                                      env_a_name=old_env_name,
-                                      env_b_name=new_env_name,
-                                      object_a_def=table_name,
-                                      key_cols=key_cols)
+            res = tdc.compare_objects(
+                comparison_type="table",
+                env_a_name=old_env_name,
+                env_b_name=new_env_name,
+                object_a_def=table_name,
+                key_cols=key_cols,
+            )
             if not res["exec_success"]:
                 results["exec_failure"][table_name] = res
                 exit_status = 1
@@ -413,38 +394,40 @@ def compare_tables(table_comparison_config_name, output_to_s3=False):
 
         time = dt.now().strftime("%Y%m%d-%H%M%S")
         fname = "tables_comparison_{name}_{datetime}.json".format(name=table_comparison_config_name, datetime=time)
-        print('Comparison result: ')
+        print("Comparison result: ")
         print(json.dumps(results, indent=4))
-        with open(fname, 'w') as outfile:
+        with open(fname, "w") as outfile:
             json.dump(results, outfile, indent=4)
 
         if output_to_s3:
             from conf.config import s3_config
+
             s3 = boto3.resource(
-                's3',
-                aws_access_key_id=s3_config["access_key"],
-                aws_secret_access_key=s3_config["secret_key"]
+                "s3", aws_access_key_id=s3_config["access_key"], aws_secret_access_key=s3_config["secret_key"]
             )
-            object = s3.Object(s3_config["bucket_name"], 'table_comparisons/{}'.format(fname))
+            object = s3.Object(s3_config["bucket_name"], "table_comparisons/{}".format(fname))
             object.put(Body=json.dumps(results))
 
         if len(results["exec_failure"]) > 0:
-            raise RuntimeError("{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
-                num_exec_fail=len(results["exec_failure"])))
+            raise RuntimeError(
+                "{num_exec_fail} failure(s) encountered in calculated table comparisons".format(
+                    num_exec_fail=len(results["exec_failure"])
+                )
+            )
     except Exception as e:
         print("Error in table comparison script: " + str(e))
-        batch_logging_update(job_id, 'f', str(e))
+        batch_logging_update(job_id, "f", str(e))
         raise e
 
-    batch_logging_update(job_id, 'e')
+    batch_logging_update(job_id, "e")
 
     return exit_status
-    
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Database table comparison tool')
-    parser.add_argument('--table-comparison-config', type=str)
-    parser.add_argument('--output-to-s3', action="store_true")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Database table comparison tool")
+    parser.add_argument("--table-comparison-config", type=str)
+    parser.add_argument("--output-to-s3", action="store_true")
 
     args = parser.parse_args()
 

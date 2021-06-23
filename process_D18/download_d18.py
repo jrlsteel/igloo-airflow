@@ -4,18 +4,18 @@ import multiprocessing
 from multiprocessing import freeze_support
 import timeit
 
-sys.path.append('..')
+sys.path.append("..")
 
 from connections import connect_db as db
 from common import utils as util
 
-class GetD18Files:
 
+class GetD18Files:
     def __init__(self):
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_bucket']
-        self.upload_key = self.dir['s3_d18_key']['D18Raw']
-        self.sftp_d18_dir = self.dir['s3_d18_key']['D18_SFTP']
+        self.bucket_name = self.dir["s3_bucket"]
+        self.upload_key = self.dir["s3_d18_key"]["D18Raw"]
+        self.sftp_d18_dir = self.dir["s3_d18_key"]["D18_SFTP"]
 
     def sftp_to_Ensek(self, d18_files, s3):
         """
@@ -40,14 +40,14 @@ class GetD18Files:
                     i = 0
 
                 filename = str(file)
-                filepath = '/' + self.sftp_d18_dir + '/' + filename
+                filepath = "/" + self.sftp_d18_dir + "/" + filename
 
                 with io.BytesIO() as file_data:  # read files in memory and copy to s3
                     sftp.getfo(filepath, file_data)
                     file_data.seek(0)
                     s3.put_object(Bucket=self.bucket_name, Key=self.upload_key + filename, Body=file_data)
 
-                i = i+1
+                i = i + 1
                 # break
 
         except Exception as e:
@@ -70,7 +70,7 @@ class GetD18Files:
         return ensek_d18_files
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     freeze_support()
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # s.sftp_to_Ensek(d18_files, s3) ##### Enable this to test without multiprocessing
     ######### multiprocessing starts  ##########
     env = util.get_env()
-    if env == 'uat':
+    if env == "uat":
         n = 12  # number of process to run in parallel
     else:
         n = 24
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     processes = []
     lv = 0
 
-    for i in range(n+1):
+    for i in range(n + 1):
         s = GetD18Files()
         print(i)
         uv = i * k
@@ -114,4 +114,4 @@ if __name__ == '__main__':
         process.join()
     ####### multiprocessing Ends #########
 
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    print("Process completed in " + str(timeit.default_timer() - start) + " seconds")

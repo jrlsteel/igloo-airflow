@@ -9,7 +9,6 @@ from airflow.operators.bash_operator import BashOperator
 from common.slack_utils import alert_slack
 
 
-
 args = {
     "owner": "Airflow",
     "start_date": days_ago(2),

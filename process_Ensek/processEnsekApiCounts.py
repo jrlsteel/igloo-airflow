@@ -2,32 +2,39 @@ import os
 import sys
 import pandas_redshift as pr
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from conf import config as con
+
+import boto3
+from common.secrets_manager import get_secret
+
+client = boto3.client("secretsmanager")
 
 
 def get_count(table_name, schema):
     # sql to count
-    sql = '''select count(1) from ''' + schema + table_name
+    sql = """select count(1) from """ + schema + table_name
     count = pr.redshift_to_pandas(sql)
 
     # convert the dataframe to string
     count_str = count.to_string(header=None, index=False)
 
-    count_details = {
-                "table_name": table_name,
-                "count": count_str
-                }
+    count_details = {"table_name": table_name, "count": count_str}
     print(count_details)
     return count_details
 
 
 def get_redshift_connection():
+    redshift_config = get_secret(client, con.redshift_config["secret_id"])
     try:
-        pr.connect_to_redshift(host=con.redshift_config['host'], port=con.redshift_config['port'],
-                               user=con.redshift_config['user'], password=con.redshift_config['pwd'],
-                               dbname=con.redshift_config['db'])
+        pr.connect_to_redshift(
+            host=redshift_config["host"],
+            port=redshift_config["port"],
+            user=redshift_config["username"],
+            password=redshift_config["password"],
+            dbname=con.redshift_config["db"],
+        )
         print("Connected to Redshift")
     except ConnectionError as e:
         sys.exit("Error : " + str(e))
@@ -55,7 +62,7 @@ def process_count():
         "cdb_stagetariffHistoryElecStandCharge",
         "cdb_stagetariffHistoryElecUnitRates",
         "cdb_stagetariffHistoryGasStandCharge",
-        "cdb_stagetariffHistoryGasUnitRates"
+        "cdb_stagetariffHistoryGasUnitRates",
     ]
     stage_schema = "aws_s3_ensec_api_extracts."
     stage_counts = []
@@ -77,7 +84,7 @@ def process_count():
         print("Connection to Redshift Closed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     stage_counts_main = process_count()
     print(stage_counts_main)

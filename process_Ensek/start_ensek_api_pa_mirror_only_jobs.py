@@ -1,7 +1,8 @@
 import sys
 from datetime import datetime
 import timeit
-sys.path.append('..')
+
+sys.path.append("..")
 
 from process_Ensek import processAllEnsekPAScripts as ae
 from common import process_glue_job as glue
@@ -10,8 +11,8 @@ from common import utils as util
 from common import Refresh_UAT as refresh
 from conf import config as con
 
-class StartEnsekPAJobs:
 
+class StartEnsekPAJobs:
     def __init__(self):
         self.env = util.get_env()
         self.dir = util.get_dir()
@@ -29,22 +30,36 @@ class StartEnsekPAJobs:
         :return: None
         """
 
-        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime('%H:%M:%S'), self.process_name))
+        print("{0}: >>>> Process {1}<<<<".format(datetime.now().strftime("%H:%M:%S"), self.process_name))
         try:
-            util.batch_logging_insert(self.mirror_jobid, 8, 'ensek_extract_mirror-' + source_input + '-' + self.env,
-                                      'start_ensek_api_pa_jobs.py')
+            util.batch_logging_insert(
+                self.mirror_jobid,
+                8,
+                "ensek_extract_mirror-" + source_input + "-" + self.env,
+                "start_ensek_api_pa_jobs.py",
+            )
             start = timeit.default_timer()
             r = refresh.SyncS3(source_input, destination_input)
-            r.process_sync(env={
-                'AWS_ACCESS_KEY_ID': con.s3_config['access_key'],
-                'AWS_SECRET_ACCESS_KEY': con.s3_config['secret_key']
-            })
+            r.process_sync(
+                env={
+                    "AWS_ACCESS_KEY_ID": con.s3_config["access_key"],
+                    "AWS_SECRET_ACCESS_KEY": con.s3_config["secret_key"],
+                }
+            )
 
-            util.batch_logging_update(self.mirror_jobid, 'e')
-            print( "ensek_extract_mirror-" + source_input + "-" + self.env + " files completed in {1:.2f} seconds".format(datetime.now().strftime('%H:%M:%S'), float(timeit.default_timer() - start)))
+            util.batch_logging_update(self.mirror_jobid, "e")
+            print(
+                "ensek_extract_mirror-"
+                + source_input
+                + "-"
+                + self.env
+                + " files completed in {1:.2f} seconds".format(
+                    datetime.now().strftime("%H:%M:%S"), float(timeit.default_timer() - start)
+                )
+            )
         except Exception as e:
-            util.batch_logging_update(self.mirror_jobid, 'f', str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            util.batch_logging_update(self.mirror_jobid, "f", str(e))
+            util.batch_logging_update(self.all_jobid, "f", str(e))
             print("Error in process :- " + str(e))
             sys.exit(1)
 
@@ -52,7 +67,7 @@ class StartEnsekPAJobs:
         try:
             all_ensek_pa_scripts_response = ae.process_all_ensek_pa_scripts()
             if all_ensek_pa_scripts_response:
-                print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+                print("{0}: All Ensek Scripts job completed successfully".format(datetime.now().strftime("%H:%M:%S")))
                 # return all_ensek_scripts_response
             else:
                 print("Error occurred in All Ensek Scripts job")
@@ -60,42 +75,45 @@ class StartEnsekPAJobs:
                 raise Exception
         except Exception as e:
             print("Error in Ensek Scripts :- " + str(e))
-            util.batch_logging_update(self.all_jobid, 'f', str(e))
+            util.batch_logging_update(self.all_jobid, "f", str(e))
             sys.exit(1)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     s = StartEnsekPAJobs()
 
-    util.batch_logging_insert(s.all_jobid, 103, 'all_pa_jobs', 'start_ensek_api_pa_jobs.py')
+    util.batch_logging_insert(s.all_jobid, 103, "all_pa_jobs", "start_ensek_api_pa_jobs.py")
 
     print("Running Environment: {0}".format(s.env.upper()))
-    
-    if s.env in ['newprod']:
+
+    if s.env in ["newprod"]:
         # run PA Ensek Jobs
-        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime("%H:%M:%S")))
         s.submit_all_ensek_pa_scripts()
 
-    elif s.env in ['preprod', 'dev']:
+    elif s.env in ["preprod", "dev"]:
         s.submit_all_ensek_pa_scripts()
-        s3_destination_bucket = s.dir['s3_bucket']
-        s3_source_bucket = s.dir['s3_source_bucket']
+        s3_destination_bucket = s.dir["s3_bucket"]
+        s3_source_bucket = s.dir["s3_source_bucket"]
 
         # run PA Ensek Jobs in UAT PreProd Limit of 100 accounts
-        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime('%H:%M:%S')))
+        print("{0}:  PA Ensek Jobs running...".format(datetime.now().strftime("%H:%M:%S")))
 
-        print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("Ensek Meterpoints Mirror  job is running...".format(datetime.now().strftime("%H:%M:%S"), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/MeterPoints/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/MeterPoints/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-        print("Ensek Meterpoints Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print(
+            "Ensek Meterpoints Attributes mirror  job is running...".format(
+                datetime.now().strftime("%H:%M:%S"), s.process_name
+            )
+        )
         source_input = "s3://" + s3_source_bucket + "/stage1/MeterPointsAttributes/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/MeterPointsAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-        print("Ensek Meters Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("Ensek Meters Mirror  job is running...".format(datetime.now().strftime("%H:%M:%S"), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/Meters/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/Meters/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
@@ -104,13 +122,16 @@ if __name__ == '__main__':
         destination_input = "s3://" + s3_destination_bucket + "/stage1/MetersAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-        print("Ensek Registers Mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'), s.process_name))
+        print("Ensek Registers Mirror  job is running...".format(datetime.now().strftime("%H:%M:%S"), s.process_name))
         source_input = "s3://" + s3_source_bucket + "/stage1/Registers/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/Registers/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-        print("Ensek Registers Attributes mirror  job is running...".format(datetime.now().strftime('%H:%M:%S'),
-                                                                         s.process_name))
+        print(
+            "Ensek Registers Attributes mirror  job is running...".format(
+                datetime.now().strftime("%H:%M:%S"), s.process_name
+            )
+        )
         source_input = "s3://" + s3_source_bucket + "/stage1/RegistersAttributes/"
         destination_input = "s3://" + s3_destination_bucket + "/stage1/RegistersAttributes/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
@@ -119,6 +140,6 @@ if __name__ == '__main__':
         destination_input = "s3://" + s3_destination_bucket + "/stage1/ReadingsInternal/"
         s.submit_process_s3_mirror_job(source_input, destination_input)
 
-    print("{0}: All jobs completed successfully".format(datetime.now().strftime('%H:%M:%S')))
+    print("{0}: All jobs completed successfully".format(datetime.now().strftime("%H:%M:%S")))
 
-    util.batch_logging_update(s.all_jobid, 'e')
+    util.batch_logging_update(s.all_jobid, "e")

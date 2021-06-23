@@ -18,14 +18,10 @@ def format_bytes(size):
     return str(round(size, 2)) + power_labels[n] + "b"
 
 
-def send_slack_notification(
-    slack_alert_url, monitored_system, usage_percent, used_bytes, remaining_bytes
-):
-    header = (
-        ":floppy_disk: {monitored_system} disk usage at {dsu}% :floppy_disk:".format(
-            monitored_system=monitored_system,
-            dsu=usage_percent,
-        )
+def send_slack_notification(slack_alert_url, monitored_system, usage_percent, used_bytes, remaining_bytes):
+    header = ":floppy_disk: {monitored_system} disk usage at {dsu}% :floppy_disk:".format(
+        monitored_system=monitored_system,
+        dsu=usage_percent,
     )
     slack_data = {
         "text": header,

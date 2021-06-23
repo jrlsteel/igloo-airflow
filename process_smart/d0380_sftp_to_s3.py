@@ -46,9 +46,7 @@ def copy_all_from_d0380():
     try:
         directory = common.utils.get_dir()
         s3_destination_bucket = directory["s3_bucket"]
-        s3_key_prefix = "{}/D0380/".format(
-            common.directories.common["elective_hh"]["d0380_s3_key_prefix"]
-        )
+        s3_key_prefix = "{}/D0380/".format(common.directories.common["elective_hh"]["d0380_s3_key_prefix"])
 
         aws_access_key_id = config.s3_config["access_key"]
         aws_secret_access_key = config.s3_config["secret_key"]
@@ -74,9 +72,7 @@ def copy_all_from_d0380():
             sftp_host,
         )
 
-        logger.debug(
-            "SFTP Connection info: {}".format(sftp_connection_string.replace(sftp_password, "<redacted>"))
-        )
+        logger.debug("SFTP Connection info: {}".format(sftp_connection_string.replace(sftp_password, "<redacted>")))
 
         sftp_object = pysftp.Connection(
             host=sftp_host,
@@ -92,9 +88,9 @@ def copy_all_from_d0380():
 
         for filename in file_list:
             filepath = "{}/{}".format(sftp_prefix, filename)
-            print('File Path: ', filepath)
+            print("File Path: ", filepath)
             with io.BytesIO() as file_data:  # read files in memory and copy to s3
-                print('file data ', file_data)
+                print("file data ", file_data)
                 sftp_object.getfo(filepath, file_data)
                 file_data.seek(0)
                 print(file_data)
@@ -106,7 +102,6 @@ def copy_all_from_d0380():
                 )
 
         logger.info("All files copied")
-
 
     except Exception as e:
         logger.error(traceback.format_exc())

@@ -21,12 +21,13 @@ from conf import config
 from common import schedules
 
 
-
 dag_id = "ensek_main"
 
+
 def get_schedule():
-    env = config.environment_config['environment']
+    env = config.environment_config["environment"]
     return schedules.get_schedule(env, dag_id)
+
 
 args = {
     "owner": "Airflow",
@@ -39,7 +40,10 @@ dag = DAG(
     dag_id=dag_id,
     default_args=args,
     schedule_interval=get_schedule(),
-    tags=["cdw", "ensek",],
+    tags=[
+        "cdw",
+        "ensek",
+    ],
     catchup=False,
     description="Runs all ETLs for Ensek",
     max_active_runs=1,
@@ -64,7 +68,7 @@ task_slack_report_string = """
 api_verification_report_string = task_slack_report_string.format(
     "Verifies there are sufficient new files in the s3 directory: {}, demonstrating the success of this API extracts",
     "Investigate signficance of verifcation failure in Airflow logs",
-    "Failure indicates no data present in ETL destination"
+    "Failure indicates no data present in ETL destination",
 )
 
 api_extract_report_string = task_slack_report_string.format(
@@ -78,25 +82,25 @@ staging_report_string = task_slack_report_string.format(
     "Runs glue job on the stage 1 {} files which reduces them to 17 parquet files and writes them to stage 2",
     "Do not rerun, investigate root cause.",
     "Given this task is long running, rerunning it would impact other batch processes significantly.",
-    )
+)
 
 ref_report_string = task_slack_report_string.format(
     "Runs glue job on stage 2 {} files which updates respective Redshift tables.",
     "Do not rerun, investigate root cause.",
     "Given this task is long running, rerunning it would impact other batch processes significantly.",
-    )
+)
 
 staging_verify_report_string = task_slack_report_string.format(
     "Verifies there are sufficient new files in the staging directory.",
     "Do not rerun, investigate root cause.",
-    "Rerunning will have the same outcome until valid data is present."
+    "Rerunning will have the same outcome until valid data is present.",
 )
 
 
 ref_verify_report_string = task_slack_report_string.format(
     "Verifies there is valid data in relevant redshift tables.",
     "Do not rerun, investigate root cause.",
-    "Rerunning will have the same outcome until valid data is present."
+    "Rerunning will have the same outcome until valid data is present.",
 )
 
 # DAG Tasks
@@ -122,9 +126,7 @@ api_extract_verify_meterpoints = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_meterpoints.doc = api_verification_report_string.format(
-    s3_key["MeterPoints"]
-)
+api_extract_verify_meterpoints.doc = api_verification_report_string.format(s3_key["MeterPoints"])
 
 
 api_extract_verify_meterpoints_attributes = PythonOperator(
@@ -138,9 +140,7 @@ api_extract_verify_meterpoints_attributes = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_meterpoints.doc = api_verification_report_string.format(
-    s3_key["MeterPointsAttributes"]
-)
+api_extract_verify_meterpoints.doc = api_verification_report_string.format(s3_key["MeterPointsAttributes"])
 
 
 api_extract_verify_meters = PythonOperator(
@@ -154,9 +154,7 @@ api_extract_verify_meters = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_meters.doc = api_verification_report_string.format(
-    s3_key["Meters"]
-)
+api_extract_verify_meters.doc = api_verification_report_string.format(s3_key["Meters"])
 
 
 api_extract_verify_meters_attributes = PythonOperator(
@@ -170,9 +168,7 @@ api_extract_verify_meters_attributes = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_meters_attributes.doc = api_verification_report_string.format(
-    s3_key["MetersAttributes"]
-)
+api_extract_verify_meters_attributes.doc = api_verification_report_string.format(s3_key["MetersAttributes"])
 
 
 api_extract_verify_registers = PythonOperator(
@@ -186,9 +182,7 @@ api_extract_verify_registers = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_registers.doc = api_verification_report_string.format(
-    s3_key["Registers"]
-)
+api_extract_verify_registers.doc = api_verification_report_string.format(s3_key["Registers"])
 
 
 api_extract_verify_register_attributes = PythonOperator(
@@ -202,14 +196,15 @@ api_extract_verify_register_attributes = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_register_attributes.doc = api_verification_report_string.format(
-    s3_key["RegistersAttributes"]
-)
+api_extract_verify_register_attributes.doc = api_verification_report_string.format(s3_key["RegistersAttributes"])
 
 staging_meterpoints = PythonOperator(
     task_id="staging_meterpoints",
     python_callable=process_glue_job_await_completion,
-    op_args=[directory["glue_staging_meterpoints_job_name"], common.directories.common["meterpoints"]["glue_job_name_staging"]],
+    op_args=[
+        directory["glue_staging_meterpoints_job_name"],
+        common.directories.common["meterpoints"]["glue_job_name_staging"],
+    ],
     dag=dag,
 )
 staging_meterpoints.doc = staging_report_string.format("Meterpoints")
@@ -270,14 +265,15 @@ api_extract_verify_internalreadings = PythonOperator(
     },
     dag=dag,
 )
-api_extract_verify_internalreadings.doc = api_verification_report_string.format(
-    s3_key["ReadingsInternal"]
-)
+api_extract_verify_internalreadings.doc = api_verification_report_string.format(s3_key["ReadingsInternal"])
 
 staging_internalreadings = PythonOperator(
     task_id="staging_internalreadings",
     python_callable=process_glue_job_await_completion,
-    op_args=[directory["glue_staging_internalreadings_job_name"], common.directories.common["internalreadings"]["glue_job_name_staging"]],
+    op_args=[
+        directory["glue_staging_internalreadings_job_name"],
+        common.directories.common["internalreadings"]["glue_job_name_staging"],
+    ],
     dag=dag,
 )
 staging_internalreadings.doc = staging_report_string.format("Internal Readings")
@@ -295,7 +291,10 @@ staging_verify_internalreadings.doc = staging_verify_report_string
 ref_tables_internalreadings = PythonOperator(
     task_id="ref_tables_internalreadings",
     python_callable=process_glue_job_await_completion,
-    op_args=[directory["glue_ref_internalreadings_job_name"], common.directories.common["internalreadings"]["glue_job_name_ref"]],
+    op_args=[
+        directory["glue_ref_internalreadings_job_name"],
+        common.directories.common["internalreadings"]["glue_job_name_ref"],
+    ],
     dag=dag,
 )
 ref_tables_internalreadings.doc = ref_report_string
@@ -312,8 +311,8 @@ ref_tables_verify_internalreadings = PythonOperator(
 ref_tables_verify_internalreadings.doc = ref_verify_report_string
 
 process_customerdb = BashOperator(
-    task_id='process_customerdb',
-    bash_command='cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_customerdb_jobs.py',
+    task_id="process_customerdb",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_customerdb_jobs.py",
     dag=dag,
 )
 
@@ -330,9 +329,7 @@ if environment in ["preprod", "dev"]:
         python_callable=startensekjobs.submit_process_s3_mirror_job,
         op_kwargs={
             "source_input": "s3://" + s3_source_bucket + "/stage1/MeterPoints/",
-            "destination_input": "s3://"
-            + s3_destination_bucket
-            + "/stage1/MeterPoints/",
+            "destination_input": "s3://" + s3_destination_bucket + "/stage1/MeterPoints/",
         },
         dag=dag,
     )
@@ -341,12 +338,8 @@ if environment in ["preprod", "dev"]:
         task_id="ensek_meterpoints_attributes_mirror",
         python_callable=startensekjobs.submit_process_s3_mirror_job,
         op_kwargs={
-            "source_input": "s3://"
-            + s3_source_bucket
-            + "/stage1/MeterPointsAttributes/",
-            "destination_input": "s3://"
-            + s3_destination_bucket
-            + "/stage1/MeterPointsAttributes/",
+            "source_input": "s3://" + s3_source_bucket + "/stage1/MeterPointsAttributes/",
+            "destination_input": "s3://" + s3_destination_bucket + "/stage1/MeterPointsAttributes/",
         },
         dag=dag,
     )
@@ -366,9 +359,7 @@ if environment in ["preprod", "dev"]:
         python_callable=startensekjobs.submit_process_s3_mirror_job,
         op_kwargs={
             "source_input": "s3://" + s3_source_bucket + "/stage1/MetersAttributes/",
-            "destination_input": "s3://"
-            + s3_destination_bucket
-            + "/stage1/MetersAttributes/",
+            "destination_input": "s3://" + s3_destination_bucket + "/stage1/MetersAttributes/",
         },
         dag=dag,
     )
@@ -388,9 +379,7 @@ if environment in ["preprod", "dev"]:
         python_callable=startensekjobs.submit_process_s3_mirror_job,
         op_kwargs={
             "source_input": "s3://" + s3_source_bucket + "/stage1/RegistersAttributes/",
-            "destination_input": "s3://"
-            + s3_destination_bucket
-            + "/stage1/RegistersAttributes/",
+            "destination_input": "s3://" + s3_destination_bucket + "/stage1/RegistersAttributes/",
         },
         dag=dag,
     )
@@ -400,13 +389,10 @@ if environment in ["preprod", "dev"]:
         python_callable=startensekjobs.submit_process_s3_mirror_job,
         op_kwargs={
             "source_input": "s3://" + s3_source_bucket + "/stage1/ReadingsInternal/",
-            "destination_input": "s3://"
-            + s3_destination_bucket
-            + "/stage1/ReadingsInternal/",
+            "destination_input": "s3://" + s3_destination_bucket + "/stage1/ReadingsInternal/",
         },
         dag=dag,
     )
-
 
     # Not Prod Dependencies
 
@@ -423,7 +409,12 @@ if environment in ["preprod", "dev"]:
 
     api_extract_meterpoints >> api_extract_internalreadings
 
-    api_extract_internalreadings >> ensek_readingsinternal_mirror >> staging_internalreadings >> ref_tables_internalreadings
+    (
+        api_extract_internalreadings
+        >> ensek_readingsinternal_mirror
+        >> staging_internalreadings
+        >> ref_tables_internalreadings
+    )
     ensek_readingsinternal_mirror >> api_extract_verify_internalreadings
     staging_internalreadings >> staging_verify_internalreadings
     ref_tables_internalreadings >> ref_tables_verify_internalreadings

@@ -1,0 +1,26 @@
+{
+  "name": "enzek-meterpoint-readings",
+  "version": "1.0.0",
+  "description": "Igloo CDW Python Batch",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/iglooenergy/enzek-meterpoint-readings.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings#readme",
+  "dependencies": {
+    "@igloo/build-tools": "0.0.5",
+    "husky": "^6.0.0"
+  },
+  "devDependencies": {
+    "husky": "^6.0.0"
+  }
+}

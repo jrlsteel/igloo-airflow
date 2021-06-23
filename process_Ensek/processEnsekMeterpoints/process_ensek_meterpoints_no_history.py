@@ -83,9 +83,7 @@ class MeterPoints:
                             metrics[0]["connection_error_counter"].value += 1
                             if metrics[0]["connection_error_counter"].value % 100 == 0:
                                 iglog.in_prod_env(
-                                    "Connection errors: {}".format(
-                                        str(metrics[0]["connection_error_counter"])
-                                    )
+                                    "Connection errors: {}".format(str(metrics[0]["connection_error_counter"]))
                                 )
                         break
                     except:
@@ -95,9 +93,7 @@ class MeterPoints:
                         with metrics[0]["number_of_retries_total"].get_lock():
                             metrics[0]["number_of_retries_total"].value += 1
                             if attempt_num > 0:
-                                metrics[0]["retries_per_account"][
-                                    account_id
-                                ] = attempt_num
+                                metrics[0]["retries_per_account"][account_id] = attempt_num
                     except:
                         pass
                     time.sleep(retry_in_secs)
@@ -135,9 +131,7 @@ class MeterPoints:
             df_meterpoints1 = df_meterpoints[meta_meters + ["account_id"]]
             df_meterpoints1.rename(columns={"id": "meter_point_id"}, inplace=True)
             meter_point_ids = df_meterpoints1["meter_point_id"]
-            df_meter_points_string = df_meterpoints1.to_csv(
-                None, columns=column_list, index=False
-            )
+            df_meter_points_string = df_meterpoints1.to_csv(None, columns=column_list, index=False)
             file_name_meterpoints = "meter_points_" + str(account_id) + ".csv"
             k.key = dir_s3["s3_key"]["MeterPoints"] + file_name_meterpoints
             k.set_contents_from_string(df_meter_points_string)
@@ -150,9 +144,7 @@ class MeterPoints:
             "meterId",
             "meter_point_id",
         ]
-        df_meters = json_normalize(
-            data, record_path=["meters"], meta=["id"], meta_prefix="meter_point_"
-        )
+        df_meters = json_normalize(data, record_path=["meters"], meta=["id"], meta_prefix="meter_point_")
         if df_meters.empty:
             metrics[0]["no_meters_data"].append(account_id)
         else:
@@ -175,17 +167,13 @@ class MeterPoints:
         if df_attributes.empty:
             metrics[0]["no_meterpoints_attributes_data"].append(account_id)
         else:
-            column_list = util.get_common_info(
-                "ensek_column_order", "ref_meterpoints_attributes"
-            )
+            column_list = util.get_common_info("ensek_column_order", "ref_meterpoints_attributes")
             df_attributes["account_id"] = account_id
-            df_attributes["attributes_attributeValue"] = df_attributes[
-                "attributes_attributeValue"
-            ].str.replace(",", " ")
-            # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
-            df_attributes_string = df_attributes.to_csv(
-                None, columns=column_list, index=False
+            df_attributes["attributes_attributeValue"] = df_attributes["attributes_attributeValue"].str.replace(
+                ",", " "
             )
+            # df_attributes.to_csv('attributes_'  + str(account_id) + '.csv')
+            df_attributes_string = df_attributes.to_csv(None, columns=column_list, index=False)
             filename_attributes = "mp_attributes_" + str(account_id) + ".csv"
             # k.key = 'ensek-meterpoints/Attributes/' + filename_attributes
             k.key = dir_s3["s3_key"]["MeterPointsAttributes"] + filename_attributes
@@ -226,13 +214,9 @@ class MeterPoints:
             # df_registers.rename(columns={'registers_id' : 'register_id'}, inplace=True)
             df_registers1["account_id"] = account_id
             df_registers1["registers_sourceIdType"] = (
-                df_registers1["registers_sourceIdType"]
-                .str.replace("\t", "")
-                .str.strip()
+                df_registers1["registers_sourceIdType"].str.replace("\t", "").str.strip()
             )
-            df_registers_string = df_registers1.to_csv(
-                None, columns=column_list, index=False
-            )
+            df_registers_string = df_registers1.to_csv(None, columns=column_list, index=False)
             filename_registers = "registers_" + str(account_id) + ".csv"
             # k.key = 'ensek-meterpoints/Registers/' + filename_registers
             k.key = dir_s3["s3_key"]["Registers"] + filename_registers
@@ -251,25 +235,13 @@ class MeterPoints:
             metrics[0]["no_registers_attributes_data"].append(account_id)
 
         else:
-            column_list = util.get_common_info(
-                "ensek_column_order", "ref_registers_attributes"
-            )
-            df_registersAttributes.rename(
-                columns={"meter_point_meters_meterId": "meter_id"}, inplace=True
-            )
-            df_registersAttributes.rename(
-                columns={"meter_point_meters_registers_id": "register_id"}, inplace=True
-            )
+            column_list = util.get_common_info("ensek_column_order", "ref_registers_attributes")
+            df_registersAttributes.rename(columns={"meter_point_meters_meterId": "meter_id"}, inplace=True)
+            df_registersAttributes.rename(columns={"meter_point_meters_registers_id": "register_id"}, inplace=True)
             df_registersAttributes["account_id"] = account_id
-            df_registersAttributes_string = df_registersAttributes.to_csv(
-                None, columns=column_list, index=False
-            )
-            filename_registersAttributes = (
-                "registersAttributes_" + str(account_id) + ".csv"
-            )
-            k.key = (
-                dir_s3["s3_key"]["RegistersAttributes"] + filename_registersAttributes
-            )
+            df_registersAttributes_string = df_registersAttributes.to_csv(None, columns=column_list, index=False)
+            filename_registersAttributes = "registersAttributes_" + str(account_id) + ".csv"
+            k.key = dir_s3["s3_key"]["RegistersAttributes"] + filename_registersAttributes
             k.set_contents_from_string(df_registersAttributes_string)
 
         """ Prcessing Meters -> attributes data"""
@@ -285,21 +257,13 @@ class MeterPoints:
             metrics[0]["no_meters_attributes_data"].append(account_id)
 
         else:
-            column_list = util.get_common_info(
-                "ensek_column_order", "ref_meters_attributes"
-            )
-            df_metersAttributes.rename(
-                columns={"meter_point_meters_meterId": "meter_id"}, inplace=True
-            )
+            column_list = util.get_common_info("ensek_column_order", "ref_meters_attributes")
+            df_metersAttributes.rename(columns={"meter_point_meters_meterId": "meter_id"}, inplace=True)
             df_metersAttributes["account_id"] = account_id
-            df_metersAttributes[
+            df_metersAttributes["metersAttributes_attributeValue"] = df_metersAttributes[
                 "metersAttributes_attributeValue"
-            ] = df_metersAttributes["metersAttributes_attributeValue"].str.replace(
-                ",", " "
-            )
-            df_metersAttributes_string = df_metersAttributes.to_csv(
-                None, columns=column_list, index=False
-            )
+            ].str.replace(",", " ")
+            df_metersAttributes_string = df_metersAttributes.to_csv(None, columns=column_list, index=False)
             filename_metersAttributes = "metersAttributes_" + str(account_id) + ".csv"
             k.key = dir_s3["s3_key"]["MetersAttributes"] + filename_metersAttributes
             k.set_contents_from_string(df_metersAttributes_string)
@@ -316,9 +280,7 @@ class MeterPoints:
     def processAccounts(self, account_ids, S3, dir_s3, metrics):
         api_url_mp, head_mp = util.get_ensek_api_info1("meterpoints")
         api_url_mpr, head_mpr = util.get_ensek_api_info1("meterpoints_readings")
-        api_url_mprb, head_mprb = util.get_ensek_api_info1(
-            "meterpoints_readings_billeable"
-        )
+        api_url_mprb, head_mprb = util.get_ensek_api_info1("meterpoints_readings_billeable")
 
         current_account = ""
         for account_id in account_ids:
@@ -326,20 +288,12 @@ class MeterPoints:
             with metrics[0]["account_id_counter"].get_lock():
                 metrics[0]["account_id_counter"].value += 1
                 if metrics[0]["account_id_counter"].value % 1000 == 0:
-                    iglog.in_prod_env(
-                        "Account IDs processesed: {}".format(
-                            str(metrics[0]["account_id_counter"].value)
-                        )
-                    )
+                    iglog.in_prod_env("Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
             api_url_mp1 = api_url_mp.format(account_id)
-            meter_info_response = self.get_api_response(
-                api_url_mp1, head_mp, account_id, metrics
-            )
+            meter_info_response = self.get_api_response(api_url_mp1, head_mp, account_id, metrics)
             if meter_info_response:
                 formatted_meter_info = self.format_json_response(meter_info_response)
-                meter_points = self.extract_meter_point_json(
-                    formatted_meter_info, account_id, S3, dir_s3, metrics
-                )
+                meter_points = self.extract_meter_point_json(formatted_meter_info, account_id, S3, dir_s3, metrics)
                 list_meterpoints = []
                 for each_meter_point in meter_points:
                     list_meterpoints.append(each_meter_point)
@@ -451,36 +405,20 @@ def process_api_extract_meterpoints():
             if len(metrics["api_method_time"]) > 0:
                 metrics["max_api_process_time"] = max(metrics["api_method_time"])
                 metrics["min_api_process_time"] = min(metrics["api_method_time"])
-                metrics["median_api_process_time"] = statistics.median(
-                    metrics["api_method_time"]
-                )
-                metrics["average_api_process_time"] = statistics.mean(
-                    metrics["api_method_time"]
-                )
+                metrics["median_api_process_time"] = statistics.median(metrics["api_method_time"])
+                metrics["average_api_process_time"] = statistics.mean(metrics["api_method_time"])
             else:
                 metrics["max_api_process_time"] = "No api times processed"
                 metrics["min_api_process_time"] = "No api times processed"
                 metrics["median_api_process_time"] = "No api times processed"
                 metrics["average_api_process_time"] = "No api times processed"
 
-            metrics["connection_error_counter"] = metrics[
-                "connection_error_counter"
-            ].value
-            metrics["number_of_retries_total"] = metrics[
-                "number_of_retries_total"
-            ].value
+            metrics["connection_error_counter"] = metrics["connection_error_counter"].value
+            metrics["number_of_retries_total"] = metrics["number_of_retries_total"].value
             metrics["account_id_counter"] = metrics["account_id_counter"].value
 
-            iglog.in_prod_env(
-                "Process completed in "
-                + str(timeit.default_timer() - start)
-                + " seconds\n"
-            )
-            iglog.in_prod_env(
-                "Metrics completed in "
-                + str(timeit.default_timer() - start_metrics)
-                + " seconds\n"
-            )
+            iglog.in_prod_env("Process completed in " + str(timeit.default_timer() - start) + " seconds\n")
+            iglog.in_prod_env("Metrics completed in " + str(timeit.default_timer() - start_metrics) + " seconds\n")
             iglog.in_prod_env("METRICS FROM CURRENT RUN...\n")
             for metric_name, metric_data in metrics.items():
                 if metric_name in [
@@ -488,9 +426,7 @@ def process_api_extract_meterpoints():
                     "each_account_meterpoints",
                 ]:
                     continue
-                iglog.in_prod_env(
-                    str(metric_name).upper() + "\n" + str(metric_data) + "\n"
-                )
+                iglog.in_prod_env(str(metric_name).upper() + "\n" + str(metric_data) + "\n")
 
 
 if __name__ == "__main__":

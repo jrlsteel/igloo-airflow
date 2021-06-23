@@ -26,21 +26,21 @@ from common import utils as util
 
 @responses.activate
 def test_api_response_one_page():
-    with open (os.path.join(os.path.dirname(__file__), "fixtures", "data.json")) as f_in:
+    with open(os.path.join(os.path.dirname(__file__), "fixtures", "data.json")) as f_in:
         data_json_1 = f_in.read()
 
-    metrics = [{
-        "api_error_codes" : [],
-        "api_method_time" : [],
-        },]   
+    metrics = [
+        {
+            "api_error_codes": [],
+            "api_method_time": [],
+        },
+    ]
     ensekaccounts = process_ensek_accounts.Accounts()
     url = "https://test.com"
-    head = {'Content-Type': 'application/json',
-            'Authorization': 'Bearer {0}'.format("1")}
+    head = {"Content-Type": "application/json", "Authorization": "Bearer {0}".format("1")}
     account_id = "1865"
 
-    responses.add(responses.GET, '{}'.format(url),
-                  body=data_json_1, status=200)
+    responses.add(responses.GET, "{}".format(url), body=data_json_1, status=200)
 
     response = ensekaccounts.get_api_response(url, head, account_id, metrics)
     print(response)

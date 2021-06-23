@@ -74,7 +74,6 @@ account_ids = {
                 where getdate() between nvl(use_from, getdate() - 1) and nvl(use_until, getdate() + 1)
                   and account_id is not null
                 order by account_id""",
-
 }
 
 acc_mp_ids = {
@@ -92,7 +91,7 @@ having datediff(days, ssd, getdate()) <= 7""",
     "weekly": """select account_id, min(greatest(associationstartdate, supplystartdate)) as ssd
 from ref_meterpoints
 group by account_id
-having datediff(days, ssd, getdate()) <= 7"""
+having datediff(days, ssd, getdate()) <= 7""",
 }
 
 
@@ -105,25 +104,22 @@ tariff_diff_acc_ids = {
                 from vw_tariff_checks
                 where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
                                      'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
-                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')"""
+                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
 }
 
 epc_postcodes = {
     "daily": """select * from vw_etl_epc_postcodes_daily order by postcode""",
     "weekly": """select * from vw_etl_epc_postcodes_daily order by postcode""",
-
 }
 
 land_registry_postcodes = {
     "daily": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
     "weekly": """select * from vw_etl_land_registry_postcodes_daily order by postcode""",
-
 }
 
 weather_postcodes = {
     "daily": """select * from vw_etl_weather_postcode_sectors""",
     "weekly": """select * from vw_etl_weather_postcode_sectors""",
-
 }
 
 smart_reads_billing = {
@@ -134,11 +130,11 @@ smart_reads_billing = {
 
 weather_forecast = {
     "hourly": {
-      "stage1": """select * from vw_etl_weather_postcode_sectors""",
-      "stage2": """select * from vw_etl_weather_forecast_hourly_load"""
+        "stage1": """select * from vw_etl_weather_postcode_sectors""",
+        "stage2": """select * from vw_etl_weather_forecast_hourly_load""",
     },
     "daily": {
-      "stage1": """select * from vw_etl_weather_postcode_sectors""",
-      "stage2": """select * from vw_etl_weather_forecast_daily_load"""
-    }
+        "stage1": """select * from vw_etl_weather_postcode_sectors""",
+        "stage2": """select * from vw_etl_weather_forecast_daily_load""",
+    },
 }

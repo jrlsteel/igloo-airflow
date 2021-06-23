@@ -20,38 +20,41 @@ import pysftp
 import boto3
 import paramiko
 
+import common.secrets_manager
+
 sys.path.append("..")
 
 logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")
 
+client = boto3.client("secretsmanager")
+
 
 class GoCardlessReport:
     def __init__(self, config, bucket_name):
-
         self.s3_destination_bucket = bucket_name
         self.s3_key_prefix = "go-cardless-id-mandate-lookup"
 
         self.aws_access_key_id = config.s3_config["access_key"]
         self.aws_secret_access_key = config.s3_config["secret_key"]
 
-        self.sftp_host = config.ensek_sftp_config["host"]
-        self.sftp_username = config.ensek_sftp_config["username"]
-        self.sftp_password = config.ensek_sftp_config["password"]
+        ensek_sftp_config = common.secrets_manager.get_secret(client, config.ensek_sftp_config["secret_id"])
+
+        self.sftp_host = ensek_sftp_config["host"]
+        self.sftp_username = ensek_sftp_config["username"]
+        self.sftp_password = ensek_sftp_config["password"]
         self.sftp_prefix = "fileExports"
         self.go_cardless_filename_prefix = "Go_Cardless_Report_"
 
         key_data = b"""AAAAB3NzaC1yc2EAAAABIwAAAIEAy/xRmuLb93TkDauehP1S1fSwcUHJ5FVErE8hmJ/g/rHHPb2pwMK6ctdy4CiJck9w0iSUtXHtUWov6UbES+ZQMywLd11aN//Aq9z72xIUq2VjjnDygK1Sr7e0FQ8VuZtb4PiP5qLGbmTzystiEqL+9JPBD7wJMSDQvKrlqo27Kn0="""
         key = paramiko.RSAKey(data=decodebytes(key_data))
         self.cnopts = pysftp.CnOpts()
-        self.cnopts.hostkeys.add("52.214.39.234", "ssh-rsa", key)
+        self.cnopts.hostkeys.add(ensek_sftp_config["host"], "ssh-rsa", key)
 
         self.s3 = None
 
         datepart = datetime.today().strftime("%y%m%d")
-        self.todays_filename = "{}{}.csv".format(
-            self.go_cardless_filename_prefix, datepart
-        )
+        self.todays_filename = "{}{}.csv".format(self.go_cardless_filename_prefix, datepart)
 
     def connect_s3(self):
 
@@ -90,11 +93,7 @@ class GoCardlessReport:
 
     def filter_latest_gocardless_report(self, file_list):
 
-        go_cardless_reports = [
-            file
-            for file in file_list
-            if file.startswith(self.go_cardless_filename_prefix)
-        ]
+        go_cardless_reports = [file for file in file_list if file.startswith(self.go_cardless_filename_prefix)]
 
         if go_cardless_reports == []:
             raise Exception("No go-cardless reports found")
@@ -114,9 +113,7 @@ class GoCardlessReport:
         if not self.s3:
             self.connect_s3()
 
-        list_objects_response = self.s3.list_objects_v2(
-            Bucket=self.s3_destination_bucket, Prefix=self.s3_key_prefix
-        )
+        list_objects_response = self.s3.list_objects_v2(Bucket=self.s3_destination_bucket, Prefix=self.s3_key_prefix)
 
         existing_objects = list_objects_response.get("Contents", [])
         existing_keys = [existing_object["Key"] for existing_object in existing_objects]

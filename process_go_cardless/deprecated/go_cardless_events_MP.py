@@ -21,15 +21,14 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                                       environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 Events = client.events
 Refunds = client.refunds
 Mandates = client.mandates
@@ -37,37 +36,37 @@ Subscriptions = client.subscriptions
 Payments = client.payments
 
 
-class IterableQueue():
-    def __init__(self,source_queue):
-            self.source_queue = source_queue
+class IterableQueue:
+    def __init__(self, source_queue):
+        self.source_queue = source_queue
+
     def __iter__(self):
         while True:
             try:
-               yield self.source_queue.get_nowait()
+                yield self.source_queue.get_nowait()
             except queue.Empty:
-               return
+                return
 
 
 class GoCardlessEvents(object):
-
     def __init__(self):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.sql = 'select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_events '
-        self.EventsFileDirectory = self.dir['s3_finance_goCardless_key']['Events']
-        self.MandatesFileDirectory = self.dir['s3_finance_goCardless_key']['Mandates-Files']
-        self.SubscriptionsFileDirectory = self.dir['s3_finance_goCardless_key']['Subscriptions-Files']
-        self.PaymentsFileDirectory = self.dir['s3_finance_goCardless_key']['Payments-Files']
-        self.RefundsFileDirectory = self.dir['s3_finance_goCardless_key']['Refunds-Files']
+        self.sql = "select max(created_at) as lastRun from aws_fin_stage1_extracts.fin_go_cardless_api_events "
+        self.EventsFileDirectory = self.dir["s3_finance_goCardless_key"]["Events"]
+        self.MandatesFileDirectory = self.dir["s3_finance_goCardless_key"]["Mandates-Files"]
+        self.SubscriptionsFileDirectory = self.dir["s3_finance_goCardless_key"]["Subscriptions-Files"]
+        self.PaymentsFileDirectory = self.dir["s3_finance_goCardless_key"]["Payments-Files"]
+        self.RefundsFileDirectory = self.dir["s3_finance_goCardless_key"]["Refunds-Files"]
         self.Events = Events
         self.Mandates = Mandates
         self.Subscriptions = Subscriptions
         self.Payments = Payments
         self.Refunds = Refunds
-        self.execEndDate = datetime.now().replace(microsecond=0).isoformat() ##datetime.today().strftime('%Y-%m-%d')
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.execEndDate = datetime.now().replace(microsecond=0).isoformat()  ##datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -76,14 +75,13 @@ class GoCardlessEvents(object):
             return False
         return True
 
-
-    def get_date(self, _date, _addDays = None, dateFormat="%Y-%m-%d"):
+    def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -91,16 +89,14 @@ class GoCardlessEvents(object):
         return dateEnd.strftime(dateFormat)
 
     def daterange(self, start_date, dateFormat="%Y-%m-%d"):
-        end_date = datetime.strptime(self.execEndDate, '%Y-%m-%d')   ##self.execEndDate
+        end_date = datetime.strptime(self.execEndDate, "%Y-%m-%d")  ##self.execEndDate
         for n in range(int((end_date - start_date).days)):
             seq_date = start_date + timedelta(n)
             yield seq_date.strftime(dateFormat)
         return seq_date
 
+    """ EVENTS """
 
-
-
-    ''' EVENTS '''
     def process_Events(self, _StartDate, _EndDate):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
@@ -111,19 +107,18 @@ class GoCardlessEvents(object):
         Events = self.Events
         Mandates = self.Mandates
         Subscriptions = self.Subscriptions
-        filenameEvents = 'go_cardless_events_' + _StartDate + '_' + _EndDate + '.csv'
-        fileDate = datetime.strptime(self.toDay, '%Y-%m-%d')
-        qtr = math.ceil(fileDate.month / 3.)  ## math.ceil(startdatetime.month / 3.)
-        yr = math.ceil(fileDate.year) ## math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
-        print('Listing Events.......')
+        filenameEvents = "go_cardless_events_" + _StartDate + "_" + _EndDate + ".csv"
+        fileDate = datetime.strptime(self.toDay, "%Y-%m-%d")
+        qtr = math.ceil(fileDate.month / 3.0)  ## math.ceil(startdatetime.month / 3.)
+        yr = math.ceil(fileDate.year)  ## math.ceil(startdatetime.year)
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
+        print("Listing Events.......")
         # Loop through a page
         q_Event = Queue()
         event_datalist = []
         print(RpStartDate, _EndDate)
         try:
-            for event in Events.all(
-                    params={"created_at[gt]": RpStartDate, "created_at[lte]": RpEndDate }):
+            for event in Events.all(params={"created_at[gt]": RpStartDate, "created_at[lte]": RpEndDate}):
 
                 id = None
 
@@ -196,28 +191,69 @@ class GoCardlessEvents(object):
                 if event.details.will_attempt_retry and len(event.details.will_attempt_retry) != 0:
                     will_attempt_retry = event.details.will_attempt_retry
 
-                listRow = [id, created_at, resource_type, action, customer_notifications, cause, description, origin,
-                           reason_code, scheme, will_attempt_retry,
-                           mandate, new_customer_bank_account, new_mandate, organisation, parent_event, payment,
-                           payout, previous_customer_bank_account, refund, subscription]
+                listRow = [
+                    id,
+                    created_at,
+                    resource_type,
+                    action,
+                    customer_notifications,
+                    cause,
+                    description,
+                    origin,
+                    reason_code,
+                    scheme,
+                    will_attempt_retry,
+                    mandate,
+                    new_customer_bank_account,
+                    new_mandate,
+                    organisation,
+                    parent_event,
+                    payment,
+                    payout,
+                    previous_customer_bank_account,
+                    refund,
+                    subscription,
+                ]
                 q_Event.put(listRow)
 
-
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         while not q_Event.empty():
             event_datalist.append(q_Event.get())
 
-        df_event = pd.DataFrame(event_datalist, columns=['id',  'created_at', 'resource_type', 'action', 'customer_notifications',
-                                             'cause', 'description', 'origin', 'reason_code', 'scheme', 'will_attempt_retry',
-                                             'mandate' , 'new_customer_bank_account' , 'new_mandate' , 'organisation' ,
-                                             'parent_event' , 'payment' , 'payout', 'previous_customer_bank_account' , 'refund' ,
-                                             'subscription'])
+        df_event = pd.DataFrame(
+            event_datalist,
+            columns=[
+                "id",
+                "created_at",
+                "resource_type",
+                "action",
+                "customer_notifications",
+                "cause",
+                "description",
+                "origin",
+                "reason_code",
+                "scheme",
+                "will_attempt_retry",
+                "mandate",
+                "new_customer_bank_account",
+                "new_mandate",
+                "organisation",
+                "parent_event",
+                "payment",
+                "payout",
+                "previous_customer_bank_account",
+                "refund",
+                "subscription",
+            ],
+        )
 
         print(df_event.head(5))
-
 
         ### EVENTS ####
         df_string = df_event.to_csv(None, index=False)
@@ -226,15 +262,11 @@ class GoCardlessEvents(object):
         s3.set_contents_from_string(df_string)
         return df_event
 
-
-
     def ResourceType(self, df, resource):
         resource_df = df.copy()  ##df[df['mandate'].notnull()]
         resource_sr = resource_df[resource].dropna().unique()
         resource_ToList = resource_sr.tolist()
         return resource_ToList
-
-
 
     def f_put(self, method, df, q):
         print("f_put start")
@@ -242,8 +274,8 @@ class GoCardlessEvents(object):
         q.put(data)
 
     def f_get(self, q):
-        #print("f_get start")
-        while (1):
+        # print("f_get start")
+        while 1:
             data = pd.DataFrame()
             loop = 0
             while not q.empty():
@@ -251,20 +283,12 @@ class GoCardlessEvents(object):
                 print("get (loop: %s)" % loop)
                 time.sleep(0)
                 loop += 1
-            time.sleep(1.)
+            time.sleep(1.0)
             # self.redshift_upsert(df=data, crud_type='i')
 
+    """ MANDATES """
 
-
-
-
-
-
-
-
-
-    ''' MANDATES '''
-    def process_Mandates(self, df, q, _StartDate = None, _EndDate = None ):
+    def process_Mandates(self, df, q, _StartDate=None, _EndDate=None):
         EventsfileDirectory = self.EventsFileDirectory
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
         MandatesfileDirectory = self.MandatesFileDirectory
@@ -272,7 +296,7 @@ class GoCardlessEvents(object):
         Mandates = self.Mandates
         Subscriptions = self.Subscriptions
         s3 = self.s3
-        print('Listing Mandates.......')
+        print("Listing Mandates.......")
         # Loop through a page
         q_Mandate = Queue()
         datalist = []
@@ -283,10 +307,10 @@ class GoCardlessEvents(object):
                 EnsekAccountId = None
                 StatementId = None
                 # print(mandate.id)
-                if 'AccountId' in mandate.metadata:
-                    EnsekAccountId = mandate.metadata['AccountId']
-                if 'StatementId' in mandate.metadata:
-                    StatementId = mandate.metadata['StatementId']
+                if "AccountId" in mandate.metadata:
+                    EnsekAccountId = mandate.metadata["AccountId"]
+                if "StatementId" in mandate.metadata:
+                    StatementId = mandate.metadata["StatementId"]
 
                 mandate_id = mandate.id
                 print(mandate_id)
@@ -304,26 +328,53 @@ class GoCardlessEvents(object):
                 EnsekID = EnsekAccountId
                 EnsekStatementId = StatementId
 
-                filenameMandates = 'go_cardless_mandates_' + mandate_id + '.csv'
+                filenameMandates = "go_cardless_mandates_" + mandate_id + ".csv"
 
-                mandate_listRow = [mandate_id, CustomerId, new_mandate_id, created_at, next_possible_charge_date,
-                                   payments_require_approval,
-                                   reference, scheme, status, creditor, customer_bank_account, EnsekID,
-                                   EnsekStatementId]
+                mandate_listRow = [
+                    mandate_id,
+                    CustomerId,
+                    new_mandate_id,
+                    created_at,
+                    next_possible_charge_date,
+                    payments_require_approval,
+                    reference,
+                    scheme,
+                    status,
+                    creditor,
+                    customer_bank_account,
+                    EnsekID,
+                    EnsekStatementId,
+                ]
                 ##print(mandate_listRow)
                 q_Mandate.put(mandate_listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         while not q_Mandate.empty():
             datalist.append(q_Mandate.get())
-        df = pd.DataFrame(datalist, columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                             'next_possible_charge_date',
-                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
-                                             'customer_bank_account',
-                                             'EnsekID', 'EnsekStatementId'])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "mandate_id",
+                "CustomerId",
+                "new_mandate_id",
+                "created_at",
+                "next_possible_charge_date",
+                "payments_require_approval",
+                "reference",
+                "scheme",
+                "status",
+                "creditor",
+                "customer_bank_account",
+                "EnsekID",
+                "EnsekStatementId",
+            ],
+        )
 
         ##print(df.head(5))
         q.put(df)
@@ -333,39 +384,52 @@ class GoCardlessEvents(object):
         MandatesFileDirectory = self.MandatesFileDirectory
         s3 = self.s3
 
-        for row in df.itertuples(index=True, name='Pandas'):
+        for row in df.itertuples(index=True, name="Pandas"):
             id = row.mandate_id
-            r_1 = [row.mandate_id, row.CustomerId, row.new_mandate_id, row.created_at, row.next_possible_charge_date,
-                    row.payments_require_approval,
-                    row.reference, row.scheme, row.status, row.creditor, row.customer_bank_account, row.EnsekID, row.EnsekStatementId]
+            r_1 = [
+                row.mandate_id,
+                row.CustomerId,
+                row.new_mandate_id,
+                row.created_at,
+                row.next_possible_charge_date,
+                row.payments_require_approval,
+                row.reference,
+                row.scheme,
+                row.status,
+                row.creditor,
+                row.customer_bank_account,
+                row.EnsekID,
+                row.EnsekStatementId,
+            ]
 
             print(r_1)
-            df_1 = pd.DataFrame([r_1], columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                             'next_possible_charge_date',
-                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
-                                             'customer_bank_account',
-                                             'EnsekID', 'EnsekStatementId'] )
+            df_1 = pd.DataFrame(
+                [r_1],
+                columns=[
+                    "mandate_id",
+                    "CustomerId",
+                    "new_mandate_id",
+                    "created_at",
+                    "next_possible_charge_date",
+                    "payments_require_approval",
+                    "reference",
+                    "scheme",
+                    "status",
+                    "creditor",
+                    "customer_bank_account",
+                    "EnsekID",
+                    "EnsekStatementId",
+                ],
+            )
 
-            filename = 'go_cardless_mandates_' + id + '.csv'
+            filename = "go_cardless_mandates_" + id + ".csv"
 
             df_string = df_1.to_csv(None, index=False)
             s3.key = MandatesFileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
-
-
-
-
-
-
-
-
-
-
-
-
-    ''' SUBSCRIPTIONS '''
+    """ SUBSCRIPTIONS """
 
     def process_Subscriptions(self, df, q, _StartDate=None, _EndDate=None):
         EventsfileDirectory = self.EventsFileDirectory
@@ -375,7 +439,7 @@ class GoCardlessEvents(object):
         Events = self.Events
         Mandates = self.Mandates
         Subscriptions = self.Subscriptions
-        print('Listing Subscriptions.......')
+        print("Listing Subscriptions.......")
         # Loop through a page
         q_Subscription = Queue()
         datalist = []
@@ -391,8 +455,8 @@ class GoCardlessEvents(object):
 
                 upcoming_payments = subscription.upcoming_payments
                 if len(upcoming_payments) > 0:
-                    charge_date = upcoming_payments[0]['charge_date']
-                    amount_subscription = upcoming_payments[0]['amount']
+                    charge_date = upcoming_payments[0]["charge_date"]
+                    amount_subscription = upcoming_payments[0]["amount"]
                 created_at = subscription.created_at
                 amount = subscription.amount
                 currency = subscription.currency
@@ -412,26 +476,64 @@ class GoCardlessEvents(object):
                 if subscription.links.mandate:
                     mandate = subscription.links.mandate
 
-                subscription_listRow = [id, created_at, amount, currency, status, name, start_date,
-                                        end_date, interval, interval_unit, day_of_month, month,
-                                        count_no, payment_reference, app_fee, retry_if_possible, mandate,
-                                        charge_date,
-                                        amount_subscription]
+                subscription_listRow = [
+                    id,
+                    created_at,
+                    amount,
+                    currency,
+                    status,
+                    name,
+                    start_date,
+                    end_date,
+                    interval,
+                    interval_unit,
+                    day_of_month,
+                    month,
+                    count_no,
+                    payment_reference,
+                    app_fee,
+                    retry_if_possible,
+                    mandate,
+                    charge_date,
+                    amount_subscription,
+                ]
 
                 q_Subscription.put(subscription_listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         while not q_Subscription.empty():
             datalist.append(q_Subscription.get())
 
-        df = pd.DataFrame(datalist,
-                          columns=['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date',
-                                   'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
-                                   'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
-                                   'charge_date', 'amount_subscription'])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "id",
+                "created_at",
+                "amount",
+                "currency",
+                "status",
+                "name",
+                "start_date",
+                "end_date",
+                "interval",
+                "interval_unit",
+                "day_of_month",
+                "month",
+                "count_no",
+                "payment_reference",
+                "app_fee",
+                "retry_if_possible",
+                "mandate",
+                "charge_date",
+                "amount_subscription",
+            ],
+        )
         q.put(df)
         return df
 
@@ -439,38 +541,63 @@ class GoCardlessEvents(object):
         SubscriptionsfileDirectory = self.SubscriptionsFileDirectory
         s3 = self.s3
 
-        for row in df.itertuples(index=True, name='Pandas'):
+        for row in df.itertuples(index=True, name="Pandas"):
             id = row.id
-            r_1 = [row.id, row.created_at, row.amount, row.currency, row.status, row.name, row.start_date,
-                   row.end_date, row.interval, row.interval_unit, row.day_of_month, row.month,
-                   row.count_no, row.payment_reference, row.app_fee, row.retry_if_possible, row.mandate,
-                   row.charge_date,
-                   row.amount_subscription]
+            r_1 = [
+                row.id,
+                row.created_at,
+                row.amount,
+                row.currency,
+                row.status,
+                row.name,
+                row.start_date,
+                row.end_date,
+                row.interval,
+                row.interval_unit,
+                row.day_of_month,
+                row.month,
+                row.count_no,
+                row.payment_reference,
+                row.app_fee,
+                row.retry_if_possible,
+                row.mandate,
+                row.charge_date,
+                row.amount_subscription,
+            ]
 
             print(r_1)
-            df_1 = pd.DataFrame([r_1],
-                                columns=['id', 'created_at', 'amount', 'currency', 'status', 'name', 'start_date',
-                                         'end_date', 'interval', 'interval_unit', 'day_of_month', 'month',
-                                         'count_no', 'payment_reference', 'app_fee', 'retry_if_possible', 'mandate',
-                                         'charge_date', 'amount_subscription'])
+            df_1 = pd.DataFrame(
+                [r_1],
+                columns=[
+                    "id",
+                    "created_at",
+                    "amount",
+                    "currency",
+                    "status",
+                    "name",
+                    "start_date",
+                    "end_date",
+                    "interval",
+                    "interval_unit",
+                    "day_of_month",
+                    "month",
+                    "count_no",
+                    "payment_reference",
+                    "app_fee",
+                    "retry_if_possible",
+                    "mandate",
+                    "charge_date",
+                    "amount_subscription",
+                ],
+            )
 
-            filename = 'go_cardless_subscriptions_' + id + '.csv'
+            filename = "go_cardless_subscriptions_" + id + ".csv"
             df_string = df_1.to_csv(None, index=False)
             s3.key = SubscriptionsfileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
-
-
-
-
-
-
-
-
-
-
-    ''' PAYMENTS '''
+    """ PAYMENTS """
 
     def process_Payments(self, df, q, _StartDate=None, _EndDate=None):
         EventsfileDirectory = self.EventsFileDirectory
@@ -478,7 +605,7 @@ class GoCardlessEvents(object):
         s3 = self.s3
         Events = self.Events
         Payments = self.Payments
-        print('Listing Payments.......')
+        print("Listing Payments.......")
         # Loop through a page
         q_payment = Queue()
         payment_datalist = []
@@ -489,13 +616,13 @@ class GoCardlessEvents(object):
                 EnsekAccountId = None
                 StatementId = None
                 if self.is_json(payment.id):
-                    '''
+                    """
                     if payment.metadata:
                         if 'AccountId' in payment.metadata:
                             EnsekAccountId = json.loads(payment.metadata['AccountId'].decode("utf-8"))
                         if 'StatementId' in payment.metadata:
                             StatementId = json.loads(payment.metadata['StatementId'].decode("utf-8"))
-                    '''
+                    """
                     id_js = json.loads(payment.id.decode("utf-8"))
                     amount_js = json.loads(payment.amount.decode("utf-8"))
                     amount_refunded_js = json.loads(payment.amount_refunded.decode("utf-8"))
@@ -510,17 +637,29 @@ class GoCardlessEvents(object):
                     subscription_js = json.loads(payment.links.subscription.decode("utf-8"))
                     EnsekID_js = EnsekAccountId
                     EnsekStatementId_js = StatementId
-                    listRow = [id_js, amount_js, amount_refunded_js, charge_date_js, created_at_js, currency_js,
-                               description_js,
-                               reference_js, status_js, payout_js, mandate_js, subscription_js, EnsekID_js,
-                               EnsekStatementId_js]
+                    listRow = [
+                        id_js,
+                        amount_js,
+                        amount_refunded_js,
+                        charge_date_js,
+                        created_at_js,
+                        currency_js,
+                        description_js,
+                        reference_js,
+                        status_js,
+                        payout_js,
+                        mandate_js,
+                        subscription_js,
+                        EnsekID_js,
+                        EnsekStatementId_js,
+                    ]
                     ##q.put(listRow)
                 else:
                     if payment.metadata:
-                        if 'AccountId' in payment.metadata:
-                            EnsekAccountId = payment.metadata['AccountId']
-                        if 'StatementId' in payment.metadata:
-                            StatementId = payment.metadata['StatementId']
+                        if "AccountId" in payment.metadata:
+                            EnsekAccountId = payment.metadata["AccountId"]
+                        if "StatementId" in payment.metadata:
+                            StatementId = payment.metadata["StatementId"]
 
                     print(payment.id)
                     id = payment.id
@@ -539,23 +678,55 @@ class GoCardlessEvents(object):
                     EnsekID = EnsekAccountId
                     EnsekStatementId = StatementId
 
-                payment_listRow = [id, amount, amount_refunded, charge_date, created_at, currency, description,
-                                   reference, status, payout, mandate, subscription, EnsekID, EnsekStatementId]
+                payment_listRow = [
+                    id,
+                    amount,
+                    amount_refunded,
+                    charge_date,
+                    created_at,
+                    currency,
+                    description,
+                    reference,
+                    status,
+                    payout,
+                    mandate,
+                    subscription,
+                    EnsekID,
+                    EnsekStatementId,
+                ]
                 q_payment.put(payment_listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         while not q_payment.empty():
             payment_datalist.append(q_payment.get())
 
-        df = pd.DataFrame(payment_datalist, columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
-                                                     'currency', 'description', 'reference', 'status', 'payout',
-                                                     'mandate',
-                                                     'subscription', 'EnsekID', 'StatementId'])
+        df = pd.DataFrame(
+            payment_datalist,
+            columns=[
+                "id",
+                "amount",
+                "amount_refunded",
+                "charge_date",
+                "created_at",
+                "currency",
+                "description",
+                "reference",
+                "status",
+                "payout",
+                "mandate",
+                "subscription",
+                "EnsekID",
+                "StatementId",
+            ],
+        )
 
-        remove_duplicates_df = df.drop_duplicates(subset=['id'], keep='first')
+        remove_duplicates_df = df.drop_duplicates(subset=["id"], keep="first")
         q.put(df)
         return remove_duplicates_df
 
@@ -563,19 +734,47 @@ class GoCardlessEvents(object):
         PaymentsfileDirectory = self.PaymentsFileDirectory
         s3 = self.s3
 
-        for row in df.itertuples(index=True, name='Pandas'):
+        for row in df.itertuples(index=True, name="Pandas"):
             id = row.id
-            r_1 = [row.id, row.amount, row.amount_refunded, row.charge_date, row.created_at, row.currency,
-                   row.description, row.reference, row.status, row.payout, row.mandate,
-                   row.subscription, row.EnsekID, row.StatementId]
+            r_1 = [
+                row.id,
+                row.amount,
+                row.amount_refunded,
+                row.charge_date,
+                row.created_at,
+                row.currency,
+                row.description,
+                row.reference,
+                row.status,
+                row.payout,
+                row.mandate,
+                row.subscription,
+                row.EnsekID,
+                row.StatementId,
+            ]
 
             print(r_1)
-            df_1 = pd.DataFrame([r_1],
-                                columns=['id', 'amount', 'amount_refunded', 'charge_date', 'created_at',
-                                         'currency', 'description', 'reference', 'status', 'payout', 'mandate',
-                                         'subscription', 'EnsekID', 'StatementId'])
+            df_1 = pd.DataFrame(
+                [r_1],
+                columns=[
+                    "id",
+                    "amount",
+                    "amount_refunded",
+                    "charge_date",
+                    "created_at",
+                    "currency",
+                    "description",
+                    "reference",
+                    "status",
+                    "payout",
+                    "mandate",
+                    "subscription",
+                    "EnsekID",
+                    "StatementId",
+                ],
+            )
 
-            filename = 'go_cardless_Payments_' + id + '.csv'
+            filename = "go_cardless_Payments_" + id + ".csv"
             df_string = df_1.to_csv(None, index=False)
             s3.key = PaymentsfileDirectory + filename
             print(s3.key)
@@ -586,23 +785,20 @@ class GoCardlessEvents(object):
 
         s31 = db.get_finance_s3_connections_resources()
         dir_s3 = util.get_dir()
-        bucket = dir_s3['s3_finance_bucket']
+        bucket = dir_s3["s3_finance_bucket"]
 
         ##file1 = 'go-cardless-api-paymentsnewtesting-files/go_cardless_Payments_file.csv'
         ##file2 = 'go-cardless-api-paymentsMerged-files/go_cardless_Payments_Update_20200618.csv'
 
-        paymentsFileName = 'go-cardless-api-payments-files/go_cardless_Payments_file.csv'
+        paymentsFileName = "go-cardless-api-payments-files/go_cardless_Payments_file.csv"
 
         # archive File
-        print('....Archiving File.....')
-        keypath = 'go-cardless-api-Archived_Files/Payment_Files/go_cardless_Payments_file.csv'
-        copy_source = {
-            'Bucket': bucket,
-            'Key': paymentsFileName
-        }
+        print("....Archiving File.....")
+        keypath = "go-cardless-api-Archived_Files/Payment_Files/go_cardless_Payments_file.csv"
+        copy_source = {"Bucket": bucket, "Key": paymentsFileName}
 
         s3.copy(copy_source, bucket, keypath)
-        print('....Archiving Completed.....')
+        print("....Archiving Completed.....")
 
         ## Previous Payments
         df1 = self.read_files_to_df(paymentsFileName)
@@ -611,18 +807,18 @@ class GoCardlessEvents(object):
         ##df2 = self.read_files_to_df(file2)
 
         ## SELECT NEW or UPDATED Payment IDs
-        df2_ID = df2[['id']].copy()
+        df2_ID = df2[["id"]].copy()
 
         ## Merge Previous Payments with (Updated or New) Payments
-        df_all = df1.merge(df2_ID.drop_duplicates(), on=['id'],
-                           how='left', indicator=True)
-        df_all = df_all[df_all['_merge'] == 'left_only']
+        df_all = df1.merge(df2_ID.drop_duplicates(), on=["id"], how="left", indicator=True)
+        df_all = df_all[df_all["_merge"] == "left_only"]
 
         df_update = df2.copy()
-        df_Right = df_all.drop(['_merge'], axis=1).copy()
+        df_Right = df_all.drop(["_merge"], axis=1).copy()
         df_All_Payments = pd.concat([df_Right, df_update], sort=False)
         df_All_Payments[["amount", "EnsekID", "StatementId"]] = df_All_Payments[
-            ["amount", "EnsekID", "StatementId"]].apply(pd.to_numeric)
+            ["amount", "EnsekID", "StatementId"]
+        ].apply(pd.to_numeric)
         cols_to_use = df_All_Payments.columns
 
         ## WRITE All Payments TO s3
@@ -631,7 +827,7 @@ class GoCardlessEvents(object):
     def read_files_to_df(self, files):
 
         ##prefix = 'go-cardless-api-payments-files'
-        prefix = ''
+        prefix = ""
         s31 = db.get_finance_s3_connections_resources()
         s3 = self.s3
         bucket = s31.Bucket(self.bucket_name)
@@ -643,9 +839,9 @@ class GoCardlessEvents(object):
         for obj in prefix_objs:
             key = obj.key
             print(key)
-            body = obj.get()['Body'].read()
+            body = obj.get()["Body"].read()
             ### CONVERT Bytes To String
-            s = str(body, 'utf-8')
+            s = str(body, "utf-8")
             data = StringIO(s)
 
             df = pd.read_csv(data, low_memory=False)
@@ -657,22 +853,14 @@ class GoCardlessEvents(object):
         s3 = self.s3
         pdf = df
 
-        filename = 'go_cardless_Payments_file.csv'
+        filename = "go_cardless_Payments_file.csv"
         s3.key = PaymentsfileDirectory + filename
         df_string = pdf.to_csv(None, index=False)
         s3.key = "/go-cardless-api-payments-files/go_cardless_Payments_file.csv"
         print(s3.key)
         s3.set_contents_from_string(df_string)
 
-
-
-
-
-
-
-
-
-    ''' REFUNDS '''
+    """ REFUNDS """
 
     def process_Refunds(self, df, q, _StartDate=None, _EndDate=None):
         EventsfileDirectory = self.EventsFileDirectory
@@ -680,7 +868,7 @@ class GoCardlessEvents(object):
         s3 = self.s3
         Events = self.Events
         Refunds = self.Refunds
-        print('Listing Refunds.......')
+        print("Listing Refunds.......")
         # Loop through a page
         q_refund = Queue()
         refund_datalist = []
@@ -689,8 +877,8 @@ class GoCardlessEvents(object):
             for rec in refundToList:
                 refund = client.refunds.get(rec)
                 EnsekAccountId = None
-                if 'AccountId' in refund.metadata:
-                    EnsekAccountId = refund.metadata['AccountId']
+                if "AccountId" in refund.metadata:
+                    EnsekAccountId = refund.metadata["AccountId"]
 
                 ## print(refund.id)
                 id = refund.id
@@ -706,21 +894,46 @@ class GoCardlessEvents(object):
                 mandate = refund.links.mandate
                 EnsekID = EnsekAccountId
 
-                Refund_listRow = [EnsekID, amount, created_at, currency, id,
-                                  mandate, metadata, payment, reference, status]
+                Refund_listRow = [
+                    EnsekID,
+                    amount,
+                    created_at,
+                    currency,
+                    id,
+                    mandate,
+                    metadata,
+                    payment,
+                    reference,
+                    status,
+                ]
 
                 q_refund.put(Refund_listRow)
 
-        except (json.decoder.JSONDecodeError, gocardless_pro.errors.GoCardlessInternalError,
-                gocardless_pro.errors.MalformedResponseError) as e:
+        except (
+            json.decoder.JSONDecodeError,
+            gocardless_pro.errors.GoCardlessInternalError,
+            gocardless_pro.errors.MalformedResponseError,
+        ) as e:
             pass
 
         while not q_refund.empty():
             refund_datalist.append(q_refund.get())
 
-        df = pd.DataFrame(refund_datalist, columns=['EnsekID', 'amount', 'created_at', 'currency', 'id',
-                                                    'mandate', 'metadata', 'payment', 'reference', 'status'
-                                                    ])
+        df = pd.DataFrame(
+            refund_datalist,
+            columns=[
+                "EnsekID",
+                "amount",
+                "created_at",
+                "currency",
+                "id",
+                "mandate",
+                "metadata",
+                "payment",
+                "reference",
+                "status",
+            ],
+        )
         q.put(df)
         return df
 
@@ -728,31 +941,47 @@ class GoCardlessEvents(object):
         RefundsfileDirectory = self.RefundsFileDirectory
         s3 = self.s3
 
-        for row in df.itertuples(index=True, name='Pandas'):
+        for row in df.itertuples(index=True, name="Pandas"):
             id = row.id
-            r_1 = [row.EnsekID, row.amount, row.created_at, row.currency, row.id,
-                   row.mandate, row.metadata, row.payment, row.reference, row.status]
+            r_1 = [
+                row.EnsekID,
+                row.amount,
+                row.created_at,
+                row.currency,
+                row.id,
+                row.mandate,
+                row.metadata,
+                row.payment,
+                row.reference,
+                row.status,
+            ]
 
             print(r_1)
-            df_1 = pd.DataFrame([r_1],
-                                columns=['EnsekID', 'amount', 'created_at', 'currency', 'id',
-                                         'mandate', 'metadata', 'payment', 'reference', 'status'
-                                         ])
+            df_1 = pd.DataFrame(
+                [r_1],
+                columns=[
+                    "EnsekID",
+                    "amount",
+                    "created_at",
+                    "currency",
+                    "id",
+                    "mandate",
+                    "metadata",
+                    "payment",
+                    "reference",
+                    "status",
+                ],
+            )
 
-            filename = 'go_cardless_Refunds_' + id + '.csv'
+            filename = "go_cardless_Refunds_" + id + ".csv"
             df_string = df_1.to_csv(None, index=False)
             s3.key = RefundsfileDirectory + filename
             print(s3.key)
             s3.set_contents_from_string(df_string)
 
-
-
-
-
-
     def Multiprocess_Event(self, df, method):
         env = util.get_env()
-        if env == 'uat':
+        if env == "uat":
             n = 12  # number of process to run in parallel
         else:
             n = 12
@@ -785,8 +1014,7 @@ class GoCardlessEvents(object):
             process.join()
         ####### Multiprocessing Ends #########
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
-
+        print("Process completed in " + str(timeit.default_timer() - start) + " seconds")
 
     def MultiProcessDataframe(self, df, method):
         df_All = pd.DataFrame()
@@ -794,7 +1022,7 @@ class GoCardlessEvents(object):
         ######### multiprocessing starts  ##########
         itr = IterableQueue
         env = util.get_env()
-        if env == 'uat':
+        if env == "uat":
             n = 6  # number of process to run in parallel
         else:
             n = 6
@@ -840,20 +1068,17 @@ class GoCardlessEvents(object):
             # Completed Parallel Processes
             print(q2.qsize())
 
-
             # Concatenate Dataframes
             for dfIQ in IterableQueue(q2):
                 df_All = pd.concat([df_All, dfIQ], sort=False)
         except gocardless_pro.errors.InvalidApiUsageError as e:
-            print('Error: {0}'.format(e))
-
+            print("Error: {0}".format(e))
 
         ####### multiprocessing Ends #########
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+        print("Process completed in " + str(timeit.default_timer() - start) + " seconds")
 
         return df_All
-
 
     def MultiProcessDataframe_v2(self, df, method):
         df_All = pd.DataFrame()
@@ -861,7 +1086,7 @@ class GoCardlessEvents(object):
         ######### multiprocessing starts  ##########
         itr = IterableQueue
         env = util.get_env()
-        if env == 'uat':
+        if env == "uat":
             n = 8  # number of process to run in parallel
         else:
             n = 8
@@ -906,7 +1131,6 @@ class GoCardlessEvents(object):
         # Completed Parallel Processes
         print(q2.qsize())
 
-
         # Concatenate Dataframes
         for dfIQ in IterableQueue(q2):
             df_All = pd.concat([df_All, dfIQ], sort=False)
@@ -915,17 +1139,9 @@ class GoCardlessEvents(object):
 
         ####### multiprocessing Ends #########
 
-        print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+        print("Process completed in " + str(timeit.default_timer() - start) + " seconds")
 
         return df_All
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -935,33 +1151,29 @@ if __name__ == "__main__":
     p = GoCardlessEvents()
     startdateDF = util.execute_query(p.sql)
     ReportEndDate = str(p.execEndDate) + str(".000Z")
-    ReportStartDate = str(startdateDF.iat[0,0])
-    print('ReportStartDate:  {0}'.format(ReportStartDate))
-    print('ReportEndDate:  {0}'.format(ReportEndDate))
+    ReportStartDate = str(startdateDF.iat[0, 0])
+    print("ReportStartDate:  {0}".format(ReportStartDate))
+    print("ReportEndDate:  {0}".format(ReportEndDate))
 
     ### EVENTS ###
     eventsDF = p.process_Events(_StartDate=ReportStartDate, _EndDate=ReportEndDate)
 
-
     ### MANDATES ###
-    mandateList = p.ResourceType(df=eventsDF, resource='mandate')
+    mandateList = p.ResourceType(df=eventsDF, resource="mandate")
     df_mandates = p.MultiProcessDataframe(df=mandateList, method=p.process_Mandates)
     pMandates = p.Multiprocess_Event(df=df_mandates, method=p.writeCSVs_Mandates)
 
     ### SUBSCRIPTIONS ###
-    subscriptionList = p.ResourceType(df=eventsDF, resource='subscription')
+    subscriptionList = p.ResourceType(df=eventsDF, resource="subscription")
     df_subscriptions = p.MultiProcessDataframe(df=subscriptionList, method=p.process_Subscriptions)
     pSubscriptions = p.Multiprocess_Event(df=df_subscriptions, method=p.writeCSVs_Subscriptions)
 
-
     ### PAYMENTS ###
-    paymentList = p.ResourceType(df=eventsDF, resource='payment')
-    df_payments = p.MultiProcessDataframe(df=paymentList, method=p.process_Payments) 
+    paymentList = p.ResourceType(df=eventsDF, resource="payment")
+    df_payments = p.MultiProcessDataframe(df=paymentList, method=p.process_Payments)
     pPaymentsFiles = p.Update_Events_Driven_Payments(df2=df_payments)
 
-
     ## REFUNDS ##
-    refundList = p.ResourceType(df=eventsDF, resource='refund')
+    refundList = p.ResourceType(df=eventsDF, resource="refund")
     df_refunds = p.MultiProcessDataframe(df=refundList, method=p.process_Refunds)
     pRefunds = p.Multiprocess_Event(df=df_refunds, method=p.writeCSVs_Refunds)
-

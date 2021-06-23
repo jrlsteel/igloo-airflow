@@ -13,7 +13,7 @@ import datetime
 import sys
 import os
 
-sys.path.append('..')
+sys.path.append("..")
 
 from conf import config as con
 from common import utils as util
@@ -23,57 +23,55 @@ from common import api_filters as apif
 
 
 class LandRegistry:
-    max_calls = con.api_config['max_api_calls']
-    rate = con.api_config['allowed_period_in_secs']
+    max_calls = con.api_config["max_api_calls"]
+    rate = con.api_config["allowed_period_in_secs"]
 
     def __init__(self):
-        self.start_date = datetime.datetime.strptime('2018-01-01', '%Y-%m-%d').date()
+        self.start_date = datetime.datetime.strptime("2018-01-01", "%Y-%m-%d").date()
         self.end_date = datetime.datetime.today().date()
         self.api_url, self.head, self.key = util.get_api_info(api="land_registry", header_type="json")
         self.num_days_per_api_calls = 7
-        self.sql = apif.land_registry_postcodes['daily']  # there is no need for a weekly run here
+        self.sql = apif.land_registry_postcodes["daily"]  # there is no need for a weekly run here
 
     def get_params(self, address):
 
         params = {}
-        street = address['thoroughfare']
+        street = address["thoroughfare"]
 
         # add a space into the postcode
         # ARE ALL POSTCODES X + 3 digits?
-        postcode = address['postcode'][:-3] + ' ' + address['postcode'][-3:]
+        postcode = address["postcode"][:-3] + " " + address["postcode"][-3:]
 
         # building number
-        paon = address['building_name_number']
+        paon = address["building_name_number"]
 
         # get any sub number e.g. address
-        saon = address['sub_building_name_number']
+        saon = address["sub_building_name_number"]
 
         if street:
-            params['propertyAddress.street'] = street.upper()
+            params["propertyAddress.street"] = street.upper()
 
         if postcode:
-            params['propertyAddress.postcode'] = postcode
+            params["propertyAddress.postcode"] = postcode
 
         if paon:
-            params['propertyAddress.paon'] = paon
+            params["propertyAddress.paon"] = paon
 
         if saon:
-            params['propertyAddress.saon'] = saon
+            params["propertyAddress.saon"] = saon
 
         return params
-
-    
 
     @sleep_and_retry
     @limits(calls=max_calls, period=rate)
     def get_api_response(self, address):
         """
-            get the response for the respective url that is passed as part of this function
+        get the response for the respective url that is passed as part of this function
         """
         session = requests.Session()
         start_time = time.time()
-        timeout = con.api_config['connection_timeout']
-        retry_in_secs = con.api_config['retry_in_secs']
+        timeout = con.api_config["connection_timeout"]
+        retry_in_secs = con.api_config["retry_in_secs"]
         i = 0
         params = self.get_params(address)
 
@@ -82,27 +80,27 @@ class LandRegistry:
                 response = session.get(url=self.api_url, headers=self.head, params=params)
                 # print(response.url)
                 if response.status_code == 200:
-                    response = json.loads(response.content.decode('utf-8'))
-                    return response['result']['items']
+                    response = json.loads(response.content.decode("utf-8"))
+                    return response["result"]["items"]
                 else:
-                    print('Problem Grabbing Data: ', response.status_code)
-                    self.log_error('Response Error: Problem grabbing data', response.status_code)
+                    print("Problem Grabbing Data: ", response.status_code)
+                    self.log_error("Response Error: Problem grabbing data", response.status_code)
                     return None
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
-                    print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
-                    self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
+                    self.log_error("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
                     break
                 else:
-                    print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
-                    self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
+                    self.log_error("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
 
     def extract_land_registry_data(self, data, address, k, dir_s3):
-        meta_landreg = ['transactionDate', 'newBuild', 'pricePaid', 'transactionId']
+        meta_landreg = ["transactionDate", "newBuild", "pricePaid", "transactionId"]
         land_registry_df = json_normalize(data)
 
         if land_registry_df.empty:
@@ -110,17 +108,17 @@ class LandRegistry:
         else:
             land_registry_df1 = land_registry_df[meta_landreg]
             land_registry_df1._is_copy = False
-            land_registry_df1['propertyType'] = land_registry_df['propertyType.prefLabel'][0][0]['_value']
-            land_registry_df1['recordStatus'] = land_registry_df['recordStatus.prefLabel'][0][0]['_value']
-            land_registry_df1['transactionCategory'] = land_registry_df['transactionCategory.prefLabel'][0][0]['_value']
+            land_registry_df1["propertyType"] = land_registry_df["propertyType.prefLabel"][0][0]["_value"]
+            land_registry_df1["recordStatus"] = land_registry_df["recordStatus.prefLabel"][0][0]["_value"]
+            land_registry_df1["transactionCategory"] = land_registry_df["transactionCategory.prefLabel"][0][0]["_value"]
 
-            land_registry_df1['uprn'] = address['uprn']
-            land_registry_df1['id'] = address['id']
+            land_registry_df1["uprn"] = address["uprn"]
+            land_registry_df1["id"] = address["id"]
 
-            column_list = util.get_common_info('land_registry_column_order', 'land_registry')
+            column_list = util.get_common_info("land_registry_column_order", "land_registry")
             land_registry_string = land_registry_df1.to_csv(None, columns=column_list, index=False)
-            file_name_landreg = 'land_registry_' + str(address['id']).strip() + '.csv'
-            k.key = dir_s3['s3_land_reg_key']['LandRegistry'] + file_name_landreg
+            file_name_landreg = "land_registry_" + str(address["id"]).strip() + ".csv"
+            k.key = dir_s3["s3_land_reg_key"]["LandRegistry"] + file_name_landreg
             k.set_contents_from_string(land_registry_string)
 
     def format_json_response(self, data):
@@ -129,25 +127,24 @@ class LandRegistry:
         :param data: The json response returned from api
         :return: json data
         """
-        data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_str = json.dumps(data, indent=4).replace("null", '""')
         data_json = json.loads(data_str)
         return data_json
 
-    def log_error(self, error_msg, error_code=''):
-        logs_dir_path = sys.path[0] + '/logs/'
+    def log_error(self, error_msg, error_code=""):
+        logs_dir_path = sys.path[0] + "/logs/"
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(logs_dir_path + 'land_registry_log' + time.strftime('%d%m%Y') + '.csv',
-                  mode='a') as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(logs_dir_path + "land_registry_log" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
+            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
     def processData(self, addresses, k, _dir_s3):
 
         for index, address in addresses.iterrows():
-            print('addres_id:' + str(address['id']))
-            msg_ac = 'ac:' + str(address['id'])
-            self.log_error(msg_ac, '')
+            print("addres_id:" + str(address["id"]))
+            msg_ac = "ac:" + str(address["id"])
+            self.log_error(msg_ac, "")
 
             api_response = self.get_api_response(address)
 
@@ -172,7 +169,7 @@ if __name__ == "__main__":
     p = LandRegistry()
 
     dir_s3 = util.get_dir()
-    bucket_name = dir_s3['s3_bucket']
+    bucket_name = dir_s3["s3_bucket"]
 
     s3 = s3_con(bucket_name)
 
@@ -186,7 +183,7 @@ if __name__ == "__main__":
     ##### Multiprocessing Starts #########
 
     env = util.get_env()
-    if env == 'uat':
+    if env == "uat":
         n = 12  # number of process to run in parallel
     else:
         n = 12
@@ -220,4 +217,4 @@ if __name__ == "__main__":
         process.join()
     ####### Multiprocessing Ends #########
 
-    print("Process completed in " + str(timeit.default_timer() - start) + ' seconds')
+    print("Process completed in " + str(timeit.default_timer() - start) + " seconds")

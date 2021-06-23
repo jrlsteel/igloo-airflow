@@ -557,9 +557,7 @@ def test_copy_d0379_to_sftp(mocker):
     )
 
     s3_client = boto3.client("s3")
-    d0379_file_path = os.path.join(
-        os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt"
-    )
+    d0379_file_path = os.path.join(os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt")
     s3_client.upload_file(
         d0379_file_path,
         "igloo-data-warehouse-dev-555393537168",
@@ -596,9 +594,7 @@ def test_copy_d0379_to_sftp_raises_exception_if_open_fails(mocker):
     )
 
     s3_client = boto3.client("s3")
-    d0379_file_path = os.path.join(
-        os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt"
-    )
+    d0379_file_path = os.path.join(os.path.dirname(__file__), "fixtures", "D0379_20210219_0123456789.txt")
     s3_client.upload_file(
         d0379_file_path,
         "igloo-data-warehouse-dev-555393537168",
@@ -608,8 +604,6 @@ def test_copy_d0379_to_sftp_raises_exception_if_open_fails(mocker):
     def mock_open_raises_authentication_failed_exception(file, mode):
         raise paramiko.ssh_exception.AuthenticationException()
 
-    with unittest.mock.patch(
-        "smart_open.open", mock_open_raises_authentication_failed_exception
-    ):
+    with unittest.mock.patch("smart_open.open", mock_open_raises_authentication_failed_exception):
         with pytest.raises(paramiko.ssh_exception.AuthenticationException):
             copy_d0379_to_sftp(datetime.date.fromisoformat("2021-02-19"))

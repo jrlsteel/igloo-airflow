@@ -15,35 +15,43 @@ import datetime
 import sys
 import os
 from pathlib import Path
-#sys.path.append('..')
+
+# sys.path.append('..')
 
 from process_Ensek.processEnsekPriorityServiceRegister.conf import config as con
 from process_Ensek.processEnsekPriorityServiceRegister.connections import connect_db as db
 from common.utils import get_ensek_api_info1
 
+
 class TstApi:
 
-    #def __init__(self):
+    # def __init__(self):
     #    pass
 
     def get_connection_pr(self, env):
         try:
-            pr.connect_to_redshift(host=env['redshift_config']['host'], port=env['redshift_config']['port'],
-                                   user=env['redshift_config']['user'], password=env['redshift_config']['pwd'],
-                                   dbname=env['redshift_config']['db'])
+            pr.connect_to_redshift(
+                host=env["redshift_config"]["host"],
+                port=env["redshift_config"]["port"],
+                user=env["redshift_config"]["user"],
+                password=env["redshift_config"]["pwd"],
+                dbname=env["redshift_config"]["db"],
+            )
             print("Connected to Redshift")
 
-            pr.connect_to_s3(aws_access_key_id=env['s3_config']['access_key'],
-                             aws_secret_access_key=env['s3_config']['secret_key'],
-                             bucket=env['s3_config']['bucket_name'],
-                             subdirectory='aws-glue-tempdir/')
+            pr.connect_to_s3(
+                aws_access_key_id=env["s3_config"]["access_key"],
+                aws_secret_access_key=env["s3_config"]["secret_key"],
+                bucket=env["s3_config"]["bucket_name"],
+                subdirectory="aws-glue-tempdir/",
+            )
         except Exception as e:
             raise e
 
     def get_api_response(self, api_url, head, query_string, auth):
-        '''
-            get the response for the respective url that is passed as part of this function
-        '''
+        """
+        get the response for the respective url that is passed as part of this function
+        """
         session = requests.Session()
         start_time = time.time()
         timeout = 5
@@ -52,12 +60,17 @@ class TstApi:
         # print("trying now...")
         while True:
             try:
-                response = session.get(api_url, params=query_string, headers=head, auth=auth, )
+                response = session.get(
+                    api_url,
+                    params=query_string,
+                    headers=head,
+                    auth=auth,
+                )
                 # print(response.content)
                 # print(response.encoding)
                 # print(response.text)
                 if response.status_code == 200:
-                    response_json = json.loads(response.content.decode('utf-8'))
+                    response_json = json.loads(response.content.decode("utf-8"))
                     return response_json
                 else:
                     # print(response.text)
@@ -66,45 +79,44 @@ class TstApi:
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
-                    print('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
+                    print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
                     ##self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
-                    print('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
+                    print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
                     ##self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
 
     def extract_data_response(self, data, filename, k, _param):
-        ''' Processing meter points data'''
+        """Processing meter points data"""
         df = json_normalize(data)
         # print(df_internal_readings)
         if df.empty:
             print(" - No Data")
         else:
             df.insert(0, "account_id", k)
-            csv_filename = Path(filename + datetime.datetime.today().strftime("%y%m%d") + '.csv')
+            csv_filename = Path(filename + datetime.datetime.today().strftime("%y%m%d") + ".csv")
             if csv_filename.exists():
-                df_string = df.to_csv(csv_filename, mode='a', index=False, header=False)
+                df_string = df.to_csv(csv_filename, mode="a", index=False, header=False)
             else:
-                df_string = df.to_csv(csv_filename, mode='w', index=False)
+                df_string = df.to_csv(csv_filename, mode="w", index=False)
 
             print(df_string)
 
     def format_json_response(self, data):
-        data_str = json.dumps(data, indent=4).replace('null', '""')
+        data_str = json.dumps(data, indent=4).replace("null", '""')
         data_json = json.loads(data_str)
         return data_json
 
-    def log_error(self, error_msg, error_code=''):
-        logs_dir_path = sys.path[0] + '/logs/'
+    def log_error(self, error_msg, error_code=""):
+        logs_dir_path = sys.path[0] + "/logs/"
         if not os.path.exists(logs_dir_path):
             os.makedirs(logs_dir_path)
-        with open(sys.path[0] + '/logs/' + 'test' + time.strftime('%d%m%Y') + '.csv',
-                  mode='a') as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        with open(sys.path[0] + "/logs/" + "test" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
+            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
             employee_writer.writerow([error_msg, error_code])
 
     def test_tado(self, account_ids, k, env, compare_demand_batch):
@@ -113,29 +125,27 @@ class TstApi:
 
         # last_updated = "2019-04-20 14:10:10"
 
-        headers = {
-            'Content-Type': "application/json",
-            'x-api-key': env['aws_api_gateway']['x-api-key']
-        }
+        headers = {"Content-Type": "application/json", "x-api-key": env["aws_api_gateway"]["x-api-key"]}
 
-        auth = AWSRequestsAuth(aws_access_key=env['aws_api_gateway']['access_key'],
-                               aws_secret_access_key=env['aws_api_gateway']['secret_key'],
-                               aws_token="",
-                               aws_host='6rsh2pqob0.execute-api.eu-west-1.amazonaws.com',
-                               aws_region='eu-west-1',
-                               aws_service='execute-api'
-                               )
+        auth = AWSRequestsAuth(
+            aws_access_key=env["aws_api_gateway"]["access_key"],
+            aws_secret_access_key=env["aws_api_gateway"]["secret_key"],
+            aws_token="",
+            aws_host="6rsh2pqob0.execute-api.eu-west-1.amazonaws.com",
+            aws_region="eu-west-1",
+            aws_service="execute-api",
+        )
         # to check if ondemand and batch returns same value.
         params = ["true", "false"]
         for account_id in account_ids:
             for param in params:
                 # encoded_qs = urllib.parse.quote(param)
-                querystring = ''
+                querystring = ""
                 if compare_demand_batch:
                     querystring = {"demand": param}
 
-                print('ac:' + str(account_id))
-                msg_ac = 'ac:' + str(account_id)
+                print("ac:" + str(account_id))
+                msg_ac = "ac:" + str(account_id)
                 ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
@@ -143,7 +153,7 @@ class TstApi:
                 if api_response:
                     # formatted_api_response = self.format_json_response(api_response)
                     # print(formatted_api_response)
-                    self.extract_data_response(api_response, 'tado', k, param)
+                    self.extract_data_response(api_response, "tado", k, param)
                 else:
                     print(api_response)
 
@@ -152,30 +162,28 @@ class TstApi:
 
         # last_updated = "2019-04-20 14:10:10"
 
-        headers = {
-            'Content-Type': "application/json",
-            'x-api-key': env['aws_api_gateway']['x-api-key']
-        }
+        headers = {"Content-Type": "application/json", "x-api-key": env["aws_api_gateway"]["x-api-key"]}
 
-        auth = AWSRequestsAuth(aws_access_key=env['aws_api_gateway']['access_key'],
-                               aws_secret_access_key=env['aws_api_gateway']['secret_key'],
-                               aws_token="",
-                               aws_host='6rsh2pqob0.execute-api.eu-west-1.amazonaws.com',
-                               aws_region='eu-west-1',
-                               aws_service='execute-api'
-                               )
+        auth = AWSRequestsAuth(
+            aws_access_key=env["aws_api_gateway"]["access_key"],
+            aws_secret_access_key=env["aws_api_gateway"]["secret_key"],
+            aws_token="",
+            aws_host="6rsh2pqob0.execute-api.eu-west-1.amazonaws.com",
+            aws_region="eu-west-1",
+            aws_service="execute-api",
+        )
 
         # to check if ondemand and batch returns same value.
         params = ["false"]
         for account_id in account_ids:
             for param in params:
                 # encoded_qs = urllib.parse.quote(param)
-                querystring = ''
+                querystring = ""
                 if compare_demand_batch:
                     querystring = {"demand": param}
 
-                print('ac:' + str(account_id))
-                msg_ac = 'ac:' + str(account_id)
+                print("ac:" + str(account_id))
+                msg_ac = "ac:" + str(account_id)
                 ##self.log_error(msg_ac, '')
                 api_url1 = api_url.format(account_id)
                 api_response = self.get_api_response(api_url1, headers, querystring, auth)
@@ -188,19 +196,19 @@ class TstApi:
                     print(api_response)
 
     def test_psr(self, account_ids_local, k, env, compare_demand_batch):
-        api_url, headers = get_ensek_api_info1('internal_psr')
+        api_url, headers = get_ensek_api_info1("internal_psr")
 
         for account_id in account_ids_local:
             if account_id > 43053:
                 # loggingqqqqqqqqqqqq
-                print('ac:' + str(account_id))
+                print("ac:" + str(account_id))
                 # perform api call
                 api_url_full = api_url.format(account_id)
-                api_response = self.get_api_response(api_url_full, headers, '', '')
-                #print(json.dumps(internal_data_response, indent=4))
+                api_response = self.get_api_response(api_url_full, headers, "", "")
+                # print(json.dumps(internal_data_response, indent=4))
                 if api_response:
                     formatted_api_response = self.format_json_response(api_response)
-                    str_api_response = json.dumps(api_response, indent=4).replace('null', '""')
+                    str_api_response = json.dumps(api_response, indent=4).replace("null", '""')
                     # res.loc[len(res)] = [account_id, formatted_api_response]
                     print("ac: " + str(account_id) + ", response: " + str_api_response)
                     self.extract_data_response(formatted_api_response, "psr", account_id, 0)
@@ -208,7 +216,7 @@ class TstApi:
         # return res
 
     def get_account_ids(self):
-        #sql = "select external_id from ref_cdb_supply_contracts where external_id in (1831,4601,38081,18159,18908,30087,15899,33000,22526,36211,41701,45996,43682,30407,31005,42503,41906,32096)"
+        # sql = "select external_id from ref_cdb_supply_contracts where external_id in (1831,4601,38081,18159,18908,30087,15899,33000,22526,36211,41701,45996,43682,30407,31005,42503,41906,32096)"
         # sql = "select external_id from ref_cdb_supply_contracts where external_id in (1831,4601)"
         sql = "select external_id from ref_cdb_supply_contracts"
         account_id_df = pr.redshift_to_pandas(sql)

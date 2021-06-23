@@ -34,11 +34,31 @@ endif
 	# And finally, initialise git-flow with all defaults and v prefix for version tags
 	git flow init -f -d -t v
 
+# Run `make prepare` after cloning the repo to set up git hooks and build scripts.
+prepare:
+	npm install
+	npm run-script prepare
+
 install:
 	pip3 install -r requirements.txt
 
 install-test-deps:
 	pip3 install -r requirements-dev.txt
+
+check-code-formatting:
+	# Run black in check mode, causing it to bail out with an error if any changes would be made.
+	# This is intended to be used in CI pipelines, where we want the pipeline to fail if the
+	# code formatting is not correct.
+	black --check .
+
+code-formatting:
+	# Run black on everything
+	black .
+
+code-formatting-pre-commit:
+	# Run black on all Python files that are currently staged, and then add 'git add' them all
+	git diff -z --name-only --staged **/*.py | xargs -0 black
+	git diff -z --name-only --staged **/*.py | xargs -0 git add
 
 conf/config.py:
 	mkdir -p conf/
@@ -48,8 +68,6 @@ test: conf/config.py
 	rm -rf .coverage coverage.xml htmlcov
 	coverage run -m pytest --ignore=archive --ignore=dags
 	coverage xml
-
-ci-test: install-test-deps test
 
 version:
 	@echo $(VERSION)

@@ -16,34 +16,32 @@ from pathlib import Path
 
 import sys
 
-sys.path.append('..')
+sys.path.append("..")
 
 from common import utils as util
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
 from connections import connect_db as db
 
-client = gocardless_pro.Client(access_token=con.go_cardless['access_token'],
-                               environment=con.go_cardless['environment'])
+client = gocardless_pro.Client(access_token=con.go_cardless["access_token"], environment=con.go_cardless["environment"])
 mandates = client.mandates
 
 
 class GoCardlessMandates(object):
-
     def __init__(self, _execStartDate=None, _execEndDate=None):
         self.env = util.get_env()
         self.dir = util.get_dir()
-        self.bucket_name = self.dir['s3_finance_bucket']
+        self.bucket_name = self.dir["s3_finance_bucket"]
         self.s3 = s3_con(self.bucket_name)
-        self.fileDirectory = self.dir['s3_finance_goCardless_key']['Mandates']
+        self.fileDirectory = self.dir["s3_finance_goCardless_key"]["Mandates"]
         self.mandates = mandates
-        self.toDay = datetime.today().strftime('%Y-%m-%d')
+        self.toDay = datetime.today().strftime("%Y-%m-%d")
         if _execStartDate is None:
             _execStartDate = self.get_date(self.toDay, _addDays=-1)
-        self.execStartDate = datetime.strptime(_execStartDate, '%Y-%m-%d')
+        self.execStartDate = datetime.strptime(_execStartDate, "%Y-%m-%d")
         if _execEndDate is None:
             _execEndDate = self.toDay
-        self.execEndDate = datetime.strptime(_execEndDate, '%Y-%m-%d')
+        self.execEndDate = datetime.strptime(_execEndDate, "%Y-%m-%d")
 
     def is_json(self, myjson):
         try:
@@ -54,11 +52,11 @@ class GoCardlessMandates(object):
 
     def get_date(self, _date, _addDays=None, dateFormat="%Y-%m-%d"):
         dateStart = _date
-        dateStart = datetime.strptime(dateStart, '%Y-%m-%d')
+        dateStart = datetime.strptime(dateStart, "%Y-%m-%d")
         if _addDays is None:
             _addDays = 1  ###self.noDays
         addDays = _addDays
-        if (addDays != 0):
+        if addDays != 0:
             dateEnd = dateStart + timedelta(days=addDays)
         else:
             dateEnd = dateStart
@@ -77,15 +75,15 @@ class GoCardlessMandates(object):
         fileDirectory = self.fileDirectory
         s3 = self.s3
         if _StartDate is None:
-            _StartDate = '{:%Y-%m-%d}'.format(self.execStartDate)
+            _StartDate = "{:%Y-%m-%d}".format(self.execStartDate)
         if _EndDate is None:
-            _EndDate = '{:%Y-%m-%d}'.format(self.execEndDate)
-        startdatetime = datetime.strptime(_StartDate, '%Y-%m-%d')
+            _EndDate = "{:%Y-%m-%d}".format(self.execEndDate)
+        startdatetime = datetime.strptime(_StartDate, "%Y-%m-%d")
         mandates = self.mandates
-        filename = 'go_cardless_mandates_' + _StartDate + '_' + _EndDate + '.csv'
-        qtr = math.ceil(startdatetime.month / 3.)
+        filename = "go_cardless_mandates_" + _StartDate + "_" + _EndDate + ".csv"
+        qtr = math.ceil(startdatetime.month / 3.0)
         yr = math.ceil(startdatetime.year)
-        fkey = 'timestamp=' + str(yr) + '-Q' + str(qtr) + '/'
+        fkey = "timestamp=" + str(yr) + "-Q" + str(qtr) + "/"
         # Loop through a page
         q = Queue()
         df_out = pd.DataFrame()
@@ -94,17 +92,16 @@ class GoCardlessMandates(object):
         StartDate = _StartDate + "T00:00:00.000Z"
         EndDate = _EndDate + "T00:00:00.000Z"
         print(_StartDate, _EndDate)
-        print('.....listing mandates')
+        print(".....listing mandates")
 
-        for mandate in client.mandates.all(
-                params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
+        for mandate in client.mandates.all(params={"created_at[gte]": StartDate, "created_at[lte]": EndDate}):
             EnsekAccountId = None
             StatementId = None
-            #print(mandate.id)
-            if 'AccountId' in mandate.metadata:
-                EnsekAccountId = mandate.metadata['AccountId']
-            if 'StatementId' in mandate.metadata:
-                StatementId = mandate.metadata['StatementId']
+            # print(mandate.id)
+            if "AccountId" in mandate.metadata:
+                EnsekAccountId = mandate.metadata["AccountId"]
+            if "StatementId" in mandate.metadata:
+                StatementId = mandate.metadata["StatementId"]
 
             mandate_id = mandate.id
             CustomerId = mandate.links.customer
@@ -120,18 +117,43 @@ class GoCardlessMandates(object):
             EnsekID = EnsekAccountId
             EnsekStatementId = StatementId
 
-            listRow = [mandate_id, CustomerId, new_mandate_id, created_at, next_possible_charge_date,
-                       payments_require_approval,
-                       reference, scheme, status, creditor, customer_bank_account, EnsekID, EnsekStatementId]
+            listRow = [
+                mandate_id,
+                CustomerId,
+                new_mandate_id,
+                created_at,
+                next_possible_charge_date,
+                payments_require_approval,
+                reference,
+                scheme,
+                status,
+                creditor,
+                customer_bank_account,
+                EnsekID,
+                EnsekStatementId,
+            ]
             q.put(listRow)
 
         while not q.empty():
             datalist.append(q.get())
-        df = pd.DataFrame(datalist, columns=['mandate_id', 'CustomerId', 'new_mandate_id', 'created_at',
-                                             'next_possible_charge_date',
-                                             'payments_require_approval', 'reference', 'scheme', 'status', 'creditor',
-                                             'customer_bank_account',
-                                             'EnsekID', 'EnsekStatementId'])
+        df = pd.DataFrame(
+            datalist,
+            columns=[
+                "mandate_id",
+                "CustomerId",
+                "new_mandate_id",
+                "created_at",
+                "next_possible_charge_date",
+                "payments_require_approval",
+                "reference",
+                "scheme",
+                "status",
+                "creditor",
+                "customer_bank_account",
+                "EnsekID",
+                "EnsekStatementId",
+            ],
+        )
 
         print(df.head(5))
 
@@ -167,6 +189,3 @@ if __name__ == "__main__":
     p1 = p.process_Mandates()
     ### Extract return single Daily Files from Date Range Provided ###
     ## p2 = p.runDailyFiles()
-
-
-
