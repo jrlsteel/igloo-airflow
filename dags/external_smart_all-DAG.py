@@ -129,7 +129,16 @@ populate_ref_readings_smartdaily_uSmart_raw = PythonOperator(
     python_callable=sql_wrapper,
     op_args=[
         """ TRUNCATE ref_readings_smartdaily_uSmart_raw;
-            INSERT INTO ref_readings_smartdaily_uSmart_raw (SELECT cast(mpxn as bigint), deviceid, type, total_consumption, register_num, register_value, timestamp, getdate() FROM mv_readings_smart_daily_uSmart);"""
+            INSERT INTO ref_readings_smartdaily_uSmart_raw (SELECT cast(mpxn as bigint),
+                                                            deviceid,
+                                                            "type",
+                                                            total_consumption,
+                                                            register_num,
+                                                            register_value,
+                                                            "timestamp",
+                                                            getdate()
+                                                            FROM mv_readings_smart_daily_uSmart)
+            """
     ],
     dag=dag,
 )
