@@ -11,6 +11,7 @@ import sys
 sys.path.append("..")
 
 from common import utils as util
+from common import process_glue_crawler
 from common.utils import IglooLogger
 from conf import config as con
 from connections.connect_db import get_finance_s3_connections as s3_con
@@ -401,6 +402,10 @@ if __name__ == "__main__":
     iglog.in_prod_env("Current environment: {0}, Master_Source: {1}".format(current_env, master_source))
     if master_source == current_env:  # current environment is master source, run the data extract script
         gc_processor.process_events()
+
+        # run the crawler to pick up any new partitions
+        iglog.in_prod_env("Running the events crawler")
+        process_glue_crawler.run_glue_crawler("data-crawler-fin-gc-events-stage1")
 
     n_proc = 2
 
