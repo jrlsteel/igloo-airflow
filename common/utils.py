@@ -418,7 +418,7 @@ def get_api_info(api=None, auth_type=None, token_required=False, header_type=Non
 
 
 def get_auth_code():
-    internalapi_config = get_secret(con.internalapi_config["secret_id"])
+    internalapi_config = get_secret(client, con.internalapi_config["secret_id"])
     oauth_url = "https://igloo.ignition.ensek.co.uk/api/Token"
     data = {
         "username": internalapi_config["username"],
@@ -429,7 +429,7 @@ def get_auth_code():
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "application/json",
-        "Referrer": "https: // igloo.ignition.ensek.co.uk",
+        "Referrer": "https://igloo.ignition.ensek.co.uk",
     }
     response = requests.post(oauth_url, data=data, headers=headers)
     response = response.json()

@@ -39,7 +39,7 @@ def get_meter_point_api_info(account_id, api):
 
 
 def get_auth_code():
-    internalapi_config = get_secret(con.internalapi_config["secret_id"])
+    internalapi_config = get_secret(client, con.internalapi_config["secret_id"])
     oauth_url = "https://igloo.ignition.ensek.co.uk/api/Token"
     data = {
         "username": internalapi_config["username"],

@@ -43,7 +43,7 @@ def get_api_info(account_id, api):
 
 
 def get_auth_code():
-    internalapi_config = get_secret(con.internalapi_config["secret_id"])
+    internalapi_config = get_secret(client, con.internalapi_config["secret_id"])
     oauth_url = "https://igloo.ignition.ensek.co.uk/api/Token"
     data = {
         "username": internalapi_config["username"],
@@ -142,7 +142,7 @@ def get_accountID_fromDB():
 
 
 def get_accountID_from_Redshift():
-    redshift_config = get_secret(con.refshift_config["secret_id"])
+    redshift_config = get_secret(client, con.refshift_config["secret_id"])
     conn = psycopg2.connect(
         host=redshift_config["host"],
         port=redshift_config["port"],
