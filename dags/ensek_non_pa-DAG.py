@@ -57,6 +57,8 @@ igloo_calculated_trigger = TriggerDagRunOperator(
     task_id="igloo_calculated_trigger", trigger_dag_id="igloo_calculated", dag=dag
 )
 
+igloo_alp_trigger = TriggerDagRunOperator(task_id="igloo_alp_trigger", trigger_dag_id="igloo_alp", dag=dag)
+
 (
     start_ensek_api_mirror_only_jobs
     >> start_ensek_non_pa_staging_jobs
