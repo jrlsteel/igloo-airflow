@@ -31,40 +31,8 @@ dag = DAG(
     max_active_runs=1,
 )
 
-processALP_CV = BashOperator(
-    task_id="processALP_CV",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_CV.py",
-    dag=dag,
-)
-
-processALP_WCF = BashOperator(
-    task_id="processALP_WCF",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_WCF.py",
-    dag=dag,
-)
-
-start_alp_historical_staging_jobs = BashOperator(
-    task_id="start_alp_historical_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_staging_jobs.py",
-    dag=dag,
-)
-
-start_alp_historical_ref_jobs = BashOperator(
-    task_id="start_alp_historical_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_ref_jobs.py",
-    dag=dag,
-)
-
 start_alp_historical_calc_jobs = BashOperator(
     task_id="start_alp_historical_calc_jobs",
     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_calc_jobs.py",
     dag=dag,
-)
-
-(
-    processALP_CV
-    >> processALP_WCF
-    >> start_alp_historical_staging_jobs
-    >> start_alp_historical_ref_jobs
-    >> start_alp_historical_calc_jobs
 )
