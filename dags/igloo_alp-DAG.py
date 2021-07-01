@@ -18,12 +18,12 @@ from common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
-    "start_date": days_ago(2),  # don't know what this is doing
+    "start_date": days_ago(2),
     "on_failure_callback": alert_slack,
 }
 
 dag = DAG(
-    dag_id="igloo_calculated",
+    dag_id="igloo_alp",
     default_args=args,
     schedule_interval=None,
     tags=["cdw"],
@@ -55,16 +55,4 @@ start_alp_historical_ref_jobs = BashOperator(
     dag=dag,
 )
 
-start_alp_historical_calc_jobs = BashOperator(
-    task_id="start_alp_historical_calc_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python start_alp_historical_calc_jobs.py",
-    dag=dag,
-)
-
-(
-    processALP_CV
-    >> processALP_WCF
-    >> start_alp_historical_staging_jobs
-    >> start_alp_historical_ref_jobs
-    >> start_alp_historical_calc_jobs
-)
+(processALP_CV >> processALP_WCF >> start_alp_historical_staging_jobs >> start_alp_historical_ref_jobs)

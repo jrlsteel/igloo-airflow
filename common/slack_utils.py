@@ -1,5 +1,18 @@
+import sys
 from airflow.hooks.base_hook import BaseHook
 from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperator
+import requests
+import json
+
+import boto3
+
+sys.path.append("..")
+
+from common import utils
+from common.secrets_manager import get_secret
+from conf import config
+
+client = boto3.client("secretsmanager")
 
 SLACK_CONN_ID = "slack"
 
@@ -9,6 +22,29 @@ Host: https://hooks.slack.com/services
 Conn Type: HTTP
 Password: /T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX (this was provided by Ed)
 """
+
+
+def post_slack_message(message, slack_channel):
+
+    print(f"Posting message to slack: \n    {message}")
+    env = utils.get_env()
+
+    if env in ["dev", "preprod"]:
+        slack_channel = "test-alerts"
+        message = env + " : " + message
+
+    return requests.post(
+        "https://slack.com/api/chat.postMessage",
+        {
+            "token": get_secret(client, config.slack_config["secret_id"])["slack_reports_token"],
+            "channel": slack_channel,
+            "text": message,
+        },
+    )
+
+
+def get_slack_webhook_token():
+    return BaseHook.get_connection(SLACK_CONN_ID).password
 
 
 def alert_slack(context):
