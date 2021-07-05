@@ -12,6 +12,8 @@ from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 from common.slack_utils import alert_slack
 import common
 
+from common.process_glue_crawler import run_glue_crawler
+
 args = {
     "owner": "Airflow",
     "start_date": days_ago(2),  # don't know what this is doing
@@ -55,6 +57,21 @@ smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
     dag=dag,
     task_id="smart_all_refresh_mv_hh_elec_reads_jobs_task",
     python_callable=refresh_mv_hh_elec_reads,
+)
+
+
+crawler_usmart_stage2_gas_task = PythonOperator(
+    task_id="crawler_usmart_stage2_gas_task",
+    op_args=["data-crawler-usmart-stage2-gas"],
+    python_callable=run_glue_crawler,
+    dag=dag,
+)
+
+crawler_usmart_stage2_elec_task = PythonOperator(
+    task_id="crawler_usmart_stage2_elec_task",
+    op_args=["data-crawler-usmart-stage2-elec"],
+    python_callable=run_glue_crawler,
+    dag=dag,
 )
 
 
@@ -150,6 +167,8 @@ populate_ref_readings_smart_daily_uSmart_raw = PythonOperator(
     >> start_smart_all_ref_jobs
     >> refresh_smart_daily_usmart_table
 )
+start_smart_all_staging_jobs >> crawler_usmart_stage2_gas_task
+start_smart_all_staging_jobs >> crawler_usmart_stage2_elec_task
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
 start_smart_all_staging_jobs >> populate_ref_readings_smart_daily_uSmart_raw
