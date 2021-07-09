@@ -1,24 +1,18 @@
-from datetime import datetime, timedelta
-from lxml import etree
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-from moto import mock_s3_deprecated
 import csv
 import json
 import os
 import sys
-import pandas
-from unittest.mock import Mock, patch
-from process_ensek_internal_readings import InternalReadings
-import statistics
 from collections import defaultdict
-from pandas.io.json import json_normalize
-import requests
+
 import responses
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+from moto import mock_s3_deprecated
+
+from process_ensek_internal_readings import InternalReadings
 
 sys.path.append("../../")
 from connections.connect_db import get_boto_S3_Connections as s3_con
-from common import utils as util
 
 
 @mock_s3_deprecated

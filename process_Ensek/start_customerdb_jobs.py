@@ -3,9 +3,7 @@ from datetime import datetime
 
 sys.path.append("..")
 
-from process_Ensek import processAllEnsekPAScripts as ae
 from common import process_glue_job as glue
-
 from common import utils as util
 
 

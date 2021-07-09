@@ -1,8 +1,8 @@
-import boto3
-from time import sleep
-import sys
-import common
 import datetime
+import sys
+from time import sleep
+
+import common
 
 sys.path.append("..")
 from connections import connect_db as db
