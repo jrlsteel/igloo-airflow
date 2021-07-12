@@ -39,64 +39,50 @@ class ProcessGlueJob:
         return cjob_status, cjob_execution_time, cjob_running_name
 
     def run_glue_job(self):
-        try:
-            job_status = ""
-            job_execution_time = 0
+        job_status = ""
 
-            # Check if already a job is running state
-            current_job = self.glue_client.get_job_runs(JobName=self.job_name, MaxResults=1)
-            current_job_run_id = current_job["JobRuns"][0]["Id"]
-            current_job_status = current_job["JobRuns"][0]["JobRunState"]
-            current_job_name = current_job["JobRuns"][0]["Arguments"]["--process_job"]
+        # Check if already a job is running state
+        current_job = self.glue_client.get_job_runs(JobName=self.job_name, MaxResults=1)
+        current_job_run_id = current_job["JobRuns"][0]["Id"]
+        current_job_status = current_job["JobRuns"][0]["JobRunState"]
+        current_job_name = current_job["JobRuns"][0]["Arguments"]["--process_job"]
 
-            # Start the job if it is not already  running state ie.
-            # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
-            if current_job_status.upper() not in ["STARTING", "RUNNING", "STOPPING"]:
+        # Start the job if it is not already  running state ie.
+        # NOT in status 'STARTING'|'RUNNING'|'STOPPING'
+        if current_job_status.upper() not in ["STARTING", "RUNNING", "STOPPING"]:
+            sleep(120)  # sleep to avoid concurrent execution
+            response = self.start_glue_job()
+
+            job_run_id = response["JobRunId"]
+            print("{0} job started for {1}... Job Id: {2}".format(self.job_name, self.process_job, job_run_id))
+
+        else:
+            print(
+                "{0} job already running for {1}... Job Id: {2}".format(
+                    self.job_name, current_job_name, current_job_run_id
+                )
+            )
+            job_run_id = current_job_run_id
+
+        # Check Job status for every 3 minutes until it is STOPPED/SUCCEEDED/FAILED/TIMEOUT
+        # 'JobRunState': 'STARTING' | 'RUNNING' | 'STOPPING' | 'STOPPED' | 'SUCCEEDED' | 'FAILED' | 'TIMEOUT'
+        job_completed_state = ["STOPPED", "SUCCEEDED", "FAILED", "TIMEOUT"]
+        exception_state = ["STOPPED", "FAILED", "TIMEOUT"]
+
+        while job_status.upper() not in job_completed_state:
+            sleep(120)
+            job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
+            if job_status.upper() in exception_state and self.process_job == running_job:
+                raise Exception(
+                    "Job stopped with status {0}. Please check the job id - {1}".format(job_status.upper(), job_run_id)
+                )
+
+            if job_status.upper() in job_completed_state and self.process_job != running_job:
                 sleep(120)  # sleep to avoid concurrent execution
                 response = self.start_glue_job()
-
                 job_run_id = response["JobRunId"]
-                print("{0} job started for {1}... Job Id: {2}".format(self.job_name, self.process_job, job_run_id))
-
-            else:
-                print(
-                    "{0} job already running for {1}... Job Id: {2}".format(
-                        self.job_name, current_job_name, current_job_run_id
-                    )
-                )
-                job_run_id = current_job_run_id
-
-            # Check Job status for every 3 minutes until it is STOPPED/SUCCEEDED/FAILED/TIMEOUT
-            # 'JobRunState': 'STARTING' | 'RUNNING' | 'STOPPING' | 'STOPPED' | 'SUCCEEDED' | 'FAILED' | 'TIMEOUT'
-            job_completed_state = ["STOPPED", "SUCCEEDED", "FAILED", "TIMEOUT"]
-            exception_state = ["STOPPED", "FAILED", "TIMEOUT"]
-
-            while job_status.upper() not in job_completed_state:
-                sleep(120)
                 job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
-                if job_status.upper() in exception_state and self.process_job == running_job:
-                    raise Exception(
-                        "Job stopped with status {0}. Please check the job id - {1}".format(
-                            job_status.upper(), job_run_id
-                        )
-                    )
-
-                if job_status.upper() in job_completed_state and self.process_job != running_job:
-                    sleep(120)  # sleep to avoid concurrent execution
-                    response = self.start_glue_job()
-                    job_run_id = response["JobRunId"]
-                    job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
-                    print("{0} job started for {1}... Job Id: {2}".format(self.job_name, running_job, job_run_id))
-
-            job_response = {
-                "job_run_id": job_run_id,
-                "job_status": job_status,
-                "job_execution_time": job_execution_time,
-            }
-            return True
-
-        except:
-            raise
+                print("{0} job started for {1}... Job Id: {2}".format(self.job_name, running_job, job_run_id))
 
     def start_glue_job(self):
         response = self.glue_client.start_job_run(
@@ -121,7 +107,7 @@ class ProcessGlueJob:
             raise
 
 
-def process_glue_job_await_completion(job_name, process_name):
+def run_glue_job_await_completion(job_name, process_name):
     directory = common.utils.get_dir()
     s3_bucket = directory["s3_bucket"]
     environment = common.utils.get_env()
@@ -137,22 +123,19 @@ def process_glue_job_await_completion(job_name, process_name):
             environment=environment,
             processJob=process_name,
         )
-        job_response = glue_job.run_glue_job()
-        if job_response:
-            print("{0}: Glue Job Completed successfully".format(datetime.datetime.now().strftime("%H:%M:%S")))
-        else:
-            print("Error occurred in Glue Job")
-            raise Exception
-    except Exception as e:
-        print("Error in Glue Job :- " + str(e))
-        print("Unexpected error:", sys.exc_info()[0])
+        glue_job.run_glue_job()
+
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        print(f"{timestamp}: Glue job completed successfully: job_name={job_name}, process_name={process_name}")
+    except:
+        print(f"Error running glue job: job_name={job_name}, process_name={process_name}")
+        print(sys.exc_info()[0])
         raise
 
 
 if __name__ == "__main__":
     s = ProcessGlueJob("process_ref_d18")
-    job_gluejob_response = s.run_glue_job()
+    s.run_glue_job()
     job_gluetrigger_response = s.run_glue_trigger()
 
-    print(job_gluejob_response)
     print(job_gluetrigger_response)

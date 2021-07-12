@@ -8,7 +8,7 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import common
-from common.process_glue_job import process_glue_job_await_completion
+from common.process_glue_job import run_glue_job_await_completion
 from common.slack_utils import alert_slack
 from process_verification.verification_template import (
     verify_new_api_response_files_in_s3_directory,
@@ -123,8 +123,9 @@ api_extract_verify_meterpoints = createS3VerificationStep("api_extract_verify_me
 
 api_extract_verify_meterpoints.doc = api_verification_report_string.format(s3_key["MeterPoints"])
 
-api_extract_verify_meterpoints_attributes = createS3VerificationStep("api_extract_verify_meterpoints_attributes",
-                                                                 "MeterPointsAttributes")
+api_extract_verify_meterpoints_attributes = createS3VerificationStep(
+    "api_extract_verify_meterpoints_attributes", "MeterPointsAttributes"
+)
 
 api_extract_verify_meterpoints.doc = api_verification_report_string.format(s3_key["MeterPointsAttributes"])
 
@@ -132,7 +133,9 @@ api_extract_verify_meters = createS3VerificationStep("api_extract_verify_meters"
 
 api_extract_verify_meters.doc = api_verification_report_string.format(s3_key["Meters"])
 
-api_extract_verify_meters_attributes = createS3VerificationStep("api_extract_verify_meters_attributes", "MetersAttributes")
+api_extract_verify_meters_attributes = createS3VerificationStep(
+    "api_extract_verify_meters_attributes", "MetersAttributes"
+)
 
 api_extract_verify_meters_attributes.doc = api_verification_report_string.format(s3_key["MetersAttributes"])
 
@@ -140,14 +143,15 @@ api_extract_verify_registers = createS3VerificationStep("api_extract_verify_regi
 
 api_extract_verify_registers.doc = api_verification_report_string.format(s3_key["Registers"])
 
-api_extract_verify_register_attributes = createS3VerificationStep("api_extract_verify_register_attributes",
-                                                              "RegistersAttributes")
+api_extract_verify_register_attributes = createS3VerificationStep(
+    "api_extract_verify_register_attributes", "RegistersAttributes"
+)
 
 api_extract_verify_register_attributes.doc = api_verification_report_string.format(s3_key["RegistersAttributes"])
 
 staging_meterpoints = PythonOperator(
     task_id="staging_meterpoints",
-    python_callable=process_glue_job_await_completion,
+    python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_staging_meterpoints_job_name"],
         common.directories.common["meterpoints"]["glue_job_name_staging"],
@@ -166,7 +170,7 @@ staging_verify_meterpoints.doc = staging_verify_report_string
 
 ref_tables_meterpoints = PythonOperator(
     task_id="ref_tables_meterpoints",
-    python_callable=process_glue_job_await_completion,
+    python_callable=run_glue_job_await_completion,
     op_args=[directory["glue_ref_meterpoints_job_name"], common.directories.common["meterpoints"]["glue_job_name_ref"]],
     dag=dag,
 )
@@ -196,14 +200,15 @@ api_extract_internalreadings = BashOperator(
 )
 api_extract_internalreadings.doc = api_extract_report_string.format("Internal Readings data per account ID")
 
-api_extract_verify_internalreadings = createS3VerificationStep("verify_new_api_response_files_in_s3_directory",
-                                                           "ReadingsInternal")
+api_extract_verify_internalreadings = createS3VerificationStep(
+    "verify_new_api_response_files_in_s3_directory", "ReadingsInternal"
+)
 
 api_extract_verify_internalreadings.doc = api_verification_report_string.format(s3_key["ReadingsInternal"])
 
 staging_internalreadings = PythonOperator(
     task_id="staging_internalreadings",
-    python_callable=process_glue_job_await_completion,
+    python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_staging_internalreadings_job_name"],
         common.directories.common["internalreadings"]["glue_job_name_staging"],
@@ -222,7 +227,7 @@ staging_verify_internalreadings.doc = staging_verify_report_string
 
 ref_tables_internalreadings = PythonOperator(
     task_id="ref_tables_internalreadings",
-    python_callable=process_glue_job_await_completion,
+    python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_ref_internalreadings_job_name"],
         common.directories.common["internalreadings"]["glue_job_name_ref"],
@@ -255,7 +260,6 @@ if environment in ["preprod", "dev"]:
     s3_destination_bucket = startensekjobs.dir["s3_bucket"]
     s3_source_bucket = startensekjobs.dir["s3_source_bucket"]
 
-
     def createMirrorTask(task_id, path):
         """
         Wrapper for mirror etl
@@ -270,11 +274,11 @@ if environment in ["preprod", "dev"]:
             dag=dag,
         )
 
-
     ensek_meterpoints_mirror = createMirrorTask("ensek_meterpoints_mirror", "MeterPoints")
 
-    ensek_meterpoints_attributes_mirror = createMirrorTask("ensek_meterpoints_attributes_mirror",
-                                                           "MeterPointsAttributes")
+    ensek_meterpoints_attributes_mirror = createMirrorTask(
+        "ensek_meterpoints_attributes_mirror", "MeterPointsAttributes"
+    )
 
     ensek_meters_mirror = createMirrorTask("ensek_meters_mirror", "Meters")
 
@@ -302,10 +306,10 @@ if environment in ["preprod", "dev"]:
     api_extract_meterpoints >> api_extract_internalreadings
 
     (
-            api_extract_internalreadings
-            >> ensek_readingsinternal_mirror
-            >> staging_internalreadings
-            >> ref_tables_internalreadings
+        api_extract_internalreadings
+        >> ensek_readingsinternal_mirror
+        >> staging_internalreadings
+        >> ref_tables_internalreadings
     )
     ensek_readingsinternal_mirror >> api_extract_verify_internalreadings
     staging_internalreadings >> staging_verify_internalreadings

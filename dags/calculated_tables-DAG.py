@@ -108,7 +108,7 @@ last_operator = ""
 for report_name, value in reports.items():
     current_operator = PythonOperator(
         task_id=report_name,
-        python_callable=process_glue_job.process_glue_job_await_completion,
+        python_callable=process_glue_job.run_glue_job_await_completion,
         op_args=["_process_ref_tables", report_name],
         dag=dag,
     )
