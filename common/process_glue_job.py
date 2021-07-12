@@ -83,6 +83,7 @@ class ProcessGlueJob:
                 job_run_id = response["JobRunId"]
                 job_status, job_execution_time, running_job = self.get_job_status(self.glue_client, job_run_id)
                 print("{0} job started for {1}... Job Id: {2}".format(self.job_name, running_job, job_run_id))
+        return True
 
     def start_glue_job(self):
         response = self.glue_client.start_job_run(
