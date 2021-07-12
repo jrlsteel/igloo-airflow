@@ -12,6 +12,8 @@ from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 from common.slack_utils import alert_slack
 import common
 
+from common.process_glue_crawler import run_glue_crawler
+
 args = {
     "owner": "Airflow",
     "start_date": days_ago(2),  # don't know what this is doing
@@ -55,6 +57,21 @@ smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
     dag=dag,
     task_id="smart_all_refresh_mv_hh_elec_reads_jobs_task",
     python_callable=refresh_mv_hh_elec_reads,
+)
+
+
+crawler_usmart_stage2_gas_task = PythonOperator(
+    task_id="crawler_usmart_stage2_gas_task",
+    op_args=["data-crawler-usmart-stage2-gas"],
+    python_callable=run_glue_crawler,
+    dag=dag,
+)
+
+crawler_usmart_stage2_elec_task = PythonOperator(
+    task_id="crawler_usmart_stage2_elec_task",
+    op_args=["data-crawler-usmart-stage2-elec"],
+    python_callable=run_glue_crawler,
+    dag=dag,
 )
 
 
@@ -116,8 +133,8 @@ def sql_wrapper(sql):
         raise e
 
 
-refresh_smart_daily_usmart_table = PythonOperator(
-    task_id="refresh_smart_daily_usmart_table",
+refresh_mv_readings_smart_daily_usmart = PythonOperator(
+    task_id="refresh_mv_readings_smart_daily_usmart",
     python_callable=sql_wrapper,
     op_args=["REFRESH MATERIALIZED VIEW mv_readings_smart_daily_usmart"],
     dag=dag,
@@ -137,19 +154,35 @@ populate_ref_readings_smart_daily_uSmart_raw = PythonOperator(
                                                             register_value,
                                                             "timestamp",
                                                             getdate()
-                                                            FROM mv_readings_smart_daily_uSmart)
+                                                            FROM mv_readings_smart_daily_usmart)
             """
     ],
     dag=dag,
 )
 
-
-(
-    start_smart_all_mirror_jobs
-    >> start_smart_all_staging_jobs
-    >> start_smart_all_ref_jobs
-    >> refresh_smart_daily_usmart_table
+truncate_ref_readings_smart_daily_all = PythonOperator(
+    dag=dag,
+    task_id="truncate_ref_readings_smart_daily_all",
+    python_callable=sql_wrapper,
+    op_args=["""TRUNCATE ref_readings_smart_daily_all"""],
 )
+
+# pylint: disable=pointless-statement
+# fmt: off
+
+# Legacy Read-to-Bill & Half-hourly Settlement Trial
+start_smart_all_mirror_jobs >> start_smart_all_staging_jobs
+start_smart_all_staging_jobs >> start_smart_all_ref_jobs
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
-start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
-start_smart_all_staging_jobs >> populate_ref_readings_smart_daily_uSmart_raw
+start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs
+smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
+
+# Future Read-to-Bill based on reads from ASe-i & uSmart being pushed in to
+# ref_readings_smart_daily_all
+start_smart_all_staging_jobs >> crawler_usmart_stage2_gas_task >> refresh_mv_readings_smart_daily_usmart
+start_smart_all_staging_jobs >> crawler_usmart_stage2_elec_task >> refresh_mv_readings_smart_daily_usmart
+refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
+populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
+
+# fmt: on
+# pylint: enable=pointless-statement
