@@ -55,8 +55,8 @@ igloo_calculated_trigger = TriggerDagRunOperator(
 igloo_alp_trigger = TriggerDagRunOperator(task_id="igloo_alp_trigger", trigger_dag_id="igloo_alp", dag=dag)
 
 (
-        start_ensek_api_mirror_only_jobs
-        >> start_ensek_non_pa_staging_jobs
-        >> start_ensek_non_pa_ref_jobs
-        >> igloo_calculated_trigger
+    start_ensek_api_mirror_only_jobs
+    >> start_ensek_non_pa_staging_jobs
+    >> start_ensek_non_pa_ref_jobs
+    >> igloo_calculated_trigger
 )

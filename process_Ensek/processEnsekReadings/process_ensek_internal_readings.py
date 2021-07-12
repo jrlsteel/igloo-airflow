@@ -115,7 +115,8 @@ class InternalReadings:
                     metrics[0]["account_id_counter"].value += 1
                     if metrics[0]["account_id_counter"].value % 1000 == 0:
                         iglog.in_prod_env(
-                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
+                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value))
+                        )
                 api_url1 = api_url.format(account_id)
                 internal_data_response = self.get_api_response(api_url1, head, account_id, metrics)
                 if internal_data_response:

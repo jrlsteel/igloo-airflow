@@ -4,6 +4,7 @@ import timeit
 import traceback
 from datetime import datetime
 from common import utils as util
+
 iglog = util.IglooLogger()
 
 
@@ -47,7 +48,7 @@ def process_all_ensek_scripts():
         )
         util.batch_logging_update(job_id, "e")
     except:
-        print('processAllEnsekScripts - Status Registrations Meterpoints raised an error')
+        print("processAllEnsekScripts - Status Registrations Meterpoints raised an error")
         iglog.in_prod_env(traceback.print_exc())
         raise
 
@@ -64,7 +65,7 @@ def process_all_ensek_scripts():
         )
         util.batch_logging_update(job_id, "e")
     except:
-        print('processAllEnsekScripts - Internal Estimates raised an error')
+        print("processAllEnsekScripts - Internal Estimates raised an error")
         iglog.in_prod_env(traceback.print_exc())
         raise
 
@@ -81,7 +82,7 @@ def process_all_ensek_scripts():
         )
         util.batch_logging_update(job_id, "e")
     except:
-        print('processAllEnsekScripts - Tariff History raised an error')
+        print("processAllEnsekScripts - Tariff History raised an error")
         iglog.in_prod_env(traceback.print_exc())
         raise
 
@@ -98,7 +99,7 @@ def process_all_ensek_scripts():
         )
         util.batch_logging_update(job_id, "e")
     except:
-        print('processAllEnsekScripts - Account Settings raised an error')
+        print("processAllEnsekScripts - Account Settings raised an error")
         iglog.in_prod_env(traceback.print_exc())
         raise
 
@@ -116,7 +117,7 @@ def process_all_ensek_scripts():
         util.batch_logging_update(job_id, "e")
 
     except:
-        print('processAllEnsekScripts - Account Transactions raised an error')
+        print("processAllEnsekScripts - Account Transactions raised an error")
         iglog.in_prod_env(traceback.print_exc())
         raise
 

@@ -285,7 +285,8 @@ class MeterPoints:
                     metrics[0]["account_id_counter"].value += 1
                     if metrics[0]["account_id_counter"].value % 1000 == 0:
                         iglog.in_prod_env(
-                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
+                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value))
+                        )
                 api_url_mp1 = api_url_mp.format(account_id)
                 meter_info_response = self.get_api_response(api_url_mp1, head_mp, account_id, metrics)
 
@@ -308,7 +309,7 @@ class MeterPoints:
                 failed_accounts.append(account_id)
 
         if len(failed_accounts) > 0:
-            iglog.in_prod_env('{} account(s) have failed ot process. {}'.format(len(failed_accounts), failed_accounts))
+            iglog.in_prod_env("{} account(s) have failed ot process. {}".format(len(failed_accounts), failed_accounts))
         iglog.in_prod_env("Last account ID processed: {}".format(last_successful_account))
 
 
