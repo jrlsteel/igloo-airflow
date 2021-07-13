@@ -268,24 +268,27 @@ populate_ref_readings_smart_daily_all_with_usmart_reads = PythonOperator(
     dag=dag,
     task_id="populate_ref_readings_smart_daily_all_with_usmart_reads",
     python_callable=run_glue_job_await_completion,
-    op_args=["_process_ref_tables", "readings_smart_daily_usmart"],
+    op_args=["_process_ref_tables", "populate_ref_readings_smart_daily_all_with_usmart_reads"],
 )
 
 populate_ref_readings_smart_daily_all_with_asei_elec_reads = PythonOperator(
     dag=dag,
     task_id="populate_ref_readings_smart_daily_all_with_asei_elec_reads",
     python_callable=run_glue_job_await_completion,
-    op_args=["_process_ref_tables", "readings_smart_daily_asei_elec"],
+    op_args=["_process_ref_tables", "populate_ref_readings_smart_daily_all_with_asei_elec_reads"],
 )
 
 populate_ref_readings_smart_daily_all_with_asei_gas_reads = PythonOperator(
     dag=dag,
     task_id="populate_ref_readings_smart_daily_all_with_asei_gas_reads",
     python_callable=run_glue_job_await_completion,
-    op_args=["_process_ref_tables", "readings_smart_daily_asei_gas"],
+    op_args=["_process_ref_tables", "populate_ref_readings_smart_daily_all_with_asei_gas_reads"],
 )
 
-legacy_asei_smart_ref_jobs_complete = DummyOperator(dag=dag, task_id="legacy_asei_smart_ref_jobs_complete")
+legacy_asei_smart_ref_jobs_complete = DummyOperator(
+    dag=dag,
+    task_id="legacy_asei_smart_ref_jobs_complete",
+)
 
 # pylint: disable=pointless-statement,line-too-long
 # fmt: off
