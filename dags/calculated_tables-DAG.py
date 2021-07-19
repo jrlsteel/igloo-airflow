@@ -23,14 +23,14 @@ dag = DAG(
     dag_id="igloo_calculated",
     default_args=args,
     schedule_interval=None,
-    tags=["cdw"],
+    tags=["cdw", "reporting"],
     catchup=False,
     max_active_runs=1,
     description="Creates all ref_calculated_<> tables in Redshift.",
 )
 
 dependencies = {
-    "daily_reporting_customer_file": {"calculated_dependencies": ["igl_ind_eac_aq"]},
+    "daily_reporting_customer_file": {"calculated_dependencies": ["igl_ind_eac_aq", "cons_accu"]},
     "daily_reporting_ds_batch_legacy": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_igl_tariffs": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_metering": {
@@ -38,7 +38,7 @@ dependencies = {
         "slack_message": "Daily Metering File Updated (ref_calculated_metering_report)",
     },
     "daily_reporting_sales": {
-        "calculated_dependencies": [],
+        "calculated_dependencies": ["cons_accu"],
         "slack_message": "Daily Sales Report Updated (ref_calculated_sales_report)",
     },
     "daily_reporting_tariff_comparison": {
@@ -52,8 +52,8 @@ dependencies = {
     "daily_reporting_cumulative_alp_cv": {"calculated_dependencies": []},
     "daily_reporting_ref_aq_calc_params": {"calculated_dependencies": ["igl_ind_eac_aq"]},
     "daily_reporting_epc_address_linking": {"calculated_dependencies": []},
-    "daily_reporting_epc_certificates": {"calculated_dependencies": []},
-    "daily_reporting_epc_recommendations": {"calculated_dependencies": []},
+    "daily_reporting_epc_certificates": {"calculated_dependencies": ["daily_reporting_epc_address_linking"]},
+    "daily_reporting_epc_recommendations": {"calculated_dependencies": ["daily_reporting_epc_certificates"]},
     "daily_reporting_meter_port_elec": {
         "calculated_dependencies": ["daily_reporting_customer_file"],
         "slack_message": "Smart Portfolio Elec Report Updated (ref_calculated_metering_portfolio_elec_report)",
@@ -68,7 +68,7 @@ dependencies = {
     "eac_aq": {"calculated_dependencies": []},
     "igl_ind_eac_aq": {"calculated_dependencies": ["eac_aq"]},
     "cons_accu": {"calculated_dependencies": ["eac_aq", "igl_ind_eac_aq"]},
-    "tado_efficiency": {"calculated_dependencies": []},
+    "tado_efficiency": {"calculated_dependencies": ["cons_accu"]},
     "est_adv": {
         "calculated_dependencies": [
             "daily_reporting_cumulative_ppc",
