@@ -1,26 +1,21 @@
-import requests
 import json
+import logging
+import multiprocessing
+import statistics
+import time
+import timeit
+import warnings
+from multiprocessing import Manager, freeze_support, Value
+from time import sleep
+
+import requests
 from pandas.io.json import json_normalize
 from ratelimit import limits, sleep_and_retry
-import time
-from time import sleep
-import timeit
 from requests import ConnectionError
-import csv
-import multiprocessing
-from multiprocessing import Manager, Process, freeze_support, Value
-import datetime
-import pandas
-import logging
-import statistics
-from collections import defaultdict
-import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 import sys
-import os
-
 
 sys.path.append("..")
 sys.path.append("../..")
@@ -279,28 +274,43 @@ class MeterPoints:
 
     def processAccounts(self, account_ids, S3, dir_s3, metrics):
         api_url_mp, head_mp = util.get_ensek_api_info1("meterpoints")
-        api_url_mpr, head_mpr = util.get_ensek_api_info1("meterpoints_readings")
-        api_url_mprb, head_mprb = util.get_ensek_api_info1("meterpoints_readings_billeable")
+        # api_url_mpr, head_mpr = util.get_ensek_api_info1("meterpoints_readings") # Currently unused
+        # api_url_mprb, head_mprb = util.get_ensek_api_info1("meterpoints_readings_billeable") # Currently unused
 
-        current_account = ""
+        last_successful_account = ""
+        failed_accounts = []
         for account_id in account_ids:
-            current_account = account_id
-            with metrics[0]["account_id_counter"].get_lock():
-                metrics[0]["account_id_counter"].value += 1
-                if metrics[0]["account_id_counter"].value % 1000 == 0:
-                    iglog.in_prod_env("Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
-            api_url_mp1 = api_url_mp.format(account_id)
-            meter_info_response = self.get_api_response(api_url_mp1, head_mp, account_id, metrics)
-            if meter_info_response:
-                formatted_meter_info = self.format_json_response(meter_info_response)
-                meter_points = self.extract_meter_point_json(formatted_meter_info, account_id, S3, dir_s3, metrics)
-                list_meterpoints = []
-                for each_meter_point in meter_points:
-                    list_meterpoints.append(each_meter_point)
-                metrics[0]["each_account_meterpoints"].append(list_meterpoints)
-            else:
-                metrics[0]["accounts_with_no_data"].append(account_id)
-        iglog.in_prod_env("Last account ID processed: {}".format(current_account))
+            try:
+                with metrics[0]["account_id_counter"].get_lock():
+                    metrics[0]["account_id_counter"].value += 1
+                    if metrics[0]["account_id_counter"].value % 1000 == 0:
+                        iglog.in_prod_env(
+                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value))
+                        )
+                api_url_mp1 = api_url_mp.format(account_id)
+                meter_info_response = self.get_api_response(api_url_mp1, head_mp, account_id, metrics)
+
+                if meter_info_response:
+                    formatted_meter_info = self.format_json_response(meter_info_response)
+                    meter_points = self.extract_meter_point_json(formatted_meter_info, account_id, S3, dir_s3, metrics)
+                    list_meterpoints = []
+                    for each_meter_point in meter_points:
+                        list_meterpoints.append(each_meter_point)
+                    metrics[0]["each_account_meterpoints"].append(list_meterpoints)
+                else:
+                    metrics[0]["accounts_with_no_data"].append(account_id)
+
+                last_successful_account = account_id
+            except (OSError, ValueError, IOError) as err:
+                print("Caught exception for account {}, details: {}".format(account_id, err))
+                failed_accounts.append(account_id)
+            except Exception as err:
+                print("Unexpected error was caught for account {}, details: {}".format(account_id, err))
+                failed_accounts.append(account_id)
+
+        if len(failed_accounts) > 0:
+            iglog.in_prod_env("{} account(s) have failed ot process. {}".format(len(failed_accounts), failed_accounts))
+        iglog.in_prod_env("Last account ID processed: {}".format(last_successful_account))
 
 
 def process_api_extract_meterpoints():

@@ -1,18 +1,17 @@
-import timeit
-import statistics
-import requests
 import json
-import pandas
-from ratelimit import limits, sleep_and_retry
-import time
-from requests import ConnectionError
-import csv
-from multiprocessing import Manager, Process, freeze_support, Value
 import multiprocessing
-from multiprocessing import freeze_support
-
+import statistics
 import sys
-import os
+import time
+import timeit
+import traceback
+import pandas
+import requests
+
+from multiprocessing import Manager, Value
+from multiprocessing import freeze_support
+from ratelimit import limits, sleep_and_retry
+from requests import ConnectionError
 
 sys.path.append("..")
 sys.path.append("../..")
@@ -109,21 +108,25 @@ class InternalReadings:
         return data_json
 
     def processAccounts(self, account_ids, k, dir_s3, metrics):
-        current_account_id = ""
         api_url, head = util.get_ensek_api_info1("internal_readings")
         for account_id in account_ids:
-            current_account_id = account_id
-            with metrics[0]["account_id_counter"].get_lock():
-                metrics[0]["account_id_counter"].value += 1
-                if metrics[0]["account_id_counter"].value % 1000 == 0:
-                    iglog.in_prod_env("Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value)))
-            api_url1 = api_url.format(account_id)
-            internal_data_response = self.get_api_response(api_url1, head, account_id, metrics)
-            if internal_data_response:
-                formatted_internal_data = self.format_json_response(internal_data_response)
-                self.extract_internal_data_response(formatted_internal_data, account_id, k, dir_s3, metrics)
-            else:
-                metrics[0]["accounts_with_no_data"].append(account_id)
+            try:
+                with metrics[0]["account_id_counter"].get_lock():
+                    metrics[0]["account_id_counter"].value += 1
+                    if metrics[0]["account_id_counter"].value % 1000 == 0:
+                        iglog.in_prod_env(
+                            "Account IDs processesed: {}".format(str(metrics[0]["account_id_counter"].value))
+                        )
+                api_url1 = api_url.format(account_id)
+                internal_data_response = self.get_api_response(api_url1, head, account_id, metrics)
+                if internal_data_response:
+                    formatted_internal_data = self.format_json_response(internal_data_response)
+                    self.extract_internal_data_response(formatted_internal_data, account_id, k, dir_s3, metrics)
+                else:
+                    metrics[0]["accounts_with_no_data"].append(account_id)
+            except:
+                metrics[0]["accounts_failed_to_process"].append(account_id)
+                iglog.in_prod_env(traceback.print_exc())
 
 
 def main():
@@ -186,6 +189,7 @@ def main():
             "no_internal_readings_data": manager.list(),
             "account_id_counter": Value("i", 0),
             "accounts_with_no_data": manager.list(),
+            "accounts_failed_to_process": manager.list(),
             "dict_api_error_codes": manager.dict(),
         }
 

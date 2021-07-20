@@ -5,17 +5,11 @@ sys.path.append("..")
 import datetime
 from connections.connect_db import get_boto_S3_Connections, get_redshift_connection
 import common.directories
-import time
 import traceback
-import logging
 import common.utils
 from common.utils import IglooLogger
 import boto3
-import os
-import smart_open
 from conf import config
-import sentry_sdk
-import boto
 import pandas_redshift as pr
 import subprocess
 

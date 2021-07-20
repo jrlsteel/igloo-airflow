@@ -34,24 +34,19 @@ dag = DAG(
 )
 
 
-start_ensek_api_mirror_only_jobs = BashOperator(
-    task_id="start_ensek_api_mirror_only_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_api_mirror_only_jobs.py",
-    dag=dag,
-)
+def processEnsekBashOperator(script_name):
+    return BashOperator(
+        task_id=script_name,
+        bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python {}.py".format(script_name),
+        dag=dag,
+    )
 
 
-start_ensek_non_pa_staging_jobs = BashOperator(
-    task_id="start_ensek_non_pa_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_staging_jobs.py",
-    dag=dag,
-)
+start_ensek_api_mirror_only_jobs = processEnsekBashOperator("start_ensek_api_mirror_only_jobs")
 
-start_ensek_non_pa_ref_jobs = BashOperator(
-    task_id="start_ensek_non_pa_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_non_pa_ref_jobs.py",
-    dag=dag,
-)
+start_ensek_non_pa_staging_jobs = processEnsekBashOperator("start_ensek_non_pa_staging_jobs")
+
+start_ensek_non_pa_ref_jobs = processEnsekBashOperator("start_ensek_non_pa_ref_jobs")
 
 igloo_calculated_trigger = TriggerDagRunOperator(
     task_id="igloo_calculated_trigger", trigger_dag_id="igloo_calculated", dag=dag

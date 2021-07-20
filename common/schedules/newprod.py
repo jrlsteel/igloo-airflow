@@ -8,4 +8,5 @@ schedules = {
     "weather_forecasts": "00 12 * * *",
     "igloo_smart_d0380": "00 19 * * *",
     "ensek_main": "00 18 * * *",
+    "SMART": "45 09 * * *",
 }
