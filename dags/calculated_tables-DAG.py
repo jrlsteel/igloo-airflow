@@ -30,7 +30,10 @@ dag = DAG(
 )
 
 dependencies = {
-    "daily_reporting_customer_file": {"calculated_dependencies": ["igl_ind_eac_aq", "cons_accu"]},
+    "daily_reporting_customer_file": {
+        "calculated_dependencies": ["igl_ind_eac_aq", "cons_accu"],
+        "slack_message": "Daily Customer File Updated (ref_calculated_daily_customer_file)",
+    },
     "daily_reporting_ds_batch_legacy": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_igl_tariffs": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_metering": {
