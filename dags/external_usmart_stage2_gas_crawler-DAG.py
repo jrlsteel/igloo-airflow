@@ -25,7 +25,7 @@ dag = DAG(
 
 crawler_usmart_stage2_gas_task = PythonOperator(
     task_id="crawler_usmart_stage2_gas_task",
-    op_args=["data-crawler-usmart-stage2-gas"],
+    op_args=["data-crawler-stage2-usmart-4.6.1-gas"],
     python_callable=common.process_glue_crawler.run_glue_crawler,
     dag=dag,
 )
