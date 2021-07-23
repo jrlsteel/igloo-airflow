@@ -62,14 +62,14 @@ smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
 
 crawler_usmart_stage2_gas_task = PythonOperator(
     task_id="crawler_usmart_stage2_gas_task",
-    op_args=["data-crawler-usmart-stage2-gas"],
+    op_args=["data-crawler-stage2-usmart-4.6.1-gas"],
     python_callable=run_glue_crawler,
     dag=dag,
 )
 
 crawler_usmart_stage2_elec_task = PythonOperator(
     task_id="crawler_usmart_stage2_elec_task",
-    op_args=["data-crawler-usmart-stage2-elec"],
+    op_args=["data-crawler-stage2-usmart-4.6.1-elec"],
     python_callable=run_glue_crawler,
     dag=dag,
 )
