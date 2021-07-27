@@ -208,6 +208,30 @@ def verify_number_of_rows_in_table(table_name: str, expected_count: int):
         raise e
 
 
+def verify_number_of_rows_in_table_greater_than(table_name: str, expected_count: int):
+    """
+    Verifcation step, which will create and format a SQL Expression to select a count from a given table
+    This count will be compared against the provided count for that table
+
+    Expected Args = table_name=string, count=int
+    """
+    try:
+        count = get_table_count(table_name)
+        iglog.in_prod_env("table: {} : count: {}".format(table_name, count))
+        if count < expected_count:
+            error = "Failed to verify count for {} - count was greater than {}, we expected more than {}".format(
+                table_name, str(count), str(expected_count)
+            )
+            iglog.in_prod_env(error)
+            raise RuntimeError(error)
+        else:
+            iglog.in_prod_env(f"Successfully verified count of {table_name} was greater than {str(expected_count)}")
+            return True
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
+
 def verify_table_column_value_greater_than(table_name: str, column_name: str, comparison_value):
     """
     Verifcation step, which will create and format a SQL Expression to select a given column from a given table
@@ -293,6 +317,29 @@ def verify_new_api_response_files_in_s3_directory(search_filter, expected_value,
         num_matching_files = int(result.decode().strip())
         iglog.in_prod_env("Shell output: " + str(num_matching_files))
         return verify_values_within_given_percent(int(expected_value), num_matching_files, int(percent))
+    except Exception as e:
+        iglog.in_prod_env(traceback.format_exc())
+        raise e
+
+
+def verify_files_in_s3_directory(search_filter, expected_value, s3_prefix):
+    """
+    This verification step relies on the AWS command line.
+    It counts the number of files that match a 'grep' search in a given directory and compares it with an expected value.
+    The percent should that each the values should be in range of should also be specified.
+    """
+    try:
+        directory = common.utils.get_dir()
+        s3_bucket = directory["s3_bucket"]
+        query_path = f"{s3_bucket}/{s3_prefix}/"
+        iglog.in_prod_env(f"Filtering for files containting: {search_filter}, in directoy: {query_path}")
+        command = f"aws s3 ls s3://{query_path} | grep -1 '{search_filter}' | wc -l"
+        result = subprocess.check_output(command, shell=True)
+        number_of_matching_files = int(result.decode().strip())
+        iglog.in_prod_env(f"Shell output: {str(number_of_matching_files)}")
+        if number_of_matching_files <= expected_value:
+            error = f"Failed: Count of files was lower than expected value of: {int(expected_value)}, instead recieved: {number_of_matching_files}"
+            raise RuntimeError(error)
     except Exception as e:
         iglog.in_prod_env(traceback.format_exc())
         raise e

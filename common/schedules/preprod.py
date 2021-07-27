@@ -1,5 +1,6 @@
 schedules = {
     "ensek_non_pa_test": "00 07 * * *",
+    "ensek_am": "00 07 * * *",
     "ensek_non_pa": "00 07 * * *",
     "ensek_nosi": "00 19 * * *",
     "ensek_nrl": "15 18 * * *",
