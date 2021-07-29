@@ -96,25 +96,13 @@ having datediff(days, ssd, getdate()) <= 7""",
 
 
 tariff_diff_acc_ids = {
-    # LIVE_MISMATCH is temporarily removed from these queries, as it is generating
-    # large volumes of results in the time between a new tariff being added to
-    # ref_tariffs and the tariff being updated in Ensek.
-    # "daily": """select distinct account_id
-    #             from vw_tariff_checks
-    #             where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
-    #                                  'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
-    # "weekly": """select distinct account_id
-    #             from vw_tariff_checks
-    #             where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
-    #                                  'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
-    #                                  'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
     "daily": """select distinct account_id
                 from vw_tariff_checks
-                where error_code in ('LIVE_ENSEK_MISSING',
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
                                      'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
     "weekly": """select distinct account_id
                 from vw_tariff_checks
-                where error_code in ('LIVE_ENSEK_MISSING',
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
                                      'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
                                      'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
 }
