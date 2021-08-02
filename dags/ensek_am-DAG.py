@@ -254,6 +254,9 @@ for datatype, datatype_info in dag_data.items():
         )
         # make all ref jobs upstream of igloo_calculated_trigger
         igloo_calculated_trigger.set_upstream(tasks[ref_task_string])
+        tasks[ref_task_string].set_upstream(tasks[staging_task_string])
+
+    tasks[staging_task_string].set_upstream(tasks[api_task_string])
 
     # Creates verification tasks
     for prefix in datatype_info["s3_prefixes"]:
@@ -288,9 +291,6 @@ for datatype, datatype_info in dag_data.items():
         )
         table_string = f"verify_populated_{table}"
         tasks[table_string] = createRefVerificationStep(table_string, table).set_upstream(tasks[ref_task_string])
-
-    tasks[ref_task_string].set_upstream(tasks[staging_task_string])
-    tasks[staging_task_string].set_upstream(tasks[api_task_string])
 
     startensekjobs = start_ensek_api_mirror_only_jobs.StartEnsekJobs()
     if environment in ["preprod", "dev"]:
