@@ -128,6 +128,12 @@ smart_reads_billing = {
     "all": """select * from vw_etl_smart_billing_reads_all""",
 }
 
+smart_reads_usmart_asei_billing = {
+    "elec": """select * from vw_etl_smart_billing_reads_elec""",
+    "gas": """select * from vw_etl_smart_billing_reads_gas""",
+    "all": """select * from vw_etl_smart_billing_reads_all""",
+}
+
 weather_forecast = {
     "hourly": {
         "stage1": """select * from vw_etl_weather_postcode_sectors""",

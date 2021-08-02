@@ -23,12 +23,14 @@ class SyncS3:
             if "stage2" in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
                 command = "aws s3 rm {0} --recursive".format(self._destination_path)
-                status = subprocess.run(command, shell=True, env=env)
+                status = subprocess.run(
+                    command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+                )
                 print(status)
 
             print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
             command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
             print("completed")
 
@@ -37,12 +39,14 @@ class SyncS3:
             if "stage2" in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
                 command = "aws s3 rm {0} --recursive".format(self._destination_path)
-                status = subprocess.run(command, shell=True, env=env)
+                status = subprocess.run(
+                    command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+                )
                 print(status)
 
             print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
             command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
 
             print("completed")
@@ -52,12 +56,14 @@ class SyncS3:
             if "stage2" in self._source_path:
                 print("Remove existing files in {0}".format(self._destination_path))
                 command = "aws s3 rm {0} --recursive".format(self._destination_path)
-                status = subprocess.run(command, shell=True, env=env)
+                status = subprocess.run(
+                    command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+                )
                 print(status)
 
             print("Sync files in s3 from {0} to {1}".format(self._source_path, self._destination_path))
             command = "aws s3 sync {0} {1}".format(self._source_path, self._destination_path)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
 
             print("completed")
@@ -69,7 +75,7 @@ class SyncS3:
             print("Remove existing files in {0}".format(self._destination_path))
             command = "aws s3 rm {0} --recursive".format(self._destination_path)
             print(command)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
 
             print(
@@ -81,16 +87,15 @@ class SyncS3:
                 self._source_path, self._destination_path
             )
             print(command)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
             print("completed")
 
         if "preprod" in self._destination_path:
-
             print("Remove existing files in {0} --metadata-directive REPLACE".format(self._destination_path))
             command = "aws s3 rm {0} --recursive".format(self._destination_path)
             print(command)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
             print(
                 "Sync files in s3 from {0} to {1} --metadata-directive REPLACE".format(
@@ -101,7 +106,7 @@ class SyncS3:
                 self._source_path, self._destination_path
             )
             print(command)
-            status = subprocess.run(command, shell=True, env=env)
+            status = subprocess.run(command, shell=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
             print(status)
 
             print("completed")

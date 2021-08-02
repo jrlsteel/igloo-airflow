@@ -53,6 +53,12 @@ start_smart_all_billing_reads_jobs = BashOperator(
     dag=dag,
 )
 
+start_usmart_asei_smart_all_billing_reads_jobs = BashOperator(
+    task_id="start_usmart_asei_smart_all_billing_reads_jobs",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_usmart_asei_smart_reads_billing.py",
+    dag=dag,
+)
+
 smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
     dag=dag,
     task_id="smart_all_refresh_mv_hh_elec_reads_jobs_task",
@@ -174,6 +180,7 @@ truncate_ref_readings_smart_daily_all = PythonOperator(
 start_smart_all_mirror_jobs >> start_smart_all_staging_jobs
 start_smart_all_staging_jobs >> start_smart_all_ref_jobs
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
+start_smart_all_ref_jobs >> start_usmart_asei_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs
 smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
 
