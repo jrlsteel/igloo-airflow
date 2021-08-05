@@ -11,6 +11,7 @@ import multiprocessing
 from time import sleep
 import csv
 import io
+from airflow.models import Variable
 
 sys.path.append("..")
 
@@ -22,6 +23,12 @@ import boto3
 from common.secrets_manager import get_secret
 
 client = boto3.client("secretsmanager")
+
+
+def get_sla_timedelta(dag_id):
+    deltas = Variable.get("SLA_DELTAS", deserialize_json=True)
+    td = deltas[dag_id]
+    return datetime.timedelta(hours=td["hours"], minutes=td["minutes"])
 
 
 def get_env():

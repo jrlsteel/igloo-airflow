@@ -4,13 +4,15 @@ from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
 from conf import config
 from common import schedules
-from common.slack_utils import alert_slack
+from common.utils import get_sla_timedelta
+from common.slack_utils import alert_slack, post_slack_sla_alert
 from common.process_glue_job import run_glue_job_await_completion
 from process_verification.verification_template import (
     verify_files_in_s3_directory,
@@ -22,10 +24,10 @@ from common import schedules
 from process_Ensek import start_ensek_api_mirror_only_jobs
 
 dag_id = "ensek_am"
+env = config.environment_config["environment"]
 
 
 def get_schedule():
-    env = config.environment_config["environment"]
     return schedules.get_schedule(env, dag_id)
 
 
@@ -40,16 +42,26 @@ args = {
     "owner": "Airflow",
     "start_date": days_ago(2),
     "on_failure_callback": alert_slack,
+    "sla": get_sla_timedelta(dag_id),
 }
 
 dag = DAG(
     dag_id=dag_id,
     default_args=args,
     schedule_interval=get_schedule(),
+    sla_miss_callback=post_slack_sla_alert,
     tags=["cdw"],
     catchup=False,
     max_active_runs=1,
 )
+
+# sensor = ExternalTaskSensor(
+#     task_id="ensek_main_finish_sensor_task",
+#     external_dag_id="ensek_main",
+#     external_task_id="api_extract_internalreadings_bash",
+#     execution_date=datetime.datetime.today().strftime("%Y-%m-%d"),
+#     start_date=days_ago(2),
+# )
 
 # configuring info for the dag run
 
@@ -185,12 +197,12 @@ igloo_calculated_trigger.doc = task_slack_report_string.format(
 )
 
 igloo_alp_trigger = TriggerDagRunOperator(task_id="igloo_alp_trigger", trigger_dag_id="igloo_alp", dag=dag)
-
 igloo_alp_trigger.doc = task_slack_report_string.format(
     "Triggers the ALP DAG",
     "Investigate root cause and rerun depedending.",
     "This step only triggers another DAG, and is only likely to fail because of airflow config.",
 )
+# igloo_alp_trigger.set_upstream(sensor)
 
 
 tasks = {}
@@ -216,6 +228,7 @@ for datatype, datatype_info in dag_data.items():
     if last_api_extract_operator != "":
         tasks[api_task_string].set_upstream(last_api_extract_operator)
     last_api_extract_operator = tasks[api_task_string]
+    # last_api_extract_operator.set_upstream(sensor)
 
     # Creates staging tasks
     staging_task_string = datatype.replace("process", "staging")
@@ -315,3 +328,4 @@ for datatype, datatype_info in dag_data.items():
             mirror_task_string = f"mirroring_{datatype}_{prefix}"
             tasks[mirror_task_string] = createMirrorTask(mirror_task_string, prefix)
             tasks[staging_task_string].set_upstream(tasks[mirror_task_string])
+            # tasks[mirror_task_string].set_upstream(sensor)

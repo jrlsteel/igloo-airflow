@@ -4,6 +4,7 @@ from airflow.contrib.operators.slack_webhook_operator import SlackWebhookOperato
 from airflow.operators.python_operator import PythonOperator
 
 import requests
+import datetime
 import json
 
 import boto3
@@ -42,6 +43,22 @@ def post_slack_message(message, slack_channel):
             "channel": slack_channel,
             "text": message,
         },
+    )
+
+
+def post_slack_sla_alert(dag, task_list, blocking_task_list, slas, blocking_tis):
+    sla_td = dag.default_args["sla"]
+    dt = datetime.datetime.strptime(str(sla_td), "%H:%M:%S")
+    msg = f"""
+:warning: The following tasks were/are outstanding inside `{dag.dag_id}` after `{dt.strftime("%Hh %Mm %Ss")}` of runtime:"""
+    for sla in slas:
+        msg += f"""
+------------------------------
+*Task*: `{sla.task_id}`
+*Execution Date*: `{sla.execution_date}`"""
+    post_slack_message(
+        msg,
+        "prod_ops",
     )
 
 
