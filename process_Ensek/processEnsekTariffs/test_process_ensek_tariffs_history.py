@@ -789,7 +789,7 @@ def skip_test_process_ensek_tariffs_history_30_accounts(mock_multiprocessing_pro
 
     # Act
 
-    process_ensek_tariffs_history()
+    process_ensek_tariffs_history(True)
 
     # Assert
 

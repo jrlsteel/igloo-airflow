@@ -19,6 +19,7 @@ from common import utils
 from conf import config
 from connections.connect_db import get_boto_S3_Connections as s3_con
 import statistics
+import argparse
 
 iglog = utils.IglooLogger()
 
@@ -178,25 +179,35 @@ class TariffHistory(object):
                 metrics["accounts_with_no_data"].append(account_id)
 
 
-def process_ensek_tariffs_history():
-    dir_s3 = utils.get_dir()
-    bucket_name = dir_s3["s3_bucket"]
+def get_account_ids(bucket_name, with_live_mismatch):
+    account_id_sql_filter = (
+        "tariff-accounts-with-live-mismatch" if with_live_mismatch else "tariff-accounts-without-live-mismatch"
+    )
 
-    s3 = s3_con(bucket_name)
-
-    account_ids = []
-    # Enable this to test for 1 account id
     if config.test_config["enable_manual"] == "Y":
-        account_ids = config.test_config["account_ids"]
+        iglog.in_prod_env("Account ID's: Manually inputted")
+        return config.test_config["account_ids"]
 
     if config.test_config["enable_file"] == "Y":
-        account_ids = utils.get_Users_from_s3(s3)
+        s3 = s3_con(bucket_name)
+        return utils.get_Users_from_s3(s3)
 
     if config.test_config["enable_db"] == "Y":
-        account_ids = utils.get_accountID_fromDB(False, filter="tariff-diffs")
+        iglog.in_prod_env(f"Account ID's: From DB, {account_id_sql_filter}, max_db disabled")
+        return utils.get_accountID_fromDB(False, filter=account_id_sql_filter)
 
     if config.test_config["enable_db_max"] == "Y":
-        account_ids = utils.get_accountID_fromDB(True, filter="tariff-diffs")
+        iglog.in_prod_env(f"Account ID's: From DB, {account_id_sql_filter}, max_db enabled")
+        return utils.get_accountID_fromDB(True, filter=account_id_sql_filter)
+
+    iglog.in_prod_env("Account ID's: No account id filters specified")
+    return []
+
+
+def process_ensek_tariffs_history(args):
+    dir_s3 = utils.get_dir()
+    bucket_name = dir_s3["s3_bucket"]
+    account_ids = get_account_ids(bucket_name, args.with_live_mismatch)
 
     # Enable to test without multiprocessing.
     # p.process_accounts(account_ids, s3, dir_s3)
@@ -281,4 +292,13 @@ def process_ensek_tariffs_history():
 
 
 if __name__ == "__main__":
-    process_ensek_tariffs_history()
+    parser = argparse.ArgumentParser(description="Extracts tarriff data for selected account IDs from Ensek API")
+    parser.add_argument(
+        "--with_live_mismatch",
+        action="store_true",
+        default=False,
+        help="Will use a subset of account ids who do have the status LIVE_MISMATCH",
+    )
+
+    args = parser.parse_args()
+    process_ensek_tariffs_history(args)

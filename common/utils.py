@@ -206,6 +206,10 @@ def get_accountID_fromDB(get_max, filter="live"):
         sql_group = apif.pending_acc_ids
     elif filter == "tariff-diffs":
         sql_group = apif.tariff_diff_acc_ids
+    elif filter == "tariff-accounts-with-live-mismatch":
+        sql_group = apif.tariff_diff_acc_ids_with_live_mismatch
+    elif filter == "tariff-accounts-without-live-mismatch":
+        sql_group = apif.tariff_diff_acc_ids_without_live_mismatch
     elif filter == "land-registry":
         sql_group = apif.land_registry_postcodes
     elif filter == "historical-weather":

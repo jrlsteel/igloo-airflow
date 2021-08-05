@@ -98,7 +98,7 @@ dag_data = {
         ],
     },
     "process_ensek_tariffs_history": {
-        "api_bash_command": "processEnsekTariffs/process_ensek_tariffs_history.py",
+        "api_bash_command": "processEnsekTariffs/process_ensek_tariffs_history.py {{ var.value.TARIFF_WITH_LIVE_MISMATCH_BOOLEAN }}",
         "glue_staging_job_name": "process_staging_ensek_tariffs_history_files",
         "glue_staging_job_process_parameter": "ensek-tariffs",
         "glue_ref_job_name": "_process_ensek_tariffs_history_ref_tables",

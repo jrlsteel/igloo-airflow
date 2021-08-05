@@ -94,7 +94,6 @@ group by account_id
 having datediff(days, ssd, getdate()) <= 7""",
 }
 
-
 tariff_diff_acc_ids = {
     "daily": """select distinct account_id
                 from vw_tariff_checks
@@ -103,6 +102,30 @@ tariff_diff_acc_ids = {
     "weekly": """select distinct account_id
                 from vw_tariff_checks
                 where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
+                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
+}
+
+tariff_diff_acc_ids_with_live_mismatch = {
+    "daily": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
+    "weekly": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
+                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
+}
+
+tariff_diff_acc_ids_without_live_mismatch = {
+    "daily": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
+    "weekly": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING',
                                      'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
                                      'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
 }
