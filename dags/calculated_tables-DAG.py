@@ -43,7 +43,10 @@ dag = DAG(
 )
 
 ref_ensek_transactions_finish = ExternalTaskSensor(
-    task_id="ref_ensek_transactions_finish", external_dag_id="ensek_am", external_task_id="ref_ensek_transactions"
+    task_id="ref_ensek_transactions_finish",
+    external_dag_id="ensek_am",
+    external_task_id="ref_ensek_transactions",
+    start_date=days_ago(2),
 )
 
 dependencies = {
