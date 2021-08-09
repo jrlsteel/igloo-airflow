@@ -1,21 +1,14 @@
 from __future__ import print_function
 
-import time
 import sys
-from builtins import range
-from pprint import pprint
-
-from airflow.utils.dates import days_ago
 
 from airflow.models import DAG
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.utils.dates import days_ago
 
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from common.slack_utils import alert_slack
-
 
 args = {
     "owner": "Airflow",
@@ -32,7 +25,6 @@ dag = DAG(
     max_active_runs=1,
 )
 
-
 process_ensek_internal_estimates = BashOperator(
     task_id="process_ensek_internal_estimates",
     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekEstimates/process_ensek_internal_estimates.py",
@@ -44,6 +36,5 @@ process_ensek_internal_readings = BashOperator(
     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python processEnsekReadings/process_ensek_internal_readings.py",
     dag=dag,
 )
-
 
 process_ensek_internal_estimates >> process_ensek_internal_readings

@@ -4,7 +4,6 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
-from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 from common.slack_utils import alert_slack
 
