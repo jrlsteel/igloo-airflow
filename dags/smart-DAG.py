@@ -368,17 +368,32 @@ legacy_asei_smart_ref_jobs_complete = DummyOperator(
 # fmt: off
 
 # Legacy Read-to-Bill & Elective Half-hourly Settlement Trial
-start_smart_all_mirror_jobs >> smart_staging_task_list
-smart_staging_task_list >> populate_ref_readings_smart_daily_raw >> populate_ref_readings_smart_daily >> legacy_asei_smart_ref_jobs_complete
-smart_staging_task_list >> populate_ref_smart_inventory_raw >> populate_ref_smart_inventory >> legacy_asei_smart_ref_jobs_complete
+start_smart_all_mirror_jobs >> stage_smart_inventory
+# The Smart glue jobs are configured to use 80 DPUs each. As we have an account
+# limit of 300 DPUs, we can not run all the smart jobs concurrently. To avoid
+# hitting resource limits, we run the inventory staging first, then the daily gas / elec
+# reads concurrently, followed by the half-hourly gas / elec reads.
+# This also allows us to run R2B withouth being dependent on half-hourly data processing
+# completing successfully.
+stage_smart_inventory >> stage_daily_gas_reads_asei >> stage_half_hourly_gas_reads_asei >> legacy_asei_smart_ref_jobs_complete
+stage_smart_inventory >> stage_daily_elec_reads_asei >> stage_half_hourly_elec_reads_asei >> legacy_asei_smart_ref_jobs_complete
+
+stage_daily_gas_reads_asei >> populate_ref_readings_smart_daily_raw
+stage_daily_elec_reads_asei >> populate_ref_readings_smart_daily_raw
+
+populate_ref_readings_smart_daily_raw >> populate_ref_readings_smart_daily >> legacy_asei_smart_ref_jobs_complete
+stage_smart_inventory >> populate_ref_smart_inventory_raw >> populate_ref_smart_inventory >> legacy_asei_smart_ref_jobs_complete
 legacy_asei_smart_ref_jobs_complete >> start_smart_all_billing_reads_jobs
 legacy_asei_smart_ref_jobs_complete >> refresh_mv_smart_stage2_smarthalfhourlyreads_elec
 refresh_mv_smart_stage2_smarthalfhourlyreads_elec >> generate_d0379_task >> copy_d0379_to_sftp_task
 
 # Future Read-to-Bill based on reads from ASe-i & uSmart being pushed in to
-# ref_readings_smart_daily_all
-smart_staging_task_list >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
-smart_staging_task_list >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
+# ref_readings_smart_daily_all.
+# Note that the dependency on legacy_asei_smart_ref_jobs_complete is somewhat
+# arbitrary right now, and will be replaced by a dependency on staging of uSmart
+# reads when that is available.
+legacy_asei_smart_ref_jobs_complete >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
+legacy_asei_smart_ref_jobs_complete >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
 refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
 legacy_asei_smart_ref_jobs_complete >> truncate_ref_readings_smart_daily_all
 populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all

@@ -120,31 +120,10 @@ start_smart_all_billing_reads_jobs = BashOperator(
     dag=dag,
 )
 
-start_usmart_asei_smart_all_billing_reads_jobs = BashOperator(
-    task_id="start_usmart_asei_smart_all_billing_reads_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_usmart_asei_smart_reads_billing.py",
-    dag=dag,
-)
-
 smart_all_refresh_mv_hh_elec_reads_jobs = PythonOperator(
     dag=dag,
     task_id="smart_all_refresh_mv_hh_elec_reads_jobs_task",
     python_callable=refresh_mv_hh_elec_reads,
-)
-
-
-crawler_usmart_stage2_gas_task = PythonOperator(
-    task_id="crawler_usmart_stage2_gas_task",
-    op_args=["data-crawler-stage2-usmart-4.6.1-gas"],
-    python_callable=run_glue_crawler,
-    dag=dag,
-)
-
-crawler_usmart_stage2_elec_task = PythonOperator(
-    task_id="crawler_usmart_stage2_elec_task",
-    op_args=["data-crawler-stage2-usmart-4.6.1-elec"],
-    python_callable=run_glue_crawler,
-    dag=dag,
 )
 
 
@@ -206,57 +185,23 @@ def sql_wrapper(sql):
         raise e
 
 
-refresh_mv_readings_smart_daily_usmart = PythonOperator(
-    task_id="refresh_mv_readings_smart_daily_usmart",
-    python_callable=sql_wrapper,
-    op_args=["REFRESH MATERIALIZED VIEW mv_readings_smart_daily_usmart"],
-    dag=dag,
-)
-
-
-populate_ref_readings_smart_daily_uSmart_raw = PythonOperator(
-    task_id="populate_ref_readings_smart_daily_uSmart_raw",
-    python_callable=sql_wrapper,
-    op_args=[
-        """ TRUNCATE ref_readings_smart_daily_uSmart_raw;
-            INSERT INTO ref_readings_smart_daily_uSmart_raw (SELECT cast(mpxn as bigint),
-                                                            deviceid,
-                                                            "type",
-                                                            total_consumption,
-                                                            register_num,
-                                                            register_value,
-                                                            "timestamp",
-                                                            getdate()
-                                                            FROM mv_readings_smart_daily_usmart)
-            """
-    ],
-    dag=dag,
-)
-
-truncate_ref_readings_smart_daily_all = PythonOperator(
-    dag=dag,
-    task_id="truncate_ref_readings_smart_daily_all",
-    python_callable=sql_wrapper,
-    op_args=["""TRUNCATE ref_readings_smart_daily_all"""],
-)
-
-# pylint: disable=pointless-statement
+# pylint: disable=pointless-statement,line-too-long
 # fmt: off
 
 # Legacy Read-to-Bill & Half-hourly Settlement Trial
-start_smart_all_mirror_jobs >> smart_staging_task_list
-smart_staging_task_list >> start_smart_all_ref_jobs
+start_smart_all_mirror_jobs >> stage_smart_inventory
+# The Smart glue jobs are configured to use 80 DPUs each. As we have an account
+# limit of 300 DPUs, we can not run all the smart jobs concurrently. To avoid
+# hitting resource limits, we run the inventory staging first, then the daily gas / elec
+# reads concurrently, followed by the half-hourly gas / elec reads.
+# This also allows us to run R2B withouth being dependent on half-hourly data processing
+# completing successfully.
+stage_smart_inventory >> stage_daily_gas_reads_asei >> stage_half_hourly_gas_reads_asei >> start_smart_all_ref_jobs
+stage_smart_inventory >> stage_daily_elec_reads_asei >> stage_half_hourly_elec_reads_asei >> start_smart_all_ref_jobs
+
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
-start_smart_all_ref_jobs >> start_usmart_asei_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs
 smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_sftp_task
 
-# Future Read-to-Bill based on reads from ASe-i & uSmart being pushed in to
-# ref_readings_smart_daily_all
-smart_staging_task_list >> crawler_usmart_stage2_gas_task >> refresh_mv_readings_smart_daily_usmart
-smart_staging_task_list >> crawler_usmart_stage2_elec_task >> refresh_mv_readings_smart_daily_usmart
-refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
-populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
-
 # fmt: on
-# pylint: enable=pointless-statement
+# pylint: enable=pointless-statement,line-too-long
