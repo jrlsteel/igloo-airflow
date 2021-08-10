@@ -187,14 +187,6 @@ task_slack_report_string = """
 
 # non iterable tasks
 # dependencies for these tasks created at the bottom of the script
-igloo_calculated_trigger = TriggerDagRunOperator(
-    task_id="igloo_calculated_trigger", trigger_dag_id="igloo_calculated", dag=dag
-)
-igloo_calculated_trigger.doc = task_slack_report_string.format(
-    "Triggers the Igloo_Calculated DAG",
-    "Investigate root cause and rerun depedending.",
-    "This step only triggers another DAG, and is only likely to fail because of airflow config.",
-)
 
 igloo_alp_trigger = TriggerDagRunOperator(task_id="igloo_alp_trigger", trigger_dag_id="igloo_alp", dag=dag)
 igloo_alp_trigger.doc = task_slack_report_string.format(
@@ -265,8 +257,6 @@ for datatype, datatype_info in dag_data.items():
                 "Given this task is long running, rerunning it would impact other batch processes significantly.",
             ),
         )
-        # make all ref jobs upstream of igloo_calculated_trigger
-        igloo_calculated_trigger.set_upstream(tasks[ref_task_string])
         tasks[ref_task_string].set_upstream(tasks[staging_task_string])
 
     tasks[staging_task_string].set_upstream(tasks[api_task_string])
