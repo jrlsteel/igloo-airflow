@@ -2,3 +2,4 @@
 .logs/
 .files/sample_schema/
 .files/__pycache__/
+.idea/

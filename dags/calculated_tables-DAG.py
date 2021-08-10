@@ -6,27 +6,47 @@ from airflow.utils.dates import days_ago
 
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack, post_slack_message
-from common import process_glue_job
+import datetime
+from conf import config
+from common.utils import get_sla_timedelta
+from common.slack_utils import alert_slack, post_slack_message, post_slack_sla_alert
+from common import process_glue_job, schedules
+
+dag_id = "igloo_calculated"
+env = config.environment_config["environment"]
+
+
+def get_schedule():
+    return schedules.get_schedule(env, dag_id)
 
 
 args = {
     "owner": "Airflow",
     "start_date": days_ago(2),  # don't know what this is doing
     "on_failure_callback": alert_slack,
+    "sla": get_sla_timedelta(dag_id),
 }
 
 dag = DAG(
-    dag_id="igloo_calculated",
+    dag_id=dag_id,
     default_args=args,
-    schedule_interval=None,
+    schedule_interval=get_schedule(),
+    sla_miss_callback=post_slack_sla_alert,
     tags=["cdw", "reporting"],
     catchup=False,
     max_active_runs=1,
     description="Creates all ref_calculated_<> tables in Redshift.",
+)
+
+ref_ensek_transactions_finish = ExternalTaskSensor(
+    task_id="ref_ensek_transactions_finish",
+    external_dag_id="ensek_am",
+    external_task_id="ref_ensek_transactions",
+    start_date=days_ago(2),
 )
 
 dependencies = {
@@ -37,7 +57,7 @@ dependencies = {
     "daily_reporting_ds_batch_legacy": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_igl_tariffs": {"calculated_dependencies": ["daily_reporting_customer_file"]},
     "daily_reporting_metering": {
-        "calculated_dependencies": [],
+        "calculated_dependencies": ["ref_ensek_transactions_finish"],
         "slack_message": "Daily Metering File Updated (ref_calculated_metering_report)",
     },
     "daily_reporting_sales": {
@@ -50,11 +70,11 @@ dependencies = {
             "daily_reporting_igl_tariffs",
         ]
     },
-    "daily_reporting_cumulative_ppc": {"calculated_dependencies": []},
+    "daily_reporting_cumulative_ppc": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
     "daily_reporting_eac_calc_params": {"calculated_dependencies": ["igl_ind_eac_aq"]},
-    "daily_reporting_cumulative_alp_cv": {"calculated_dependencies": []},
+    "daily_reporting_cumulative_alp_cv": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
     "daily_reporting_ref_aq_calc_params": {"calculated_dependencies": ["igl_ind_eac_aq"]},
-    "daily_reporting_epc_address_linking": {"calculated_dependencies": []},
+    "daily_reporting_epc_address_linking": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
     "daily_reporting_epc_certificates": {"calculated_dependencies": ["daily_reporting_epc_address_linking"]},
     "daily_reporting_epc_recommendations": {"calculated_dependencies": ["daily_reporting_epc_certificates"]},
     "daily_reporting_meter_port_elec": {
@@ -65,10 +85,10 @@ dependencies = {
         "calculated_dependencies": ["daily_reporting_customer_file"],
         "slack_message": "Smart Portfolio Gas Report Updated (ref_calculated_metering_portfolio_gas_report)",
     },
-    "daily_reporting_smart_missing_invalid_reads": {"calculated_dependencies": []},
-    "daily_reporting_account_debt_status": {"calculated_dependencies": []},
-    "daily_reporting_magnum_patches": {"calculated_dependencies": []},
-    "eac_aq": {"calculated_dependencies": []},
+    "daily_reporting_smart_missing_invalid_reads": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
+    "daily_reporting_account_debt_status": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
+    "daily_reporting_magnum_patches": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
+    "eac_aq": {"calculated_dependencies": ["ref_ensek_transactions_finish"]},
     "igl_ind_eac_aq": {"calculated_dependencies": ["eac_aq"]},
     "cons_accu": {"calculated_dependencies": ["eac_aq", "igl_ind_eac_aq"]},
     "tado_efficiency": {"calculated_dependencies": ["cons_accu"]},
@@ -83,7 +103,7 @@ dependencies = {
 }
 
 # Create all processing tasks
-tasks = {}
+tasks = {"ref_ensek_transactions_finish": ref_ensek_transactions_finish}
 for report_name, report_info in dependencies.items():
     tasks[report_name] = PythonOperator(
         task_id=report_name,

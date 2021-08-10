@@ -139,6 +139,22 @@ if __name__ == "__main__":
 
         # # run processing mirror job
         print(
+            "Smart All Mirror uSmart Elec job is running...".format(datetime.now().strftime("%H:%M:%S"), s.process_name)
+        )
+        source_input = "s3://" + s3_source_bucket + "/stage1/uSmart/4.6.1/Elec/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/uSmart/4.6.1/Elec/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print(
+            "Smart All Mirror uSmart Gas job is running...".format(datetime.now().strftime("%H:%M:%S"), s.process_name)
+        )
+        source_input = "s3://" + s3_source_bucket + "/stage1/uSmart/4.6.1/Gas/"
+        destination_input = "s3://" + s3_destination_bucket + "/stage1/uSmart/4.6.1/Gas/"
+        s.submit_process_s3_mirror_job(source_input, destination_input)
+
+        # # run processing mirror job
+        print(
             "Smart All Mirror MeterReads Gas job is running...".format(
                 datetime.now().strftime("%H:%M:%S"), s.process_name
             )

@@ -94,7 +94,6 @@ group by account_id
 having datediff(days, ssd, getdate()) <= 7""",
 }
 
-
 tariff_diff_acc_ids = {
     # LIVE_MISMATCH is temporarily removed from these queries, as it is generating
     # large volumes of results in the time between a new tariff being added to
@@ -108,6 +107,30 @@ tariff_diff_acc_ids = {
     #             where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
     #                                  'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
     #                                  'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
+    "daily": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
+    "weekly": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
+                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
+}
+
+tariff_diff_acc_ids_with_live_mismatch = {
+    "daily": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH')""",
+    "weekly": """select distinct account_id
+                from vw_tariff_checks
+                where error_code in ('LIVE_ENSEK_MISSING', 'LIVE_MISMATCH',
+                                     'PENDING_ENSEK_MISSING', 'PENDING_MISMATCH',
+                                     'FINAL_ENSEK_MISSING', 'FINAL_MISMATCH')""",
+}
+
+tariff_diff_acc_ids_without_live_mismatch = {
     "daily": """select distinct account_id
                 from vw_tariff_checks
                 where error_code in ('LIVE_ENSEK_MISSING',
@@ -135,6 +158,12 @@ weather_postcodes = {
 }
 
 smart_reads_billing = {
+    "elec": """select * from vw_etl_smart_billing_reads_elec""",
+    "gas": """select * from vw_etl_smart_billing_reads_gas""",
+    "all": """select * from vw_etl_smart_billing_reads_all""",
+}
+
+smart_reads_usmart_asei_billing = {
     "elec": """select * from vw_etl_smart_billing_reads_elec""",
     "gas": """select * from vw_etl_smart_billing_reads_gas""",
     "all": """select * from vw_etl_smart_billing_reads_all""",

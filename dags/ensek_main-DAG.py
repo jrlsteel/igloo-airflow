@@ -8,8 +8,9 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import common
+from common.utils import get_sla_timedelta
 from common.process_glue_job import run_glue_job_await_completion
-from common.slack_utils import alert_slack
+from common.slack_utils import alert_slack, post_slack_sla_alert
 from process_verification.verification_template import (
     verify_new_api_response_files_in_s3_directory,
     verify_seventeen_new_files_in_s3,
@@ -20,10 +21,10 @@ from conf import config
 from common import schedules
 
 dag_id = "ensek_main"
+env = config.environment_config["environment"]
 
 
 def get_schedule():
-    env = config.environment_config["environment"]
     return schedules.get_schedule(env, dag_id)
 
 
@@ -33,8 +34,10 @@ dag = DAG(
         "owner": "Airflow",
         "start_date": days_ago(2),
         "on_failure_callback": alert_slack,
+        "sla": get_sla_timedelta(dag_id),
     },
     schedule_interval=get_schedule(),
+    sla_miss_callback=post_slack_sla_alert,
     tags=[
         "cdw",
         "ensek",

@@ -11,6 +11,7 @@ import multiprocessing
 from time import sleep
 import csv
 import io
+from airflow.models import Variable
 
 sys.path.append("..")
 
@@ -22,6 +23,12 @@ import boto3
 from common.secrets_manager import get_secret
 
 client = boto3.client("secretsmanager")
+
+
+def get_sla_timedelta(dag_id):
+    deltas = Variable.get("SLA_DELTAS", deserialize_json=True)
+    td = deltas[dag_id]
+    return datetime.timedelta(hours=td["hours"], minutes=td["minutes"])
 
 
 def get_env():
@@ -199,6 +206,10 @@ def get_accountID_fromDB(get_max, filter="live"):
         sql_group = apif.pending_acc_ids
     elif filter == "tariff-diffs":
         sql_group = apif.tariff_diff_acc_ids
+    elif filter == "tariff-accounts-with-live-mismatch":
+        sql_group = apif.tariff_diff_acc_ids_with_live_mismatch
+    elif filter == "tariff-accounts-without-live-mismatch":
+        sql_group = apif.tariff_diff_acc_ids_without_live_mismatch
     elif filter == "land-registry":
         sql_group = apif.land_registry_postcodes
     elif filter == "historical-weather":

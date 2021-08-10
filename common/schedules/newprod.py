@@ -10,4 +10,5 @@ schedules = {
     "igloo_smart_d0380": "00 19 * * *",
     "ensek_main": "00 18 * * *",
     "SMART": "45 09 * * *",
+    "igloo_calculated": "00 01 * * *",
 }
