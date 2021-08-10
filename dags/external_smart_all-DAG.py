@@ -11,7 +11,7 @@ from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
 from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 from common.slack_utils import alert_slack
 import common
-
+from common.process_glue_job import run_glue_job_await_completion
 from common.process_glue_crawler import run_glue_crawler
 
 args = {
@@ -29,15 +29,82 @@ dag = DAG(
     max_active_runs=1,
 )
 
+stage_daily_gas_reads_asei = PythonOperator(
+    task_id="stage_daily_gas_reads_asei",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_smart_files",
+        "asei-smart-reads-4.6.1-gas",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id.
+        *Remidiation* Escalate and assess best recovery process.
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset.""",
+)
+
+stage_daily_elec_reads_asei = PythonOperator(
+    task_id="stage_daily_elec_reads_asei",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_smart_files",
+        "asei-smart-reads-4.6.1-elec",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id.
+        *Remidiation* Escalate and assess best recovery process.
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset.""",
+)
+
+stage_half_hourly_gas_reads_asei = PythonOperator(
+    task_id="stage_half_hourly_gas_reads_asei",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_smart_files",
+        "asei-smart-reads-4.8.1-gas",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id.
+        *Remidiation* Escalate and assess best recovery process.
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset.""",
+)
+
+stage_half_hourly_elec_reads_asei = PythonOperator(
+    task_id="stage_half_hourly_elec_reads_asei",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_smart_files",
+        "asei-smart-reads-4.8.1-elec",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id.
+        *Remidiation* Escalate and assess best recovery process.
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset.""",
+)
+
+stage_smart_inventory = PythonOperator(
+    task_id="stage_smart_inventory",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_smart_files",
+        "smart-inventory",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id.
+        *Remidiation* Escalate and assess best recovery process.
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset.""",
+)
+
+smart_staging_task_list = [
+    stage_smart_inventory,
+    stage_daily_gas_reads_asei,
+    stage_daily_elec_reads_asei,
+    stage_half_hourly_gas_reads_asei,
+    stage_half_hourly_elec_reads_asei,
+]
+
 start_smart_all_mirror_jobs = BashOperator(
     task_id="start_smart_all_mirror_jobs",
     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_mirror_jobs.py",
-    dag=dag,
-)
-
-start_smart_all_staging_jobs = BashOperator(
-    task_id="start_smart_all_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_staging_jobs.py",
     dag=dag,
 )
 
@@ -177,8 +244,8 @@ truncate_ref_readings_smart_daily_all = PythonOperator(
 # fmt: off
 
 # Legacy Read-to-Bill & Half-hourly Settlement Trial
-start_smart_all_mirror_jobs >> start_smart_all_staging_jobs
-start_smart_all_staging_jobs >> start_smart_all_ref_jobs
+start_smart_all_mirror_jobs >> smart_staging_task_list
+smart_staging_task_list >> start_smart_all_ref_jobs
 start_smart_all_ref_jobs >> start_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> start_usmart_asei_smart_all_billing_reads_jobs
 start_smart_all_ref_jobs >> smart_all_refresh_mv_hh_elec_reads_jobs
@@ -186,8 +253,8 @@ smart_all_refresh_mv_hh_elec_reads_jobs >> generate_d0379_task >> copy_d0379_to_
 
 # Future Read-to-Bill based on reads from ASe-i & uSmart being pushed in to
 # ref_readings_smart_daily_all
-start_smart_all_staging_jobs >> crawler_usmart_stage2_gas_task >> refresh_mv_readings_smart_daily_usmart
-start_smart_all_staging_jobs >> crawler_usmart_stage2_elec_task >> refresh_mv_readings_smart_daily_usmart
+smart_staging_task_list >> crawler_usmart_stage2_gas_task >> refresh_mv_readings_smart_daily_usmart
+smart_staging_task_list >> crawler_usmart_stage2_elec_task >> refresh_mv_readings_smart_daily_usmart
 refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
 populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
 
