@@ -1,16 +1,10 @@
 from __future__ import print_function
 
-import time
 import sys
-from builtins import range
-from pprint import pprint
-
-from airflow.utils.dates import days_ago
 
 from airflow.models import DAG
-from airflow.operators.python_operator import PythonOperator
-from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.utils.dates import days_ago
 
 sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
