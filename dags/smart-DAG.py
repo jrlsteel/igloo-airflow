@@ -163,6 +163,33 @@ smart_staging_task_list = [
     stage_half_hourly_elec_reads_asei,
 ]
 
+stage_usmart_4_6_1_gas = PythonOperator(
+    task_id="stage_usmart_4_6_1_gas",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_usmart_daily_files",
+        "usmart-daily-gas",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id
+        *Remidiation* Escalate and assess best recovery process
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset""",
+)
+
+stage_usmart_4_6_1_elec = PythonOperator(
+    task_id="stage_usmart_4_6_1_elec",
+    python_callable=run_glue_job_await_completion,
+    op_args=[
+        "process_staging_usmart_daily_files",
+        "usmart-daily-elec",
+    ],
+    dag=dag,
+    doc_md=""" *Purpose* Runs Glue Job for data described in task_id
+        *Remidiation* Escalate and assess best recovery process
+        *Justificaton* Upon failure it is likely stage 2 files have not been updated for this dataset""",
+)
+
+
 # Executes glue job '_process_ref_tables' with processJob argument 'smart_reader_daily_reporting'
 # 'smart_reader_daily_reporting' is defined in the 'report_groups' dict in process_ensek_data 'report_definitions.py'
 # _process_ref_tables is the name of a glue job, it's script location is
@@ -387,13 +414,14 @@ legacy_asei_smart_ref_jobs_complete >> start_smart_all_billing_reads_jobs
 legacy_asei_smart_ref_jobs_complete >> refresh_mv_smart_stage2_smarthalfhourlyreads_elec
 refresh_mv_smart_stage2_smarthalfhourlyreads_elec >> generate_d0379_task >> copy_d0379_to_sftp_task
 
+
 # Future Read-to-Bill based on reads from ASe-i & uSmart being pushed in to
 # ref_readings_smart_daily_all.
 # Note that the dependency on legacy_asei_smart_ref_jobs_complete is somewhat
 # arbitrary right now, and will be replaced by a dependency on staging of uSmart
 # reads when that is available.
-legacy_asei_smart_ref_jobs_complete >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
-legacy_asei_smart_ref_jobs_complete >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
+start_smart_all_mirror_jobs >> stage_usmart_4_6_1_gas >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
+start_smart_all_mirror_jobs >> stage_usmart_4_6_1_elec >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
 refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
 legacy_asei_smart_ref_jobs_complete >> truncate_ref_readings_smart_daily_all
 populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
