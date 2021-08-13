@@ -18,6 +18,7 @@ sys.path.append("..")
 from conf import config as con
 from common import directories as dirs3
 from common import api_filters as apif
+from common import Refresh_UAT as refresh
 
 import boto3
 from common.secrets_manager import get_secret
@@ -579,3 +580,25 @@ class IglooLogger:
         else:
             source_string = ""
         print(timestamp_string + source_string + message)
+
+
+def process_s3_mirror_job(job_name, source_input, destination_input):
+    """
+    Calls the utils/Refresh_UAT.py script which mirrors s3 data from source to destination fdlder
+    :return: None
+    """
+    logger = IglooLogger(source=job_name)
+    logger.in_prod_env("Attemping mirror job: {job_name}")
+    logger.in_prod_env(f"Source: {source_input} \nSource Type: {type(source_input)}")
+    logger.in_prod_env(f"Destination: {source_input} \nDestination Type: {type(destination_input)}")
+
+    start = timeit.default_timer()
+    r = refresh.SyncS3(source_input, destination_input)
+    r.process_sync(
+        env={
+            "AWS_ACCESS_KEY_ID": con.s3_config["access_key"],
+            "AWS_SECRET_ACCESS_KEY": con.s3_config["secret_key"],
+        }
+    )
+
+    logger.in_prod_env("Mirror job completed in {:.2f} seconds".format(float(timeit.default_timer() - start)))

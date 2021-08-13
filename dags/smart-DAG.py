@@ -16,6 +16,7 @@ from common.process_glue_crawler import run_glue_crawler
 from common.process_glue_job import run_glue_job_await_completion
 from conf import config
 from common import schedules
+from common import utils as util
 
 dag_id = "SMART"
 
@@ -81,12 +82,7 @@ dag = DAG(
     tags=["cdw"],
     catchup=False,
     max_active_runs=1,
-)
-
-start_smart_all_mirror_jobs = BashOperator(
-    task_id="start_smart_all_mirror_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_mirror_jobs.py",
-    dag=dag,
+    description="Smart DAG 1.0.2",
 )
 
 
@@ -395,7 +391,6 @@ legacy_asei_smart_ref_jobs_complete = DummyOperator(
 # fmt: off
 
 # Legacy Read-to-Bill & Elective Half-hourly Settlement Trial
-start_smart_all_mirror_jobs >> stage_smart_inventory
 # The Smart glue jobs are configured to use 80 DPUs each. As we have an account
 # limit of 300 DPUs, we can not run all the smart jobs concurrently. To avoid
 # hitting resource limits, we run the inventory staging first, then the daily gas / elec
@@ -420,8 +415,8 @@ refresh_mv_smart_stage2_smarthalfhourlyreads_elec >> generate_d0379_task >> copy
 # Note that the dependency on legacy_asei_smart_ref_jobs_complete is somewhat
 # arbitrary right now, and will be replaced by a dependency on staging of uSmart
 # reads when that is available.
-start_smart_all_mirror_jobs >> stage_usmart_4_6_1_gas >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
-start_smart_all_mirror_jobs >> stage_usmart_4_6_1_elec >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
+stage_usmart_4_6_1_gas >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
+stage_usmart_4_6_1_elec >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
 refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
 legacy_asei_smart_ref_jobs_complete >> truncate_ref_readings_smart_daily_all
 populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
@@ -431,3 +426,73 @@ truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_w
 
 # fmt: on
 # pylint: enable=pointless-statement,line-too-long
+
+
+# Mirror steps
+environment = util.get_env()
+directory = util.get_dir()
+destination_bucket = directory["s3_smart_bucket"]
+source_bucket = directory["s3_smart_source_bucket"]
+s3_temp_destination_uat_bucket = directory["s3_temp_hh_uat_bucket"]
+if environment in ["preprod", "dev"]:
+
+    def createMirrorTask(task_id, path, s3_source_bucket, s3_destination_bucket):
+        """
+        Wrapper for mirror etl
+        """
+        return PythonOperator(
+            task_id=task_id,
+            python_callable=util.process_s3_mirror_job,
+            op_kwargs={
+                "job_name": task_id,
+                "source_input": f"s3://{s3_source_bucket}/stage1/{path}/",
+                "destination_input": f"s3://{s3_destination_bucket}/stage1/{path}/",
+            },
+            dag=dag,
+        )
+
+    mirror_asei_smart_inventory = createMirrorTask(
+        "mirror_asei_smart_inventory", "Inventory", source_bucket, destination_bucket
+    )
+    mirror_asei_smartreads_daily_elec = createMirrorTask(
+        "mirror_asei_smartreads_daily_elec", "ReadingsSmart/MeterReads/Elec", source_bucket, destination_bucket
+    )
+    mirror_asei_smartreads_daily_gas = createMirrorTask(
+        "mirror_asei_smartreads_daily_gas", "ReadingsSmart/MeterReads/Gas", source_bucket, destination_bucket
+    )
+    mirror_usmart_smartreads_daily_elec = createMirrorTask(
+        "mirror_usmart_smartreads_daily_elec", "uSmart/4.6.1/Elec", source_bucket, destination_bucket
+    )
+    mirror_usmart_smartreads_daily_gas = createMirrorTask(
+        "mirror_usmart_smartreads_daily_gas", "uSmart/4.6.1/Gas", source_bucket, destination_bucket
+    )
+    mirror_asei_smartreadds_hh_elec = createMirrorTask(
+        "mirror_asei_smartreadds_hh_elec", "ReadingsSmart/ProfileData/Elec", source_bucket, destination_bucket
+    )
+    mirror_asei_smartreadds_hh_gas = createMirrorTask(
+        "mirror_asei_smartreadds_hh_gas", "ReadingsSmart/ProfileData/Gas", source_bucket, destination_bucket
+    )
+    mirror_stage2_usmart_smartreads_hh_elec = createMirrorTask(
+        "mirror_stage2_usmart_smartreads_hh_elec",
+        "stage2_SmartHalfHourlyReads_Gas",
+        source_bucket,
+        s3_temp_destination_uat_bucket,
+    )
+    mirror_stage2_usmart_smartreads_hh_gas = createMirrorTask(
+        "mirror_stage2_usmart_smartreads_hh_gas",
+        "stage2_SmartHalfHourlyReads_Elec",
+        source_bucket,
+        s3_temp_destination_uat_bucket,
+    )
+    # USMART FLOW
+    mirror_stage2_usmart_smartreads_hh_elec
+    mirror_stage2_usmart_smartreads_hh_gas
+    mirror_usmart_smartreads_daily_elec >> stage_usmart_4_6_1_elec
+    mirror_usmart_smartreads_daily_gas >> stage_usmart_4_6_1_gas
+
+    # ASEI FLOW
+    mirror_asei_smart_inventory >> stage_smart_inventory
+    mirror_asei_smartreadds_hh_elec >> stage_half_hourly_elec_reads_asei
+    mirror_asei_smartreadds_hh_gas >> stage_half_hourly_gas_reads_asei
+    mirror_asei_smartreads_daily_elec >> stage_daily_elec_reads_asei
+    mirror_asei_smartreads_daily_gas >> stage_daily_gas_reads_asei
