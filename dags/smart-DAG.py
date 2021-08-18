@@ -289,7 +289,7 @@ populate_ref_smart_inventory = PythonOperator(
 
 start_smart_all_billing_reads_jobs = BashOperator(
     task_id="start_smart_all_billing_reads_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_smart_reads_billing.py",
+    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python r2b.py --billing-window-start-date {{ tomorrow_ds }} {{ var.value.R2B_CLI_PARAMS }}",
     dag=dag,
 )
 
@@ -382,9 +382,14 @@ populate_ref_readings_smart_daily_all_with_asei_gas_reads = PythonOperator(
     op_args=["_process_ref_tables", "populate_ref_readings_smart_daily_all_with_asei_gas_reads"],
 )
 
-legacy_asei_smart_ref_jobs_complete = DummyOperator(
+legacy_asei_daily_smart_ref_jobs_complete = DummyOperator(
     dag=dag,
-    task_id="legacy_asei_smart_ref_jobs_complete",
+    task_id="legacy_asei_daily_smart_ref_jobs_complete",
+)
+
+legacy_asei_half_hourly_smart_ref_jobs_complete = DummyOperator(
+    dag=dag,
+    task_id="legacy_asei_half_hourly_smart_ref_jobs_complete",
 )
 
 # pylint: disable=pointless-statement,line-too-long
@@ -397,16 +402,15 @@ legacy_asei_smart_ref_jobs_complete = DummyOperator(
 # reads concurrently, followed by the half-hourly gas / elec reads.
 # This also allows us to run R2B withouth being dependent on half-hourly data processing
 # completing successfully.
-stage_smart_inventory >> stage_daily_gas_reads_asei >> stage_half_hourly_gas_reads_asei >> legacy_asei_smart_ref_jobs_complete
-stage_smart_inventory >> stage_daily_elec_reads_asei >> stage_half_hourly_elec_reads_asei >> legacy_asei_smart_ref_jobs_complete
+stage_smart_inventory >> stage_daily_gas_reads_asei >> stage_half_hourly_gas_reads_asei >> legacy_asei_half_hourly_smart_ref_jobs_complete
+stage_smart_inventory >> stage_daily_elec_reads_asei >> stage_half_hourly_elec_reads_asei >> legacy_asei_half_hourly_smart_ref_jobs_complete
 
 stage_daily_gas_reads_asei >> populate_ref_readings_smart_daily_raw
 stage_daily_elec_reads_asei >> populate_ref_readings_smart_daily_raw
 
-populate_ref_readings_smart_daily_raw >> populate_ref_readings_smart_daily >> legacy_asei_smart_ref_jobs_complete
-stage_smart_inventory >> populate_ref_smart_inventory_raw >> populate_ref_smart_inventory >> legacy_asei_smart_ref_jobs_complete
-legacy_asei_smart_ref_jobs_complete >> start_smart_all_billing_reads_jobs
-legacy_asei_smart_ref_jobs_complete >> refresh_mv_smart_stage2_smarthalfhourlyreads_elec
+populate_ref_readings_smart_daily_raw >> populate_ref_readings_smart_daily >> legacy_asei_daily_smart_ref_jobs_complete
+stage_smart_inventory >> populate_ref_smart_inventory_raw >> populate_ref_smart_inventory >> legacy_asei_daily_smart_ref_jobs_complete
+legacy_asei_half_hourly_smart_ref_jobs_complete >> refresh_mv_smart_stage2_smarthalfhourlyreads_elec
 refresh_mv_smart_stage2_smarthalfhourlyreads_elec >> generate_d0379_task >> copy_d0379_to_sftp_task
 
 
@@ -418,15 +422,11 @@ refresh_mv_smart_stage2_smarthalfhourlyreads_elec >> generate_d0379_task >> copy
 stage_usmart_4_6_1_gas >> crawl_stage2_usmart_4_6_1_gas >> refresh_mv_readings_smart_daily_usmart
 stage_usmart_4_6_1_elec >> crawl_stage2_usmart_4_6_1_elec >> refresh_mv_readings_smart_daily_usmart
 refresh_mv_readings_smart_daily_usmart >> populate_ref_readings_smart_daily_uSmart_raw
-legacy_asei_smart_ref_jobs_complete >> truncate_ref_readings_smart_daily_all
+legacy_asei_daily_smart_ref_jobs_complete >> truncate_ref_readings_smart_daily_all
 populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_daily_all
-truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_usmart_reads
-truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_elec_reads
-truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_gas_reads
-
-# fmt: on
-# pylint: enable=pointless-statement,line-too-long
-
+truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_usmart_reads >> start_smart_all_billing_reads_jobs
+truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_elec_reads >> start_smart_all_billing_reads_jobs
+truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_gas_reads >> start_smart_all_billing_reads_jobs
 
 # Mirror steps
 environment = util.get_env()
@@ -436,7 +436,7 @@ source_bucket = directory["s3_smart_source_bucket"]
 s3_temp_destination_uat_bucket = directory["s3_temp_hh_uat_bucket"]
 if environment in ["preprod", "dev"]:
 
-    def createMirrorTask(task_id, path, s3_source_bucket, s3_destination_bucket):
+    def create_mirror_task(task_id, path, s3_source_bucket, s3_destination_bucket):
         """
         Wrapper for mirror etl
         """
@@ -451,34 +451,34 @@ if environment in ["preprod", "dev"]:
             dag=dag,
         )
 
-    mirror_asei_smart_inventory = createMirrorTask(
+    mirror_asei_smart_inventory = create_mirror_task(
         "mirror_asei_smart_inventory", "Inventory", source_bucket, destination_bucket
     )
-    mirror_asei_smartreads_daily_elec = createMirrorTask(
+    mirror_asei_smartreads_daily_elec = create_mirror_task(
         "mirror_asei_smartreads_daily_elec", "ReadingsSmart/MeterReads/Elec", source_bucket, destination_bucket
     )
-    mirror_asei_smartreads_daily_gas = createMirrorTask(
+    mirror_asei_smartreads_daily_gas = create_mirror_task(
         "mirror_asei_smartreads_daily_gas", "ReadingsSmart/MeterReads/Gas", source_bucket, destination_bucket
     )
-    mirror_usmart_smartreads_daily_elec = createMirrorTask(
+    mirror_usmart_smartreads_daily_elec = create_mirror_task(
         "mirror_usmart_smartreads_daily_elec", "uSmart/4.6.1/Elec", source_bucket, destination_bucket
     )
-    mirror_usmart_smartreads_daily_gas = createMirrorTask(
+    mirror_usmart_smartreads_daily_gas = create_mirror_task(
         "mirror_usmart_smartreads_daily_gas", "uSmart/4.6.1/Gas", source_bucket, destination_bucket
     )
-    mirror_asei_smartreadds_hh_elec = createMirrorTask(
+    mirror_asei_smartreadds_hh_elec = create_mirror_task(
         "mirror_asei_smartreadds_hh_elec", "ReadingsSmart/ProfileData/Elec", source_bucket, destination_bucket
     )
-    mirror_asei_smartreadds_hh_gas = createMirrorTask(
+    mirror_asei_smartreadds_hh_gas = create_mirror_task(
         "mirror_asei_smartreadds_hh_gas", "ReadingsSmart/ProfileData/Gas", source_bucket, destination_bucket
     )
-    mirror_stage2_usmart_smartreads_hh_elec = createMirrorTask(
+    mirror_stage2_usmart_smartreads_hh_elec = create_mirror_task(
         "mirror_stage2_usmart_smartreads_hh_elec",
         "stage2_SmartHalfHourlyReads_Gas",
         source_bucket,
         s3_temp_destination_uat_bucket,
     )
-    mirror_stage2_usmart_smartreads_hh_gas = createMirrorTask(
+    mirror_stage2_usmart_smartreads_hh_gas = create_mirror_task(
         "mirror_stage2_usmart_smartreads_hh_gas",
         "stage2_SmartHalfHourlyReads_Elec",
         source_bucket,
@@ -496,3 +496,6 @@ if environment in ["preprod", "dev"]:
     mirror_asei_smartreadds_hh_gas >> stage_half_hourly_gas_reads_asei
     mirror_asei_smartreads_daily_elec >> stage_daily_elec_reads_asei
     mirror_asei_smartreads_daily_gas >> stage_daily_gas_reads_asei
+
+# fmt: on
+# pylint: enable=pointless-statement,line-too-long
