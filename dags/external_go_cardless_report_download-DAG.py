@@ -29,7 +29,7 @@ args = {
 dag = DAG(
     dag_id="go_cardless_report",
     default_args=args,
-    schedule_interval="00 08 * * *",
+    schedule_interval="30 09 * * *",
     tags=["cdw"],
     catchup=False,
     max_active_runs=1,
@@ -55,8 +55,6 @@ def download_go_cardless_report_wrapper(execution_date):
 download_go_cardless_report_task = PythonOperator(
     task_id="download_go_cardless_report",
     python_callable=download_go_cardless_report_wrapper,
-    op_args=["{{ ds }}"],
+    op_args=["{{ ds }}" if util.get_env() == "newprod" else "{{ prev_ds }}"],
     dag=dag,
 )
-
-download_go_cardless_report_task

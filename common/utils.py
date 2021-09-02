@@ -3,7 +3,6 @@ import platform
 import sys
 import pandas as pd
 import datetime
-from connections import connect_db as db
 import uuid
 import numpy as np
 import timeit
@@ -11,10 +10,13 @@ import multiprocessing
 from time import sleep
 import csv
 import io
+import sentry_sdk
+
 from airflow.models import Variable
 
 sys.path.append("..")
 
+from connections import connect_db as db
 from conf import config as con
 from common import directories as dirs3
 from common import api_filters as apif
@@ -144,12 +146,21 @@ def redshift_upsert(sql=None, df=None, crud_type=None):
     pr.close_up_shop()
 
 
-def execute_sql(sql):
-
+def execute_redshift_sql_query(sql):
+    """
+    :param: SQL expression to execute
+    Executes SQL expression and will pass any errors to Sentry
+    """
     try:
+        print("Running SQL --- \n   {}".format(sql))
         pr = db.get_redshift_connection()
         pr.exec_commit(sql)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        sentry_sdk.flush(5)
+        raise e
     finally:
+        print("Closing up shop!")
         pr.close_up_shop()
 
 

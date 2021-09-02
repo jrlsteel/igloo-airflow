@@ -18,7 +18,7 @@ def refresh_mv_hh_elec_reads():
 
     try:
         smart_mv_hh_elec_refresh_sql_query = common["smart_mv_hh_elec_refresh"]["sql_query_smart_mv_hh_elec_refresh"]
-        response = util.execute_sql(smart_mv_hh_elec_refresh_sql_query)
+        response = util.execute_redshift_sql_query(smart_mv_hh_elec_refresh_sql_query)
         return response
     except:
         raise

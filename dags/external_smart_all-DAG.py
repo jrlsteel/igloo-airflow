@@ -177,7 +177,7 @@ def sql_wrapper(sql):
     """
     try:
         print("Running SQL --- \n   {}".format(sql))
-        response = common.utils.execute_sql(sql)
+        response = common.utils.execute_redshift_sql_query(sql)
         return response
     except Exception as e:
         sentry_sdk.capture_exception(e)
