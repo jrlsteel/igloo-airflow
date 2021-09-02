@@ -26,14 +26,14 @@ def get_schedule():
     return schedules.get_schedule(env, dag_id)
 
 
-def sql_wrapper(sql):
+def execute_redshift_sql_query(sql):
     """
     :param: SQL expression to execute
     Executes SQL expression and will pass any errors to Sentry
     """
     try:
         print("Running SQL --- \n   {}".format(sql))
-        response = common.utils.execute_sql(sql)
+        response = common.utils.execute_redshift_sql_query(sql)
         return response
     except Exception as e:
         sentry_sdk.capture_exception(e)
@@ -296,7 +296,7 @@ start_smart_all_billing_reads_jobs = BashOperator(
 refresh_mv_smart_stage2_smarthalfhourlyreads_elec = PythonOperator(
     dag=dag,
     task_id="refresh_mv_smart_stage2_smarthalfhourlyreads_elec",
-    python_callable=sql_wrapper,
+    python_callable=execute_redshift_sql_query,
     op_args=["REFRESH MATERIALIZED VIEW mv_smart_stage2_smarthalfhourlyreads_elec"],
 )
 
@@ -330,14 +330,14 @@ copy_d0379_to_sftp_task = PythonOperator(
 
 refresh_mv_readings_smart_daily_usmart = PythonOperator(
     task_id="refresh_mv_readings_smart_daily_usmart",
-    python_callable=sql_wrapper,
+    python_callable=execute_redshift_sql_query,
     op_args=["REFRESH MATERIALIZED VIEW mv_readings_smart_daily_usmart"],
     dag=dag,
 )
 
 populate_ref_readings_smart_daily_uSmart_raw = PythonOperator(
     task_id="populate_ref_readings_smart_daily_uSmart_raw",
-    python_callable=sql_wrapper,
+    python_callable=execute_redshift_sql_query,
     op_args=[
         """ TRUNCATE ref_readings_smart_daily_uSmart_raw;
             INSERT INTO ref_readings_smart_daily_uSmart_raw (SELECT cast(mpxn as bigint),
@@ -357,7 +357,7 @@ populate_ref_readings_smart_daily_uSmart_raw = PythonOperator(
 truncate_ref_readings_smart_daily_all = PythonOperator(
     dag=dag,
     task_id="truncate_ref_readings_smart_daily_all",
-    python_callable=sql_wrapper,
+    python_callable=execute_redshift_sql_query,
     op_args=["""TRUNCATE ref_readings_smart_daily_all"""],
 )
 
