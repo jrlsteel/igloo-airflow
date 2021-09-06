@@ -12,7 +12,7 @@ sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
 from conf import config
-from common.utils import get_sla_timedelta
+from common import utils as util
 from common.slack_utils import alert_slack, post_slack_message, post_slack_sla_alert
 from common import process_glue_job, schedules
 
@@ -28,7 +28,7 @@ args = {
     "owner": "Airflow",
     "start_date": days_ago(2),  # don't know what this is doing
     "on_failure_callback": alert_slack,
-    "sla": get_sla_timedelta(dag_id),
+    "sla": util.get_sla_timedelta(dag_id),
 }
 
 dag = DAG(
@@ -100,17 +100,29 @@ dependencies = {
         ]
     },
     "eligibility_reporting": {"calculated_dependencies": ["daily_reporting_customer_file"]},
+    "mv_reports_ds_consumption_accuracy_register": {
+        "calculated_dependencies": ["eac_aq", "igl_ind_eac_aq"],
+        "sql_expression": """REFRESH MATERIALIZED VIEW mv_reports_ds_consumption_accuracy_register""",
+    },
 }
 
 # Create all processing tasks
 tasks = {"ref_ensek_transactions_finish": ref_ensek_transactions_finish}
 for report_name, report_info in dependencies.items():
-    tasks[report_name] = PythonOperator(
-        task_id=report_name,
-        python_callable=process_glue_job.run_glue_job_await_completion,
-        op_args=["_process_ref_tables", report_name],
-        dag=dag,
-    )
+    if "sql_expression" in report_info.keys():
+        tasks[report_name] = PythonOperator(
+            dag=dag,
+            task_id=f"{report_name}_sql_expression",
+            python_callable=util.execute_redshift_sql_query,
+            op_args=[report_info["sql_expression"]],
+        )
+    else:
+        tasks[report_name] = PythonOperator(
+            task_id=report_name,
+            python_callable=process_glue_job.run_glue_job_await_completion,
+            op_args=["_process_ref_tables", report_name],
+            dag=dag,
+        )
 
 # Create slack message tasks and dependencies
 for report_name, report_info in dependencies.items():
