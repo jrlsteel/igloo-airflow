@@ -1,14 +1,9 @@
-import sys
+from cdw.common.slack_utils import alert_slack
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-from common.slack_utils import alert_slack
-
-import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-import common.process_glue_crawler
-import sentry_sdk
+import cdw.common.process_glue_crawler
 
 crawler_id = "data-crawler-stage2-usmart-4.6.1-gas"
 
@@ -26,6 +21,6 @@ dag = DAG(
 crawler_usmart_stage2_gas_task = PythonOperator(
     task_id="crawler_usmart_stage2_gas_task",
     op_args=["data-crawler-stage2-usmart-4.6.1-gas"],
-    python_callable=common.process_glue_crawler.run_glue_crawler,
+    python_callable=cdw.common.process_glue_crawler.run_glue_crawler,
     dag=dag,
 )

@@ -6,22 +6,21 @@ from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
-from conf import config
-from common import schedules
-from common.utils import get_sla_timedelta
-from common.slack_utils import alert_slack, post_slack_sla_alert
-from common.process_glue_job import run_glue_job_await_completion
-from process_verification.verification_template import (
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.utils import get_sla_timedelta
+from cdw.common.slack_utils import alert_slack, post_slack_sla_alert
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.process_verification.verification_template import (
     verify_files_in_s3_directory,
     verify_number_of_rows_in_table_greater_than,
 )
-import common
-from conf import config
-from common import schedules
-from process_Ensek import start_ensek_api_mirror_only_jobs
+import cdw.common
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.process_Ensek import start_ensek_api_mirror_only_jobs
 
 dag_id = "ensek_am"
 env = config.environment_config["environment"]
@@ -31,10 +30,10 @@ def get_schedule():
     return schedules.get_schedule(env, dag_id)
 
 
-directory = common.utils.get_dir()
+directory = cdw.common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
-environment = common.utils.get_env()
+environment = cdw.common.utils.get_env()
 
 date_today_string = str(datetime.date.today())
 
@@ -141,10 +140,10 @@ dag_data = {
     },
 }
 
-directory = common.utils.get_dir()
+directory = cdw.common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
-environment = common.utils.get_env()
+environment = cdw.common.utils.get_env()
 
 date_today_string = str(datetime.date.today())
 
@@ -206,9 +205,7 @@ for datatype, datatype_info in dag_data.items():
     api_task_string = f"api_extract_{datatype}_bash"
     tasks[api_task_string] = BashOperator(
         task_id=api_task_string,
-        bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python {}".format(
-            datatype_info["api_bash_command"]
-        ),
+        bash_command="cd /opt/airflow/cdw/process_Ensek && python {}".format(datatype_info["api_bash_command"]),
         dag=dag,
         doc_md=task_slack_report_string.format(
             f"Api extraction for {datatype}",

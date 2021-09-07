@@ -6,13 +6,12 @@ import sys
 import datetime
 import sentry_sdk
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
-from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
-from common.slack_utils import alert_slack
-import common
-from common.process_glue_job import run_glue_job_await_completion
-from common.process_glue_crawler import run_glue_crawler
+from cdw.process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
+from cdw.process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
+from cdw.common.slack_utils import alert_slack
+import cdw.common
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.common.process_glue_crawler import run_glue_crawler
 
 args = {
     "owner": "Airflow",
@@ -104,19 +103,19 @@ smart_staging_task_list = [
 
 start_smart_all_mirror_jobs = BashOperator(
     task_id="start_smart_all_mirror_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_mirror_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_smart && python start_smart_all_mirror_jobs.py",
     dag=dag,
 )
 
 start_smart_all_ref_jobs = BashOperator(
     task_id="start_smart_all_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_reporting_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_smart && python start_smart_all_reporting_jobs.py",
     dag=dag,
 )
 
 start_smart_all_billing_reads_jobs = BashOperator(
     task_id="start_smart_all_billing_reads_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python process_smart_reads_billing.py",
+    bash_command="cd /opt/airflow/cdw/process_smart && python process_smart_reads_billing.py",
     dag=dag,
 )
 
@@ -177,7 +176,7 @@ def sql_wrapper(sql):
     """
     try:
         print("Running SQL --- \n   {}".format(sql))
-        response = common.utils.execute_redshift_sql_query(sql)
+        response = cdw.common.utils.execute_redshift_sql_query(sql)
         return response
     except Exception as e:
         sentry_sdk.capture_exception(e)

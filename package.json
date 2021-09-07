@@ -1,13 +1,14 @@
 {
-  "name": "enzek-meterpoint-readings",
+  "name": "igloo-cdw-airflow",
   "version": "1.0.0",
-  "description": "Igloo CDW Python Batch",
+  "description": "Igloo CDW Airflow",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "igloo-codebuild": "igloo-codebuild"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,7 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings#readme",
   "dependencies": {
-    "@igloo/build-tools": "0.0.5",
+    "@igloo/build-tools": "^0.0.7",
     "husky": "^6.0.0"
   },
   "devDependencies": {

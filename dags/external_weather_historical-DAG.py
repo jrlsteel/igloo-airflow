@@ -13,12 +13,11 @@ from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 import sentry_sdk
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-import common.process_glue_crawler
-import common.utils
-from conf import config
-from common.slack_utils import alert_slack
+import cdw.common.process_glue_crawler
+import cdw.common.utils
+from cdw.conf import config
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -69,7 +68,7 @@ def fn_weather_historical_daily_verify():
         historical_date = datetime.now() - timedelta(1)
         historical_date = datetime.strftime(historical_date, "%Y-%m-%d")
 
-        df = common.utils.execute_query_return_df(
+        df = cdw.common.utils.execute_query_return_df(
             """select count(*) from ref_historical_weather where postcode in ('{}') and trunc(timestamp_utc) = '{}'""".format(
                 "', '".join(gsp_weather_station_postcodes), historical_date
             )
@@ -83,19 +82,19 @@ def fn_weather_historical_daily_verify():
 
 start_weather_mirror_jobs = BashOperator(
     task_id="start_weather_processing_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_mirror_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_mirror_jobs.py",
     dag=dag,
 )
 
 start_weather_staging_jobs = BashOperator(
     task_id="start_weather_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_staging_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_staging_jobs.py",
     dag=dag,
 )
 
 start_weather_ref_jobs = BashOperator(
     task_id="start_weather_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_weather_ref_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_ref_jobs.py",
     dag=dag,
 )
 

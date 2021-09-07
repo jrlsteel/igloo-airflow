@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.utils.dates import days_ago
 
@@ -9,12 +8,12 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 
 
-from process_verification.verification_template import (
+from cdw.process_verification.verification_template import (
     verify_number_of_rows_in_table,
     verify_table_column_value_greater_than,
 )
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -33,7 +32,7 @@ dag = DAG(
 
 start_go_cardless_api_extracts = BashOperator(
     task_id="start_go_cardless_api_extracts",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_go_cardless && python start_go_cardless_api_extracts.py",
+    bash_command="cd /opt/airflow/cdw/process_go_cardless && python start_go_cardless_api_extracts.py",
     dag=dag,
 )
 

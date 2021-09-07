@@ -8,13 +8,12 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
-from conf import config
-from common import utils as util
-from common.slack_utils import alert_slack, post_slack_message, post_slack_sla_alert
-from common import process_glue_job, schedules
+from cdw.conf import config
+from cdw.common import utils as util
+from cdw.common.slack_utils import alert_slack, post_slack_message, post_slack_sla_alert
+from cdw.common import process_glue_job, schedules
 
 dag_id = "igloo_calculated"
 env = config.environment_config["environment"]

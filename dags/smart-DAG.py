@@ -7,16 +7,15 @@ import sys
 import datetime
 import sentry_sdk
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
-from common.slack_utils import alert_slack
-import common
+from cdw.process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
+from cdw.common.slack_utils import alert_slack
+import cdw.common
 
-from common.process_glue_crawler import run_glue_crawler
-from common.process_glue_job import run_glue_job_await_completion
-from conf import config
-from common import schedules
-from common import utils as util
+from cdw.common.process_glue_crawler import run_glue_crawler
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common import utils as util
 
 dag_id = "SMART"
 
@@ -33,7 +32,7 @@ def execute_redshift_sql_query(sql):
     """
     try:
         print("Running SQL --- \n   {}".format(sql))
-        response = common.utils.execute_redshift_sql_query(sql)
+        response = cdw.common.utils.execute_redshift_sql_query(sql)
         return response
     except Exception as e:
         sentry_sdk.capture_exception(e)
@@ -249,7 +248,7 @@ stage_usmart_4_6_1_elec = PythonOperator(
 
 # start_smart_all_ref_jobs = BashOperator(
 #     task_id="start_smart_all_ref_jobs",
-#     bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_reporting_jobs.py",
+#     bash_command="cd /opt/airflow/cdw/process_smart && python start_smart_all_reporting_jobs.py",
 #     dag=dag,
 # )
 
@@ -289,7 +288,7 @@ populate_ref_smart_inventory = PythonOperator(
 
 start_smart_all_billing_reads_jobs = BashOperator(
     task_id="start_smart_all_billing_reads_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python r2b.py --billing-window-start-date {{ tomorrow_ds }} {{ var.value.R2B_CLI_PARAMS }}",
+    bash_command="cd /opt/airflow/cdw/process_smart && python r2b.py --billing-window-start-date {{ tomorrow_ds }} {{ var.value.R2B_CLI_PARAMS }}",
     dag=dag,
 )
 

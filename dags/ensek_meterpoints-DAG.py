@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
 from airflow.utils.dates import days_ago
@@ -9,10 +8,10 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 import sentry_sdk
 
-import common.utils as util
-from common.process_glue_job import ProcessGlueJob as glue_job
-from common.slack_utils import alert_slack
-from process_verification.verification_template import (
+import cdw.common.utils as util
+from cdw.common.process_glue_job import ProcessGlueJob as glue_job
+from cdw.common.slack_utils import alert_slack
+from cdw.process_verification.verification_template import (
     verify_new_api_response_files_in_s3_directory,
     verify_seventeen_new_files_in_s3,
     ref_verification_step,
@@ -97,7 +96,7 @@ def dummy_python_task():
 
 api_extract_meterpoints = BashOperator(
     task_id="api_extract_meterpoints_bash",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py",
     dag=dag,
 )
 api_extract_meterpoints.doc_md = """# Purpose

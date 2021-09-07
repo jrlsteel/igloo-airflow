@@ -12,9 +12,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -37,7 +36,7 @@ dag = DAG(
 
 postcodes_etl = BashOperator(
     task_id="postcodes_etl",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_postcodes && python postcodes_etl.py",
+    bash_command="cd /opt/airflow/cdw/process_postcodes && python postcodes_etl.py",
     dag=dag,
 )
 

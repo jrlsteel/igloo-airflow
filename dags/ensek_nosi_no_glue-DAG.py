@@ -6,9 +6,8 @@ from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -27,7 +26,7 @@ dag = DAG(
 
 download_nosi = BashOperator(
     task_id="download_nosi",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python download_nosi.py",
+    bash_command="cd /opt/airflow/cdw/process_Nosi && python download_nosi.py",
     dag=dag,
 )
 

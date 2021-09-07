@@ -1,11 +1,10 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 
 args = {
@@ -27,12 +26,12 @@ dag = DAG(
 
 process_ensek_transactions = BashOperator(
     task_id="process_ensek_transactions",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekTransactions && python process_ensek_transactions.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekTransactions && python process_ensek_transactions.py",
     dag=dag,
 )
 
 process_ensek_accounts = BashOperator(
     task_id="process_ensek_accounts",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekAccounts && python process_ensek_accounts.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekAccounts && python process_ensek_accounts.py",
     dag=dag,
 )

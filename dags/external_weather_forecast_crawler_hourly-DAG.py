@@ -1,13 +1,12 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-import common.process_glue_crawler
+import cdw.common.process_glue_crawler
 import sentry_sdk
 
 crawler_id = "data-crawler-weather-forecast-hourly-stage2"

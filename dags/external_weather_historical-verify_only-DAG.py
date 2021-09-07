@@ -13,12 +13,11 @@ from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 import sentry_sdk
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-import common.process_glue_crawler
-import common.utils
-from conf import config
-from common.slack_utils import alert_slack
+import cdw.common.process_glue_crawler
+import cdw.common.utils
+from cdw.conf import config
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -70,7 +69,7 @@ def verify_postcode_data_exists_for_weather_station_postcodes():
         historical_date = datetime.now() - timedelta(1)
         historical_date = datetime.strftime(historical_date, "%Y-%m-%d")
 
-        df = common.utils.execute_query_return_df(
+        df = cdw.common.utils.execute_query_return_df(
             """select count(*) from ref_historical_weather where postcode in ('{}') and trunc(timestamp_utc) = '{}'""".format(
                 "', '".join(gsp_weather_station_postcodes), historical_date
             )

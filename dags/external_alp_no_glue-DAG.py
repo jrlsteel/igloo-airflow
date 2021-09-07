@@ -12,9 +12,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -33,13 +32,13 @@ dag = DAG(
 
 processALP_CV = BashOperator(
     task_id="processALP_CV",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_CV.py",
+    bash_command="cd /opt/airflow/cdw/process_ALP && python processALP_CV.py",
     dag=dag,
 )
 
 processALP_WCF = BashOperator(
     task_id="processALP_WCF",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_ALP && python processALP_WCF.py",
+    bash_command="cd /opt/airflow/cdw/process_ALP && python processALP_WCF.py",
     dag=dag,
 )
 

@@ -279,7 +279,9 @@ dmypy.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,node,macos
 
-conf/
+# Local config files
+cdw/conf/*.py
+!cdw/conf/__init__.py
 
 # VSCode settings
 .vscode
