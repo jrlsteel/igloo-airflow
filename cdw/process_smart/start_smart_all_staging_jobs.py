@@ -1,13 +1,8 @@
 import sys
 from datetime import datetime
-import timeit
-import subprocess
-
 
 from cdw.common import process_glue_job as glue
 from cdw.common import utils as util
-from cdw.common import Refresh_UAT as refresh
-from process_calculated_steps import start_calculated_steps_jobs as sj
 
 
 class SmartStagingAll:

@@ -17,8 +17,8 @@ import os
 from pathlib import Path
 
 #
-from process_Ensek.processEnsekPriorityServiceRegister.conf import config as con
-from process_Ensek.processEnsekPriorityServiceRegister.connections import connect_db as db
+from cdw.process_Ensek.processEnsekPriorityServiceRegister.conf import config as con
+from cdw.process_Ensek.processEnsekPriorityServiceRegister.connections import connect_db as db
 from cdw.common.utils import get_ensek_api_info1
 
 

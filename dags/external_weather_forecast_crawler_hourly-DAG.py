@@ -1,13 +1,9 @@
-import sys
-
 from cdw.common.slack_utils import alert_slack
 
-import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 import cdw.common.process_glue_crawler
-import sentry_sdk
 
 crawler_id = "data-crawler-weather-forecast-hourly-stage2"
 
@@ -27,7 +23,7 @@ def fn_run_glue_crawler(crawler_id):
     :param: Crawler Name'
     """
     print("Running Weather Forecast Crawler Daily={}".format(crawler_id))
-    common.process_glue_crawler.run_glue_crawler(crawler_id)
+    cdw.common.process_glue_crawler.run_glue_crawler(crawler_id)
 
 
 crawler_weather_forcecast_hourly_task = PythonOperator(

@@ -1,4 +1,3 @@
-import sys
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
@@ -27,7 +26,7 @@ def fn_run_glue_crawler(crawler_id):
     """
     try:
         print("Running Weather Forecast Crawler Daily={}".format(crawler_id))
-        common.process_glue_crawler.run_glue_crawler(crawler_id)
+        cdw.common.process_glue_crawler.run_glue_crawler(crawler_id)
     except Exception as e:
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)

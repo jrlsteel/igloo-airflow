@@ -296,7 +296,7 @@ def compare_calculated_tables(stage=None):
     batch_logging_insert(job_id, 70, "calculated_table_comparisons", "compare_tables.py")
 
     try:
-        from process_table_comparisons.table_definitions import calculated_table_keys
+        from cdw.process_table_comparisons.table_definitions import calculated_table_keys
         from cdw.conf.config import redshift_comparison_configs
 
         if stage is None:

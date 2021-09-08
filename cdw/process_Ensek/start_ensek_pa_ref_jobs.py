@@ -2,8 +2,7 @@ import sys
 from datetime import datetime
 import timeit
 
-
-from process_Ensek import processAllEnsekPAScripts as ae
+from cdw.process_Ensek import processAllEnsekPAScripts as ae
 from cdw.common import process_glue_job as glue
 
 from cdw.common import utils as util

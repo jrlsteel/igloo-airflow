@@ -1,15 +1,12 @@
-import sys
 from datetime import datetime
 
 
-from process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
-from process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
-from process_eac_aq import start_consumption_accuracy_jobs as ca
-from process_tado import start_tado_efficiency_jobs as ta
-from process_EstimatedAdvance import start_est_advance_job as est_adv
-from process_reports import start_reporting_jobs as srj
-from process_data_gate import start_smart_meter_eligibility_jobs as sme, start_meets_eligibility_jobs as me
-from process_Ensek.processEnsekTariffs import start_igloo_calculated_tariffs_job as calc_tariffs
+from cdw.process_eac_aq import start_eac_aq_pa_jobs as eacaqpa
+from cdw.process_eac_aq import start_igloo_ind_eac_aq_jobs as iglindeacaq
+from cdw.process_eac_aq import start_consumption_accuracy_jobs as ca
+from cdw.process_tado import start_tado_efficiency_jobs as ta
+from cdw.process_EstimatedAdvance import start_est_advance_job as est_adv
+from cdw.process_reports import start_reporting_jobs as srj
 
 from cdw.common import utils as util
 from cdw.common import slack_utils

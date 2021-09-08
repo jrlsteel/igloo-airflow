@@ -1,12 +1,6 @@
-import io
-import timeit
-import json
-import time
-import csv
-import sys
 import timeit
 
-from process_forecast_weather_data import ForecastWeather
+from cdw.process_WeatherData.process_forecast_weather_data import ForecastWeather
 
 p = ForecastWeather(duration=120, forecast_resolution="hourly")
 

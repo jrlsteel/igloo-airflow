@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
-from lxml import etree
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from moto import mock_s3_deprecated
 import csv
 
-from processALP_WCF import ALPHistoricalWCF
+from cdw.process_ALP.processALP_WCF import ALPHistoricalWCF
 
 from cdw.connections.connect_db import get_boto_S3_Connections as s3_con
 
