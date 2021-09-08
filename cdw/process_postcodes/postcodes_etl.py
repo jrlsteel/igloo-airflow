@@ -127,15 +127,6 @@ class PostcodesETLPipeline(ETLPipeline):
         self.load(df)
         self.logger.in_prod_env("Completed load step in {} seconds".format(timeit.default_timer() - start_time))
 
-    def log_error(self, error_msg, error_code=""):
-        self.logger.in_prod_env(error_msg)
-        logfile = os.path.join(sys.path[0], "logs", "{}_logs_{}.csv".format(self.name, time.strftime("%d%m%Y")))
-        os.makedirs(os.path.dirname(logfile), exist_ok=True)
-
-        with open(logfile, mode="a") as errorlog:
-            csv_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([error_msg, error_code])
-
 
 if __name__ == "__main__":
 

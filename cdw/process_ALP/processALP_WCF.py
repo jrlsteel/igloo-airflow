@@ -85,18 +85,15 @@ class ALPHistoricalWCF:
                         print(response_xml)
                 else:
                     print("Problem Grabbing Data: ", response.status_code)
-                    # self.log_error('Response Error: Problem grabbing data', response.status_code)
                     return None
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
-                    # self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
                     break
                 else:
                     print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
-                    # self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -143,20 +140,11 @@ class ALPHistoricalWCF:
         data_xml = etree.fromstring(data)
         return data_xml
 
-    def log_error(self, error_msg, error_code=""):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
-        with open(logs_dir_path + "historical_wcf_log" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
-
     def processData(self, wcf_folders, k, _dir_s3):
         for wcf_folder in wcf_folders:
             # postcodes[:2]:
             t = con.api_config["total_no_of_calls"]
             msg_ac = "wcf_folders:" + str(wcf_folders)
-            # self.log_error(msg_ac, '')
             _start_date = self.start_date
             while _start_date < self.end_date:
                 # Logic to fetch date for only 7 days for each call

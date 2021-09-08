@@ -45,18 +45,15 @@ class IglooEAC:
                     return json.loads(response.content.decode("utf-8"))
                 else:
                     print("Problem Grabbing Data: ", response.status_code)
-                    self.log_error("Response Error: Problem grabbing data", response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
-                    self.log_error("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
 
                     break
                 else:
                     print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
-                    self.log_error("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -86,14 +83,6 @@ class IglooEAC:
         data_str = json.dumps(data, indent=4).replace("null", '""')
         data_json = json.loads(data_str)
         return data_json
-
-    def log_error(self, error_msg, error_code=""):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
-        with open(sys.path[0] + "/logs/" + "accountslogs_" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
 
     def processAccounts(self, account_ids, k, dir_s3):
 
@@ -127,7 +116,6 @@ class IglooEAC:
             else:
                 print("ac:" + str(account_id) + " has no data for Account Transactions")
                 msg_ac = "ac:" + str(account_id) + " has no data for Account Transactions"
-                self.log_error(msg_ac, "")
 
 
 if __name__ == "__main__":

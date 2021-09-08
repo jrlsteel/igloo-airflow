@@ -69,7 +69,6 @@ def get_api_response(api_url, head):
         return response
     else:
         print("Problem Grabbing Data: ", response.status_code)
-        # log_error('Response Error: Problem grabbing data', response.status_code)
 
 
 def get_api_response_pages(api_url, head):
@@ -142,7 +141,6 @@ def processAccounts(account_id_s):
         for account_id in account_id_s:
             api_url, head = get_meter_point_api_info(account_id, api)
             # msg_ac = 'ac:' + str(account_id)
-            # log_error(msg_ac, '')
 
             if api in ["internal_readings"]:
                 api_response = get_api_response_pages(api_url, head)

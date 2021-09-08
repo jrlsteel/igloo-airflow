@@ -63,7 +63,6 @@ class SmartReadsBillings:
                 response_json = json.loads(response.content.decode("utf-8"))
                 logger.in_prod_env(f"Status code not 201 instead: {status_code}, response is:\n {str(response_json)}")
         except ConnectionError:
-            self.log_error("Unable to Connect")
             response_json = json.loads('{message: "Connection Error"}')
 
         return response_json, status_code

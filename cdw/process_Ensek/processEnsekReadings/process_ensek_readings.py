@@ -44,18 +44,15 @@ class MeterPoints:
                     return response
                 else:
                     print("Problem Grabbing Data: ", response.status_code)
-                    self.log_error("Response Error: Problem grabbing data", response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
-                    self.log_error("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
 
                     break
                 else:
                     print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
-                    self.log_error("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -92,7 +89,6 @@ class MeterPoints:
     #     df_meters = json_normalize(data, record_path=['meters'], meta=['id'], meta_prefix='meter_point_')
     #     if df_meters.empty:
     #         print(" - has no meters data")
-    #         self.log_error(" - has no meters data")
     #     else:
     #         df_meters['account_id'] = account_id
     #         df_meters1 = df_meters[meta_meters + ['account_id']]
@@ -109,7 +105,6 @@ class MeterPoints:
     #                                    meta_prefix='meter_point_')
     #     if df_attributes.empty:
     #         print(" - has no attributes data")
-    #         self.log_error(" - has no attributes data")
     #
     #     else:
     #         df_attributes['account_id'] = account_id
@@ -129,7 +124,6 @@ class MeterPoints:
     #                                   meta_prefix='meter_point_', record_prefix='registers_', sep='_')
     #     if df_registers.empty:
     #         print(" - has no registers data")
-    #         self.log_error(" - has no registers data")
     #
     #     else:
     #         df_registers1 = df_registers[ordered_columns]
@@ -153,7 +147,6 @@ class MeterPoints:
     #                                             meta_prefix='meter_point_', record_prefix='registersAttributes_', sep='_')
     #     if df_registersAttributes.empty:
     #         print(" - has no registers data")
-    #         self.log_error(" - has no registers data")
     #
     #     else:
     #         df_registersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
@@ -172,7 +165,6 @@ class MeterPoints:
     #                                          meta_prefix='meter_point_', record_prefix='metersAttributes_', sep='_')
     #     if df_metersAttributes.empty:
     #         print(" - has no registers data")
-    #         self.log_error(" - has no registers data")
     #
     #     else:
     #         df_metersAttributes.rename(columns={'meter_point_meters_meterId': 'meter_id'}, inplace=True)
@@ -232,14 +224,6 @@ class MeterPoints:
         data_json = json.loads(data_str)
         return data_json
 
-    def log_error(self, error_msg, error_code=""):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
-        with open(sys.path[0] + "/logs/" + "meterpoint_logs_" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
-
     def processAccounts(self, account_ids, S3, dir_s3):
         api_url_mp, head_mp = util.get_ensek_api_info1("meterpoints")
         api_url_mpr, head_mpr = util.get_ensek_api_info1("meterpoints_readings")
@@ -249,7 +233,6 @@ class MeterPoints:
             t = con.api_config["total_no_of_calls"]
             print("ac:" + str(account_id))
             msg_ac = "ac:" + str(account_id)
-            self.log_error(msg_ac, "")
             # api_url_mp1 = api_url_mp.format(account_id)
             # meter_info_response = self.get_api_response(api_url_mp1, head_mp)
             # # print(type(meter_info_response))
@@ -259,7 +242,6 @@ class MeterPoints:
             #     for each_meter_point in meter_points:
             #         print('mp:' + str(each_meter_point))
             #         msg_mp = 'mp:' + str(each_meter_point)
-            #         self.log_error(msg_mp, '')
 
             # api_url, head = get_meter_readings_api_info(account_id, each_meter_point)
             api_url_mpr1 = api_url_mpr.format(account_id, each_meter_point)
@@ -276,7 +258,6 @@ class MeterPoints:
             else:
                 print("mp:" + str(each_meter_point) + " has no data")
                 msg_mp = "mp:" + str(each_meter_point) + " has no data"
-                self.log_error(msg_mp, "")
 
             if meter_reading_billeable_response:
                 formatted_meter_reading = self.format_json_response(meter_reading_billeable_response)
@@ -286,11 +267,9 @@ class MeterPoints:
             else:
                 print("mp:" + str(each_meter_point) + " has no data")
                 msg_mp = "mp:" + str(each_meter_point) + " has no data"
-                self.log_error(msg_mp, "")
             # else:
             #     print('ac:' + str(account_id) + ' has no data')
             #     msg_ac = 'ac:' + str(account_id) + ' has no data'
-            #     self.log_error(msg_ac, '')
 
 
 if __name__ == "__main__":

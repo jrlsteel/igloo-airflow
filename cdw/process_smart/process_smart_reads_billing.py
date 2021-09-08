@@ -50,14 +50,6 @@ class SmartReadsBillings:
             print(e)
             return json.dumps('{message: "malformed response error"}')
 
-    def log_error(self, error_msg, error_code=""):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
-        with open(logs_dir_path + "smart_reads_billing" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
-
     def post_api_response(self, api_url, body, head, query_string="", auth=""):
         session = requests.Session()
         status_code = 0
@@ -74,7 +66,6 @@ class SmartReadsBillings:
                 response_json = json.loads(response.content.decode("utf-8"))
                 print(response_json)
         except ConnectionError:
-            self.log_error("Unable to Connect")
             response_json = json.loads('{message: "Connection Error"}')
 
         return response_json, status_code
@@ -130,8 +121,6 @@ class SmartReadsBillings:
             else:
                 print("ac:" + str(df["accountid"]) + " has no data for Elec status")
                 msg_ac = "ac:" + str(df["accountid"]) + " has no data for Elec status"
-                # self.log_error(msg_ac, '')
-                # self.log_error(msg_ac, '')
 
     def smart_reads_billing_details(self, config_sql):
         pr = db.get_redshift_connection()

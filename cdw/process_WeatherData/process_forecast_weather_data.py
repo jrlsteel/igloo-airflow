@@ -81,17 +81,14 @@ class ForecastWeather:
                         return self.format_json_response(response)
                 else:
                     print(f"Problem grabbing data for URL {api_url}:", response.status_code)
-                    self.log_error(f"Response Error: Problem grabbing data for URL {api_url}:", response.status_code)
                     return None
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
-                    self.log_error("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
                     break
                 else:
                     print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
-                    self.log_error("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -148,18 +145,6 @@ class ForecastWeather:
 
     def format_json_response(self, data):
         return json.dumps(data, indent=4).replace("null", '""')
-
-    def log_error(self, error_msg, error_code=""):
-
-        logs_dir_path = sys.path[0] + "/logs/"
-
-        os.makedirs(logs_dir_path, exist_ok=True)
-
-        with open(
-            logs_dir_path + self.forecast_resolution + "_weather_log" + time.strftime("%d%m%Y") + ".csv", mode="a"
-        ) as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
 
     def processData(self):
 

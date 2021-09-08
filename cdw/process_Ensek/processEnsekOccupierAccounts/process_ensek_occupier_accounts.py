@@ -46,18 +46,15 @@ class OccupierAccounts:
                     return response_items
                 else:
                     print("Problem Grabbing Data: ", response.status_code)
-                    # self.log_error('Response Error: Problem grabbing data', response.status_code)
                     break
 
             except ConnectionError:
                 if time.time() > start_time + timeout:
                     print("Unable to Connect after {} seconds of ConnectionErrors".format(timeout))
-                    # self.log_error('Unable to Connect after {} seconds of ConnectionErrors'.format(timeout))
 
                     break
                 else:
                     print("Retrying connection in " + str(retry_in_secs) + " seconds" + str(i))
-                    # self.log_error('Retrying connection in ' + str(retry_in_secs) + ' seconds' + str(i))
 
                     time.sleep(retry_in_secs)
             i = i + retry_in_secs
@@ -95,16 +92,6 @@ class OccupierAccounts:
         data_str = json.dumps(data, indent=4).replace("null", '""')
         data_json = json.loads(data_str)
         return data_json
-
-    def log_error(self, error_msg, error_code=""):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
-        with open(
-            sys.path[0] + "/logs/" + "occupier_accounts_logs_" + time.strftime("%d%m%Y") + ".csv", mode="a"
-        ) as errorlog:
-            employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            employee_writer.writerow([error_msg, error_code])
 
     def processOccupierAccounts(self, k, dir_s3):
         api_url, head = util.get_ensek_api_info1("occupier_accounts")

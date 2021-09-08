@@ -73,7 +73,6 @@ def get_api_response(api_url, head):
         return response
     else:
         print("Problem Grabbing Data: ", response.status_code)
-        # log_error('Response Error: Problem grabbing data', response.status_code)
 
 
 def get_api_response_pages(api_url, head):
@@ -110,12 +109,6 @@ def format_json_response(data, api):
 
     data_json = json.loads(data_str)
     return data_json
-
-
-def log_error(error_msg, error_code=""):
-    with open(sys.path[0] + "/logs/" + "ensek_schema_error_" + time.strftime("%d%m%Y") + ".csv", mode="a") as errorlog:
-        employee_writer = csv.writer(errorlog, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        employee_writer.writerow([error_msg, error_code])
 
 
 def get_accountID_fromDB():
@@ -257,7 +250,6 @@ def processAccounts():
                             + validate_schema_response["error"]
                             + validate_schema_response["error_json"]
                         )
-                        log_error(msg_error, "")
                         # print(msg_error)
                         raise Exception(" schema Error : {0}".format(msg_error))
             print(
