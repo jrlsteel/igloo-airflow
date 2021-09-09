@@ -11,15 +11,10 @@ from multiprocessing import freeze_support
 from multiprocessing import Manager, freeze_support, Value
 import statistics
 
-import sys
-import os
-
-
 import cdw.common
 import cdw.common.utils
 from cdw.conf import config
 from cdw.connections.connect_db import get_boto_S3_Connections as s3_con
-
 
 iglog = cdw.common.utils.IglooLogger("Process_Ensek_Transactions")
 
@@ -29,9 +24,6 @@ class AccountTransactions:
     rate = config.api_config["allowed_period_in_secs"]
 
     def __init__(self, process_num):
-        logs_dir_path = sys.path[0] + "/logs/"
-        if not os.path.exists(logs_dir_path):
-            os.makedirs(logs_dir_path)
         self.pnum = process_num
 
     @sleep_and_retry
