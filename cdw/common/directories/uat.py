@@ -253,7 +253,7 @@ uat = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f",
         },
         "smart_reads_billing": {
-            "api_url": "https://vpce-0fc7cde64b2850e80-lxb0i11z.execute-api.eu-west-1.vpce.amazonaws.com/staging/api/v1/meter-reads",
+            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/",
             "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
             "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com",
         },

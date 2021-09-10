@@ -255,7 +255,7 @@ newprod = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f",
         },
         "smart_reads_billing": {
-            "api_url": "https://vpce-0aef8e00f3f1643c5-ew9hc5n2.execute-api.eu-west-1.vpce.amazonaws.com/prod/api/v1/meter-reads",
+            "api_url": "https://fu911s0fs6.execute-api.eu-west-1.amazonaws.com/prod/",
             "api_key": "17EXj0FzF89jK3nTdZ5JG2ZSsctlxhJr463tFB2g",
             "host": "vduzli2ylh.execute-api.eu-west-1.amazonaws.com",
         },
