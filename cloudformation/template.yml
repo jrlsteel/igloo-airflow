@@ -30,41 +30,6 @@ Conditions:
   UATOrStagingEnvironment: !Or [ Condition: UATEnvironment, Condition: StagingEnvironment ]
 
 Resources:
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub igloo-cdw-airflow-artifacts-${Environment}-${AWS::AccountId}
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      Tags:
-        - Key: category
-          Value: cdw
-        - Key: environment
-          Value: !Ref Environment
-
-  ArtifactBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref ArtifactBucket
-      PolicyDocument:
-        Statement:
-          - Action:
-              - s3:*
-            Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${ArtifactBucket}
-              - !Sub arn:aws:s3:::${ArtifactBucket}/*
-            Principal:
-              AWS:
-                - !Sub arn:aws:iam::${AWS::AccountId}:user/ci-agent
-
   WriteCDWSourceDataBucketsPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
