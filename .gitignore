@@ -285,3 +285,4 @@ cdw/conf/*.py
 
 # VSCode settings
 .vscode
+conf/config.py

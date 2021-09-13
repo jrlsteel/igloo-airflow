@@ -257,6 +257,9 @@ uat = {
             "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
             "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com",
         },
+        "read_to_bill": {
+            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
+        },
     },
     "s3_bucket": "igloo-data-warehouse-uat",
     "s3_key": {

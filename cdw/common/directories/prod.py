@@ -256,6 +256,9 @@ prod = {
             "api_key": "17EXj0FzF89jK3nTdZ5JG2ZSsctlxhJr463tFB2g",
             "host": "vduzli2ylh.execute-api.eu-west-1.amazonaws.com",
         },
+        "read_to_bill": {
+            "api_url": "https://fu911s0fs6.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
+        },
     },
     "s3_bucket": "igloo-data-warehouse-prod",
     "s3_key": {

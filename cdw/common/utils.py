@@ -11,9 +11,12 @@ from time import sleep
 import csv
 import io
 import sentry_sdk
+import os
+import boto3
+
+from requests_aws4auth import AWS4Auth
 
 from airflow.models import Variable
-
 
 from cdw.connections import connect_db as db
 from cdw.conf import config as con
@@ -21,7 +24,6 @@ from cdw.common import directories as dirs3
 from cdw.common import api_filters as apif
 from cdw.common import Refresh_UAT as refresh
 
-import boto3
 from cdw.common.secrets_manager import get_secret
 
 client = boto3.client("secretsmanager")
@@ -358,6 +360,11 @@ def get_smart_read_billing_api_info(api):
     head = {"Content-Type": "application/json", "Host": "{0}".format(host), "x-api-key": "{0}".format(api_key)}
     return api_url, head
 
+def get_api_url(api):
+    dir = get_dir()
+    api_url = dir["apis"][api]["api_url"]
+    return api_url
+
 
 def get_epc_api_info(api):
     dir = get_dir()
@@ -612,3 +619,50 @@ def process_s3_mirror_job(job_name, source_input, destination_input):
     )
 
     logger.in_prod_env("Mirror job completed in {:.2f} seconds".format(float(timeit.default_timer() - start)))
+
+
+def send_signed_post_request(url, json_payload):
+    # Contact ECS helper to obtain temp credentials
+    token_host = "169.254.170.2"
+    token_path = os.environ["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
+
+    token_response = requests.get("http://{}{}".format(token_host, token_path))
+    token = token_response.json()
+
+    # Extract tokens required to sign AWS Request
+    access_key = token["AccessKeyId"]
+    access_key_secret = token["SecretAccessKey"]
+    session_token = token["Token"]
+
+    # Sign Request
+    auth = AWS4Auth(access_key, access_key_secret, "eu-west-1", "execute-api", session_token=session_token)
+
+    response = requests.post(
+        url,
+        json=json_payload,
+        auth=auth,
+    )
+    return response.json()
+
+
+def send_signed_get_request(url):
+    # Contact ECS helper to obtain temp credentials
+    token_host = "169.254.170.2"
+    token_path = os.environ["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
+
+    token_response = requests.get("http://{}{}".format(token_host, token_path))
+    token = token_response.json()
+
+    # Extract tokens required to sign AWS Request
+    access_key = token["AccessKeyId"]
+    access_key_secret = token["SecretAccessKey"]
+    session_token = token["Token"]
+
+    # Sign Request
+    auth = AWS4Auth(access_key, access_key_secret, "eu-west-1", "execute-api", session_token=session_token)
+
+    response = requests.get(
+        url,
+        auth=auth,
+    )
+    return response.json()

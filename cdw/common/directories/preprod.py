@@ -259,6 +259,9 @@ preprod = {
             "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
             "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com",
         },
+        "read_to_bill": {
+            "api_url": "https://oznt943hdh.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
+        },
     },
     # All bad practice here needs to be sorted
     "s3_source_bucket": "igloo-data-warehouse-prod-630944350233",

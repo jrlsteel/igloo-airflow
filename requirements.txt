@@ -53,3 +53,4 @@ wincertstore==0.2
 yarg==0.1.9
 zipp==3.1.0
 apache-airflow
+requests_aws4auth
