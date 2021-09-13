@@ -55,6 +55,7 @@ pipelines:
             - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_UAT
             - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_UAT
             - export AWS_REGION=$AWS_DEFAULT_REGION_UAT
+            - make -e ENVIRONMENT=uat -C cloudformation build deploy
             - source .aws/npm-auth-ci.sh
             - npm install
             - npm run igloo-codebuild -- --project-name igloo-cdw-airflow-deploy --source-version $BITBUCKET_BRANCH -w -r
@@ -79,6 +80,7 @@ pipelines:
             - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_UAT
             - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_UAT
             - export AWS_REGION=$AWS_DEFAULT_REGION_UAT
+            - make -e ENVIRONMENT=uat -C cloudformation build deploy
             - source .aws/npm-auth-ci.sh
             - npm install
             - npm run igloo-codebuild -- --project-name igloo-cdw-airflow-deploy --source-version $BITBUCKET_BRANCH -w -r
@@ -112,6 +114,7 @@ pipelines:
             - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_STAGING
             - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_STAGING
             - export AWS_REGION=$AWS_DEFAULT_REGION_STAGING
+            - make -e ENVIRONMENT=staging -C cloudformation build deploy
             - source .aws/npm-auth-ci.sh
             - npm install
             - npm run igloo-codebuild -- --project-name igloo-cdw-airflow-deploy --source-version $BITBUCKET_BRANCH -w -r
@@ -157,6 +160,7 @@ pipelines:
             - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PROD
             - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION_PROD
             - export AWS_REGION=$AWS_DEFAULT_REGION_PROD
+            - make -e ENVIRONMENT=prod -C cloudformation build deploy
             - source .aws/npm-auth-ci.sh
             - npm install
             - npm run igloo-codebuild -- --project-name igloo-cdw-airflow-deploy --source-version $BITBUCKET_TAG -w -r
