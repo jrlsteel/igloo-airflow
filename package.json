@@ -12,11 +12,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/iglooenergy/enzek-meterpoint-readings.git"
+    "url": "git+ssh://git@bitbucket.org/iglooenergy/igloo-cdw-airflow.git"
   },
   "author": "",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings#readme",
+  "homepage": "https://bitbucket.org/iglooenergy/igloo-cdw-airflow#readme",
   "dependencies": {
     "@igloo/build-tools": "^0.0.7",
     "husky": "^6.0.0"

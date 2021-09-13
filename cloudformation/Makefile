@@ -26,7 +26,7 @@ CI_AGENT_ROLE_ARN      := arn:aws:iam::${AWS_ACCOUNT_ID}:role/ci-agent-role
 # Role that will be passed to SAM to when deploying
 CI_DEPLOYMENT_ROLE_ARN := arn:aws:iam::$(AWS_ACCOUNT_ID):role/ci-deployment-role
 
-SAM_STACK_NAME    := enzek-meterpoint-readings
+SAM_STACK_NAME    := igloo-cdw-airflow
 
 # If we are running in CI (Bitbucket) then there is no need to set the
 # --use-container argument as we should be running inside an appropriate
