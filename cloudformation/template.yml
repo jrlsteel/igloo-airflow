@@ -12,7 +12,7 @@ Parameters:
       - prod
   StackName:
     Type: String
-    Default: enzek-meterpoint-readings
+    Default: igloo-cdw-airflow
 
 Mappings:
   EnvironmentMap:
@@ -33,7 +33,7 @@ Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub enzek-meterpoint-readings-artifacts-${Environment}-${AWS::AccountId}
+      BucketName: !Sub igloo-cdw-airflow-artifacts-${Environment}-${AWS::AccountId}
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -64,44 +64,6 @@ Resources:
             Principal:
               AWS:
                 - !Sub arn:aws:iam::${AWS::AccountId}:user/ci-agent
-
-  DeployFnSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Sub ${StackName}-DeployFnSecurityGroup
-      VpcId: !ImportValue CoreVPC
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: name
-          Value: !Sub ${StackName}-DeployFnSecurityGroup
-        - Key: category
-          Value: cdw
-
-  DeployFn:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${StackName}-DeployFn
-      CodeUri: deploy-fn/
-      Handler: deploy.lambda_handler
-      Runtime: python3.7
-      Timeout: 15
-      Events:
-        ArtifactUploaded:
-          Type: S3
-          Properties:
-            Bucket:
-              Ref: ArtifactBucket
-            Events: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix      # or "suffix"
-                  Value: enzek-meterpoint-readings
-      VpcConfig:
-        SecurityGroupIds:
-          - !GetAtt DeployFnSecurityGroup.GroupId
-        SubnetIds: !Split [ ",", !ImportValue CorePrivateSubnets ]
 
   WriteCDWSourceDataBucketsPolicy:
     Type: AWS::IAM::ManagedPolicy

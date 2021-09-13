@@ -1,4 +1,4 @@
-enzek-meterpoint-readings
+igloo-cdw-airflow
 =========================
 
 This repo contains all functionality required by the various batch processes that run on a daily / weekly basis to extract data from various sources and ingest it in to the Customer Data Warehouse (CDW).

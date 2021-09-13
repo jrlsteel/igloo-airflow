@@ -34,8 +34,8 @@
       "breakingChange": "BREAKING CHANGES"
     },
 
-    "commitUrl": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings/commits/%commit%",
-    "commitRangeUrl": "https://bitbucket.org/iglooenergy/enzek-meterpoint-readings/branches/compare/%from%..%to%",
+    "commitUrl": "https://bitbucket.org/iglooenergy/igloo-cdw-airflow/commits/%commit%",
+    "commitRangeUrl": "https://bitbucket.org/iglooenergy/igloo-cdw-airflow/branches/compare/%from%..%to%",
     "issueUrl": "https://iglooenergy.atlassian.net/browse/%issue%"
   }
 }
