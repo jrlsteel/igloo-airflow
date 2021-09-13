@@ -102,6 +102,8 @@ deploy:
 	# Changing the ownership of the process_EPC folder such that airflow is able to write to it.
 	# This is needed because the EPC ETL downloads a zip file that unpacks it into that directory.
 	chown 1000.1000 $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)/cdw/process_EPC
+	# Allow ec2-user to write to conf directory so that users can update the config file (igloo-cdw-airflow-config)
+	chown 1000.1000 $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)/cdw/conf
 
 release-finish:
 	# Set GIT_MERGE_AUTOEDIT=no to avoid invoking the editor when merging
