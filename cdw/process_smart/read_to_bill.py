@@ -108,7 +108,7 @@ class SmartReadsBillings:
             if dry_run is True:
                 logger.in_prod_env(body)
             else:
-                util.make_signed_post_request(api_url, body)
+                util.send_signed_post_request(api_url, body)
 
             if index % 100 == 0:
                 logger.in_prod_env(f"Reads processed: {index+1}")
@@ -117,7 +117,7 @@ class SmartReadsBillings:
         api_url = util.get_api_url("read_to_bill")
         queue_finished = False
         while not queue_finished:
-            response = util.make_signed_get_request(api_url)
+            response = util.send_signed_get_request(api_url)
             if response["queue"]["length"] == 0:
                 queue_finished = True
 

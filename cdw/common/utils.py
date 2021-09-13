@@ -621,7 +621,7 @@ def process_s3_mirror_job(job_name, source_input, destination_input):
     logger.in_prod_env("Mirror job completed in {:.2f} seconds".format(float(timeit.default_timer() - start)))
 
 
-def make_signed_post_request(url, json_payload):
+def send_signed_post_request(url, json_payload):
     # Contact ECS helper to obtain temp credentials
     token_host = "169.254.170.2"
     token_path = os.environ["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
@@ -645,7 +645,7 @@ def make_signed_post_request(url, json_payload):
     return response.json()
 
 
-def make_signed_get_request(url):
+def send_signed_get_request(url):
     # Contact ECS helper to obtain temp credentials
     token_host = "169.254.170.2"
     token_path = os.environ["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
