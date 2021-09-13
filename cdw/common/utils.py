@@ -360,6 +360,11 @@ def get_smart_read_billing_api_info(api):
     head = {"Content-Type": "application/json", "Host": "{0}".format(host), "x-api-key": "{0}".format(api_key)}
     return api_url, head
 
+def get_api_url(api):
+    dir = get_dir()
+    api_url = dir["apis"][api]["api_url"]
+    return api_url
+
 
 def get_epc_api_info(api):
     dir = get_dir()

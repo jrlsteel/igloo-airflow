@@ -83,7 +83,7 @@ class SmartReadsBillings:
             logger.in_prod_env("df_string: {0}".format(str(df)))
 
     def process_accounts(self, _df, dry_run):
-        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info("read_to_bill")
+        api_url = util.get_api_url("read_to_bill")
         for index, df in _df.iterrows():
             # Get Smart Reads Billing
             body = json.dumps(
@@ -108,16 +108,16 @@ class SmartReadsBillings:
             if dry_run is True:
                 logger.in_prod_env(body)
             else:
-                util.make_signed_post_request(api_url_smart_reads, body)
+                util.make_signed_post_request(api_url, body)
 
             if index % 100 == 0:
                 logger.in_prod_env(f"Reads processed: {index+1}")
 
     def block_until_queue_processed(self):
-        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info("read_to_bill")
+        api_url = util.get_api_url("read_to_bill")
         queue_finished = False
         while not queue_finished:
-            response = util.make_signed_get_request(api_url_smart_reads)
+            response = util.make_signed_get_request(api_url)
             if response["queue"]["length"] == 0:
                 queue_finished = True
 
