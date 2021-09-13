@@ -255,7 +255,7 @@ dev = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f",
         },
         "smart_reads_billing": {
-            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/",
+            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
             "api_key": "nNUEXIkGdx4R13FHUi7Iw8tDIUuu3hbW7UBJrrz1",
             "host": "43syav1qg0.execute-api.eu-west-1.amazonaws.com",
         },

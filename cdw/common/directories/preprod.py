@@ -255,7 +255,7 @@ preprod = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f",
         },
         "smart_reads_billing": {
-            "api_url": "https://oznt943hdh.execute-api.eu-west-1.amazonaws.com/prod/",
+            "api_url": "https://oznt943hdh.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
             "api_key": "HorYWPvBNO6ULqsw3aZozyW7vJKJowlacPhTH8I6",
             "host": "xcy0iyaa30.execute-api.eu-west-1.amazonaws.com",
         },
