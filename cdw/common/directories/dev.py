@@ -255,9 +255,12 @@ dev = {
             "token": "quqSpLjJly3jlh79S7uUN9uE1YoPQums86o0768f",
         },
         "smart_reads_billing": {
-            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
+            "api_url": "https://vpce-05192ff7be6fd8ae8-izusx1w8.execute-api.eu-west-1.vpce.amazonaws.com/uat/api/v1/meter-reads",
             "api_key": "nNUEXIkGdx4R13FHUi7Iw8tDIUuu3hbW7UBJrrz1",
             "host": "43syav1qg0.execute-api.eu-west-1.amazonaws.com",
+        },
+        "read_to_bill": {
+            "api_url": "https://hf9erhtu5i.execute-api.eu-west-1.amazonaws.com/prod/meter-read-submission",
         },
     },
     # All bad practice here needs to be sorted

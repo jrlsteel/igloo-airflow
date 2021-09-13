@@ -292,6 +292,12 @@ start_smart_all_billing_reads_jobs = BashOperator(
     dag=dag,
 )
 
+start_smart_all_billing_reads_jobs_snowstorm = BashOperator(
+    task_id="start_smart_all_billing_reads_jobs_snowstorm",
+    bash_command="cd /opt/airflow/cdw/process_smart && python read_to_bill.py --billing-window-start-date {{ tomorrow_ds }} {{ var.value.R2B_CLI_PARAMS }}",
+    dag=dag,
+)
+
 refresh_mv_smart_stage2_smarthalfhourlyreads_elec = PythonOperator(
     dag=dag,
     task_id="refresh_mv_smart_stage2_smarthalfhourlyreads_elec",
@@ -426,6 +432,11 @@ populate_ref_readings_smart_daily_uSmart_raw >> truncate_ref_readings_smart_dail
 truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_usmart_reads >> start_smart_all_billing_reads_jobs
 truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_elec_reads >> start_smart_all_billing_reads_jobs
 truncate_ref_readings_smart_daily_all >> populate_ref_readings_smart_daily_all_with_asei_gas_reads >> start_smart_all_billing_reads_jobs
+
+# Snowstorm step requires all previous steps to finish
+populate_ref_readings_smart_daily_all_with_usmart_reads >> start_smart_all_billing_reads_jobs_snowstorm
+populate_ref_readings_smart_daily_all_with_asei_elec_reads >> start_smart_all_billing_reads_jobs_snowstorm
+populate_ref_readings_smart_daily_all_with_asei_gas_reads >> start_smart_all_billing_reads_jobs_snowstorm
 
 # Mirror steps
 environment = util.get_env()

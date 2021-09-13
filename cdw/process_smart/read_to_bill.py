@@ -83,9 +83,8 @@ class SmartReadsBillings:
             logger.in_prod_env("df_string: {0}".format(str(df)))
 
     def process_accounts(self, _df, dry_run):
-        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info("smart_reads_billing")
+        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info("read_to_bill")
         for index, df in _df.iterrows():
-            account_id = str(df["accountid"])
             # Get Smart Reads Billing
             body = json.dumps(
                 {
@@ -109,12 +108,18 @@ class SmartReadsBillings:
             if dry_run is True:
                 logger.in_prod_env(body)
             else:
-                response_smart_reads = self.post_api_response(api_url_smart_reads, body, head_smart_reads)
+                util.make_signed_post_request(api_url_smart_reads, body)
 
-                if not response_smart_reads:
-                    logger.in_prod_env(f"account: {account_id} has no data for Elec status")
             if index % 100 == 0:
                 logger.in_prod_env(f"Reads processed: {index+1}")
+
+    def block_until_queue_processed(self):
+        api_url_smart_reads, head_smart_reads = util.get_smart_read_billing_api_info("read_to_bill")
+        queue_finished = False
+        while not queue_finished:
+            response = util.make_signed_get_request(api_url_smart_reads)
+            if response["queue"]["length"] == 0:
+                queue_finished = True
 
     def smart_reads_billing_details(self, config_sql):
         pr = db.get_redshift_connection()
@@ -158,6 +163,8 @@ def main(billing_window_start_date, next_bill_date, dcc_adapter_filter=None, dry
     logger.in_prod_env(f"Number of reads to process: {len(smart_reads_billing_df)}")
 
     p.process_accounts(smart_reads_billing_df, dry_run)
+
+    p.block_until_queue_processed()
 
     logger.in_prod_env(f"Process completed in {str(timeit.default_timer() - start)} seconds")
 
