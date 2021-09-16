@@ -308,7 +308,7 @@ def verify_new_api_response_files_in_s3_directory(search_filter, expected_value,
         s3_bucket = directory["s3_bucket"]
         query_path = s3_bucket + "/" + s3_prefix
         iglog.in_prod_env("Filtering for files containting: {}, in directoy: {}".format(search_filter, query_path))
-        command = "aws s3 ls s3://{} | grep -1 '{}' | wc -l".format(query_path, search_filter)
+        command = "aws s3 ls s3://{} | grep '{}' | wc -l".format(query_path, search_filter)
         result = subprocess.check_output(command, shell=True)
         num_matching_files = int(result.decode().strip())
         iglog.in_prod_env("Shell output: " + str(num_matching_files))
@@ -329,7 +329,7 @@ def verify_files_in_s3_directory(search_filter, expected_value, s3_prefix):
         s3_bucket = directory["s3_bucket"]
         query_path = f"{s3_bucket}/{s3_prefix}/"
         iglog.in_prod_env(f"Filtering for files containting: {search_filter}, in directoy: {query_path}")
-        command = f"aws s3 ls s3://{query_path} | grep -1 '{search_filter}' | wc -l"
+        command = f"aws s3 ls s3://{query_path} | grep '{search_filter}' | wc -l"
         result = subprocess.check_output(command, shell=True)
         number_of_matching_files = int(result.decode().strip())
         iglog.in_prod_env(f"Shell output: {str(number_of_matching_files)}")
