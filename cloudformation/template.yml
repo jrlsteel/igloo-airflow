@@ -50,7 +50,7 @@ Resources:
             Action:
               - s3:GetObject
               - s3:PutObject
-              - s3:DeleteBucket
+              - s3:DeleteObject
             Resource:
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn, "*" ]]
