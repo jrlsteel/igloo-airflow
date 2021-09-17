@@ -193,7 +193,6 @@ igloo_alp_trigger.doc = task_slack_report_string.format(
     "Investigate root cause and rerun depedending.",
     "This step only triggers another DAG, and is only likely to fail because of airflow config.",
 )
-# igloo_alp_trigger.set_upstream(sensor)
 
 
 tasks = {}
@@ -319,8 +318,9 @@ for datatype, datatype_info in dag_data.items():
             )
 
         for prefix in datatype_info["s3_prefixes"]:
+            api_verify_string = f"api_extract_verify_{prefix}"
             mirror_task_string = f"mirroring_{datatype}_{prefix}"
             tasks[mirror_task_string] = createMirrorTask(mirror_task_string, prefix)
             tasks[staging_task_string].set_upstream(tasks[mirror_task_string])
-            tasks[f"api_extract_verify_{prefix}"].set_upsream(tasks[mirror_task_string])
+            tasks[api_verify_string].set_upsream(tasks[mirror_task_string])
             # tasks[mirror_task_string].set_upstream(sensor)
