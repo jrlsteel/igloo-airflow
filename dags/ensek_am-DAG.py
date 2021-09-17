@@ -5,7 +5,7 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
-
+from airflow.models import Variable
 
 import datetime
 from cdw.conf import config
@@ -148,7 +148,7 @@ environment = cdw.common.utils.get_env()
 date_today_string = str(datetime.date.today())
 
 
-def createS3VerificationStep(task_id, path, task_description):
+def createS3VerificationStep(task_id, path, task_description, expected_value):
     """
     A Wrapper function for our verification step. One which checks to verify we have enough files in a given S3 location
     """
@@ -157,7 +157,7 @@ def createS3VerificationStep(task_id, path, task_description):
         python_callable=verify_files_in_s3_directory,
         op_kwargs={
             "search_filter": date_today_string,
-            "expected_value": 10,
+            "expected_value": expected_value,
             "s3_prefix": path,
         },
         dag=dag,
@@ -193,7 +193,6 @@ igloo_alp_trigger.doc = task_slack_report_string.format(
     "Investigate root cause and rerun depedending.",
     "This step only triggers another DAG, and is only likely to fail because of airflow config.",
 )
-# igloo_alp_trigger.set_upstream(sensor)
 
 
 tasks = {}
@@ -260,7 +259,7 @@ for datatype, datatype_info in dag_data.items():
 
     # Creates verification tasks
     for prefix in datatype_info["s3_prefixes"]:
-        # stage1
+
         api_verify_string = f"api_extract_verify_{prefix}"
         verify_task_docstring_stage1 = task_slack_report_string.format(
             f"Verifies there are sufficient new files in the s3 directory: {prefix}, demonstrating the success of this API extraction",
@@ -272,14 +271,22 @@ for datatype, datatype_info in dag_data.items():
             "Do not rerun, investigate root cause.",
             "Rerunning will have the same outcome until valid data is present.",
         )
+        # stage1
         tasks[api_verify_string] = createS3VerificationStep(
-            api_verify_string, "stage1/{}".format(prefix), verify_task_docstring_stage1
-        ).set_upstream(tasks[api_task_string])
+            api_verify_string,
+            "stage1/{}".format(prefix),
+            verify_task_docstring_stage1,
+            int(Variable.get("STAGE1_VERIFICATION_THRESHOLD")),
+        )
+        tasks[api_verify_string].set_upstream(tasks[api_task_string])
 
         # stage2
         stage2_verify_string = f"stage2_verify_{prefix}"
         tasks[stage2_verify_string] = createS3VerificationStep(
-            stage2_verify_string, "stage2/stage2_{}".format(prefix), verify_task_docstring_stage2
+            stage2_verify_string,
+            "stage2/stage2_{}".format(prefix),
+            verify_task_docstring_stage2,
+            int(Variable.get("STAGE2_VERIFICATION_THRESHOLD")),
         ).set_upstream(tasks[staging_task_string])
 
         # ref
@@ -312,7 +319,9 @@ for datatype, datatype_info in dag_data.items():
             )
 
         for prefix in datatype_info["s3_prefixes"]:
+            api_verify_string = f"api_extract_verify_{prefix}"
             mirror_task_string = f"mirroring_{datatype}_{prefix}"
             tasks[mirror_task_string] = createMirrorTask(mirror_task_string, prefix)
             tasks[staging_task_string].set_upstream(tasks[mirror_task_string])
+            tasks[api_verify_string].set_upstream(tasks[mirror_task_string])
             # tasks[mirror_task_string].set_upstream(sensor)
