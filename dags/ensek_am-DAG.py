@@ -322,5 +322,8 @@ for datatype, datatype_info in dag_data.items():
             mirror_task_string = f"mirroring_{datatype}_{prefix}"
             tasks[mirror_task_string] = createMirrorTask(mirror_task_string, prefix)
             tasks[staging_task_string].set_upstream(tasks[mirror_task_string])
+            print("LOGGINGGGG")
+            print(api_verify_string)
+            print(tasks[api_verify_string])
             tasks[api_verify_string].set_upstream(tasks[mirror_task_string])
             # tasks[mirror_task_string].set_upstream(sensor)
