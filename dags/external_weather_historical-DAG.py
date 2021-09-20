@@ -126,11 +126,12 @@ directory = util.get_dir()
 fetch_stage1_data >> weather_staging_job >> weather_ref_job >> weather_historical_daily_verify
 
 if environment in ["preprod", "dev"]:
+    master_source = util.get_master_source("weather_historical")
 
     dest_prefix = directory["s3_weather_key"]["HistoricalWeather"]
     destination = "s3://{}/{}".format(directory["s3_bucket"], dest_prefix)
 
-    source_dir = util.get_master_source("weather_historical")
+    source_dir = util.get_dir(master_source)
     source_prefix = source_dir["s3_weather_key"]["HistoricalWeather"]
     source = "s3://{}/{}".format(source_dir["s3_bucket"], source_prefix)
 
