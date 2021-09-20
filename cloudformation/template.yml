@@ -30,13 +30,14 @@ Conditions:
   UATOrStagingEnvironment: !Or [ Condition: UATEnvironment, Condition: StagingEnvironment ]
 
 Resources:
-  WriteCDWSourceDataBucketsPolicy:
+  S3SyncUserManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: "A managed policy that allows write access to all CDW Source Data buckets"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
+          # Allow read/write access to the CDW S3 buckets in the current account
           - Effect: Allow
             Action:
               - s3:ListBucket
@@ -57,6 +58,25 @@ Resources:
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn, "*" ]]
+          # Allow read access to the CDW S3 buckets in the production account
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !ImportValue CoreIglooDataWarehouseProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseDataScienceProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseFinanceProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseMeteringProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseSmartMeterDataProdS3BucketArn
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataProdS3BucketArn, "*" ]]
 
   S3SyncUser:
     Type: AWS::IAM::User
@@ -64,7 +84,7 @@ Resources:
       UserName: s3-sync
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
-        - !Ref WriteCDWSourceDataBucketsPolicy
+        - !Ref S3SyncUserManagedPolicy
       Tags:
         - Key: category
           Value: cdw
