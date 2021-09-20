@@ -97,8 +97,6 @@ if __name__ == "__main__":
 
     s = Weather()
 
-    util.batch_logging_insert(s.all_jobid, 107, "all_weather_jobs", "start_weather_jobs.py")
-
     master_source = util.get_master_source("weather_historical")
     current_env = util.get_env()
     print("Current environment: {0}, Master_Source: {1}".format(current_env, master_source))

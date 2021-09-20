@@ -41,7 +41,7 @@ def get_env():
 
 
 def get_master_source(job_name):
-    return con.master_sources.get(job_name, "prod")  # default to prod if job name isn't found
+    return con.master_sources.get(job_name, "newprod")  # default to newprod if job name isn't found
 
 
 def get_multiprocess(source):
