@@ -166,8 +166,9 @@ if __name__ == "__main__":
     weather_postcode_sql = p.sql
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
     if environment in ["preprod", "dev"]:
-        weather_postcodes = weather_postcodes[:24] # only get 24 postcodes if environment is dev or preprod, as we do not want to process all of them.
-
+        weather_postcodes = weather_postcodes[
+            :24
+        ]  # only get 24 postcodes if environment is dev or preprod, as we do not want to process all of them.
 
     ##### Multiprocessing Starts #########
     env = util.get_env()

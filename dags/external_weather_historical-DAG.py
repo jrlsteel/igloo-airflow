@@ -123,7 +123,7 @@ weather_historical_daily_verify = PythonOperator(
 
 directory = util.get_dir()
 
-    fetch_stage1_data >> weather_staging_job >> weather_ref_job >> weather_historical_daily_verify
+fetch_stage1_data >> weather_staging_job >> weather_ref_job >> weather_historical_daily_verify
 
 if environment in ["preprod", "dev"]:
 
