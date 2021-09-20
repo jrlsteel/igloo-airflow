@@ -139,7 +139,7 @@ if environment in ["preprod", "dev"]:
     dest_prefix = directory["s3_weather_key"]["HistoricalWeather"]
     destination = "s3://{}/{}".format(directory["s3_bucket"], dest_prefix)
 
-    source_dir = util.get_dir("newprod")
+    source_dir = util.get_dir(master_source)
     source_prefix = source_dir["s3_weather_key"]["HistoricalWeather"]
     source = "s3://{}/{}".format(source_dir["s3_bucket"], source_prefix)
 
