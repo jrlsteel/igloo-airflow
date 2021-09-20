@@ -10,6 +10,7 @@ from airflow.operators.bash_operator import BashOperator
 import sentry_sdk
 
 from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.common import schedules
 import cdw.common.process_glue_crawler
 import cdw.common.utils
 from cdw.common import utils as util
@@ -17,11 +18,18 @@ from cdw.common.slack_utils import alert_slack
 
 environment = cdw.common.utils.get_env()
 
+dag_id = "igloo_weather_historical"
+
 task_slack_report_string = """
 *Purpose*: {0}
 *Failure Remediation*: {1}
 *Justification*: {2}
 """
+
+
+def get_schedule():
+    return schedules.get_schedule(environment, dag_id)
+
 
 args = {
     "owner": "Airflow",
@@ -30,9 +38,9 @@ args = {
 }
 
 dag = DAG(
-    dag_id="igloo_weather_historical",
+    dag_id=dag_id,
     default_args=args,
-    schedule_interval="00 17 * * *",
+    schedule_interval=get_schedule(),
     tags=["cdw"],
     catchup=False,
     max_active_runs=1,
