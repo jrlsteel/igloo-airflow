@@ -139,6 +139,7 @@ if environment in ["preprod", "dev"]:
         task_id="mirror_s1_data",
         python_callable=util.process_s3_mirror_job,
         op_kwargs={
+            "job_name": "mirror_s1_job",
             "source_input": source,
             "destination_input": destination,
         },
