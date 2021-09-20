@@ -1,23 +1,35 @@
 from __future__ import print_function
 from datetime import datetime, timedelta
 
-import time
-import sys
-from builtins import range
-from pprint import pprint
-
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
+
 import sentry_sdk
 
-
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.common import schedules
 import cdw.common.process_glue_crawler
 import cdw.common.utils
-from cdw.conf import config
+from cdw.common import utils as util
 from cdw.common.slack_utils import alert_slack
+
+environment = cdw.common.utils.get_env()
+
+dag_id = "igloo_weather_historical"
+
+task_slack_report_string = """
+*Purpose*: {0}
+*Failure Remediation*: {1}
+*Justification*: {2}
+"""
+
+
+def get_schedule():
+    return schedules.get_schedule(environment, dag_id)
+
 
 args = {
     "owner": "Airflow",
@@ -26,9 +38,9 @@ args = {
 }
 
 dag = DAG(
-    dag_id="igloo_weather_historical",
+    dag_id=dag_id,
     default_args=args,
-    schedule_interval="00 17 * * *",
+    schedule_interval=get_schedule(),
     tags=["cdw"],
     catchup=False,
     max_active_runs=1,
@@ -80,22 +92,34 @@ def fn_weather_historical_daily_verify():
         raise e
 
 
-start_weather_mirror_jobs = BashOperator(
-    task_id="start_weather_processing_jobs",
-    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_mirror_jobs.py",
+fetch_stage1_data = BashOperator(
+    task_id="fetch_stage1_data",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python processHistoricalWeatherData.py",
     dag=dag,
 )
 
-start_weather_staging_jobs = BashOperator(
-    task_id="start_weather_staging_jobs",
-    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_staging_jobs.py",
+weather_staging_job = PythonOperator(
+    task_id="weather_staging_job",
+    python_callable=run_glue_job_await_completion,
+    op_args=["process_staging_files", "historicalweather"],
     dag=dag,
+    doc_md=task_slack_report_string.format(
+        f"Runs glue job on the stage 1 historicalweather, files which reduces them to 17 parquet files and writes them to stage 2",
+        "Do not rerun until root cause is understood, data will correct overnight given cause is resolved.",
+        "Rerunning could cause other tasks to finish later than required.",
+    ),
 )
 
-start_weather_ref_jobs = BashOperator(
-    task_id="start_weather_ref_jobs",
-    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_weather_ref_jobs.py",
+weather_ref_job = PythonOperator(
+    task_id="weather_ref_job",
+    python_callable=run_glue_job_await_completion,
+    op_args=["_process_ref_tables", "historicalweather"],
     dag=dag,
+    doc_md=task_slack_report_string.format(
+        f"Runs glue job on the stage 1 historicalweather, files which reduces them to 17 parquet files and writes them to stage 2",
+        "Do not rerun until root cause is understood, data will correct overnight given cause is resolved.",
+        "Rerunning could cause other tasks to finish later than required.",
+    ),
 )
 
 weather_historical_daily_verify = PythonOperator(
@@ -104,4 +128,29 @@ weather_historical_daily_verify = PythonOperator(
     dag=dag,
 )
 
-start_weather_mirror_jobs >> start_weather_staging_jobs >> start_weather_ref_jobs >> weather_historical_daily_verify
+
+directory = util.get_dir()
+
+fetch_stage1_data >> weather_staging_job >> weather_ref_job >> weather_historical_daily_verify
+
+if environment in ["preprod", "dev"]:
+    master_source = util.get_master_source("weather_historical")
+
+    dest_prefix = directory["s3_weather_key"]["HistoricalWeather"]
+    destination = "s3://{}/{}".format(directory["s3_bucket"], dest_prefix)
+
+    source_dir = util.get_dir(master_source)
+    source_prefix = source_dir["s3_weather_key"]["HistoricalWeather"]
+    source = "s3://{}/{}".format(source_dir["s3_bucket"], source_prefix)
+
+    mirror_s1_data = PythonOperator(
+        task_id="mirror_s1_data",
+        python_callable=util.process_s3_mirror_job,
+        op_kwargs={
+            "job_name": "mirror_s1_job",
+            "source_input": source,
+            "destination_input": destination,
+        },
+        dag=dag,
+    )
+    mirror_s1_data >> weather_staging_job

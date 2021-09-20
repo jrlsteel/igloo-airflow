@@ -11,4 +11,5 @@ schedules = {
     "ensek_main": "00 00 * * *",
     "SMART": "45 09 * * *",
     "igloo_calculated": "00 07 * * *",
+    "igloo_weather_historical": "00 20 * * *",
 }

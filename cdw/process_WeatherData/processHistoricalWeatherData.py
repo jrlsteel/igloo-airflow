@@ -20,6 +20,8 @@ from cdw.connections.connect_db import get_boto_S3_Connections as s3_con
 from cdw.connections import connect_db as db
 from cdw.common import api_filters as apif
 
+environment = util.get_env()
+
 logger = util.IglooLogger()
 
 
@@ -160,14 +162,13 @@ if __name__ == "__main__":
 
     s3 = s3_con(bucket_name)
     # weather_sql = "SELECT left(postcode, len(postcode) - 3) postcode FROM aws_s3_stage1_extracts.stage1_postcodesuk where  left(postcode, len(postcode) - 3) in ('SL6') group by left(postcode, len(postcode) - 3)"
-    # weather_postcode_sql = weather_sql
 
     weather_postcode_sql = p.sql
     weather_postcodes = p.get_weather_postcode(weather_postcode_sql)
-
-    # print(weather_postcodes)
-    # if False:
-    # p.processData(weather_postcodes, s3, dir_s3)
+    if environment in ["preprod", "dev"]:
+        weather_postcodes = weather_postcodes[
+            :24
+        ]  # only get 24 postcodes if environment is dev or preprod, as we do not want to process all of them.
 
     ##### Multiprocessing Starts #########
     env = util.get_env()
