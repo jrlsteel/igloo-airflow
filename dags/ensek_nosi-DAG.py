@@ -4,11 +4,10 @@ from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from conf import config
-from common import schedules
-from common.slack_utils import alert_slack
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.slack_utils import alert_slack
 
 dag_id = "ensek_nosi"
 
@@ -35,19 +34,19 @@ dag = DAG(
 
 mirror_nosi = BashOperator(
     task_id="mirror_nosi",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi_mirror_only_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Nosi && python start_ensek_readings_nosi_mirror_only_jobs.py",
     dag=dag,
 )
 
 start_ensek_readings_nosi_staging_jobs = BashOperator(
     task_id="start_ensek_readings_nosi_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi_staging_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Nosi && python start_ensek_readings_nosi_staging_jobs.py",
     dag=dag,
 )
 
 start_ensek_readings_nosi_ref_jobs = BashOperator(
     task_id="start_ensek_readings_nosi_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Nosi && python start_ensek_readings_nosi_ref_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Nosi && python start_ensek_readings_nosi_ref_jobs.py",
     dag=dag,
 )
 

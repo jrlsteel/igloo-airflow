@@ -12,13 +12,12 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from conf import config
-from common import utils as util
-from process_payment_method_reconciliation.validate_payment_methods import PaymentMethodValidator
+from cdw.conf import config
+from cdw.common import utils as util
+from cdw.process_payment_method_reconciliation.validate_payment_methods import PaymentMethodValidator
 import sentry_sdk
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",

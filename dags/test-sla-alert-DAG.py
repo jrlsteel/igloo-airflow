@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 import datetime
@@ -8,7 +7,7 @@ import time
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-from common.slack_utils import post_slack_sla_alert
+from cdw.common.slack_utils import post_slack_sla_alert
 import json
 
 # args = {"owner": "Airflow", "start_date": days_ago(2), "sla": datetime.datetime.today().replace(hour=8, minute=0, second=0, microsecond=0), "on_failure_callback": alert_slack}

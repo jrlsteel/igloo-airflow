@@ -1,4 +1,3 @@
-PACKAGE_NAME      := enzek-meterpoint-readings
 # The commit hash of the current HEAD of the repo.
 HEAD_COMMIT_HASH  := $(shell git rev-parse HEAD)
 
@@ -6,9 +5,16 @@ HEAD_COMMIT_HASH  := $(shell git rev-parse HEAD)
 # If there are no tags yet, default the version to 0.0.1.
 VERSION           := $(shell git describe --tags $(HEAD_COMMIT_HASH) 2> /dev/null || echo v0.0.0)
 PYTHON            := python3
-PACKAGE_INCLUDE   := * .venv
-PACKAGE_EXCLUDE   := .git .gitignore .venv $(PACKAGE_NAME)-*.zip
-AWS_S3_BUCKET     := $(PACKAGE_NAME)-artifacts-${ENVIRONMENT}-$(AWS_ACCOUNT_ID)
+
+# The directory that contains the code to be deployed
+SOURCE_PATH := $(shell pwd)
+
+# The directory within the EFS filesystem in to which the code should be
+# deployed
+AIRFLOW_EFS_CODE_DEPLOY_PATH=opt.airflow
+AIRFLOW_EFS_DAG_DEPLOY_PATH=usr.local.airflow.dags/igloo-cdw-airflow
+
+AIRFLOW_EFS_CONFIG_DEPLOY_PATH=opt.airflow/cdw/conf/config.py
 
 .PHONY: git-flow-init
 .PHONY: install
@@ -60,11 +66,10 @@ code-formatting-pre-commit:
 	git diff -z --name-only --staged **/*.py | xargs -0 black
 	git diff -z --name-only --staged **/*.py | xargs -0 git add
 
-conf/config.py:
-	mkdir -p conf/
-	cp test/config.py conf/
+cdw/conf/config.py:
+	cp test/config.py cdw/conf/
 
-test: conf/config.py
+test: cdw/conf/config.py
 	rm -rf .coverage coverage.xml htmlcov
 	coverage run -m pytest --ignore=archive --ignore=dags
 	coverage xml
@@ -75,13 +80,30 @@ version:
 build:
 	# TODO
 
-$(PACKAGE_NAME)-$(VERSION).zip:
-	git archive --format=zip -o enzek-meterpoint-readings-${VERSION}.zip HEAD
+# Deploys code to a location in the local file system.
+# AIRFLOW_EFS_ROOT should be the location in the filesystem where the
+# Airflow EFS filesystem is mounted.
+deploy:
+	@echo Copying config file to $(SOURCE_PATH)/cdw/conf
+	cp $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CONFIG_DEPLOY_PATH) $(SOURCE_PATH)/cdw/conf
 
-package: $(PACKAGE_NAME)-$(VERSION).zip
+	@echo Copying code to $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)
+	rsync \
+		-va \
+		--delete \
+		$(SOURCE_PATH)/cdw $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)
 
-deploy: package
-	aws s3 cp $(PACKAGE_NAME)-$(VERSION).zip s3://$(AWS_S3_BUCKET)
+	@echo Copying DAGs to $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_DAG_DEPLOY_PATH)
+	rsync \
+		-va \
+		--delete \
+		$(SOURCE_PATH)/dags $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_DAG_DEPLOY_PATH)
+
+	# Changing the ownership of the process_EPC folder such that airflow is able to write to it.
+	# This is needed because the EPC ETL downloads a zip file that unpacks it into that directory.
+	chown 1000.1000 $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)/cdw/process_EPC
+	# Allow ec2-user to write to conf directory so that users can update the config file (igloo-cdw-airflow-config)
+	chown -R 1000.1000 $(AIRFLOW_EFS_ROOT)/$(AIRFLOW_EFS_CODE_DEPLOY_PATH)/cdw/conf
 
 release-finish:
 	# Set GIT_MERGE_AUTOEDIT=no to avoid invoking the editor when merging

@@ -6,9 +6,8 @@ from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -27,7 +26,7 @@ dag = DAG(
 
 start_ensek_api_mirror_only_jobs = BashOperator(
     task_id="start_ensek_occupier_accounts_mirror_jobs.py",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_mirror_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekOccupierAccounts && python start_ensek_occupier_accounts_mirror_jobs.py",
     dag=dag,
 )
 

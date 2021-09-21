@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
@@ -9,7 +8,7 @@ import time
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-from common.slack_utils import post_slack_message
+from cdw.common.slack_utils import post_slack_message
 import json
 
 # args = {"owner": "Airflow", "start_date": days_ago(2), "sla": datetime.datetime.today().replace(hour=8, minute=0, second=0, microsecond=0), "on_failure_callback": alert_slack}

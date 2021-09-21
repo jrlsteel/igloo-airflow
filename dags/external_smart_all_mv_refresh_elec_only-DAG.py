@@ -10,10 +10,9 @@ from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-from process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
+from cdw.process_smart.start_smart_refresh_mv_hh import refresh_mv_hh_elec_reads
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",

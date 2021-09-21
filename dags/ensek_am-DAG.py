@@ -5,23 +5,22 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
-
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
+from airflow.models import Variable
 
 import datetime
-from conf import config
-from common import schedules
-from common.utils import get_sla_timedelta
-from common.slack_utils import alert_slack, post_slack_sla_alert
-from common.process_glue_job import run_glue_job_await_completion
-from process_verification.verification_template import (
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.utils import get_sla_timedelta
+from cdw.common.slack_utils import alert_slack, post_slack_sla_alert
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.process_verification.verification_template import (
     verify_files_in_s3_directory,
     verify_number_of_rows_in_table_greater_than,
 )
-import common
-from conf import config
-from common import schedules
-from process_Ensek import start_ensek_api_mirror_only_jobs
+import cdw.common
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.process_Ensek import start_ensek_api_mirror_only_jobs
 
 dag_id = "ensek_am"
 env = config.environment_config["environment"]
@@ -31,10 +30,10 @@ def get_schedule():
     return schedules.get_schedule(env, dag_id)
 
 
-directory = common.utils.get_dir()
+directory = cdw.common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
-environment = common.utils.get_env()
+environment = cdw.common.utils.get_env()
 
 date_today_string = str(datetime.date.today())
 
@@ -141,15 +140,15 @@ dag_data = {
     },
 }
 
-directory = common.utils.get_dir()
+directory = cdw.common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
-environment = common.utils.get_env()
+environment = cdw.common.utils.get_env()
 
 date_today_string = str(datetime.date.today())
 
 
-def createS3VerificationStep(task_id, path, task_description):
+def createS3VerificationStep(task_id, path, task_description, expected_value):
     """
     A Wrapper function for our verification step. One which checks to verify we have enough files in a given S3 location
     """
@@ -158,7 +157,7 @@ def createS3VerificationStep(task_id, path, task_description):
         python_callable=verify_files_in_s3_directory,
         op_kwargs={
             "search_filter": date_today_string,
-            "expected_value": 10,
+            "expected_value": expected_value,
             "s3_prefix": path,
         },
         dag=dag,
@@ -194,7 +193,6 @@ igloo_alp_trigger.doc = task_slack_report_string.format(
     "Investigate root cause and rerun depedending.",
     "This step only triggers another DAG, and is only likely to fail because of airflow config.",
 )
-# igloo_alp_trigger.set_upstream(sensor)
 
 
 tasks = {}
@@ -206,9 +204,7 @@ for datatype, datatype_info in dag_data.items():
     api_task_string = f"api_extract_{datatype}_bash"
     tasks[api_task_string] = BashOperator(
         task_id=api_task_string,
-        bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python {}".format(
-            datatype_info["api_bash_command"]
-        ),
+        bash_command="cd /opt/airflow/cdw/process_Ensek && python {}".format(datatype_info["api_bash_command"]),
         dag=dag,
         doc_md=task_slack_report_string.format(
             f"Api extraction for {datatype}",
@@ -263,7 +259,7 @@ for datatype, datatype_info in dag_data.items():
 
     # Creates verification tasks
     for prefix in datatype_info["s3_prefixes"]:
-        # stage1
+
         api_verify_string = f"api_extract_verify_{prefix}"
         verify_task_docstring_stage1 = task_slack_report_string.format(
             f"Verifies there are sufficient new files in the s3 directory: {prefix}, demonstrating the success of this API extraction",
@@ -275,14 +271,22 @@ for datatype, datatype_info in dag_data.items():
             "Do not rerun, investigate root cause.",
             "Rerunning will have the same outcome until valid data is present.",
         )
+        # stage1
         tasks[api_verify_string] = createS3VerificationStep(
-            api_verify_string, "stage1/{}".format(prefix), verify_task_docstring_stage1
-        ).set_upstream(tasks[api_task_string])
+            api_verify_string,
+            "stage1/{}".format(prefix),
+            verify_task_docstring_stage1,
+            int(Variable.get("STAGE1_VERIFICATION_THRESHOLD")),
+        )
+        tasks[api_verify_string].set_upstream(tasks[api_task_string])
 
         # stage2
         stage2_verify_string = f"stage2_verify_{prefix}"
         tasks[stage2_verify_string] = createS3VerificationStep(
-            stage2_verify_string, "stage2/stage2_{}".format(prefix), verify_task_docstring_stage2
+            stage2_verify_string,
+            "stage2/stage2_{}".format(prefix),
+            verify_task_docstring_stage2,
+            int(Variable.get("STAGE2_VERIFICATION_THRESHOLD")),
         ).set_upstream(tasks[staging_task_string])
 
         # ref
@@ -315,7 +319,9 @@ for datatype, datatype_info in dag_data.items():
             )
 
         for prefix in datatype_info["s3_prefixes"]:
+            api_verify_string = f"api_extract_verify_{prefix}"
             mirror_task_string = f"mirroring_{datatype}_{prefix}"
             tasks[mirror_task_string] = createMirrorTask(mirror_task_string, prefix)
             tasks[staging_task_string].set_upstream(tasks[mirror_task_string])
+            tasks[api_verify_string].set_upstream(tasks[mirror_task_string])
             # tasks[mirror_task_string].set_upstream(sensor)

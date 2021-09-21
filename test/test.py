@@ -1,6 +1,5 @@
 import sys
 
-sys.path.append("..")
 from utils import Refresh_UAT as ref_uat
 
 

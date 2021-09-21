@@ -12,7 +12,7 @@ Parameters:
       - prod
   StackName:
     Type: String
-    Default: enzek-meterpoint-readings
+    Default: igloo-cdw-airflow
 
 Mappings:
   EnvironmentMap:
@@ -30,86 +30,14 @@ Conditions:
   UATOrStagingEnvironment: !Or [ Condition: UATEnvironment, Condition: StagingEnvironment ]
 
 Resources:
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub enzek-meterpoint-readings-artifacts-${Environment}-${AWS::AccountId}
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      Tags:
-        - Key: category
-          Value: cdw
-        - Key: environment
-          Value: !Ref Environment
-
-  ArtifactBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref ArtifactBucket
-      PolicyDocument:
-        Statement:
-          - Action:
-              - s3:*
-            Effect: Allow
-            Resource:
-              - !Sub arn:aws:s3:::${ArtifactBucket}
-              - !Sub arn:aws:s3:::${ArtifactBucket}/*
-            Principal:
-              AWS:
-                - !Sub arn:aws:iam::${AWS::AccountId}:user/ci-agent
-
-  DeployFnSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Sub ${StackName}-DeployFnSecurityGroup
-      VpcId: !ImportValue CoreVPC
-      Tags:
-        - Key: environment
-          Value: !Ref Environment
-        - Key: name
-          Value: !Sub ${StackName}-DeployFnSecurityGroup
-        - Key: category
-          Value: cdw
-
-  DeployFn:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${StackName}-DeployFn
-      CodeUri: deploy-fn/
-      Handler: deploy.lambda_handler
-      Runtime: python3.7
-      Timeout: 15
-      Events:
-        ArtifactUploaded:
-          Type: S3
-          Properties:
-            Bucket:
-              Ref: ArtifactBucket
-            Events: s3:ObjectCreated:*
-            Filter:
-              S3Key:
-                Rules:
-                - Name: prefix      # or "suffix"
-                  Value: enzek-meterpoint-readings
-      VpcConfig:
-        SecurityGroupIds:
-          - !GetAtt DeployFnSecurityGroup.GroupId
-        SubnetIds: !Split [ ",", !ImportValue CorePrivateSubnets ]
-
-  WriteCDWSourceDataBucketsPolicy:
+  S3SyncUserManagedPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: "A managed policy that allows write access to all CDW Source Data buckets"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
+          # Allow read/write access to the CDW S3 buckets in the current account
           - Effect: Allow
             Action:
               - s3:ListBucket
@@ -123,13 +51,32 @@ Resources:
             Action:
               - s3:GetObject
               - s3:PutObject
-              - s3:DeleteBucket
+              - s3:DeleteObject
             Resource:
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringS3BucketArn, "*" ]]
               - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataS3BucketArn, "*" ]]
+          # Allow read access to the CDW S3 buckets in the production account
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !ImportValue CoreIglooDataWarehouseProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseDataScienceProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseFinanceProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseMeteringProdS3BucketArn
+              - !ImportValue CoreIglooDataWarehouseSmartMeterDataProdS3BucketArn
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseDataScienceProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseFinanceProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseMeteringProdS3BucketArn, "*" ]]
+              - !Join [ "/", [ !ImportValue CoreIglooDataWarehouseSmartMeterDataProdS3BucketArn, "*" ]]
 
   S3SyncUser:
     Type: AWS::IAM::User
@@ -137,7 +84,7 @@ Resources:
       UserName: s3-sync
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
-        - !Ref WriteCDWSourceDataBucketsPolicy
+        - !Ref S3SyncUserManagedPolicy
       Tags:
         - Key: category
           Value: cdw

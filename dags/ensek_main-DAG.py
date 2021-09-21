@@ -1,24 +1,23 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
-import common
-from common.utils import get_sla_timedelta
-from common.process_glue_job import run_glue_job_await_completion
-from common.slack_utils import alert_slack, post_slack_sla_alert
-from process_verification.verification_template import (
+import cdw.common
+from cdw.common.utils import get_sla_timedelta
+from cdw.common.process_glue_job import run_glue_job_await_completion
+from cdw.common.slack_utils import alert_slack, post_slack_sla_alert
+from cdw.process_verification.verification_template import (
     verify_new_api_response_files_in_s3_directory,
     verify_seventeen_new_files_in_s3,
     ref_verification_step,
 )
-from process_Ensek import start_ensek_api_mirror_only_jobs
-from conf import config
-from common import schedules
+from cdw.process_Ensek import start_ensek_api_mirror_only_jobs
+from cdw.conf import config
+from cdw.common import schedules
 
 dag_id = "ensek_main"
 env = config.environment_config["environment"]
@@ -47,10 +46,10 @@ dag = DAG(
     max_active_runs=1,
 )
 
-directory = common.utils.get_dir()
+directory = cdw.common.utils.get_dir()
 s3_key = directory["s3_key"]
 s3_bucket = directory["s3_bucket"]
-environment = common.utils.get_env()
+environment = cdw.common.utils.get_env()
 
 date_today_string = str(datetime.date.today())
 
@@ -99,7 +98,7 @@ ref_verify_report_string = task_slack_report_string.format(
 
 api_extract_meterpoints = BashOperator(
     task_id="api_extract_meterpoints_bash",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekMeterpoints && python process_ensek_meterpoints_no_history.py",
     dag=dag,
 )
 api_extract_meterpoints.doc = api_extract_report_string.format("Meterpoint data for each account ID.")
@@ -157,7 +156,7 @@ staging_meterpoints = PythonOperator(
     python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_staging_meterpoints_job_name"],
-        common.directories.common["meterpoints"]["glue_job_name_staging"],
+        cdw.common.directories.common["meterpoints"]["glue_job_name_staging"],
     ],
     dag=dag,
 )
@@ -174,7 +173,10 @@ staging_verify_meterpoints.doc = staging_verify_report_string
 ref_tables_meterpoints = PythonOperator(
     task_id="ref_tables_meterpoints",
     python_callable=run_glue_job_await_completion,
-    op_args=[directory["glue_ref_meterpoints_job_name"], common.directories.common["meterpoints"]["glue_job_name_ref"]],
+    op_args=[
+        directory["glue_ref_meterpoints_job_name"],
+        cdw.common.directories.common["meterpoints"]["glue_job_name_ref"],
+    ],
     dag=dag,
 )
 ref_tables_meterpoints.doc = ref_report_string
@@ -198,7 +200,7 @@ ref_tables_verify_meterpoints.doc = ref_verify_report_string
 
 api_extract_internalreadings = BashOperator(
     task_id="api_extract_internalreadings_bash",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek/processEnsekReadings && python process_ensek_internal_readings.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek/processEnsekReadings && python process_ensek_internal_readings.py",
     dag=dag,
 )
 api_extract_internalreadings.doc = api_extract_report_string.format("Internal Readings data per account ID")
@@ -214,7 +216,7 @@ staging_internalreadings = PythonOperator(
     python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_staging_internalreadings_job_name"],
-        common.directories.common["internalreadings"]["glue_job_name_staging"],
+        cdw.common.directories.common["internalreadings"]["glue_job_name_staging"],
     ],
     dag=dag,
 )
@@ -223,7 +225,7 @@ staging_internalreadings.doc = staging_report_string.format("Internal Readings")
 staging_verify_internalreadings = PythonOperator(
     task_id="staging_verify_internalreadings",
     python_callable=verify_seventeen_new_files_in_s3,
-    op_kwargs={"s3_prefix": common.directories.common["s3_keys"]["internal_readings_stage2"]},
+    op_kwargs={"s3_prefix": cdw.common.directories.common["s3_keys"]["internal_readings_stage2"]},
     dag=dag,
 )
 staging_verify_internalreadings.doc = staging_verify_report_string
@@ -233,7 +235,7 @@ ref_tables_internalreadings = PythonOperator(
     python_callable=run_glue_job_await_completion,
     op_args=[
         directory["glue_ref_internalreadings_job_name"],
-        common.directories.common["internalreadings"]["glue_job_name_ref"],
+        cdw.common.directories.common["internalreadings"]["glue_job_name_ref"],
     ],
     dag=dag,
 )
@@ -251,7 +253,7 @@ ref_tables_verify_internalreadings.doc = ref_verify_report_string
 
 process_customerdb = BashOperator(
     task_id="process_customerdb",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_customerdb_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek && python start_customerdb_jobs.py",
     dag=dag,
 )
 

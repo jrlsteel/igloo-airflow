@@ -1,4 +1,3 @@
-import sys
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
@@ -6,13 +5,12 @@ from airflow.operators.python_operator import PythonOperator
 import sentry_sdk
 import datetime
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
-import common.process_glue_crawler
-import common.utils
+import cdw.common.process_glue_crawler
+import cdw.common.utils
 
-from conf import config
-from common import schedules
-from common.slack_utils import alert_slack
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.slack_utils import alert_slack
 
 dag_id = "weather_forecasts"
 
@@ -28,7 +26,7 @@ def fn_run_glue_crawler(crawler_id):
     """
     try:
         print("Running Weather Forecast Crawler Daily={}".format(crawler_id))
-        common.process_glue_crawler.run_glue_crawler(crawler_id)
+        cdw.common.process_glue_crawler.run_glue_crawler(crawler_id)
     except Exception as e:
         sentry_sdk.capture_exception(e)
         sentry_sdk.flush(5)
@@ -66,7 +64,7 @@ def fn_weather_forecast_hourly_verify():
         hourly_forecast_hours = 120
         expected_row_count = len(gsp_weather_station_postcodes) * hourly_forecast_hours
 
-        df = common.utils.execute_query_return_df(
+        df = cdw.common.utils.execute_query_return_df(
             """select count(*) from ref_weather_forecast_hourly where outcode in ('{}') and forecast_issued = '{}'""".format(
                 "', '".join(gsp_weather_station_postcodes), datetime.date.today().isoformat()
             )
@@ -109,7 +107,7 @@ def fn_weather_forecast_daily_verify():
         hourly_forecast_hours = 5
         expected_row_count = len(gsp_weather_station_postcodes) * hourly_forecast_hours
 
-        df = common.utils.execute_query_return_df(
+        df = cdw.common.utils.execute_query_return_df(
             """select count(*) from ref_weather_forecast_daily where outcode in ('{}') and forecast_issued = '{}'""".format(
                 "', '".join(gsp_weather_station_postcodes), datetime.date.today().isoformat()
             )
@@ -138,25 +136,25 @@ dag = DAG(
 
 weather_forecast_daily_download = BashOperator(
     task_id="weather_forecast_daily_download",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_forecast_weather_jobs.py --download-daily",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_forecast_weather_jobs.py --download-daily",
     dag=dag,
 )
 
 weather_forecast_daily_store = BashOperator(
     task_id="weather_forecast_daily_store",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_forecast_weather_jobs.py --store-daily",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_forecast_weather_jobs.py --store-daily",
     dag=dag,
 )
 
 weather_forecast_hourly_download = BashOperator(
     task_id="weather_forecast_hourly_download",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_forecast_weather_jobs.py --download-hourly",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_forecast_weather_jobs.py --download-hourly",
     dag=dag,
 )
 
 weather_forecast_hourly_store = BashOperator(
     task_id="weather_forecast_hourly_store",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_WeatherData && python start_forecast_weather_jobs.py --store-hourly",
+    bash_command="cd /opt/airflow/cdw/process_WeatherData && python start_forecast_weather_jobs.py --store-hourly",
     dag=dag,
 )
 

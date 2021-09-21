@@ -1,14 +1,13 @@
 import sys
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
 import datetime
 from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
-from process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
+from cdw.process_smart.d0379 import generate_d0379, copy_d0379_to_sftp
 import sentry_sdk
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {"owner": "Airflow", "start_date": days_ago(2), "on_failure_callback": alert_slack}
 

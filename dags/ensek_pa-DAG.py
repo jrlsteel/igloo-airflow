@@ -4,11 +4,10 @@ from airflow.models import DAG
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from conf import config
-from common import schedules
-from common.slack_utils import alert_slack
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.slack_utils import alert_slack
 
 dag_id = "ensek_pa"
 
@@ -35,25 +34,25 @@ dag = DAG(
 
 process_customerdb = BashOperator(
     task_id="process_customerdb",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_customerdb_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek && python start_customerdb_jobs.py",
     dag=dag,
 )
 
 start_ensek_api_pa_mirror_only_jobs = BashOperator(
     task_id="start_ensek_api_pa_mirror_only_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_api_pa_mirror_only_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek && python start_ensek_api_pa_mirror_only_jobs.py",
     dag=dag,
 )
 
 start_ensek_pa_staging_jobs = BashOperator(
     task_id="start_ensek_pa_staging_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_pa_staging_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek && python start_ensek_pa_staging_jobs.py",
     dag=dag,
 )
 
 start_ensek_pa_ref_jobs = BashOperator(
     task_id="start_ensek_pa_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python start_ensek_pa_ref_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_Ensek && python start_ensek_pa_ref_jobs.py",
     dag=dag,
 )
 

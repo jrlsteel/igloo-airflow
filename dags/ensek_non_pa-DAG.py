@@ -5,11 +5,10 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.utils.dates import days_ago
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from conf import config
-from common import schedules
-from common.slack_utils import alert_slack
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.common.slack_utils import alert_slack
 
 dag_id = "ensek_non_pa"
 
@@ -38,7 +37,7 @@ dag = DAG(
 def processEnsekBashOperator(script_name):
     return BashOperator(
         task_id=script_name,
-        bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_Ensek && python {}.py".format(script_name),
+        bash_command="cd /opt/airflow/cdw/process_Ensek && python {}.py".format(script_name),
         dag=dag,
     )
 

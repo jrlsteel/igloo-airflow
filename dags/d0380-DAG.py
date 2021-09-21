@@ -3,12 +3,11 @@ from airflow.utils.dates import days_ago
 from airflow.models import DAG
 from airflow.operators.python_operator import PythonOperator
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from conf import config
-from common import schedules
-from process_smart.d0380_sftp_to_s3 import copy_all_from_d0380
-from common.slack_utils import alert_slack
+from cdw.conf import config
+from cdw.common import schedules
+from cdw.process_smart.d0380_sftp_to_s3 import copy_all_from_d0380
+from cdw.common.slack_utils import alert_slack
 import sentry_sdk
 
 dag_id = "igloo_smart_d0380"

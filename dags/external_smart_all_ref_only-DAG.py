@@ -12,9 +12,8 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.python_operator import PythonVirtualenvOperator
 from airflow.operators.bash_operator import BashOperator
 
-sys.path.append("/opt/airflow/enzek-meterpoint-readings")
 
-from common.slack_utils import alert_slack
+from cdw.common.slack_utils import alert_slack
 
 args = {
     "owner": "Airflow",
@@ -33,7 +32,7 @@ dag = DAG(
 
 start_smart_all_ref_jobs = BashOperator(
     task_id="start_smart_all_ref_jobs",
-    bash_command="cd /opt/airflow/enzek-meterpoint-readings/process_smart && python start_smart_all_reporting_jobs.py",
+    bash_command="cd /opt/airflow/cdw/process_smart && python start_smart_all_reporting_jobs.py",
     dag=dag,
 )
 
